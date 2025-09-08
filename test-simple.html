@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Carrito Simple</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 20px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 18px;
+            display: block;
+            width: 100%;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 5px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Carrito Súper Simple</h1>
+    
+    <div class="status" id="status">
+        <h3>Estado:</h3>
+        <p>Listo para probar...</p>
+    </div>
+
+    <button class="test-btn" onclick="testCart()">🛒 PROBAR CARRITO</button>
+    <button class="test-btn" onclick="goToMain()">🏠 IR A PÁGINA PRINCIPAL</button>
+    <button class="test-btn" onclick="checkElements()">🔍 VERIFICAR ELEMENTOS</button>
+
+    <div id="results"></div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<h3>Estado:</h3><p>${message}</p>`;
+            status.className = `status ${type}`;
+        }
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<p>${message}</p>`;
+            results.appendChild(div);
+        }
+
+        function testCart() {
+            updateStatus('Probando carrito...', 'info');
+            
+            // Intentar abrir el carrito
+            if (typeof openCart === 'function') {
+                openCart();
+                addResult('✅ Función openCart ejecutada', 'success');
+                updateStatus('Carrito abierto!', 'success');
+            } else {
+                addResult('❌ Función openCart no encontrada', 'error');
+                updateStatus('Error: Función no encontrada', 'error');
+            }
+        }
+
+        function goToMain() {
+            window.location.href = '/';
+        }
+
+        function checkElements() {
+            updateStatus('Verificando elementos...', 'info');
+            
+            const cartToggle = document.querySelector('.cart-toggle');
+            const cartPanel = document.querySelector('.cart-panel');
+            
+            if (cartToggle) {
+                addResult('✅ Botón del carrito encontrado', 'success');
+            } else {
+                addResult('❌ Botón del carrito NO encontrado', 'error');
+            }
+            
+            if (cartPanel) {
+                addResult('✅ Panel del carrito encontrado', 'success');
+            } else {
+                addResult('❌ Panel del carrito NO encontrado', 'error');
+            }
+            
+            updateStatus('Verificación completada', 'info');
+        }
+
+        // Verificar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateStatus('Página cargada. Listo para probar!', 'success');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+

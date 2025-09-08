@@ -1,0 +1,355 @@
+---
+// Banner principal grande como el de Vstore.cl
+---
+
+<style>
+  .main-banner {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    margin-bottom: 60px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 10;
+  }
+
+  .banner-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+  }
+
+  .banner-slide.active {
+    opacity: 1;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    z-index: 2;
+  }
+
+  .banner-content {
+    max-width: 800px;
+    padding: 0 20px;
+  }
+
+  .banner-title {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    line-height: 1.2;
+  }
+
+  .banner-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+
+  .banner-cta {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+  }
+
+  .banner-cta:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(231, 76, 60, 0.4);
+  }
+
+  .banner-indicators {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: 3;
+  }
+
+  .banner-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .banner-indicator.active {
+    background: white;
+    transform: scale(1.2);
+  }
+
+  .banner-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 3;
+  }
+
+  .banner-nav:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .banner-nav.prev {
+    left: 30px;
+  }
+
+  .banner-nav.next {
+    right: 30px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .main-banner {
+      height: 450px;
+    }
+    
+    .banner-title {
+      font-size: 3.5rem;
+    }
+    
+    .banner-subtitle {
+      font-size: 1.3rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-banner {
+      height: 400px;
+    }
+    
+    .banner-title {
+      font-size: 2.5rem;
+    }
+    
+    .banner-subtitle {
+      font-size: 1.2rem;
+    }
+    
+    .banner-cta {
+      padding: 12px 30px;
+      font-size: 1rem;
+    }
+    
+    .banner-nav {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+    
+    .banner-nav.prev {
+      left: 15px;
+    }
+    
+    .banner-nav.next {
+      right: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .main-banner {
+      height: 350px;
+    }
+    
+    .banner-title {
+      font-size: 2rem;
+    }
+    
+    .banner-subtitle {
+      font-size: 1rem;
+    }
+    
+    .banner-content {
+      padding: 0 15px;
+    }
+  }
+</style>
+
+<section class="main-banner">
+  <!-- Slide 1: Cartuchos y Tintas -->
+  <div class="banner-slide active" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <h1 class="banner-title">¡NO TE QUEDES SIN IMPRIMIR!</h1>
+        <p class="banner-subtitle">TONER Y TINTAS - EL MEJOR PRECIO DEL MERCADO</p>
+        <button class="banner-cta">Ver Ofertas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Electrodomésticos -->
+  <div class="banner-slide" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <h1 class="banner-title">ELECTRODOMÉSTICOS</h1>
+        <p class="banner-subtitle">OSTER - THOMAS - 10 AÑOS DE GARANTÍA</p>
+        <button class="banner-cta">Ver Colección</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Herramientas -->
+  <div class="banner-slide" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <h1 class="banner-title">HERRAMIENTAS PROFESIONALES</h1>
+        <p class="banner-subtitle">MAKITA - DEWALT - CALIDAD GARANTIZADA</p>
+        <button class="banner-cta">Ver Herramientas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Audio y Sonido -->
+  <div class="banner-slide" style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <h1 class="banner-title">AUDIO Y SONIDO</h1>
+        <p class="banner-subtitle">PHILCO - AUDIO PRO - LA MEJOR CALIDAD</p>
+        <button class="banner-cta">Ver Audio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 5: Computación -->
+  <div class="banner-slide" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <h1 class="banner-title">COMPUTACIÓN Y ELECTRO</h1>
+        <p class="banner-subtitle">LOGITECH - COUGAR - AULA - TECNOLOGÍA AVANZADA</p>
+        <button class="banner-cta">Ver Tecnología</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <button class="banner-nav prev">‹</button>
+  <button class="banner-nav next">›</button>
+
+  <!-- Indicadores -->
+  <div class="banner-indicators">
+    <div class="banner-indicator active" data-slide="0"></div>
+    <div class="banner-indicator" data-slide="1"></div>
+    <div class="banner-indicator" data-slide="2"></div>
+    <div class="banner-indicator" data-slide="3"></div>
+    <div class="banner-indicator" data-slide="4"></div>
+  </div>
+</section>
+
+<script>
+  class MainBanner {
+    constructor() {
+      this.currentSlide = 0;
+      this.slides = document.querySelectorAll('.banner-slide');
+      this.indicators = document.querySelectorAll('.banner-indicator');
+      this.prevBtn = document.querySelector('.banner-nav.prev');
+      this.nextBtn = document.querySelector('.banner-nav.next');
+      
+      this.init();
+    }
+
+    init() {
+      this.bindEvents();
+      this.startAutoPlay();
+    }
+
+    bindEvents() {
+      // Botones de navegación
+      this.prevBtn.addEventListener('click', () => this.prevSlide());
+      this.nextBtn.addEventListener('click', () => this.nextSlide());
+
+      // Indicadores
+      this.indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => this.goToSlide(index));
+      });
+
+      // Pausar autoplay al hacer hover
+      const banner = document.querySelector('.main-banner');
+      banner.addEventListener('mouseenter', () => this.stopAutoPlay());
+      banner.addEventListener('mouseleave', () => this.startAutoPlay());
+    }
+
+    showSlide(index) {
+      // Ocultar todas las slides
+      this.slides.forEach(slide => slide.classList.remove('active'));
+      this.indicators.forEach(indicator => indicator.classList.remove('active'));
+
+      // Mostrar la slide actual
+      this.slides[index].classList.add('active');
+      this.indicators[index].classList.add('active');
+
+      this.currentSlide = index;
+    }
+
+    nextSlide() {
+      const nextIndex = (this.currentSlide + 1) % this.slides.length;
+      this.showSlide(nextIndex);
+    }
+
+    prevSlide() {
+      const prevIndex = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+      this.showSlide(prevIndex);
+    }
+
+    goToSlide(index) {
+      this.showSlide(index);
+    }
+
+    startAutoPlay() {
+      this.autoPlayInterval = setInterval(() => {
+        this.nextSlide();
+      }, 5000); // Cambiar cada 5 segundos
+    }
+
+    stopAutoPlay() {
+      if (this.autoPlayInterval) {
+        clearInterval(this.autoPlayInterval);
+      }
+    }
+  }
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', () => {
+    new MainBanner();
+  });
+</script>

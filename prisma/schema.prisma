@@ -1,0 +1,240 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // En prod cambiarás a "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ===================== Enums =====================
+ */
+
+enum Gender {
+  MEN
+  WOMEN
+  KIDS_BOY
+  KIDS_GIRL
+  UNISEX
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+}
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  FULFILLED
+}
+
+/**
+ * ===================== Modelos base =====================
+ */
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  name        String
+  description String?
+  categoryId  Int
+  category    Category          @relation(fields: [categoryId], references: [id])
+  gender      Gender
+  imageUrl    String?
+  variants    Variant[]
+  suppliers   ProductSupplier[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // back-relations
+  orderItems OrderItem[]
+}
+
+model Variant {
+  id             Int        @id @default(autoincrement())
+  productId      Int
+  product        Product    @relation(fields: [productId], references: [id])
+  sku            String     @unique
+  size           Size
+  colorName      String
+  colorHex       String?
+  salePriceCents Int
+  barcode        String?
+  inventory      Inventory?
+
+  // back-relations
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model Inventory {
+  id        Int     @id @default(autoincrement())
+  variantId Int     @unique
+  variant   Variant @relation(fields: [variantId], references: [id])
+  stock     Int     @default(0)
+}
+
+model Supplier {
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  contactEmail String?
+  phone        String?
+  rating       Int?
+  leadTimeDays Int?
+  paymentTerms String?
+  notes        String?
+
+  products  ProductSupplier[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model ProductSupplier {
+  productId          Int
+  supplierId         Int
+  product            Product  @relation(fields: [productId], references: [id])
+  supplier           Supplier @relation(fields: [supplierId], references: [id])
+  purchasePriceCents Int
+  preferred          Boolean  @default(false)
+
+  @@id([productId, supplierId])
+}
+
+/**
+ * ===================== Clientes y dirección =====================
+ */
+
+model Customer {
+  id          Int          @id @default(autoincrement())
+  type        CustomerType
+  name        String
+  email       String?      @unique
+  phone       String?
+  companyName String?
+  taxId       String?
+  notes       String?
+
+  // back-relations
+  addresses Address[]
+  carts     Cart[]
+  orders    Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id])
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String?
+  country    String   @default("CL")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // back-relations: órdenes que usan esta dirección
+  orders Order[]
+}
+
+/**
+ * ===================== Carrito y pedidos =====================
+ */
+
+model Cart {
+  id         Int       @id @default(autoincrement())
+  customerId Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  items      CartItem[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+
+model CartItem {
+  id             Int      @id @default(autoincrement())
+  cartId         Int
+  cart           Cart     @relation(fields: [cartId], references: [id])
+  variantId      Int
+  variant        Variant  @relation(fields: [variantId], references: [id])
+  quantity       Int      @default(1)
+  salePriceCents Int
+  colorName      String?
+  colorHex       String?
+  size           Size
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([cartId, variantId, size, colorHex])
+}
+
+model Order {
+  id                Int         @id @default(autoincrement())
+  customerId        Int?
+  customer          Customer?   @relation(fields: [customerId], references: [id])
+  status            OrderStatus @default(PENDING)
+  subtotalCents     Int
+  discountCents     Int         @default(0)
+  totalCents        Int
+  currency          String      @default("CLP")
+  shippingAddressId Int?
+  shippingAddress   Address?    @relation(fields: [shippingAddressId], references: [id])
+  items             OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model OrderItem {
+  id             Int     @id @default(autoincrement())
+  orderId        Int
+  order          Order   @relation(fields: [orderId], references: [id])
+  productId      Int
+  product        Product @relation(fields: [productId], references: [id])
+  variantId      Int
+  variant        Variant @relation(fields: [variantId], references: [id])
+  quantity       Int
+  salePriceCents Int
+  size           Size
+  colorName      String?
+  colorHex       String?
+}
+
+/**
+ * ===================== Reglas de precio =====================
+ */
+
+model PriceRule {
+  id             Int          @id @default(autoincrement())
+  appliesTo      String // "GLOBAL" | "PRODUCT:123" | "CATEGORY:camisas"
+  customerType   CustomerType
+  percentOff     Int?
+  amountOffCents Int?
+  active         Boolean      @default(true)
+  note           String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

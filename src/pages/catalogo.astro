@@ -1,0 +1,815 @@
+---
+import Layout from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Navigation from "../components/Navigation.astro";
+import { prisma } from "../lib/db";
+
+// Obtener productos por categoría
+const hombresProducts = await prisma.product.findMany({
+  where: { gender: "MEN" },
+  include: {
+    category: true,
+    variants: { include: { inventory: true } }
+  }
+});
+
+const mujeresProducts = await prisma.product.findMany({
+  where: { gender: "WOMEN" },
+  include: {
+    category: true,
+    variants: { include: { inventory: true } }
+  }
+});
+
+const ninosProducts = await prisma.product.findMany({
+  where: { 
+    OR: [
+      { gender: "KIDS_BOY" },
+      { gender: "KIDS_GIRL" }
+    ]
+  },
+  include: {
+    category: true,
+    variants: { include: { inventory: true } }
+  }
+});
+
+const accesoriosProducts = await prisma.product.findMany({
+  where: { 
+    category: {
+      slug: "accesorios"
+    }
+  },
+  include: {
+    category: true,
+    variants: { include: { inventory: true } }
+  }
+});
+---
+
+<Layout title="Catálogo - Tienda Web" description="Explora nuestro catálogo completo de productos">
+  <Navigation />
+  <Header />
+  
+  <div class="container">
+    <main class="catalogo-page">
+      <h1>Catálogo de Productos</h1>
+      
+      <!-- Sección Hombres -->
+      <section class="categoria-section" id="hombres">
+        <h2>👔 Hombres</h2>
+        <div class="products-grid">
+          {hombresProducts.map((product) => {
+            const hasVariants = product.variants && product.variants.length > 0;
+            const first = hasVariants ? product.variants[0] : null;
+            return (
+              <div class="product-card" data-variants={JSON.stringify(
+                product.variants.map(v => ({ id: v.id, size: v.size, colorHex: v.colorHex || '#000000' }))
+              )}>
+                <div class="product-image">
+                  <img
+                    src={product.imageUrl || "/img/placeholder.png"}
+                    alt={product.name}
+                    loading="lazy" />
+                </div>
+                <div class="product-info">
+                  <h3>{product.name}</h3>
+                  <p class="product-category">{product.category.name}</p>
+                  {first && (
+                    <p class="product-price">${(first.salePriceCents / 100).toLocaleString()}</p>
+                  )}
+                  
+                  <div class="product-options">
+                    <div class="size-selector">
+                      <label>Talla:</label>
+                      <select class="size-select">
+                        {hasVariants
+                          ? product.variants.map((v, i) => (
+                              <option
+                                value={v.size}
+                                data-variant-id={v.id}
+                                data-stock={v.inventory?.stock || 0}
+                                selected={i === 0}
+                              >
+                                {v.size} {v.inventory?.stock === 0 ? '(Agotado)' : `(${v.inventory?.stock || 0})`}
+                              </option>
+                            ))
+                          : <option disabled>No disponible</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="color-selector">
+                      <label>Color:</label>
+                      <button class="color-btn" type="button">
+                        <span class="selected-color" style={`background-color: ${first?.colorHex ?? '#b8653c'}`}></span>
+                      </button>
+                      <div class="color-palette">
+                        {hasVariants &&
+                          Array.from(new Map(product.variants.map(v => [v.colorHex ?? '#000000', v])).values())
+                          .map(v => (
+                            <div
+                              class="color-option"
+                              data-color={v.colorHex ?? '#000000'}
+                              style={`background-color: ${v.colorHex ?? '#000000'}`}
+                              title={v.colorName ?? 'Color'}
+                            />
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-controls">
+                    <div class="quantity-controls">
+                      <button class="btn-minus">-</button>
+                      <span class="quantity">1</span>
+                      <button class="btn-plus">+</button>
+                    </div>
+                    <button class="btn-add-cart" data-stock={first?.inventory?.stock || 0}>
+                      {first?.inventory?.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+                    </button>
+                  </div>
+                  <div class="stock-info">
+                    <span class="stock-display">
+                      Stock: <span class="stock-number">{first?.inventory?.stock || 0}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Sección Mujeres -->
+      <section class="categoria-section" id="mujeres">
+        <h2>👗 Mujeres</h2>
+        <div class="products-grid">
+          {mujeresProducts.map((product) => {
+            const hasVariants = product.variants && product.variants.length > 0;
+            const first = hasVariants ? product.variants[0] : null;
+            return (
+              <div class="product-card" data-variants={JSON.stringify(
+                product.variants.map(v => ({ id: v.id, size: v.size, colorHex: v.colorHex || '#000000' }))
+              )}>
+                <div class="product-image">
+                  <img
+                    src={product.imageUrl || "/img/placeholder.png"}
+                    alt={product.name}
+                    loading="lazy" />
+                </div>
+                <div class="product-info">
+                  <h3>{product.name}</h3>
+                  <p class="product-category">{product.category.name}</p>
+                  {first && (
+                    <p class="product-price">${(first.salePriceCents / 100).toLocaleString()}</p>
+                  )}
+                  
+                  <div class="product-options">
+                    <div class="size-selector">
+                      <label>Talla:</label>
+                      <select class="size-select">
+                        {hasVariants
+                          ? product.variants.map((v, i) => (
+                              <option
+                                value={v.size}
+                                data-variant-id={v.id}
+                                data-stock={v.inventory?.stock || 0}
+                                selected={i === 0}
+                              >
+                                {v.size} {v.inventory?.stock === 0 ? '(Agotado)' : `(${v.inventory?.stock || 0})`}
+                              </option>
+                            ))
+                          : <option disabled>No disponible</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="color-selector">
+                      <label>Color:</label>
+                      <button class="color-btn" type="button">
+                        <span class="selected-color" style={`background-color: ${first?.colorHex ?? '#b8653c'}`}></span>
+                      </button>
+                      <div class="color-palette">
+                        {hasVariants &&
+                          Array.from(new Map(product.variants.map(v => [v.colorHex ?? '#000000', v])).values())
+                          .map(v => (
+                            <div
+                              class="color-option"
+                              data-color={v.colorHex ?? '#000000'}
+                              style={`background-color: ${v.colorHex ?? '#000000'}`}
+                              title={v.colorName ?? 'Color'}
+                            />
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-controls">
+                    <div class="quantity-controls">
+                      <button class="btn-minus">-</button>
+                      <span class="quantity">1</span>
+                      <button class="btn-plus">+</button>
+                    </div>
+                    <button class="btn-add-cart" data-stock={first?.inventory?.stock || 0}>
+                      {first?.inventory?.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+                    </button>
+                  </div>
+                  <div class="stock-info">
+                    <span class="stock-display">
+                      Stock: <span class="stock-number">{first?.inventory?.stock || 0}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Sección Niños -->
+      <section class="categoria-section" id="ninos">
+        <h2>👶 Niños</h2>
+        <div class="products-grid">
+          {ninosProducts.map((product) => {
+            const hasVariants = product.variants && product.variants.length > 0;
+            const first = hasVariants ? product.variants[0] : null;
+            return (
+              <div class="product-card" data-variants={JSON.stringify(
+                product.variants.map(v => ({ id: v.id, size: v.size, colorHex: v.colorHex || '#000000' }))
+              )}>
+                <div class="product-image">
+                  <img
+                    src={product.imageUrl || "/img/placeholder.png"}
+                    alt={product.name}
+                    loading="lazy" />
+                </div>
+                <div class="product-info">
+                  <h3>{product.name}</h3>
+                  <p class="product-category">{product.category.name}</p>
+                  {first && (
+                    <p class="product-price">${(first.salePriceCents / 100).toLocaleString()}</p>
+                  )}
+                  
+                  <div class="product-options">
+                    <div class="size-selector">
+                      <label>Talla:</label>
+                      <select class="size-select">
+                        {hasVariants
+                          ? product.variants.map((v, i) => (
+                              <option
+                                value={v.size}
+                                data-variant-id={v.id}
+                                data-stock={v.inventory?.stock || 0}
+                                selected={i === 0}
+                              >
+                                {v.size} {v.inventory?.stock === 0 ? '(Agotado)' : `(${v.inventory?.stock || 0})`}
+                              </option>
+                            ))
+                          : <option disabled>No disponible</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="color-selector">
+                      <label>Color:</label>
+                      <button class="color-btn" type="button">
+                        <span class="selected-color" style={`background-color: ${first?.colorHex ?? '#b8653c'}`}></span>
+                      </button>
+                      <div class="color-palette">
+                        {hasVariants &&
+                          Array.from(new Map(product.variants.map(v => [v.colorHex ?? '#000000', v])).values())
+                          .map(v => (
+                            <div
+                              class="color-option"
+                              data-color={v.colorHex ?? '#000000'}
+                              style={`background-color: ${v.colorHex ?? '#000000'}`}
+                              title={v.colorName ?? 'Color'}
+                            />
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-controls">
+                    <div class="quantity-controls">
+                      <button class="btn-minus">-</button>
+                      <span class="quantity">1</span>
+                      <button class="btn-plus">+</button>
+                    </div>
+                    <button class="btn-add-cart" data-stock={first?.inventory?.stock || 0}>
+                      {first?.inventory?.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+                    </button>
+                  </div>
+                  <div class="stock-info">
+                    <span class="stock-display">
+                      Stock: <span class="stock-number">{first?.inventory?.stock || 0}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Sección Accesorios -->
+      <section class="categoria-section" id="accesorios">
+        <h2>⌚ Accesorios</h2>
+        <div class="products-grid">
+          {accesoriosProducts.map((product) => {
+            const hasVariants = product.variants && product.variants.length > 0;
+            const first = hasVariants ? product.variants[0] : null;
+            return (
+              <div class="product-card" data-variants={JSON.stringify(
+                product.variants.map(v => ({ id: v.id, size: v.size, colorHex: v.colorHex || '#000000' }))
+              )}>
+                <div class="product-image">
+                  <img
+                    src={product.imageUrl || "/img/placeholder.png"}
+                    alt={product.name}
+                    loading="lazy" />
+                </div>
+                <div class="product-info">
+                  <h3>{product.name}</h3>
+                  <p class="product-category">{product.category.name}</p>
+                  {first && (
+                    <p class="product-price">${(first.salePriceCents / 100).toLocaleString()}</p>
+                  )}
+                  
+                  <div class="product-options">
+                    <div class="size-selector">
+                      <label>Talla:</label>
+                      <select class="size-select">
+                        {hasVariants
+                          ? product.variants.map((v, i) => (
+                              <option
+                                value={v.size}
+                                data-variant-id={v.id}
+                                data-stock={v.inventory?.stock || 0}
+                                selected={i === 0}
+                              >
+                                {v.size} {v.inventory?.stock === 0 ? '(Agotado)' : `(${v.inventory?.stock || 0})`}
+                              </option>
+                            ))
+                          : <option disabled>No disponible</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="color-selector">
+                      <label>Color:</label>
+                      <button class="color-btn" type="button">
+                        <span class="selected-color" style={`background-color: ${first?.colorHex ?? '#b8653c'}`}></span>
+                      </button>
+                      <div class="color-palette">
+                        {hasVariants &&
+                          Array.from(new Map(product.variants.map(v => [v.colorHex ?? '#000000', v])).values())
+                          .map(v => (
+                            <div
+                              class="color-option"
+                              data-color={v.colorHex ?? '#000000'}
+                              style={`background-color: ${v.colorHex ?? '#000000'}`}
+                              title={v.colorName ?? 'Color'}
+                            />
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="product-controls">
+                    <div class="quantity-controls">
+                      <button class="btn-minus">-</button>
+                      <span class="quantity">1</span>
+                      <button class="btn-plus">+</button>
+                    </div>
+                    <button class="btn-add-cart" data-stock={first?.inventory?.stock || 0}>
+                      {first?.inventory?.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+                    </button>
+                  </div>
+                  <div class="stock-info">
+                    <span class="stock-display">
+                      Stock: <span class="stock-number">{first?.inventory?.stock || 0}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <style>
+    .catalogo-page {
+      padding: 2rem 0;
+    }
+
+    .catalogo-page h1 {
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2.5rem;
+      color: #333;
+    }
+
+    .categoria-section {
+      margin-bottom: 4rem;
+    }
+
+    .categoria-section h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: #444;
+      border-bottom: 2px solid #8b7355;
+      padding-bottom: 0.5rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 1.5rem;
+    }
+
+    .product-info h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .product-category {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #8b7355;
+      margin-bottom: 1rem;
+    }
+
+    .product-options {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .size-selector, .color-selector {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .size-selector label, .color-selector label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+      color: #555;
+    }
+
+    .size-select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .color-btn {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .selected-color {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #ddd;
+    }
+
+    .color-palette {
+      display: none;
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0.5rem;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .color-option {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 2px;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #ddd;
+    }
+
+    .product-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-minus, .btn-plus {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .quantity {
+      min-width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .btn-add-cart {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: #8b7355;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .btn-add-cart:hover {
+      background: #6b5a42;
+    }
+
+    .stock-info {
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .stock-display {
+      font-size: 0.9rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .stock-number {
+      font-weight: bold;
+      color: #8b7355;
+    }
+
+    .btn-add-cart[data-stock="0"] {
+      background: #dc2626 !important;
+      cursor: not-allowed !important;
+      opacity: 0.6;
+    }
+
+    .btn-add-cart[data-stock="0"]:hover {
+      background: #dc2626 !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .size-select option[data-stock="0"] {
+      color: #dc2626;
+      font-style: italic;
+    }
+
+    /* RESPONSIVE CATALOGO - MEJORADO */
+    @media (max-width: 1200px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.2rem;
+        padding: 0 1rem;
+      }
+      
+      .catalogo-page h1 {
+        font-size: 2.4rem;
+        margin-bottom: 2.5rem;
+      }
+      
+      .categoria-section h2 {
+        font-size: 1.9rem;
+        margin-bottom: 1.8rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .catalogo-page {
+        padding: 1.5rem 0;
+      }
+      
+      .catalogo-page h1 {
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+      }
+      
+      .categoria-section {
+        margin-bottom: 2.5rem;
+      }
+      
+      .categoria-section h2 {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+        padding: 0 0.8rem;
+      }
+      
+      .product-card {
+        margin: 0;
+        padding: 1.2rem;
+        border-radius: 12px;
+      }
+      
+      .product-image {
+        height: 220px;
+        border-radius: 8px;
+      }
+      
+      .product-name {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+      }
+      
+      .product-price {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+      }
+      
+      .product-options {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .product-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .size-selector, .color-selector {
+        width: 100%;
+      }
+      
+      .size-select {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+      }
+      
+      .color-btn {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+      }
+      
+      .quantity-controls {
+        justify-content: center;
+        gap: 0.8rem;
+      }
+      
+      .btn-quantity {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+      }
+      
+      .quantity-display {
+        font-size: 1rem;
+        min-width: 40px;
+      }
+      
+      .btn-add-cart {
+        width: 100%;
+        padding: 0.9rem;
+        font-size: 1rem;
+        border-radius: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .catalogo-page {
+        padding: 1rem 0;
+      }
+      
+      .catalogo-page h1 {
+        font-size: 1.9rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .categoria-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.2rem;
+      }
+      
+      .products-grid {
+        gap: 1rem;
+        padding: 0 0.5rem;
+      }
+      
+      .product-card {
+        padding: 1rem;
+      }
+      
+      .product-image {
+        height: 200px;
+      }
+      
+      .product-name {
+        font-size: 1.1rem;
+        margin-bottom: 0.6rem;
+      }
+      
+      .product-price {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+      }
+      
+      .product-options {
+        gap: 0.8rem;
+      }
+      
+      .size-select {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+      }
+      
+      .color-btn {
+        padding: 0.5rem;
+        font-size: 0.7rem;
+      }
+      
+      .btn-quantity {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+      }
+      
+      .quantity-display {
+        font-size: 0.9rem;
+        min-width: 35px;
+      }
+      
+      .btn-add-cart {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</Layout>

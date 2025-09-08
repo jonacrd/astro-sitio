@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Carrito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            display: block;
+            width: 100%;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🔧 Debug del Carrito</h1>
+        
+        <div class="status" id="status">
+            <h3>Estado del Sistema:</h3>
+            <p>Verificando elementos del carrito...</p>
+        </div>
+
+        <button class="test-button" onclick="checkCartElements()">1. Verificar Elementos del Carrito</button>
+        <button class="test-button" onclick="testCartOpen()">2. Probar Apertura del Carrito</button>
+        <button class="test-button" onclick="testCartClose()">3. Probar Cierre del Carrito</button>
+        <button class="test-button" onclick="simulateAddProduct()">4. Simular Agregar Producto</button>
+        <button class="test-button" onclick="goToMainPage()">5. Ir a Página Principal</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<h3>Estado del Sistema:</h3><p>${message}</p>`;
+            status.className = `status ${type}`;
+        }
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<p>${message}</p>`;
+            results.appendChild(div);
+        }
+
+        function checkCartElements() {
+            updateStatus('Verificando elementos del carrito...', 'info');
+            
+            // Verificar si estamos en la página principal
+            if (window.location.pathname !== '/') {
+                addResult('❌ No estás en la página principal. Ve a la página principal primero.', 'error');
+                return;
+            }
+
+            const cartToggle = document.querySelector('.cart-toggle');
+            const cartPanel = document.querySelector('.cart-panel');
+            const cartList = document.querySelector('#cart-list');
+            const cartCount = document.querySelector('#cart-count');
+
+            let results = [];
+            
+            if (cartToggle) {
+                results.push('✅ Botón del carrito encontrado');
+                addResult('✅ Botón del carrito encontrado', 'success');
+            } else {
+                results.push('❌ Botón del carrito NO encontrado');
+                addResult('❌ Botón del carrito NO encontrado', 'error');
+            }
+
+            if (cartPanel) {
+                results.push('✅ Panel del carrito encontrado');
+                addResult('✅ Panel del carrito encontrado', 'success');
+            } else {
+                results.push('❌ Panel del carrito NO encontrado');
+                addResult('❌ Panel del carrito NO encontrado', 'error');
+            }
+
+            if (cartList) {
+                results.push('✅ Lista del carrito encontrada');
+                addResult('✅ Lista del carrito encontrada', 'success');
+            } else {
+                results.push('❌ Lista del carrito NO encontrada');
+                addResult('❌ Lista del carrito NO encontrada', 'error');
+            }
+
+            if (cartCount) {
+                results.push('✅ Contador del carrito encontrado');
+                addResult('✅ Contador del carrito encontrado', 'success');
+            } else {
+                results.push('❌ Contador del carrito NO encontrado');
+                addResult('❌ Contador del carrito NO encontrado', 'error');
+            }
+
+            updateStatus('Verificación completada. Revisa los resultados abajo.', 'info');
+        }
+
+        function testCartOpen() {
+            updateStatus('Probando apertura del carrito...', 'info');
+            
+            const cartToggle = document.querySelector('.cart-toggle');
+            if (cartToggle) {
+                cartToggle.click();
+                addResult('✅ Click en botón del carrito ejecutado', 'success');
+                
+                setTimeout(() => {
+                    const cartPanel = document.querySelector('.cart-panel');
+                    if (cartPanel && cartPanel.classList.contains('open')) {
+                        addResult('✅ Carrito se abrió correctamente', 'success');
+                        updateStatus('Carrito abierto correctamente', 'success');
+                    } else {
+                        addResult('❌ Carrito NO se abrió', 'error');
+                        updateStatus('Error: Carrito no se abrió', 'error');
+                    }
+                }, 500);
+            } else {
+                addResult('❌ No se puede probar: Botón del carrito no encontrado', 'error');
+                updateStatus('Error: Botón del carrito no encontrado', 'error');
+            }
+        }
+
+        function testCartClose() {
+            updateStatus('Probando cierre del carrito...', 'info');
+            
+            const closeBtn = document.querySelector('#close-cart');
+            if (closeBtn) {
+                closeBtn.click();
+                addResult('✅ Click en botón cerrar ejecutado', 'success');
+                
+                setTimeout(() => {
+                    const cartPanel = document.querySelector('.cart-panel');
+                    if (cartPanel && !cartPanel.classList.contains('open')) {
+                        addResult('✅ Carrito se cerró correctamente', 'success');
+                        updateStatus('Carrito cerrado correctamente', 'success');
+                    } else {
+                        addResult('❌ Carrito NO se cerró', 'error');
+                        updateStatus('Error: Carrito no se cerró', 'error');
+                    }
+                }, 500);
+            } else {
+                addResult('❌ No se puede probar: Botón cerrar no encontrado', 'error');
+                updateStatus('Error: Botón cerrar no encontrado', 'error');
+            }
+        }
+
+        function simulateAddProduct() {
+            updateStatus('Simulando agregar producto...', 'info');
+            
+            // Simular agregar un producto
+            if (typeof testOpenCart === 'function') {
+                testOpenCart();
+                addResult('✅ Función testOpenCart ejecutada', 'success');
+            } else {
+                addResult('❌ Función testOpenCart no disponible', 'error');
+            }
+        }
+
+        function goToMainPage() {
+            window.location.href = '/';
+        }
+
+        // Verificar elementos al cargar
+        window.addEventListener('load', () => {
+            setTimeout(checkCartElements, 1000);
+        });
+    </script>
+</body>
+</html>
+
