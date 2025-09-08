@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
+    "@astrojs/vercel": "^8.2.7",
     "@prisma/client": "^6.15.0",
     "@tailwindcss/vite": "^4.1.12",
     "astro": "^5.13.5",
