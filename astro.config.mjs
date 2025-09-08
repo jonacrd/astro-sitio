@@ -1,12 +1,10 @@
-// astro.config.mjs
-import { defineConfig } from 'astro/config'
-import vercel from '@astrojs/vercel/server'   // ✅ único import correcto
-import path from 'node:path'
+import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
+import path from 'node:path';
 
 export default defineConfig({
-  output: 'server',            // necesario para SSR/API en Vercel
-  adapter: vercel(),           // activa el adapter de Vercel
-  // (opcional) tus alias de Vite
+  output: 'server',
+  adapter: vercel(),
   vite: {
     resolve: {
       alias: {
@@ -17,4 +15,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
