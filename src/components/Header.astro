@@ -10,7 +10,7 @@ try {
       items: true
     }
   });
-  cartItemCount = cart?.items.reduce((total, item) => total + item.quantity, 0) || 0;
+  cartItemCount = cart?.items.reduce((total, item) => total + item.qty, 0) || 0;
 } catch (error) {
   console.log('Error al obtener carrito:', error);
 }

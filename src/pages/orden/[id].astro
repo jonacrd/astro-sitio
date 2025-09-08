@@ -10,7 +10,7 @@ const order = id
   ? await prisma.order.findUnique({
       where: { id },
       include: {
-        items: { include: { variant: { include: { product: true } } } }
+        items: { include: { product: true } }
       }
     })
   : null;

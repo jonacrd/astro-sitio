@@ -102,11 +102,13 @@ const sections = [
 
 <style>
   .category-carousel {
+    min-width: 100dvw;
     padding: 80px 20px;
     background: linear-gradient(135deg, #fff 0%, #f8f9fa 50%, #e9ecef 100%);
     overflow: hidden;
     position: relative;
     z-index: 10;
+
   }
 
   .category-carousel::before {
@@ -122,6 +124,7 @@ const sections = [
   }
 
   .carousel-header {
+    height: 100px;
     text-align: center;
     margin-bottom: 30px;
     position: relative;
@@ -151,10 +154,10 @@ const sections = [
 
   .carousel-container {
     position: relative;
-    max-width: 1200px;
+    max-width: 500px;
     margin: 0 auto;
     overflow: hidden;
-    height: 600px;
+    height: 400px;
     width: 100%;
     padding: 0 20px;
     margin-bottom: 60px;
@@ -191,11 +194,11 @@ const sections = [
     text-align: center;
     position: relative;
     overflow: hidden;
-    height: 200px;
+    height: 50px;
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
   }
 
@@ -211,7 +214,7 @@ const sections = [
   }
 
   .section-icon {
-    font-size: 5rem;
+    font-size: 2rem;
     margin-bottom: 25px;
     display: block;
     filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
@@ -220,7 +223,7 @@ const sections = [
   }
 
   .section-title {
-    font-size: 3rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: white;
     margin-bottom: 20px;
@@ -258,7 +261,7 @@ const sections = [
   }
 
   .section-cta:hover {
-    background: rgba(255,255,255,0.35);
+    background: rgba(94, 94, 94, 0.35);
     border-color: rgba(255,255,255,0.6);
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
@@ -269,7 +272,7 @@ const sections = [
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 20px;
-    background: rgba(248, 249, 250, 0.8);
+    background: rgba(73, 73, 73, 0.8);
     flex: 1;
     overflow-y: auto;
     height: calc(100% - 200px);
@@ -537,7 +540,6 @@ const sections = [
       {sections.map(section => (
         <div class={`category-section ${section.id}`}>
           <div class="section-header">
-            <span class="section-icon">{section.icon}</span>
             <h3 class="section-title">{section.name}</h3>
             <p class="section-subtitle">Los mejores productos para {section.name.toLowerCase()}</p>
             <button class="section-cta" onclick={`goToCategory('${section.id}')`}>

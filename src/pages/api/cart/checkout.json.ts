@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
         include: {
           items: {
             include: {
-              variant: { include: { product: true } }
+              product: true
             }
           }
         }

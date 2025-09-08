@@ -6,9 +6,9 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/db';
 import { parseCookies, buildSetCookie } from '../../lib/cookies';
 
-// Tipo de carrito con items+variant+product
+// Tipo de carrito con items+product
 type CartWithItems = Prisma.CartGetPayload<{
-  include: { items: { include: { variant: { include: { product: true } } } } }
+  include: { items: { include: { product: true } } }
 }>;
 
 export const GET: APIRoute = async ({ request }) => {
@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ request }) => {
     ? await prisma.cart.findUnique({
         where: { id: cartId },
         include: {
-          items: { include: { variant: { include: { product: true } } } },
+          items: { include: { product: true } },
         },
       })
     : null;
@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ request }) => {
     cart = await prisma.cart.findUnique({
       where: { id: cartId },
       include: {
-        items: { include: { variant: { include: { product: true } } } },
+        items: { include: { product: true } },
       },
     });
   }

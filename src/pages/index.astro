@@ -8,6 +8,12 @@ import CategoryBanners from "../components/CategoryBanners.astro";
 import SectionCarousel from "../components/SectionCarousel.astro";
 import NewCart from "../components/NewCart.astro";
 import Navigation from "../components/Navigation.astro";
+import ProductGrid from "../components/ProductGrid.astro";
+import CartPanel from "../components/CartPanel.astro";
+
+// Obtener productos desde la base de datos
+import { prisma } from '../lib/db';
+const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
 ---
 <Layout title="Tienda Web" description="Bienvenido a nuestra tienda en línea">
   <Navigation />
@@ -18,8 +24,69 @@ import Navigation from "../components/Navigation.astro";
     <MainBanner />
     <CategoryBanners />
     <SectionCarousel />
+    
+    <!-- Sección de productos -->
+    <section class="products-section">
+      <div class="section-header">
+        <h2>🛍️ Nuestros Productos</h2>
+        <p>Descubre nuestra amplia selección de productos de calidad</p>
+      </div>
+      <ProductGrid products={products} />
+    </section>
   </main>
   <NewCart />
+  <CartPanel />
   <footer>…</footer>
 </Layout>
+
+<style>
+  .products-section {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 0 20px;
+  }
+
+  .section-header h2 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .section-header p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .products-section {
+      padding: 40px 0;
+    }
+    
+    .section-header {
+      margin-bottom: 2rem;
+    }
+    
+    .section-header h2 {
+      font-size: 2rem;
+    }
+    
+    .section-header p {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .section-header h2 {
+      font-size: 1.8rem;
+    }
+  }
+</style>
 

@@ -7,11 +7,7 @@ import { prisma } from '../../lib/db.js';
 
 export const GET: APIRoute = async () => {
   const products = await prisma.product.findMany({
-    include: {
-      category: true,
-      variants: { include: { inventory: true } },
-      suppliers: { include: { supplier: true } },
-    }
+    orderBy: { id: 'asc' }
   });
 
   return new Response(JSON.stringify(products), {

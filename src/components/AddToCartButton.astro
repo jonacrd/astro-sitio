@@ -1,0 +1,94 @@
+---
+export interface Props {
+  productId: number;
+  stock: number;
+  disabled?: boolean;
+}
+
+const { productId, stock, disabled = false } = Astro.props;
+const isOutOfStock = stock <= 0;
+const isDisabled = disabled || isOutOfStock;
+---
+
+<button 
+  class={`add-to-cart-btn ${isDisabled ? 'disabled' : ''}`}
+  data-product-id={productId}
+  disabled={isDisabled}
+>
+  {isOutOfStock ? 'Sin stock' : 'Agregar al carrito'}
+</button>
+
+<style>
+  .add-to-cart-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .add-to-cart-btn:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .add-to-cart-btn.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .add-to-cart-btn:active:not(.disabled) {
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('.add-to-cart-btn:not(.disabled)');
+    
+    buttons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const target = e.target as HTMLButtonElement;
+        const productId = parseInt(target.dataset.productId || '0');
+        
+        if (!productId) return;
+        
+        try {
+          const response = await fetch('/api/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, qty: 1 })
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            alert(error.error || 'Error al agregar al carrito');
+            return;
+          }
+          
+          // Disparar evento para actualizar el carrito
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          
+          // Feedback visual
+          target.textContent = '¡Agregado!';
+          target.style.background = '#4CAF50';
+          setTimeout(() => {
+            target.textContent = 'Agregar al carrito';
+            target.style.background = '';
+          }, 1500);
+          
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al agregar al carrito');
+        }
+      });
+    });
+  });
+</script>
