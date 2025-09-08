@@ -3,3 +3,4 @@ export async function jfetch<T>(url: string, opts: RequestInit = {}): Promise<T>
   if (!res.ok) throw new Error(await res.text());
   return res.json() as Promise<T>;
 }
+

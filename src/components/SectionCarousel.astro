@@ -1,487 +1,370 @@
 ---
-// Carrusel de secciones destacadas como en Vstore.cl
-import { prisma } from '../lib/db';
+interface Section {
+  title: string;
+  subtitle?: string;
+  href: string;
+  imageUrl?: string;
+  description?: string;
+}
 
-// Obtener productos por categorías para las secciones destacadas
-const categorySections = await Promise.all([
-  prisma.product.findMany({
-    where: { category: { name: { contains: 'hombre' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
-    },
-    take: 6
-  }),
-  prisma.product.findMany({
-    where: { category: { name: { contains: 'mujer' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
-    },
-    take: 6
-  }),
-  prisma.product.findMany({
-    where: { category: { name: { contains: 'niño' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
-    },
-    take: 6
-  }),
-  prisma.product.findMany({
-    where: { category: { name: { contains: 'zapatos' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
-    },
-    take: 6
-  }),
-  prisma.product.findMany({
-    where: { category: { name: { contains: 'accesorio' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
-    },
-    take: 6
-  })
-]);
-
-const sections = [
-  { id: 'hombre', name: 'Hombre', products: categorySections[0], color: '#2c3e50' },
-  { id: 'mujer', name: 'Mujer', products: categorySections[1], color: '#e74c3c' },
-  { id: 'ninos', name: 'Niños', products: categorySections[2], color: '#f39c12' },
-  { id: 'zapatos', name: 'Zapatos', products: categorySections[3], color: '#8e44ad' },
-  { id: 'accesorios', name: 'Accesorios', products: categorySections[4], color: '#27ae60' }
-];
+const { sections = [] } = Astro.props as { sections?: Section[] };
 ---
 
+<section class="section-carousel">
+  <div class="container">
+    {sections.length === 0 ? (
+      <div class="sections-grid">
+        <!-- Sección de Ofertas -->
+        <div class="section-card">
+          <div class="section-content">
+            <div class="section-text">
+              <h2 class="section-title">🔥 Ofertas Especiales</h2>
+              <p class="section-subtitle">Hasta 50% de descuento en productos seleccionados</p>
+              <p class="section-description">No te pierdas nuestras increíbles ofertas. Tiempo limitado.</p>
+              <a href="/catalogo?filter=ofertas" class="section-btn">
+                Ver Ofertas
+              </a>
+            </div>
+            <div class="section-image">
+              <div class="image-placeholder">🛍️</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Novedades -->
+        <div class="section-card">
+          <div class="section-content reverse">
+            <div class="section-text">
+              <h2 class="section-title">✨ Novedades</h2>
+              <p class="section-subtitle">Descubre las últimas tendencias de la temporada</p>
+              <p class="section-description">Productos frescos y modernos que están de moda.</p>
+              <a href="/catalogo?filter=nuevos" class="section-btn">
+                Ver Novedades
+              </a>
+            </div>
+            <div class="section-image">
+              <div class="image-placeholder">🌟</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Marcas -->
+        <div class="section-card">
+          <div class="section-content">
+            <div class="section-text">
+              <h2 class="section-title">🏷️ Marcas Destacadas</h2>
+              <p class="section-subtitle">Las mejores marcas en un solo lugar</p>
+              <p class="section-description">Calidad garantizada de marcas reconocidas mundialmente.</p>
+              <a href="/catalogo?filter=marcas" class="section-btn">
+                Ver Marcas
+              </a>
+            </div>
+            <div class="section-image">
+              <div class="image-placeholder">🏆</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class="sections-grid">
+        {sections.map((section) => (
+          <div class="section-card">
+            <div class="section-content">
+              <div class="section-text">
+                <h2 class="section-title">{section.title}</h2>
+                {section.subtitle && <p class="section-subtitle">{section.subtitle}</p>}
+                {section.description && <p class="section-description">{section.description}</p>}
+                <a href={section.href} class="section-btn">
+                  Ver Más
+                </a>
+              </div>
+              <div class="section-image">
+                {section.imageUrl ? (
+                  <img src={section.imageUrl} alt={section.title} class="section-img" />
+                ) : (
+                  <div class="image-placeholder">📦</div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
 <style>
-  .sections-carousel {
-    padding: 60px 20px;
-    background: white;
+  .section-carousel {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
   }
 
-  .sections-header {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-
-  .sections-title {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 20px;
-  }
-
-  .sections-subtitle {
-    font-size: 1.2rem;
-    color: #6c757d;
-    max-width: 600px;
+  .container {
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem;
   }
 
-  .sections-container {
-    max-width: 100%;
-    margin: 0 auto;
-    width: 100%;
-    padding: 0 20px;
-  }
-
-  .section-tabs {
+  .sections-grid {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
-  .section-tab {
-    background: #f8f9fa;
-    color: #6c757d;
-    border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    position: relative;
+  .section-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .section-tab.active {
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  .section-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
-
-  .section-tab.hombre.active { background: #2c3e50; }
-  .section-tab.mujer.active { background: #e74c3c; }
-  .section-tab.ninos.active { background: #f39c12; }
-  .section-tab.zapatos.active { background: #8e44ad; }
-  .section-tab.accesorios.active { background: #27ae60; }
 
   .section-content {
-    position: relative;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    align-items: center;
+    min-height: 200px;
   }
 
-  .section-products {
+  .section-content.reverse {
+    direction: rtl;
+  }
+
+  .section-content.reverse > * {
+    direction: ltr;
+  }
+
+  .section-text {
     display: flex;
-    gap: 30px;
-    transition: transform 0.5s ease-in-out;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .section-product {
-    flex: 0 0 260px;
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    min-height: 320px;
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    line-height: 1.2;
   }
 
-  .section-product:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-  }
-
-  .product-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-  }
-
-  .product-details {
-    padding: 20px;
-  }
-
-  .product-name {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 8px;
-    line-height: 1.3;
-  }
-
-  .product-price {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #e74c3c;
-    margin-bottom: 15px;
-  }
-
-  .product-stock {
-    font-size: 0.8rem;
-    color: #27ae60;
-    margin-bottom: 15px;
+  .section-subtitle {
+    font-size: 1.1rem;
+    color: #8b7355;
     font-weight: 600;
+    margin: 0;
   }
 
-  .product-stock.low { color: #f39c12; }
-  .product-stock.out { color: #e74c3c; }
-
-  .add-to-cart-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.8rem;
-  }
-
-  .add-to-cart-btn:hover {
-    background: linear-gradient(135deg, #2980b9, #1f618d);
-    transform: translateY(-1px);
-  }
-
-  .add-to-cart-btn:disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .section-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 30px;
+  .section-description {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
   }
 
   .section-btn {
-    background: #f8f9fa;
-    color: #6c757d;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #8b7355 0%, #a8a47a 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
     transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    align-self: flex-start;
+    margin-top: 0.5rem;
   }
 
   .section-btn:hover {
-    background: #e9ecef;
-    color: #2c3e50;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 115, 85, 0.4);
   }
 
-  .section-btn:disabled {
-    background: #f8f9fa;
-    color: #bdc3c7;
-    cursor: not-allowed;
+  .section-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
   }
 
-  /* Responsive */
-  @media (max-width: 1200px) {
-    .sections-container {
-      padding: 0 15px;
+  .image-placeholder {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #f5f2e8 0%, #d3d1b6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: #8b7355;
+  }
+
+  .section-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 15px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .section-content {
+      padding: 1.75rem;
+      gap: 1.5rem;
     }
     
-    .section-product {
-      flex: 0 0 240px;
+    .section-title {
+      font-size: 1.75rem;
     }
     
-    .product-image {
-      height: 160px;
+    .section-subtitle {
+      font-size: 1rem;
+    }
+    
+    .section-description {
+      font-size: 0.95rem;
+    }
+    
+    .image-placeholder {
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
     }
   }
 
   @media (max-width: 768px) {
-    .sections-container {
-      padding: 0 10px;
+    .section-carousel {
+      padding: 1.5rem 0;
     }
     
-    .section-tabs {
-      gap: 10px;
+    .container {
+      padding: 0 0.75rem;
     }
     
-    .section-tab {
-      padding: 10px 20px;
+    .sections-grid {
+      gap: 1.25rem;
+    }
+    
+    .section-content {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .section-content.reverse {
+      direction: ltr;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.95rem;
+    }
+
+    .section-description {
       font-size: 0.9rem;
     }
-    
-    .section-product {
-      flex: 0 0 220px;
-      min-height: 300px;
+
+    .section-btn {
+      padding: 0.7rem 1.25rem;
+      font-size: 0.95rem;
+      align-self: center;
+    }
+
+    .image-placeholder {
+      width: 90px;
+      height: 90px;
+      font-size: 2.25rem;
     }
     
-    .product-image {
-      height: 140px;
+    .section-img {
+      height: 120px;
     }
   }
 
   @media (max-width: 480px) {
-    .sections-container {
-      padding: 0 5px;
+    .section-carousel {
+      padding: 1rem 0;
     }
     
-    .section-product {
-      flex: 0 0 200px;
-      min-height: 280px;
+    .container {
+      padding: 0 0.5rem;
     }
     
-    .product-image {
-      height: 120px;
+    .sections-grid {
+      gap: 1rem;
+    }
+    
+    .section-content {
+      padding: 1.25rem;
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+    }
+
+    .section-description {
+      font-size: 0.85rem;
+    }
+
+    .section-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .image-placeholder {
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+    }
+    
+    .section-img {
+      height: 100px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .section-content {
+      padding: 1rem;
+    }
+    
+    .section-title {
+      font-size: 1.2rem;
+    }
+    
+    .section-subtitle {
+      font-size: 0.85rem;
+    }
+    
+    .section-description {
+      font-size: 0.8rem;
+    }
+    
+    .section-btn {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    
+    .image-placeholder {
+      width: 70px;
+      height: 70px;
+      font-size: 1.75rem;
     }
   }
 </style>
-
-<section class="sections-carousel">
-  <div class="sections-header">
-    <h2 class="sections-title">🌟 LO DESTACADO POR CATEGORÍA</h2>
-    <p class="sections-subtitle">
-      Descubre los mejores productos de cada sección
-    </p>
-  </div>
-
-  <div class="sections-container">
-    <div class="section-tabs">
-      {sections.map((section, index) => (
-        <button 
-          class={`section-tab ${section.id} ${index === 0 ? 'active' : ''}`}
-          data-section={section.id}
-          onclick={`showSection('${section.id}')`}
-        >
-          {section.name}
-        </button>
-      ))}
-    </div>
-
-    <div class="section-content">
-      {sections.map((section, sectionIndex) => (
-        <div 
-          class="section-products" 
-          id={`section-${section.id}`}
-          style={`display: ${sectionIndex === 0 ? 'flex' : 'none'}`}
-        >
-          {section.products.map(product => {
-            const totalStock = product.variants.reduce((sum, variant) => {
-              if (variant.inventory && Array.isArray(variant.inventory)) {
-                return sum + variant.inventory.reduce((invSum, inv) => invSum + (inv.quantity || 0), 0);
-              }
-              return sum;
-            }, 0);
-            
-            const prices = product.variants.map(v => v.salePriceCents || 0).filter(p => p > 0);
-            const minPrice = prices.length > 0 ? Math.min(...prices) / 100 : 0;
-            
-            let stockStatus = 'in-stock';
-            let stockText = `${totalStock} disponibles`;
-            
-            if (totalStock === 0) {
-              stockStatus = 'out';
-              stockText = 'Agotado';
-            } else if (totalStock < 10) {
-              stockStatus = 'low';
-              stockText = `Solo ${totalStock}`;
-            }
-
-            return (
-              <div class="section-product">
-                <img 
-                  src={product.imageUrl || '/img/ropa-caballero.png'} 
-                  alt={product.name}
-                  class="product-image"
-                />
-                <div class="product-details">
-                  <h3 class="product-name">{product.name}</h3>
-                  <p class="product-price">${minPrice.toFixed(2)}</p>
-                  <p class={`product-stock ${stockStatus}`}>{stockText}</p>
-                  <button 
-                    class="add-to-cart-btn"
-                    data-product-id={product.id}
-                    data-product-name={product.name}
-                    data-product-price={minPrice}
-                    data-product-image={product.imageUrl}
-                    data-stock={totalStock}
-                    disabled={totalStock === 0}
-                    onclick={`addToCart(${product.id}, '${product.name}', ${minPrice}, '${product.imageUrl || ''}', ${totalStock})`}
-                  >
-                    {totalStock === 0 ? 'Agotado' : 'Agregar'}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ))}
-    </div>
-
-    <div class="section-controls">
-      <button class="section-btn" id="section-prev">‹</button>
-      <button class="section-btn" id="section-next">›</button>
-    </div>
-  </div>
-</section>
-
-<script>
-  class SectionCarousel {
-    constructor() {
-      this.currentSection = 0;
-      this.sections = ['hombre', 'mujer', 'ninos', 'zapatos', 'accesorios'];
-      this.currentProductIndex = 0;
-      this.productsPerView = 4;
-      
-      this.init();
-    }
-
-    init() {
-      this.bindEvents();
-      this.updateSection();
-    }
-
-    bindEvents() {
-      // Botones de sección
-      document.querySelectorAll('.section-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-          const sectionId = e.target.dataset.section;
-          this.showSection(sectionId);
-        });
-      });
-
-      // Botones de navegación
-      document.getElementById('section-prev').addEventListener('click', () => this.prevProducts());
-      document.getElementById('section-next').addEventListener('click', () => this.nextProducts());
-    }
-
-    showSection(sectionId) {
-      // Actualizar tabs
-      document.querySelectorAll('.section-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
-
-      // Mostrar productos de la sección
-      document.querySelectorAll('.section-products').forEach(section => {
-        section.style.display = 'none';
-      });
-      document.getElementById(`section-${sectionId}`).style.display = 'flex';
-
-      this.currentSection = this.sections.indexOf(sectionId);
-      this.currentProductIndex = 0;
-      this.updateSection();
-    }
-
-    updateSection() {
-      const currentSectionElement = document.querySelector('.section-products[style*="flex"]');
-      if (currentSectionElement) {
-        const totalProducts = currentSectionElement.children.length;
-        const maxIndex = Math.max(0, totalProducts - this.productsPerView);
-        
-        const translateX = -this.currentProductIndex * (250 + 30); // 250px product + 30px gap
-        currentSectionElement.style.transform = `translateX(${translateX}px)`;
-        
-        // Actualizar botones
-        document.getElementById('section-prev').disabled = this.currentProductIndex === 0;
-        document.getElementById('section-next').disabled = this.currentProductIndex >= maxIndex;
-      }
-    }
-
-    prevProducts() {
-      if (this.currentProductIndex > 0) {
-        this.currentProductIndex--;
-        this.updateSection();
-      }
-    }
-
-    nextProducts() {
-      const currentSectionElement = document.querySelector('.section-products[style*="flex"]');
-      if (currentSectionElement) {
-        const totalProducts = currentSectionElement.children.length;
-        const maxIndex = Math.max(0, totalProducts - this.productsPerView);
-        
-        if (this.currentProductIndex < maxIndex) {
-          this.currentProductIndex++;
-          this.updateSection();
-        }
-      }
-    }
-  }
-
-  // Funciones globales
-  function showSection(sectionId) {
-    window.sectionCarousel.showSection(sectionId);
-  }
-
-  // Inicializar cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', () => {
-    window.sectionCarousel = new SectionCarousel();
-    window.showSection = showSection;
-  });
-</script>

@@ -1,18 +1,18 @@
 ---
-import Layout from "../layouts/Base.astro";
-import Header from "../components/Header.astro";
-import MainBanner from "../components/MainBanner.astro";
-import CategoryCarousel from "../components/CategoryCarousel.astro";
-import ProductCarousel from "../components/ProductCarousel.astro";
-import CategoryBanners from "../components/CategoryBanners.astro";
-import SectionCarousel from "../components/SectionCarousel.astro";
-import NewCart from "../components/NewCart.astro";
-import Navigation from "../components/Navigation.astro";
-import ProductGrid from "../components/ProductGrid.astro";
-import CartPanel from "../components/CartPanel.astro";
+import Layout from "@/Layouts/Base.astro";
+import Header from "@components/Header.astro";
+import MainBanner from "@components/MainBanner.astro";
+import CategoryCarousel from "@components/CategoryCarousel.astro";
+import ProductCarousel from "@components/ProductCarousel.astro";
+import CategoryBanners from "@components/CategoryBanners.astro";
+import SectionCarousel from "@components/SectionCarousel.astro";
+import NewCart from "@components/NewCart.astro";
+import Navigation from "@components/Navigation.astro";
+import ProductGrid from "@components/ProductGrid.astro";
+import CartPanel from "@components/CartPanel.astro";
 
 // Obtener productos desde la base de datos
-import { prisma } from '../lib/db';
+import { prisma } from '@lib/db';
 const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
 ---
 <Layout title="Tienda Web" description="Bienvenido a nuestra tienda en línea">

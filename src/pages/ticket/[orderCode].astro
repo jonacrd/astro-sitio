@@ -1,7 +1,7 @@
 ---
-import Layout from "../../layouts/Base.astro";
-import Navigation from "../../components/Navigation.astro";
-import { prisma } from "../../lib/db";
+import Layout from "@/Layouts/Base.astro";
+import Navigation from "@components/Navigation.astro";
+import { prisma } from "@lib/db";
 
 export async function getStaticPaths() {
   return [];
@@ -369,3 +369,4 @@ function formatDate(date: Date): string {
     }
   }
 </style>
+

@@ -1,213 +1,261 @@
 ---
-// Banners por categorías como en Vstore.cl
-import { prisma } from '../lib/db';
-
-// Obtener categorías de la base de datos
-const categories = await prisma.category.findMany({
-  include: {
-    products: {
-      include: {
-        variants: {
-          include: {
-            inventory: true
-          }
-        }
-      },
-      take: 1 // Solo un producto por categoría para el banner
-    }
-  },
-  take: 5
-});
-
-// Mapear categorías a banners personalizados
-const categoryBanners = [
-  {
-    id: 'hombre',
-    name: 'Hombre',
-    title: 'MODA MASCULINA',
-    subtitle: 'Estilo y comodidad para el hombre moderno',
-    image: '/img/hombre-header.png',
-    color: '#2c3e50',
-    gradient: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)'
-  },
-  {
-    id: 'mujer',
-    name: 'Mujer',
-    title: 'MODA FEMENINA',
-    subtitle: 'Elegancia y tendencia para la mujer actual',
-    image: '/img/upper-dama-header.png',
-    color: '#e74c3c',
-    gradient: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
-  },
-  {
-    id: 'ninos',
-    name: 'Niños',
-    title: 'MODA INFANTIL',
-    subtitle: 'Diversión y comodidad para los más pequeños',
-    image: '/img/header-ninos.png',
-    color: '#f39c12',
-    gradient: 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)'
-  },
-  {
-    id: 'zapatos',
-    name: 'Zapatos',
-    title: 'CALZADO',
-    subtitle: 'Pisadas perfectas para cada ocasión',
-    image: '/img/zapatillas-header.png',
-    color: '#8e44ad',
-    gradient: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)'
-  },
-  {
-    id: 'accesorios',
-    name: 'Accesorios',
-    title: 'ACCESORIOS',
-    subtitle: 'Detalles que marcan la diferencia',
-    image: '/img/acesorios-header.png',
-    color: '#27ae60',
-    gradient: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)'
-  }
-];
+interface Category {
+  title: string;
+  href: string;
+  imageUrl?: string;
+  description?: string;
+}
+const { categories = [] } = Astro.props as { categories?: Category[] };
 ---
 
-<style>
-  .banners-section {
-    padding: 40px 20px;
-    background: #f8f9fa;
-  }
-
-  .banners-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .banner-card {
-    position: relative;
-    height: 200px;
-    border-radius: 15px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-  }
-
-  .banner-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-  }
-
-  .banner-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: transform 0.3s ease;
-  }
-
-  .banner-card:hover .banner-background {
-    transform: scale(1.05);
-  }
-
-  .banner-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
-  }
-
-  .banner-title {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: white;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-  }
-
-  .banner-subtitle {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.9);
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  }
-
-  .banner-btn {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    border: 2px solid rgba(255,255,255,0.3);
-    padding: 10px 20px;
-    border-radius: 25px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-  }
-
-  .banner-btn:hover {
-    background: rgba(255,255,255,0.3);
-    border-color: rgba(255,255,255,0.5);
-    transform: translateY(-2px);
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .banners-grid {
-      grid-template-columns: 1fr;
-      gap: 15px;
-    }
-    
-    .banner-card {
-      height: 150px;
-    }
-    
-    .banner-title {
-      font-size: 1.5rem;
-    }
-    
-    .banner-subtitle {
-      font-size: 0.9rem;
-    }
-  }
-</style>
-
-<section class="banners-section">
-  <div class="banners-grid">
-    {categoryBanners.map(banner => (
-      <div class="banner-card" onclick={`goToCategory('${banner.id}')`}>
-        <div 
-          class="banner-background"
-          style={`background-image: url('${banner.image}')`}
-        ></div>
-        <div class="banner-overlay">
-          <h3 class="banner-title">{banner.title}</h3>
-          <p class="banner-subtitle">{banner.subtitle}</p>
-          <button class="banner-btn">Ver Colección</button>
-        </div>
-      </div>
-    ))}
+<section class="category-banners">
+  <div class="container">
+    <div class="categories-grid">
+      {categories.length === 0 ? (
+        <>
+          <a href="/catalogo?cat=hombre" class="category-card">
+            <div class="category-image">
+              <div class="category-icon">👔</div>
+            </div>
+            <div class="category-content">
+              <h3 class="category-title">Hombre</h3>
+              <p class="category-description">Explora poleras, jeans y más.</p>
+            </div>
+          </a>
+          <a href="/catalogo?cat=mujer" class="category-card">
+            <div class="category-image">
+              <div class="category-icon">👗</div>
+            </div>
+            <div class="category-content">
+              <h3 class="category-title">Mujer</h3>
+              <p class="category-description">Novedades y básicos.</p>
+            </div>
+          </a>
+          <a href="/catalogo?cat=ninos" class="category-card">
+            <div class="category-image">
+              <div class="category-icon">👶</div>
+            </div>
+            <div class="category-content">
+              <h3 class="category-title">Niños</h3>
+              <p class="category-description">Comodidad y estilo.</p>
+            </div>
+          </a>
+          <a href="/catalogo?cat=accesorios" class="category-card">
+            <div class="category-image">
+              <div class="category-icon">⌚</div>
+            </div>
+            <div class="category-content">
+              <h3 class="category-title">Accesorios</h3>
+              <p class="category-description">Completa tu outfit.</p>
+            </div>
+          </a>
+        </>
+      ) : (
+        categories.map((c) => (
+          <a href={c.href} class="category-card">
+            <div class="category-image">
+              {c.imageUrl ? (
+                <img src={c.imageUrl} alt={c.title} class="category-img" />
+              ) : (
+                <div class="category-icon">📦</div>
+              )}
+            </div>
+            <div class="category-content">
+              <h3 class="category-title">{c.title}</h3>
+              {c.description && <p class="category-description">{c.description}</p>}
+            </div>
+          </a>
+        ))
+      )}
+    </div>
   </div>
 </section>
 
-<script>
-  function goToCategory(categoryId) {
-    // Redirigir a la página de categoría
-    window.location.href = `/catalogo?categoria=${categoryId}`;
+<style>
+  .category-banners {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   }
 
-  // Hacer la función global
-  window.goToCategory = goToCategory;
-</script>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
 
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    max-width: 100%;
+  }
+
+  .category-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .category-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .category-image {
+    height: 160px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-image::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  }
+
+  .category-icon {
+    font-size: 3rem;
+    color: white;
+    z-index: 1;
+    position: relative;
+  }
+
+  .category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .category-content {
+    padding: 1.5rem;
+  }
+
+  .category-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+  }
+
+  .category-description {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .categories-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+    }
+    
+    .category-image {
+      height: 140px;
+    }
+    
+    .category-icon {
+      font-size: 2.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .category-banners {
+      padding: 1.5rem 0;
+    }
+    
+    .container {
+      padding: 0 0.75rem;
+    }
+    
+    .categories-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    
+    .category-image {
+      height: 120px;
+    }
+    
+    .category-icon {
+      font-size: 2rem;
+    }
+    
+    .category-content {
+      padding: 1.25rem;
+    }
+    
+    .category-title {
+      font-size: 1.1rem;
+    }
+    
+    .category-description {
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .category-banners {
+      padding: 1rem 0;
+    }
+    
+    .container {
+      padding: 0 0.5rem;
+    }
+    
+    .categories-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    .category-image {
+      height: 100px;
+    }
+    
+    .category-icon {
+      font-size: 1.75rem;
+    }
+    
+    .category-content {
+      padding: 1rem;
+    }
+    
+    .category-title {
+      font-size: 1rem;
+    }
+    
+    .category-description {
+      font-size: 0.8rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .categories-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    
+    .category-image {
+      height: 120px;
+    }
+    
+    .category-icon {
+      font-size: 2rem;
+    }
+  }
+</style>

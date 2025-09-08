@@ -5,6 +5,7 @@ import type { APIRoute } from 'astro';
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/db';
 import { parseCookies, buildSetCookie } from '../../lib/cookies';
+import { randomUUID } from 'crypto';
 
 // Tipo de carrito con items+product
 type CartWithItems = Prisma.CartGetPayload<{
@@ -13,40 +14,39 @@ type CartWithItems = Prisma.CartGetPayload<{
 
 export const GET: APIRoute = async ({ request }) => {
   const cookies = parseCookies(request);
-  let cartId = cookies['cartId'] ? Number(cookies['cartId']) : undefined;
+  let sessionId = cookies['sessionId'];
 
-  let cart: CartWithItems | null = cartId
-    ? await prisma.cart.findUnique({
-        where: { id: cartId },
-        include: {
-          items: { include: { product: true } },
-        },
-      })
-    : null;
+  // Si no hay sessionId, crear uno nuevo
+  if (!sessionId) {
+    sessionId = randomUUID();
+  }
 
-  // si no hay cookie o el carrito no existe => crea uno nuevo
+  let cart: CartWithItems | null = await prisma.cart.findUnique({
+    where: { sessionId },
+    include: {
+      items: { include: { product: true } },
+    },
+  });
+
+  // si no hay carrito => crea uno nuevo
   let setCookieHeader: string | undefined;
   if (!cart) {
-    const created = await prisma.cart.create({ data: {} });
-    cartId = created.id;
-    setCookieHeader = buildSetCookie('cartId', String(cartId), {
-      maxAgeSec: 60 * 60 * 24 * 30,
-    });
-
-    // 🔁 re-lee con include para que el tipo tenga 'items'
-    cart = await prisma.cart.findUnique({
-      where: { id: cartId },
+    cart = await prisma.cart.create({ 
+      data: { sessionId },
       include: {
         items: { include: { product: true } },
       },
+    });
+    setCookieHeader = buildSetCookie('sessionId', sessionId, {
+      maxAgeSec: 60 * 60 * 24 * 30,
     });
   }
 
   // Por seguridad: si por alguna razón sigue null, responde shape vacío compatible
   if (!cart) {
     const empty: CartWithItems = {
-      id: cartId ?? 0,
-      customerId: null,
+      id: 0,
+      sessionId: sessionId,
       createdAt: new Date(),
       updatedAt: new Date(),
       items: [],

@@ -56,3 +56,4 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: err.message ?? 'Error en checkout' }), { status: 409, headers });
   }
 };
+

@@ -27,3 +27,4 @@ export const POST: APIRoute = async ({ request }) => {
   const full = await prisma.cart.findUnique({ where: { id: cart.id }, include: { items: { include: { product: true } } } });
   return new Response(JSON.stringify(full), { headers });
 };
+

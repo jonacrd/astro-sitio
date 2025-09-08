@@ -1,9 +1,9 @@
 ---
 export const prerender = false;
 
-import Layout from "../../layouts/Base.astro";
-import Navigation from "../../components/Navigation.astro";
-import { prisma } from "../../lib/db";
+import Layout from "@/Layouts/Base.astro";
+import Navigation from "@components/Navigation.astro";
+import { prisma } from "@lib/db";
 
 const id = Number(Astro.params.id || 0);
 const order = id

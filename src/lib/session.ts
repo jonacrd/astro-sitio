@@ -13,3 +13,4 @@ export function getOrSetSessionId(req: Request, headers: Headers) {
   headers.append('Set-Cookie', `${COOKIE}=${sid}; Path=/; Expires=${expires}; HttpOnly; SameSite=Lax`);
   return sid;
 }
+

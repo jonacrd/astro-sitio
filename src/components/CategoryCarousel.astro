@@ -2,55 +2,50 @@
 // Carrusel de secciones de moda (Hombre, Mujer, Niños, Zapatos, Accesorios)
 import { prisma } from '../lib/db';
 
-// Obtener productos por categorías para las secciones grandes
+// Obtener productos por categorías usando filtros en el nombre o descripción
 const categoryData = await Promise.all([
   prisma.product.findMany({
-    where: { category: { name: { contains: 'hombre' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
+    where: { 
+      OR: [
+        { name: { contains: 'hombre' } },
+        { description: { contains: 'hombre' } }
+      ]
     },
     take: 4
   }),
   prisma.product.findMany({
-    where: { category: { name: { contains: 'mujer' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
+    where: { 
+      OR: [
+        { name: { contains: 'mujer' } },
+        { description: { contains: 'mujer' } }
+      ]
     },
     take: 4
   }),
   prisma.product.findMany({
-    where: { category: { name: { contains: 'niño' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
+    where: { 
+      OR: [
+        { name: { contains: 'niño' } },
+        { description: { contains: 'niño' } }
+      ]
     },
     take: 4
   }),
   prisma.product.findMany({
-    where: { category: { name: { contains: 'zapatos' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
+    where: { 
+      OR: [
+        { name: { contains: 'zapato' } },
+        { description: { contains: 'zapato' } }
+      ]
     },
     take: 4
   }),
   prisma.product.findMany({
-    where: { category: { name: { contains: 'accesorio' } } },
-    include: {
-      variants: {
-        include: { inventory: true }
-      },
-      category: true
+    where: { 
+      OR: [
+        { name: { contains: 'accesorio' } },
+        { description: { contains: 'accesorio' } }
+      ]
     },
     take: 4
   })
@@ -549,15 +544,8 @@ const sections = [
           
           <div class="section-products">
             {section.products.map(product => {
-              const totalStock = product.variants.reduce((sum, variant) => {
-                if (variant.inventory && Array.isArray(variant.inventory)) {
-                  return sum + variant.inventory.reduce((invSum, inv) => invSum + (inv.quantity || 0), 0);
-                }
-                return sum;
-              }, 0);
-              
-              const prices = product.variants.map(v => v.salePriceCents || 0).filter(p => p > 0);
-              const minPrice = prices.length > 0 ? Math.min(...prices) / 100 : 0;
+              const totalStock = product.stock || 0;
+              const price = (product.priceCents || 0) / 100;
               
               let stockStatus = 'in-stock';
               let stockText = `${totalStock} disponibles`;
@@ -579,17 +567,17 @@ const sections = [
                   />
                   <div class="product-info">
                     <h4 class="product-name">{product.name}</h4>
-                    <p class="product-price">${minPrice.toFixed(2)}</p>
+                    <p class="product-price">${price.toFixed(2)}</p>
                     <p class={`product-stock ${stockStatus}`}>{stockText}</p>
                     <button 
                       class="add-to-cart-btn"
                       data-product-id={product.id}
                       data-product-name={product.name}
-                      data-product-price={minPrice}
+                      data-product-price={price}
                       data-product-image={product.imageUrl}
                       data-stock={totalStock}
                       disabled={totalStock === 0}
-                      onclick={`addToCart(${product.id}, '${product.name}', ${minPrice}, '${product.imageUrl || ''}', ${totalStock})`}
+                      onclick={`addToCart(${product.id}, '${product.name}', ${price}, '${product.imageUrl || ''}', ${totalStock})`}
                     >
                       {totalStock === 0 ? 'Agotado' : 'Agregar'}
                     </button>

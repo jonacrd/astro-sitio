@@ -4,14 +4,6 @@ import { prisma } from '../lib/db';
 
 // Obtener productos destacados de la base de datos
 const featuredProducts = await prisma.product.findMany({
-  include: {
-    variants: {
-      include: {
-        inventory: true
-      }
-    },
-    category: true
-  },
   take: 12 // Más productos para el carrusel
 });
 ---
@@ -299,15 +291,8 @@ const featuredProducts = await prisma.product.findMany({
   <div class="carousel-container">
     <div class="carousel-track" id="carousel-track">
       {featuredProducts.map(product => {
-        const totalStock = product.variants.reduce((sum, variant) => {
-          if (variant.inventory && Array.isArray(variant.inventory)) {
-            return sum + variant.inventory.reduce((invSum, inv) => invSum + (inv.quantity || 0), 0);
-          }
-          return sum;
-        }, 0);
-        
-        const prices = product.variants.map(v => v.salePriceCents || 0).filter(p => p > 0);
-        const minPrice = prices.length > 0 ? Math.min(...prices) / 100 : 0;
+        const totalStock = product.stock || 0;
+        const price = (product.priceCents || 0) / 100;
         
         let stockStatus = 'in-stock';
         let stockText = `${totalStock} disponibles`;
@@ -329,18 +314,18 @@ const featuredProducts = await prisma.product.findMany({
             />
             <div class="product-info">
               <h3 class="product-name">{product.name}</h3>
-              <p class="product-category">{product.category?.name || 'Sin categoría'}</p>
-              <p class="product-price">${minPrice.toFixed(2)}</p>
+              <p class="product-category">Producto destacado</p>
+              <p class="product-price">${price.toFixed(2)}</p>
               <p class={`product-stock ${stockStatus}`}>{stockText}</p>
               <button 
                 class="add-to-cart-btn"
                 data-product-id={product.id}
                 data-product-name={product.name}
-                data-product-price={minPrice}
+                data-product-price={price}
                 data-product-image={product.imageUrl}
                 data-stock={totalStock}
                 disabled={totalStock === 0}
-                onclick={`addToCart(${product.id}, '${product.name}', ${minPrice}, '${product.imageUrl || ''}', ${totalStock})`}
+                onclick={`addToCart(${product.id}, '${product.name}', ${price}, '${product.imageUrl || ''}', ${totalStock})`}
               >
                 {totalStock === 0 ? 'Agotado' : 'Agregar'}
               </button>
