@@ -6,10 +6,8 @@ import CategoryCarousel from "@components/CategoryCarousel.astro";
 import ProductCarousel from "@components/ProductCarousel.astro";
 import CategoryBanners from "@components/CategoryBanners.astro";
 import SectionCarousel from "@components/SectionCarousel.astro";
-import NewCart from "@components/NewCart.astro";
 import Navigation from "@components/Navigation.astro";
 import ProductGrid from "@components/ProductGrid.astro";
-import CartPanel from "@components/CartPanel.astro";
 
 // Obtener productos desde la base de datos
 import { prisma } from '@lib/db';
@@ -34,8 +32,6 @@ const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
       <ProductGrid products={products} />
     </section>
   </main>
-  <NewCart />
-  <CartPanel />
   <footer>…</footer>
 </Layout>
 

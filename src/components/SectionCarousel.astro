@@ -1,370 +1,253 @@
 ---
-interface Section {
-  title: string;
-  subtitle?: string;
-  href: string;
-  imageUrl?: string;
-  description?: string;
+// Carrusel de secciones con animaciones suaves
+export interface Props {
+  sections?: Array<{
+    title: string;
+    description: string;
+    imageUrl?: string;
+    href?: string;
+    icon?: string;
+  }>;
 }
 
-const { sections = [] } = Astro.props as { sections?: Section[] };
+const { sections = [] } = Astro.props;
+
+// Secciones por defecto si no se proporcionan
+const defaultSections = [
+  {
+    title: "Nuevas Colecciones",
+    description: "Descubre las últimas tendencias de la temporada",
+    icon: "✨",
+    href: "/catalogo?filter=nuevo"
+  },
+  {
+    title: "Ofertas Especiales",
+    description: "Hasta 50% de descuento en productos seleccionados",
+    icon: "🔥",
+    href: "/catalogo?filter=oferta"
+  },
+  {
+    title: "Envío Gratis",
+    description: "En compras superiores a $50.000",
+    icon: "🚚",
+    href: "/catalogo"
+  },
+  {
+    title: "Soporte 24/7",
+    description: "Estamos aquí para ayudarte siempre",
+    icon: "💬",
+    href: "/contacto"
+  }
+];
+
+const displaySections = sections.length > 0 ? sections : defaultSections;
 ---
-
-<section class="section-carousel">
-  <div class="container">
-    {sections.length === 0 ? (
-      <div class="sections-grid">
-        <!-- Sección de Ofertas -->
-        <div class="section-card">
-          <div class="section-content">
-            <div class="section-text">
-              <h2 class="section-title">🔥 Ofertas Especiales</h2>
-              <p class="section-subtitle">Hasta 50% de descuento en productos seleccionados</p>
-              <p class="section-description">No te pierdas nuestras increíbles ofertas. Tiempo limitado.</p>
-              <a href="/catalogo?filter=ofertas" class="section-btn">
-                Ver Ofertas
-              </a>
-            </div>
-            <div class="section-image">
-              <div class="image-placeholder">🛍️</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sección de Novedades -->
-        <div class="section-card">
-          <div class="section-content reverse">
-            <div class="section-text">
-              <h2 class="section-title">✨ Novedades</h2>
-              <p class="section-subtitle">Descubre las últimas tendencias de la temporada</p>
-              <p class="section-description">Productos frescos y modernos que están de moda.</p>
-              <a href="/catalogo?filter=nuevos" class="section-btn">
-                Ver Novedades
-              </a>
-            </div>
-            <div class="section-image">
-              <div class="image-placeholder">🌟</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sección de Marcas -->
-        <div class="section-card">
-          <div class="section-content">
-            <div class="section-text">
-              <h2 class="section-title">🏷️ Marcas Destacadas</h2>
-              <p class="section-subtitle">Las mejores marcas en un solo lugar</p>
-              <p class="section-description">Calidad garantizada de marcas reconocidas mundialmente.</p>
-              <a href="/catalogo?filter=marcas" class="section-btn">
-                Ver Marcas
-              </a>
-            </div>
-            <div class="section-image">
-              <div class="image-placeholder">🏆</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    ) : (
-      <div class="sections-grid">
-        {sections.map((section) => (
-          <div class="section-card">
-            <div class="section-content">
-              <div class="section-text">
-                <h2 class="section-title">{section.title}</h2>
-                {section.subtitle && <p class="section-subtitle">{section.subtitle}</p>}
-                {section.description && <p class="section-description">{section.description}</p>}
-                <a href={section.href} class="section-btn">
-                  Ver Más
-                </a>
-              </div>
-              <div class="section-image">
-                {section.imageUrl ? (
-                  <img src={section.imageUrl} alt={section.title} class="section-img" />
-                ) : (
-                  <div class="image-placeholder">📦</div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-</section>
 
 <style>
   .section-carousel {
-    padding: 2rem 0;
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    position: relative;
+    overflow: hidden;
   }
 
-  .container {
+  .section-carousel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .carousel-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .carousel-title {
+    text-align: center;
+    margin-bottom: 50px;
+    color: #f8fafc;
+  }
+
+  .carousel-title h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .carousel-title p {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   .sections-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
   }
 
   .section-card {
-    background: white;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    position: relative;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .section-card:hover::before {
+    opacity: 1;
   }
 
   .section-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(59, 130, 246, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  .section-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    padding: 2rem;
-    align-items: center;
-    min-height: 200px;
-  }
-
-  .section-content.reverse {
-    direction: rtl;
-  }
-
-  .section-content.reverse > * {
-    direction: ltr;
-  }
-
-  .section-text {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  .section-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   }
 
   .section-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    margin: 0;
-    line-height: 1.2;
-  }
-
-  .section-subtitle {
-    font-size: 1.1rem;
-    color: #8b7355;
+    font-size: 1.5rem;
     font-weight: 600;
-    margin: 0;
+    color: #f8fafc;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
   }
 
   .section-description {
-    font-size: 1rem;
-    color: #666;
-    line-height: 1.5;
-    margin: 0;
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
   }
 
-  .section-btn {
+  .section-link {
     display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #8b7355 0%, #a8a47a 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     color: white;
     text-decoration: none;
-    border-radius: 50px;
+    padding: 12px 24px;
+    border-radius: 12px;
     font-weight: 600;
-    font-size: 1rem;
     transition: all 0.3s ease;
-    align-self: flex-start;
-    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   }
 
-  .section-btn:hover {
+  .section-link:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(139, 115, 85, 0.4);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   }
 
-  .section-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 150px;
-  }
-
-  .image-placeholder {
-    width: 120px;
-    height: 120px;
-    background: linear-gradient(135deg, #f5f2e8 0%, #d3d1b6 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    color: #8b7355;
-  }
-
-  .section-img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 15px;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 1024px) {
-    .section-content {
-      padding: 1.75rem;
-      gap: 1.5rem;
-    }
-    
-    .section-title {
-      font-size: 1.75rem;
-    }
-    
-    .section-subtitle {
-      font-size: 1rem;
-    }
-    
-    .section-description {
-      font-size: 0.95rem;
-    }
-    
-    .image-placeholder {
-      width: 100px;
-      height: 100px;
-      font-size: 2.5rem;
-    }
-  }
-
+  /* Responsive */
   @media (max-width: 768px) {
     .section-carousel {
-      padding: 1.5rem 0;
+      padding: 40px 15px;
     }
-    
-    .container {
-      padding: 0 0.75rem;
+
+    .carousel-title h2 {
+      font-size: 2rem;
     }
-    
+
     .sections-grid {
-      gap: 1.25rem;
-    }
-    
-    .section-content {
       grid-template-columns: 1fr;
-      gap: 1.25rem;
-      padding: 1.5rem;
-      text-align: center;
+      gap: 20px;
     }
 
-    .section-content.reverse {
-      direction: ltr;
+    .section-card {
+      padding: 25px 20px;
     }
 
-    .section-title {
-      font-size: 1.5rem;
-    }
-
-    .section-subtitle {
-      font-size: 0.95rem;
-    }
-
-    .section-description {
-      font-size: 0.9rem;
-    }
-
-    .section-btn {
-      padding: 0.7rem 1.25rem;
-      font-size: 0.95rem;
-      align-self: center;
-    }
-
-    .image-placeholder {
-      width: 90px;
-      height: 90px;
-      font-size: 2.25rem;
-    }
-    
-    .section-img {
-      height: 120px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .section-carousel {
-      padding: 1rem 0;
-    }
-    
-    .container {
-      padding: 0 0.5rem;
-    }
-    
-    .sections-grid {
-      gap: 1rem;
-    }
-    
-    .section-content {
-      padding: 1.25rem;
-      gap: 1rem;
+    .section-icon {
+      font-size: 2.5rem;
     }
 
     .section-title {
       font-size: 1.3rem;
     }
-
-    .section-subtitle {
-      font-size: 0.9rem;
-    }
-
-    .section-description {
-      font-size: 0.85rem;
-    }
-
-    .section-btn {
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-    }
-
-    .image-placeholder {
-      width: 80px;
-      height: 80px;
-      font-size: 2rem;
-    }
-    
-    .section-img {
-      height: 100px;
-    }
   }
 
-  @media (max-width: 360px) {
-    .section-content {
-      padding: 1rem;
+  @media (max-width: 480px) {
+    .carousel-title h2 {
+      font-size: 1.8rem;
     }
-    
-    .section-title {
-      font-size: 1.2rem;
+
+    .section-card {
+      padding: 20px 15px;
     }
-    
-    .section-subtitle {
-      font-size: 0.85rem;
-    }
-    
-    .section-description {
-      font-size: 0.8rem;
-    }
-    
-    .section-btn {
-      padding: 0.5rem 0.8rem;
-      font-size: 0.85rem;
-    }
-    
-    .image-placeholder {
-      width: 70px;
-      height: 70px;
-      font-size: 1.75rem;
+
+    .section-icon {
+      font-size: 2rem;
     }
   }
 </style>
+
+<section class="section-carousel">
+  <div class="carousel-container">
+    <div class="carousel-title">
+      <h2>¿Por qué elegirnos?</h2>
+      <p>Descubre todas las ventajas que tenemos para ofrecerte</p>
+    </div>
+
+    <div class="sections-grid">
+      {displaySections.map((section) => (
+        <div class="section-card">
+          {section.icon && (
+            <span class="section-icon">{section.icon}</span>
+          )}
+          <h3 class="section-title">{section.title}</h3>
+          <p class="section-description">{section.description}</p>
+          {section.href && (
+            <a href={section.href} class="section-link">
+              Ver más
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -2,94 +2,186 @@
 export interface Props {
   productId: number;
   stock: number;
-  disabled?: boolean;
+  productName?: string;
+  productPrice?: number;
+  productImage?: string;
 }
 
-const { productId, stock, disabled = false } = Astro.props;
-const isOutOfStock = stock <= 0;
-const isDisabled = disabled || isOutOfStock;
+const { productId, stock, productName = 'Producto', productPrice = 0, productImage = '' } = Astro.props;
 ---
-
-<button 
-  class={`add-to-cart-btn ${isDisabled ? 'disabled' : ''}`}
-  data-product-id={productId}
-  disabled={isDisabled}
->
-  {isOutOfStock ? 'Sin stock' : 'Agregar al carrito'}
-</button>
 
 <style>
   .add-to-cart-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 100%;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     color: white;
     border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
+    padding: 12px 20px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
   }
 
-  .add-to-cart-btn:hover:not(.disabled) {
+  .add-to-cart-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .add-to-cart-btn:hover::before {
+    left: 100%;
+  }
+
+  .add-to-cart-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
   }
 
-  .add-to-cart-btn.disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .add-to-cart-btn:active:not(.disabled) {
+  .add-to-cart-btn:active {
     transform: translateY(0);
+  }
+
+  .add-to-cart-btn:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .add-to-cart-btn:disabled::before {
+    display: none;
+  }
+
+  .add-to-cart-btn:disabled:hover {
+    background: #6b7280;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .add-to-cart-btn {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+    }
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('.add-to-cart-btn:not(.disabled)');
-    
-    buttons.forEach(button => {
-      button.addEventListener('click', async (e) => {
-        const target = e.target as HTMLButtonElement;
-        const productId = parseInt(target.dataset.productId || '0');
-        
-        if (!productId) return;
-        
-        try {
-          const response = await fetch('/api/cart/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, qty: 1 })
-          });
-          
-          if (!response.ok) {
-            const error = await response.json();
-            alert(error.error || 'Error al agregar al carrito');
-            return;
-          }
-          
-          // Disparar evento para actualizar el carrito
-          document.dispatchEvent(new CustomEvent('cart:updated'));
-          
-          // Feedback visual
-          target.textContent = '¡Agregado!';
-          target.style.background = '#4CAF50';
-          setTimeout(() => {
-            target.textContent = 'Agregar al carrito';
-            target.style.background = '';
-          }, 1500);
-          
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al agregar al carrito');
-        }
-      });
-    });
-  });
-</script>
+<button 
+  class="add-to-cart-btn"
+  data-product-id={productId}
+  data-product-name={productName}
+  data-product-price={productPrice}
+  data-product-image={productImage}
+  data-stock={stock}
+  disabled={stock === 0}
+  onclick={`addToCart(${productId}, '${productName}', ${productPrice}, '${productImage}', ${stock})`}
+>
+  {stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+</button>
 
+<script>
+  // Función para agregar al carrito
+  async function addToCart(productId, productName, price, imageUrl, stock) {
+    if (stock === 0) {
+      alert('Este producto está agotado');
+      return;
+    }
+
+    const button = document.querySelector(`[data-product-id="${productId}"]`);
+    if (button) {
+      button.classList.add('loading');
+      button.disabled = true;
+    }
+
+    try {
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: parseInt(productId),
+          qty: 1
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(`${productName} agregado al carrito`);
+        updateCartCount();
+      } else {
+        alert(result.error || 'Error al agregar producto');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al procesar el pedido');
+    } finally {
+      if (button) {
+        button.classList.remove('loading');
+        button.disabled = false;
+      }
+    }
+  }
+
+  // Función para actualizar contador del carrito
+  async function updateCartCount() {
+    try {
+      const response = await fetch('/api/cart');
+      const cart = await response.json();
+      const totalItems = cart.items?.reduce((total, item) => total + item.qty, 0) || 0;
+      
+      const cartButton = document.querySelector('.cart-button');
+      const existingBadge = cartButton?.querySelector('.cart-badge');
+      
+      if (totalItems > 0) {
+        if (existingBadge) {
+          existingBadge.textContent = totalItems;
+        } else if (cartButton) {
+          const badge = document.createElement('span');
+          badge.className = 'cart-badge';
+          badge.setAttribute('aria-label', `${totalItems} productos en el carrito`);
+          badge.textContent = totalItems;
+          cartButton.appendChild(badge);
+        }
+      } else if (existingBadge) {
+        existingBadge.remove();
+      }
+    } catch (error) {
+      console.log('Error al actualizar carrito:', error);
+    }
+  }
+</script>

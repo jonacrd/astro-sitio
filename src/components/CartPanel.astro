@@ -1,29 +1,28 @@
 ---
-// Panel del carrito de compras
+// Panel del carrito original sin React
+import { prisma } from '../lib/db';
+import { randomUUID } from 'crypto';
+
+// Obtener carrito actual
+let cart = null;
+let sessionId = null;
+
+try {
+  // Simular obtención de sessionId (en el cliente se manejará con cookies)
+  const cartData = await prisma.cart.findFirst({
+    include: {
+      items: {
+        include: {
+          product: true
+        }
+      }
+    }
+  });
+  cart = cartData;
+} catch (error) {
+  console.log('Error al obtener carrito:', error);
+}
 ---
-
-<div class="cart-panel" id="cart-panel">
-  <div class="cart-header">
-    <h3>🛒 Carrito de Compras</h3>
-    <button class="close-cart" id="close-cart">×</button>
-  </div>
-  
-  <div class="cart-content" id="cart-content">
-    <div class="loading">Cargando carrito...</div>
-  </div>
-  
-  <div class="cart-footer" id="cart-footer" style="display: none;">
-    <div class="cart-total">
-      <span>Total: </span>
-      <span id="cart-total-amount">$0</span>
-    </div>
-    <button class="checkout-btn" id="checkout-btn">
-      Finalizar Compra
-    </button>
-  </div>
-</div>
-
-<div class="cart-overlay" id="cart-overlay"></div>
 
 <style>
   .cart-panel {
@@ -32,12 +31,11 @@
     right: -400px;
     width: 400px;
     height: 100vh;
-    background: white;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    background: #0f172a;
+    border-left: 1px solid #334155;
     transition: right 0.3s ease;
-    display: flex;
-    flex-direction: column;
+    z-index: 1000;
+    overflow-y: auto;
   }
 
   .cart-panel.open {
@@ -48,8 +46,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 999;
     opacity: 0;
@@ -63,145 +61,167 @@
   }
 
   .cart-header {
+    padding: 20px;
+    border-bottom: 1px solid #334155;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    background: #f8f9fa;
   }
 
-  .cart-header h3 {
+  .cart-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f8fafc;
     margin: 0;
-    color: #333;
-    font-size: 18px;
   }
 
   .close-cart {
     background: none;
     border: none;
-    font-size: 24px;
+    color: #94a3b8;
+    font-size: 1.5rem;
     cursor: pointer;
-    color: #666;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 5px;
+    border-radius: 5px;
+    transition: color 0.2s ease;
   }
 
   .close-cart:hover {
-    color: #333;
+    color: #f8fafc;
   }
 
   .cart-content {
-    flex: 1;
-    overflow-y: auto;
     padding: 20px;
+  }
+
+  .cart-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+  }
+
+  .cart-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
 
   .cart-item {
     display: flex;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .cart-item:last-child {
-    border-bottom: none;
+    gap: 15px;
+    padding: 15px;
+    background: #1e293b;
+    border-radius: 10px;
+    border: 1px solid #334155;
   }
 
   .cart-item-image {
     width: 60px;
     height: 60px;
-    border-radius: 8px;
     object-fit: cover;
+    border-radius: 8px;
   }
 
-  .cart-item-info {
+  .cart-item-details {
     flex: 1;
   }
 
   .cart-item-name {
     font-weight: 600;
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    line-height: 1.3;
+    color: #f8fafc;
+    margin-bottom: 5px;
   }
 
   .cart-item-price {
-    color: #2e7d32;
-    font-weight: 600;
-    font-size: 14px;
+    color: #94a3b8;
+    font-size: 0.9rem;
   }
 
   .cart-item-controls {
     display: flex;
     align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .qty-controls {
+    display: flex;
+    align-items: center;
     gap: 8px;
-    margin-top: 8px;
   }
 
   .qty-btn {
-    background: #f0f0f0;
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #475569;
+    background: #1e293b;
+    color: #f8fafc;
+    border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s ease;
   }
 
   .qty-btn:hover {
-    background: #e0e0e0;
+    background: #334155;
+    border-color: #64748b;
   }
 
   .qty-display {
-    min-width: 30px;
+    min-width: 40px;
     text-align: center;
+    color: #f8fafc;
     font-weight: 600;
   }
 
   .remove-item {
-    background: #ffebee;
-    color: #c62828;
+    background: #dc2626;
+    color: white;
     border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 5px 10px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 0.8rem;
+    transition: background 0.2s ease;
   }
 
   .remove-item:hover {
-    background: #ffcdd2;
+    background: #b91c1c;
   }
 
   .cart-footer {
     padding: 20px;
-    border-top: 1px solid #eee;
-    background: #f8f9fa;
+    border-top: 1px solid #334155;
+    background: #0f172a;
   }
 
   .cart-total {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    font-size: 18px;
-    font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f8fafc;
   }
 
   .checkout-btn {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
     color: white;
     border: none;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -209,31 +229,14 @@
 
   .checkout-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
   }
 
   .checkout-btn:disabled {
-    background: #ccc;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
-  }
-
-  .empty-cart {
-    text-align: center;
-    padding: 40px 20px;
-    color: #666;
-  }
-
-  .empty-cart-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 40px 20px;
-    color: #666;
   }
 
   /* Responsive */
@@ -245,188 +248,201 @@
   }
 </style>
 
-<script>
-  class CartPanel {
-    constructor() {
-      this.panel = document.getElementById('cart-panel');
-      this.overlay = document.getElementById('cart-overlay');
-      this.content = document.getElementById('cart-content');
-      this.footer = document.getElementById('cart-footer');
-      this.closeBtn = document.getElementById('close-cart');
-      this.checkoutBtn = document.getElementById('checkout-btn');
-      
-      this.init();
-    }
+<!-- Overlay -->
+<div id="cart-overlay" class="cart-overlay"></div>
 
-    init() {
-      this.closeBtn?.addEventListener('click', () => this.close());
-      this.overlay?.addEventListener('click', () => this.close());
-      this.checkoutBtn?.addEventListener('click', () => this.checkout());
-      
-      // Escuchar eventos de actualización del carrito
-      document.addEventListener('cart:updated', () => this.loadCart());
-      
-      // Cargar carrito inicial
-      this.loadCart();
-    }
+<!-- Panel del carrito -->
+<div id="cart-panel" class="cart-panel">
+  <div class="cart-header">
+    <h3 class="cart-title">🛒 Tu Carrito</h3>
+    <button id="close-cart" class="close-cart" aria-label="Cerrar carrito">✕</button>
+  </div>
 
-    open() {
-      this.panel?.classList.add('open');
-      this.overlay?.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    close() {
-      this.panel?.classList.remove('open');
-      this.overlay?.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
-    async loadCart() {
-      try {
-        const response = await fetch('/api/cart');
-        const cart = await response.json();
-        
-        if (cart.items && cart.items.length > 0) {
-          this.renderCart(cart);
-          this.footer.style.display = 'block';
-        } else {
-          this.renderEmptyCart();
-          this.footer.style.display = 'none';
-        }
-      } catch (error) {
-        console.error('Error loading cart:', error);
-        this.content.innerHTML = '<div class="loading">Error al cargar el carrito</div>';
-      }
-    }
-
-    renderCart(cart) {
-      const total = cart.items.reduce((sum, item) => sum + (item.qty * item.product.priceCents), 0);
-      
-      this.content.innerHTML = `
-        ${cart.items.map(item => `
-          <div class="cart-item">
-            <img src="${item.product.imageUrl || '/img/placeholder.jpg'}" 
-                 alt="${item.product.name}" 
-                 class="cart-item-image">
-            <div class="cart-item-info">
-              <h4 class="cart-item-name">${item.product.name}</h4>
-              <div class="cart-item-price">${this.formatPrice(item.product.priceCents)}</div>
+  <div class="cart-content">
+    {cart && cart.items.length > 0 ? (
+      <div class="cart-items">
+        {cart.items.map((item) => (
+          <div class="cart-item" data-product-id={item.productId}>
+            <img 
+              src={item.product.imageUrl || '/img/placeholder.jpg'} 
+              alt={item.product.name}
+              class="cart-item-image"
+            />
+            <div class="cart-item-details">
+              <div class="cart-item-name">{item.product.name}</div>
+              <div class="cart-item-price">
+                ${(item.product.priceCents / 100).toFixed(2)} c/u
+              </div>
               <div class="cart-item-controls">
-                <button class="qty-btn" onclick="cartPanel.updateQty(${item.productId}, -1)">-</button>
-                <span class="qty-display">${item.qty}</span>
-                <button class="qty-btn" onclick="cartPanel.updateQty(${item.productId}, 1)">+</button>
-                <button class="remove-item" onclick="cartPanel.removeItem(${item.productId})">Eliminar</button>
+                <div class="qty-controls">
+                  <button class="qty-btn qty-decrease" data-product-id={item.productId}>-</button>
+                  <span class="qty-display">{item.qty}</span>
+                  <button class="qty-btn qty-increase" data-product-id={item.productId}>+</button>
+                </div>
+                <button class="remove-item" data-product-id={item.productId}>
+                  Quitar
+                </button>
               </div>
             </div>
           </div>
-        `).join('')}
-      `;
-      
-      document.getElementById('cart-total-amount').textContent = this.formatPrice(total);
+        ))}
+      </div>
+    ) : (
+      <div class="cart-empty">
+        <div class="cart-empty-icon">🛒</div>
+        <p>Tu carrito está vacío</p>
+        <p>¡Agrega algunos productos!</p>
+      </div>
+    )}
+  </div>
+
+  {cart && cart.items.length > 0 && (
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cart-total">
+          ${cart.items.reduce((total, item) => total + (item.product.priceCents * item.qty), 0) / 100}
+        </span>
+      </div>
+      <button id="checkout-btn" class="checkout-btn">
+        Proceder al Checkout
+      </button>
+    </div>
+  )}
+</div>
+
+<script>
+  // Funcionalidad del carrito
+  document.addEventListener('DOMContentLoaded', function() {
+    setupCartPanel();
+  });
+
+  function setupCartPanel() {
+    const cartButton = document.querySelector('.cart-button');
+    const cartPanel = document.getElementById('cart-panel');
+    const cartOverlay = document.getElementById('cart-overlay');
+    const closeCartBtn = document.getElementById('close-cart');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    // Abrir carrito
+    if (cartButton) {
+      cartButton.addEventListener('click', () => {
+        cartPanel?.classList.add('open');
+        cartOverlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
     }
 
-    renderEmptyCart() {
-      this.content.innerHTML = `
-        <div class="empty-cart">
-          <div class="empty-cart-icon">🛒</div>
-          <p>Tu carrito está vacío</p>
-          <p>Agrega algunos productos para comenzar</p>
-        </div>
-      `;
+    // Cerrar carrito
+    if (closeCartBtn) {
+      closeCartBtn.addEventListener('click', closeCart);
     }
 
-    async updateQty(productId, change) {
-      try {
-        const endpoint = change > 0 ? '/api/cart/add' : '/api/cart/remove';
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, qty: Math.abs(change) })
-        });
+    if (cartOverlay) {
+      cartOverlay.addEventListener('click', closeCart);
+    }
 
-        if (!response.ok) {
-          const error = await response.json();
-          alert(error.error || 'Error al actualizar cantidad');
-          return;
+    // Controles de cantidad
+    document.querySelectorAll('.qty-increase').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const productId = parseInt(e.target.dataset.productId);
+        await updateCartItem(productId, 1);
+      });
+    });
+
+    document.querySelectorAll('.qty-decrease').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const productId = parseInt(e.target.dataset.productId);
+        await updateCartItem(productId, -1);
+      });
+    });
+
+    // Remover items
+    document.querySelectorAll('.remove-item').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const productId = parseInt(e.target.dataset.productId);
+        await removeCartItem(productId);
+      });
+    });
+
+    // Checkout
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            alert(result.error || 'Error en el checkout');
+            return;
+          }
+
+          // Redirigir al ticket
+          window.location.href = `/ticket/${result.order.orderCode}`;
+          
+        } catch (error) {
+          console.error('Checkout error:', error);
+          alert('Error en el checkout');
         }
-
-        this.loadCart();
-      } catch (error) {
-        console.error('Error updating quantity:', error);
-        alert('Error al actualizar cantidad');
-      }
+      });
     }
 
-    async removeItem(productId) {
-      try {
-        const response = await fetch('/api/cart/remove', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, qty: 999 }) // Cantidad alta para eliminar
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          alert(error.error || 'Error al eliminar producto');
-          return;
-        }
-
-        this.loadCart();
-      } catch (error) {
-        console.error('Error removing item:', error);
-        alert('Error al eliminar producto');
-      }
-    }
-
-    async checkout() {
-      if (!this.checkoutBtn) return;
-      
-      this.checkoutBtn.disabled = true;
-      this.checkoutBtn.textContent = 'Procesando...';
-
-      try {
-        const response = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          alert(result.error || 'Error en el checkout');
-          return;
-        }
-
-        // Redirigir al ticket
-        window.location.href = `/ticket/${result.order.orderCode}`;
-        
-      } catch (error) {
-        console.error('Checkout error:', error);
-        alert('Error en el checkout');
-      } finally {
-        this.checkoutBtn.disabled = false;
-        this.checkoutBtn.textContent = 'Finalizar Compra';
-      }
-    }
-
-    formatPrice(cents) {
-      return new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-        minimumFractionDigits: 0
-      }).format(cents);
+    function closeCart() {
+      cartPanel?.classList.remove('open');
+      cartOverlay?.classList.remove('active');
+      document.body.style.overflow = '';
     }
   }
 
-  // Inicializar cuando el DOM esté listo
-  document.addEventListener('DOMContentLoaded', () => {
-    window.cartPanel = new CartPanel();
-  });
+  async function updateCartItem(productId, qtyChange) {
+    try {
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          qty: qtyChange
+        })
+      });
 
-  // Función global para abrir el carrito
-  window.openCart = () => {
-    window.cartPanel?.open();
-  };
+      if (response.ok) {
+        // Recargar la página para actualizar el carrito
+        window.location.reload();
+      } else {
+        const result = await response.json();
+        alert(result.error || 'Error al actualizar carrito');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al actualizar carrito');
+    }
+  }
+
+  async function removeCartItem(productId) {
+    try {
+      const response = await fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId,
+          qty: 999 // Cantidad grande para eliminar completamente
+        })
+      });
+
+      if (response.ok) {
+        // Recargar la página para actualizar el carrito
+        window.location.reload();
+      } else {
+        const result = await response.json();
+        alert(result.error || 'Error al remover producto');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al remover producto');
+    }
+  }
 </script>
-

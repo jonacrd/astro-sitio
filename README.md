@@ -36,3 +36,44 @@ npm run build
 - Las API routes están en `src/pages/api/`
 - La base de datos se configura con Prisma
 - El output está configurado como `server` para SSR
+
+## 🚀 Deploy en Vercel
+
+### **Configuración en Vercel:**
+
+1. **Variables de entorno** (Settings → Environment Variables):
+   ```
+   DATABASE_URL = "postgresql://USER:PASS@HOST:5432/DB?sslmode=require"
+   ```
+
+2. **Build Command:**
+   ```
+   npm run prisma:deploy && npm run build
+   ```
+
+3. **Install Command:**
+   ```
+   npm install
+   ```
+
+### **Configuración inicial (opcional - desde local):**
+
+Antes del primer deploy, puedes configurar la base de datos localmente:
+
+1. Crear archivo `.env` con:
+   ```
+   DATABASE_URL="postgresql://USER:PASS@HOST:5432/DB?sslmode=require"
+   ```
+
+2. Ejecutar migraciones:
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev -n init
+   ```
+
+### **Notas importantes:**
+
+- Si usas **Vercel Postgres**, crea la base de datos en Storage y copia el `DATABASE_URL`
+- El comando `prisma:deploy` ejecuta las migraciones en producción
+- El `postinstall` script genera el cliente Prisma automáticamente
+- Asegúrate de que Node.js >= 18 esté configurado en Vercel

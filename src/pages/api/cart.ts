@@ -27,3 +27,4 @@ export const GET: APIRoute = async ({ cookies }) => {
 
   return new Response(JSON.stringify(cart), { headers });
 };
+
