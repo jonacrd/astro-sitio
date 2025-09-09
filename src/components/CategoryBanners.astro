@@ -75,13 +75,15 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
   .category-banners {
     padding: 1.5rem 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    max-height: 300px; /* Altura máxima de toda la sección */
+    overflow: hidden;
   }
 
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
-    border: 2px solid blue;
+
   }
 
   .categories-grid {
@@ -89,7 +91,8 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
     max-width: 100%;
-    border: 2px solid red;
+    max-height: 250px; /* Altura máxima del grid */
+
   }
 
   .category-card {
@@ -101,6 +104,8 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
     text-decoration: none;
     color: inherit;
     display: block;
+    height: 200px; /* Altura fija para las tarjetas */
+    max-height: 200px;
   }
 
   .category-card:hover {
@@ -116,6 +121,7 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
     justify-content: center;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0; /* No se encoja */
   }
 
   .category-image::before {
@@ -143,6 +149,11 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
 
   .category-content {
     padding: 1rem;
+    height: 80px; /* Altura fija para el contenido */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .category-title {
