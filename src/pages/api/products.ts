@@ -6,3 +6,4 @@ export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(products), { headers: { 'Content-Type': 'application/json' } });
 };
 
+

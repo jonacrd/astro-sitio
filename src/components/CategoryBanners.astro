@@ -73,7 +73,7 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
 
 <style>
   .category-banners {
-    padding: 2rem 0;
+    padding: 1.5rem 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   }
 
@@ -81,13 +81,15 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
+    border: 2px solid blue;
   }
 
   .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
     max-width: 100%;
+    border: 2px solid red;
   }
 
   .category-card {
@@ -107,7 +109,7 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
   }
 
   .category-image {
-    height: 160px;
+    height: 120px;
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     display: flex;
     align-items: center;
@@ -140,19 +142,19 @@ const { categories = [] } = Astro.props as { categories?: Category[] };
   }
 
   .category-content {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 
   .category-title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #2c3e50;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.4rem 0;
     line-height: 1.3;
   }
 
   .category-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #6c757d;
     margin: 0;
     line-height: 1.4;

@@ -198,3 +198,4 @@ function updateStockDisplay(productCard) {
     // Por ahora, mantenemos el stock original
   }
 }
+

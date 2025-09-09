@@ -14,3 +14,4 @@ export function getOrSetSessionId(req: Request, headers: Headers) {
   return sid;
 }
 
+
