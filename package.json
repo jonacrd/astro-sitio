@@ -2,18 +2,17 @@
   "name": "astro-sitio",
   "type": "module",
   "version": "0.0.1",
+  "engines": { 
+    "node": ">=18" 
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "start": "astro start",
     "preview": "astro preview",
-    "astro": "astro",
-    "migrate": "prisma migrate dev",
-    "studio": "prisma studio",
-    "seed": "prisma db seed",
-    "db:seed": "node -r ts-node/register prisma/seed.ts",
     "postinstall": "prisma generate",
-    "prisma:deploy": "prisma migrate deploy || prisma db push"
+    "prisma:deploy": "prisma migrate deploy || prisma db push",
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -30,11 +29,5 @@
     "prisma": "^6.15.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "prisma": {
-    "seed": "node -r ts-node/register prisma/seed.ts"
   }
 }

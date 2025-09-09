@@ -1,6 +1,6 @@
-import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
-import path from 'node:path';
+import { defineConfig } from 'astro/config'
+import vercel from '@astrojs/vercel/server'
+import path from 'node:path'
 
 export default defineConfig({
   output: 'server',
@@ -15,4 +15,4 @@ export default defineConfig({
       },
     },
   },
-});
+})
