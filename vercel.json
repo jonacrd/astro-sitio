@@ -1,10 +1,12 @@
 {
   "framework": "astro",
   "installCommand": "npm install",
-  "buildCommand": "npx prisma migrate deploy || npx prisma db push && npm run build",
+  "buildCommand": "npx prisma db push && npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "functions": {
-    "src/pages/api/**/*.ts": { "runtime": "nodejs18.x" }
+    "src/pages/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
   }
 }
