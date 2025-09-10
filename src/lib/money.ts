@@ -18,3 +18,4 @@ export function dollarsToCents(dollars: number): number {
 export function calculateCartTotal(items: Array<{ quantity: number; priceCents: number }>): number {
   return items.reduce((total, item) => total + (item.quantity * item.priceCents), 0)
 }
+

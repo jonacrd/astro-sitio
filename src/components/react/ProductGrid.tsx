@@ -54,3 +54,4 @@ export default function ProductGrid({ products, className = "" }: ProductGridPro
     </div>
   )
 }
+

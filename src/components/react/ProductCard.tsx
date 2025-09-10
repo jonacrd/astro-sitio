@@ -99,3 +99,4 @@ export default function ProductCard({ product, className = "" }: ProductCardProp
     </div>
   )
 }
+

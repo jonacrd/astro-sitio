@@ -243,3 +243,4 @@ export async function checkout(sessionId: string, customerName?: string, custome
     totalCents: order.totalCents
   }
 }
+
