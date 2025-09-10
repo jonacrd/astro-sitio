@@ -79,14 +79,12 @@ export async function searchProducts(query: string): Promise<ProductWithCategory
       OR: [
         {
           name: {
-            contains: query,
-            mode: 'insensitive'
+            contains: query
           }
         },
         {
           description: {
-            contains: query,
-            mode: 'insensitive'
+            contains: query
           }
         }
       ]
