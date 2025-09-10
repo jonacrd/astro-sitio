@@ -170,8 +170,8 @@ async function main() {
       imageUrl: '/images/marshall-acton-iii.jpg',
       categoryId: audioCategory.id
     },
-
-    // Accesorios
+      
+      // Accesorios
     {
       name: 'Soporte para Laptop Adjustable',
       slug: 'soporte-laptop-adjustable',
@@ -219,12 +219,10 @@ async function main() {
 
   // Crear algunas órdenes de ejemplo (opcional)
   const exampleOrder = await prisma.order.create({
-    data: {
+      data: {
       orderCode: 'ORD-DEMO-001',
       cartId: 'demo-cart-123',
       totalCents: 17998, // $179.98
-      customerName: 'Juan Pérez',
-      customerEmail: 'juan@ejemplo.com',
       items: {
         create: [
           {
