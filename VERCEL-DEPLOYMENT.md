@@ -19,7 +19,7 @@ Vercel es serverless y no puede usar archivos SQLite. **Solución aplicada**: Ca
 ```
 
 ### 3. ✅ Configuración Vercel
-Creado `vercel.json` con configuración específica para Astro + Prisma.
+Eliminado `vercel.json` - Vercel detecta automáticamente Astro con el adaptador oficial.
 
 ### 4. ✅ Variables de Entorno
 Documentado en `env.example` las variables necesarias.
@@ -57,11 +57,12 @@ Documentado en `env.example` las variables necesarias.
 
 ### Paso 3: Configurar Proyecto en Vercel
 
-1. **Root Directory**: `astro-sitio`
-2. **Framework Preset**: Astro
-3. **Build Command**: `npm run build` (ya configurado)
-4. **Install Command**: `npm install`
-5. **Output Directory**: `dist` (automático)
+1. **Framework Preset**: Astro (detectado automáticamente)
+2. **Build Command**: `npm run build` (ya configurado)
+3. **Install Command**: `npm install` (automático)
+4. **Output Directory**: `dist` (automático)
+
+**Nota**: No necesitas configurar manualmente estos valores, Vercel los detecta automáticamente gracias al adaptador `@astrojs/vercel`.
 
 ### Paso 4: Deploy
 
@@ -89,6 +90,12 @@ npm run seed
 ```
 
 ## 🐛 Solución de Problemas Comunes
+
+### Error: "Function Runtimes must have a valid version"
+**Causa**: Configuración incorrecta en `vercel.json`
+**Solución**: 
+1. Eliminar `vercel.json` (no es necesario con `@astrojs/vercel`)
+2. Vercel detecta automáticamente la configuración de Astro
 
 ### Error: "Module '@prisma/client' not found"
 **Solución**: Verificar que `postinstall: "prisma generate"` esté en package.json
