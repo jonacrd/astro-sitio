@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -27,13 +27,12 @@ model Product {
   categoryId  Int
   category    Category   @relation(fields: [categoryId], references: [id])
   cartItems   CartItem[]
-  orderItems  OrderItem[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 }
 
 model Cart {
-  id        String     @id // sessionId (uuid)
+  id        String     @id
   items     CartItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -55,18 +54,15 @@ model Order {
   orderCode  String      @unique
   cartId     String
   totalCents Int
-  customerName String?
-  customerEmail String?
   items      OrderItem[]
   createdAt  DateTime    @default(now())
 }
 
 model OrderItem {
-  id         Int     @id @default(autoincrement())
+  id         Int    @id @default(autoincrement())
   orderId    Int
-  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId  Int
-  product    Product @relation(fields: [productId], references: [id])
   name       String
   priceCents Int
   quantity   Int
