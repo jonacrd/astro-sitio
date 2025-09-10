@@ -56,6 +56,15 @@ async function run() {
         imageUrl: '/images/teclado.jpg',
         categoryId: cid('perifericos'),
       },
+      {
+        name: 'Teclade Mecánico 60%',
+        slug: 'teclado-mecanico-50',
+        description: 'Switches rojos, compacto',
+        priceCents: 4999,
+        stock: 25,
+        imageUrl: '/images/teclado.jpg',
+        categoryId: cid('perifericos'),
+      },
     ],
   })
   console.log('💻 Productos creados')

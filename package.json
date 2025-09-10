@@ -8,11 +8,11 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "prisma generate && prisma db push && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "postinstall": "prisma generate",
-    "prisma:deploy": "prisma migrate deploy || prisma db push",
+    "prisma:deploy": "prisma db push",
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
