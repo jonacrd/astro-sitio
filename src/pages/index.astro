@@ -1,88 +1,154 @@
 ---
-import Layout from "@/Layouts/Base.astro";
-import Header from "@components/Header.astro";
-import MainBanner from "@components/MainBanner.astro";
-import CategoryCarousel from "@components/CategoryCarousel.astro";
-import ProductCarousel from "@components/ProductCarousel.astro";
-import CategoryBanners from "@components/CategoryBanners.astro";
-import SectionCarousel from "@components/SectionCarousel.astro";
-import Navigation from "@components/Navigation.astro";
-import ProductGrid from "@components/ProductGrid.astro";
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getCategories } from '@lib/products.server'
 
-// Obtener productos desde la base de datos
-import { prisma } from '@lib/db';
-const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
+const categories = await getCategories()
 ---
-<Layout title="Tienda Web" description="Bienvenido a nuestra tienda en línea">
-  <Navigation />
-  <Header />
-  <main>
-    <CategoryCarousel />
-    <ProductCarousel />
-    <MainBanner />
-    <CategoryBanners />
-    <SectionCarousel />
-    
-    <!-- Sección de productos -->
-    <section class="products-section">
-      <div class="section-header">
-        <h2>🛍️ Nuestros Productos</h2>
-        <p>Descubre nuestra amplia selección de productos de calidad</p>
+
+<BaseLayout 
+  title="Tienda Online - Inicio"
+  description="Descubre nuestra amplia selección de productos tecnológicos de calidad"
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+          Bienvenido a nuestra 
+          <span class="text-yellow-300">Tienda Online</span>
+        </h1>
+        <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+          Encuentra los mejores productos tecnológicos con la mejor calidad y precios competitivos
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="/catalogo" 
+            class="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg text-lg font-bold hover:bg-yellow-300 transition-colors"
+          >
+            Ver Catálogo
+          </a>
+          <a 
+            href="#categories" 
+            class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-blue-600 transition-colors"
+          >
+            Explorar Categorías
+          </a>
+        </div>
       </div>
-      <ProductGrid products={products} />
-    </section>
-  </main>
-  <footer>…</footer>
-</Layout>
+    </div>
+  </section>
 
-<style>
-  .products-section {
-    padding: 60px 0;
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-  }
+  <!-- Características -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">
+          ¿Por qué elegir nuestra tienda?
+        </h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Nos comprometemos a ofrecerte la mejor experiencia de compra online
+        </p>
+      </div>
 
-  .section-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 0 20px;
-  }
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Calidad -->
+        <div class="text-center p-6">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Calidad Garantizada</h3>
+          <p class="text-gray-600">
+            Todos nuestros productos pasan por estrictos controles de calidad
+          </p>
+        </div>
 
-  .section-header h2 {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 1rem;
-    font-weight: 700;
-  }
+        <!-- Envío rápido -->
+        <div class="text-center p-6">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Envío Rápido</h3>
+          <p class="text-gray-600">
+            Recibe tus productos en tiempo récord con nuestro servicio de envío
+          </p>
+        </div>
 
-  .section-header p {
-    font-size: 1.1rem;
-    color: #666;
-    margin: 0;
-  }
+        <!-- Soporte -->
+        <div class="text-center p-6">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 11-9.75 9.75A9.75 9.75 0 0112 2.25z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Soporte 24/7</h3>
+          <p class="text-gray-600">
+            Nuestro equipo está disponible para ayudarte cuando lo necesites
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  /* Responsive */
-  @media (max-width: 768px) {
-    .products-section {
-      padding: 40px 0;
-    }
-    
-    .section-header {
-      margin-bottom: 2rem;
-    }
-    
-    .section-header h2 {
-      font-size: 2rem;
-    }
-    
-    .section-header p {
-      font-size: 1rem;
-    }
-  }
+  <!-- Categorías -->
+  <section id="categories" class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">
+          Explora nuestras categorías
+        </h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Encuentra exactamente lo que buscas en nuestras categorías organizadas
+        </p>
+      </div>
 
-  @media (max-width: 480px) {
-    .section-header h2 {
-      font-size: 1.8rem;
-    }
-  }
-</style>
+      {categories.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories.map((category) => (
+            <a 
+              href={`/catalogo?category=${category.slug}`}
+              class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center group hover:scale-105"
+            >
+              <div class="bg-gradient-to-br from-blue-500 to-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <span class="text-2xl">📦</span>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                {category.name}
+              </h3>
+              <p class="text-gray-600 group-hover:text-gray-700 transition-colors">
+                Descubre productos de {category.name.toLowerCase()}
+              </p>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-gray-500 text-lg">
+            No hay categorías disponibles en este momento
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
 
+  <!-- Call to Action -->
+  <section class="py-16 bg-blue-600 text-white">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold mb-4">
+        ¿Listo para empezar a comprar?
+      </h2>
+      <p class="text-xl mb-8 text-blue-100">
+        Explora nuestro catálogo completo y encuentra los productos perfectos para ti
+      </p>
+      <a 
+        href="/catalogo" 
+        class="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg text-lg font-bold hover:bg-yellow-300 transition-colors inline-block"
+      >
+        Ver todos los productos
+      </a>
+    </div>
+  </section>
+</BaseLayout>

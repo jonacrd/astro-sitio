@@ -1,10 +1,13 @@
 import { defineConfig } from 'astro/config'
-import vercel from '@astrojs/vercel/server'
+import react from '@astrojs/react'
+import vercel from '@astrojs/vercel/serverless'
+import tailwind from '@astrojs/tailwind'
 import path from 'node:path'
 
 export default defineConfig({
   output: 'server',
   adapter: vercel(),
+  integrations: [react(), tailwind()],
   vite: {
     resolve: {
       alias: {

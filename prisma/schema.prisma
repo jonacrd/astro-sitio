@@ -3,60 +3,71 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
 model Product {
-  id          Int       @id @default(autoincrement())
-  slug        String    @unique
+  id          Int        @id @default(autoincrement())
   name        String
+  slug        String     @unique
   description String
   priceCents  Int
-  stock       Int
+  stock       Int        @default(0)
   imageUrl    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  OrderItems  OrderItem[]
-  CartItems   CartItem[]
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id])
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Cart {
-  id         Int        @id @default(autoincrement())
-  sessionId  String     @unique
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  items      CartItem[]
+  id        String     @id // sessionId (uuid)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model CartItem {
   id        Int     @id @default(autoincrement())
-  cartId    Int
-  productId Int
-  qty       Int
-
+  cartId    String
   cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
 
   @@unique([cartId, productId])
 }
 
 model Order {
-  id          Int         @id @default(autoincrement())
-  orderCode   String      @unique
-  totalCents  Int
-  createdAt   DateTime    @default(now())
-  items       OrderItem[]
+  id         Int         @id @default(autoincrement())
+  orderCode  String      @unique
+  cartId     String
+  totalCents Int
+  customerName String?
+  customerEmail String?
+  items      OrderItem[]
+  createdAt  DateTime    @default(now())
 }
 
 model OrderItem {
   id         Int     @id @default(autoincrement())
   orderId    Int
-  productId  Int
-  qty        Int
-  priceCents Int
-
   order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product    Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId  Int
+  product    Product @relation(fields: [productId], references: [id])
+  name       String
+  priceCents Int
+  quantity   Int
 }

@@ -1,0 +1,6 @@
+<!-- Placeholder para imagen de producto -->
+<!-- Este archivo debería ser una imagen real, pero por ahora será un SVG -->
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="400" fill="#f3f4f6"/>
+  <text x="200" y="200" text-anchor="middle" dominant-baseline="middle" fill="#6b7280" font-family="Arial" font-size="16">Imagen no disponible</text>
+</svg>

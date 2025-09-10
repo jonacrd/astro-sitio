@@ -1,0 +1,79 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import CartTable from '@components/react/CartTable.tsx'
+import CheckoutButton from '@components/react/CheckoutButton.tsx'
+---
+
+<BaseLayout 
+  title="Carrito de compras - Tienda Online"
+  description="Revisa y confirma tu pedido"
+>
+  <!-- Header del carrito -->
+  <section class="bg-white py-8 border-b">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-4">
+        <a 
+          href="/catalogo" 
+          class="text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          ← Volver al catálogo
+        </a>
+        <div class="h-6 w-px bg-gray-300"></div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          Tu carrito de compras
+        </h1>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contenido del carrito -->
+  <section class="py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Tabla del carrito -->
+        <div class="lg:col-span-2">
+          <CartTable client:load />
+        </div>
+
+        <!-- Panel de checkout -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
+            <h3 class="text-lg font-bold mb-4">Resumen del pedido</h3>
+            
+            <!-- El botón de checkout manejará internamente la obtención del total -->
+            <CheckoutButton client:idle />
+            
+            <div class="mt-4 text-sm text-gray-500 space-y-2">
+              <p>✓ Envío gratuito en pedidos superiores a $50</p>
+              <p>✓ Garantía de devolución de 30 días</p>
+              <p>✓ Soporte técnico incluido</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Productos recomendados -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+          También te podría interesar
+        </h2>
+        <p class="text-gray-600">
+          Otros productos que nuestros clientes han comprado
+        </p>
+      </div>
+      
+      <div class="text-center">
+        <a 
+          href="/catalogo" 
+          class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Ver más productos
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

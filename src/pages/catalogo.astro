@@ -1,78 +1,84 @@
 ---
-import Layout from "@/Layouts/Base.astro";
-import Header from "@components/Header.astro";
-import Navigation from "@components/Navigation.astro";
-import ProductGrid from "@components/ProductGrid.astro";
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import ProductGrid from '@components/react/ProductGrid.tsx'
+import { listProducts, getCategories } from '@lib/products.server'
 
-// Obtener productos desde la base de datos
-import { prisma } from '@lib/db';
-const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
+const products = await listProducts()
+const categories = await getCategories()
 ---
 
-<Layout title="Catálogo - Tienda Web" description="Explora nuestro catálogo completo de productos">
-  <Navigation />
-  <Header />
-  
-  <div class="container">
-    <main class="catalogo-page">
-      <div class="page-header">
-        <h1>🛍️ Catálogo de Productos</h1>
-        <p>Explora nuestra amplia selección de productos de calidad</p>
+<BaseLayout 
+  title="Catálogo - Tienda Online"
+  description="Explora nuestro catálogo completo de productos tecnológicos"
+>
+  <!-- Header del catálogo -->
+  <section class="bg-white py-8 border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            Catálogo de productos
+          </h1>
+          <p class="text-gray-600">
+            Descubre nuestra selección de {products.length} productos de calidad
+          </p>
+        </div>
+
+        <!-- Filtros por categoría -->
+        {categories.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            <a 
+              href="/catalogo"
+              class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+            >
+              Todas
+            </a>
+            {categories.map((category) => (
+              <a 
+                href={`/catalogo?category=${category.slug}`}
+                class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+              >
+                {category.name}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
-      
-      <ProductGrid products={products} />
-    </main>
-  </div>
-</Layout>
+    </div>
+  </section>
 
-<style>
-  .catalogo-page {
-    padding: 2rem 0;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+  <!-- Grid de productos -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ProductGrid 
+        products={products} 
+        client:load 
+      />
+    </div>
+  </section>
 
-  .page-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding: 0 20px;
-  }
-
-  .page-header h1 {
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 1rem;
-    font-weight: 700;
-  }
-
-  .page-header p {
-    font-size: 1.1rem;
-    color: #666;
-    margin: 0;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .catalogo-page {
-      padding: 1.5rem 0;
-    }
+  <!-- Script para filtros -->
+  <script>
+    // Obtener parámetro de categoría de la URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const categoryParam = urlParams.get('category')
     
-    .page-header {
-      margin-bottom: 2rem;
+    if (categoryParam) {
+      // Resaltar el filtro activo
+      const filterLinks = document.querySelectorAll('a[href*="category="]')
+      filterLinks.forEach(link => {
+        if (link.href.includes(`category=${categoryParam}`)) {
+          link.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
+          link.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
+        }
+      })
+    } else {
+      // Resaltar "Todas" si no hay filtro
+      const allLink = document.querySelector('a[href="/catalogo"]')
+      if (allLink) {
+        allLink.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
+        allLink.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
+      }
     }
-    
-    .page-header h1 {
-      font-size: 2rem;
-    }
-    
-    .page-header p {
-      font-size: 1rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .page-header h1 {
-      font-size: 1.8rem;
-    }
-  }
-</style>
+  </script>
+</BaseLayout>

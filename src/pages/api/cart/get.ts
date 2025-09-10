@@ -1,26 +1,26 @@
 import type { APIRoute } from 'astro'
-import { getSessionId, removeFromCart } from '@lib/cart.server'
+import { getSessionId, getCart } from '@lib/cart.server'
 import { calculateCartTotal } from '@lib/money'
 
-export const POST: APIRoute = async (context) => {
+export const GET: APIRoute = async (context) => {
   try {
-    const body = await context.request.json()
-    const { productId } = body
+    const sessionId = getSessionId(context)
+    const cart = await getCart(sessionId)
     
-    if (!productId || typeof productId !== 'number') {
+    if (!cart) {
       return new Response(JSON.stringify({
-        success: false,
-        error: 'ID de producto requerido'
+        success: true,
+        cart: null,
+        items: [],
+        totalCents: 0,
+        itemCount: 0
       }), {
-        status: 400,
+        status: 200,
         headers: {
           'Content-Type': 'application/json'
         }
       })
     }
-    
-    const sessionId = getSessionId(context)
-    const cart = await removeFromCart(sessionId, productId)
     
     const totalCents = calculateCartTotal(
       cart.items.map(item => ({
@@ -34,9 +34,9 @@ export const POST: APIRoute = async (context) => {
     return new Response(JSON.stringify({
       success: true,
       cart,
+      items: cart.items,
       totalCents,
-      itemCount,
-      message: 'Producto removido del carrito'
+      itemCount
     }), {
       status: 200,
       headers: {
@@ -44,12 +44,12 @@ export const POST: APIRoute = async (context) => {
       }
     })
   } catch (error) {
-    console.error('Error removing from cart:', error)
+    console.error('Error getting cart:', error)
     return new Response(JSON.stringify({
       success: false,
-      error: error instanceof Error ? error.message : 'Error al remover del carrito'
+      error: 'Error al obtener carrito'
     }), {
-      status: 400,
+      status: 500,
       headers: {
         'Content-Type': 'application/json'
       }

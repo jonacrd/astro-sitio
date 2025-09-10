@@ -1,11 +1,11 @@
 import type { APIRoute } from 'astro'
-import { getSessionId, addToCart } from '@lib/cart.server'
+import { getSessionId, updateCartItem } from '@lib/cart.server'
 import { calculateCartTotal } from '@lib/money'
 
 export const POST: APIRoute = async (context) => {
   try {
     const body = await context.request.json()
-    const { productId, quantity = 1 } = body
+    const { productId, quantity } = body
     
     if (!productId || typeof productId !== 'number') {
       return new Response(JSON.stringify({
@@ -19,10 +19,10 @@ export const POST: APIRoute = async (context) => {
       })
     }
     
-    if (quantity <= 0) {
+    if (quantity < 0) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Cantidad debe ser mayor a 0'
+        error: 'Cantidad no puede ser negativa'
       }), {
         status: 400,
         headers: {
@@ -32,7 +32,7 @@ export const POST: APIRoute = async (context) => {
     }
     
     const sessionId = getSessionId(context)
-    const cart = await addToCart(sessionId, productId, quantity)
+    const cart = await updateCartItem(sessionId, productId, quantity)
     
     const totalCents = calculateCartTotal(
       cart.items.map(item => ({
@@ -48,7 +48,7 @@ export const POST: APIRoute = async (context) => {
       cart,
       totalCents,
       itemCount,
-      message: 'Producto agregado al carrito'
+      message: quantity === 0 ? 'Producto removido del carrito' : 'Cantidad actualizada'
     }), {
       status: 200,
       headers: {
@@ -56,10 +56,10 @@ export const POST: APIRoute = async (context) => {
       }
     })
   } catch (error) {
-    console.error('Error adding to cart:', error)
+    console.error('Error updating cart item:', error)
     return new Response(JSON.stringify({
       success: false,
-      error: error instanceof Error ? error.message : 'Error al agregar al carrito'
+      error: error instanceof Error ? error.message : 'Error al actualizar carrito'
     }), {
       status: 400,
       headers: {

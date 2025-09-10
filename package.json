@@ -2,32 +2,33 @@
   "name": "astro-sitio",
   "type": "module",
   "version": "0.0.1",
-  "engines": { 
-    "node": ">=18" 
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "dev": "astro dev",
+    "start": "astro dev",
     "build": "astro build",
-    "start": "astro start",
     "preview": "astro preview",
+    "astro": "astro",
     "postinstall": "prisma generate",
     "prisma:deploy": "prisma migrate deploy || prisma db push",
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/react": "^4.3.0",
-    "@astrojs/vercel": "^8.2.7",
-    "@prisma/client": "^6.15.0",
-    "@tailwindcss/vite": "^4.1.12",
-    "astro": "^5.13.5",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.12"
+    "astro": "^4.15.0",
+    "@astrojs/react": "^3.6.0",
+    "@astrojs/tailwind": "^5.1.0",
+    "@astrojs/vercel": "^7.8.0",
+    "@prisma/client": "^5.19.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
-    "prisma": "^6.15.0",
-    "ts-node": "^10.9.2",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "prisma": "^5.19.0",
     "typescript": "^5.9.2"
   }
 }
