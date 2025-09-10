@@ -1,0 +1,50 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import SimpleBanner from '@components/react/SimpleBanner.tsx'
+---
+
+<BaseLayout 
+  title="Test de Estilos - Tienda Online"
+  description="Página de prueba para verificar que Tailwind CSS funciona"
+>
+  <!-- Banner Simple -->
+  <SimpleBanner client:load />
+
+  <!-- Test de clases Tailwind -->
+  <section class="py-16 bg-gray-100">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        Test de Estilos Tailwind
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-bold text-blue-600 mb-2">✅ Tailwind Funciona</h3>
+          <p class="text-gray-600">Si ves este texto con estilos, Tailwind está funcionando correctamente.</p>
+        </div>
+        
+        <div class="bg-blue-500 p-6 rounded-lg shadow-lg text-white">
+          <h3 class="text-xl font-bold mb-2">🎨 Colores</h3>
+          <p>Este es un ejemplo de colores y sombras de Tailwind.</p>
+        </div>
+        
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-6 rounded-lg shadow-lg text-white">
+          <h3 class="text-xl font-bold mb-2">🌈 Gradientes</h3>
+          <p>Gradientes y efectos visuales funcionando.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Test de componentes React -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold text-gray-900 mb-8">
+        Test de Componentes React
+      </h2>
+      <p class="text-lg text-gray-600 mb-8">
+        Si el banner de arriba tiene estilos y funciona, los componentes React están bien configurados.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

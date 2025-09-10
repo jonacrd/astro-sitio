@@ -1,84 +1,157 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import ProductGrid from '@components/react/ProductGrid.tsx'
-import { listProducts, getCategories } from '@lib/products.server'
+import { getCategories } from '@lib/products.server'
+import { getProductsByCategory, getFeaturedProducts, getCategoryBannersData } from '@lib/products-featured.server'
+import ProductCarousel from '@components/react/ProductCarousel.tsx'
+import CategoryBanner from '@components/react/CategoryBanner.tsx'
+import EnhancedCategoryBanner from '@components/react/EnhancedCategoryBanner.tsx'
 
-const products = await listProducts()
 const categories = await getCategories()
+const featuredProducts = await getFeaturedProducts(8)
+const categoryBannersData = await getCategoryBannersData()
+
+// Configuración de banners por categoría
+const bannerConfigs = {
+  'ropa-hombre': { 
+    gradient: 'from-blue-600 to-blue-800', 
+    icon: '👔',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1200&h=600&fit=crop&auto=format'
+    ]
+  },
+  'ropa-mujer': { 
+    gradient: 'from-pink-600 to-pink-800', 
+    icon: '👗',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=1200&h=600&fit=crop&auto=format'
+    ]
+  },
+  'tecnologia': { 
+    gradient: 'from-purple-600 to-purple-800', 
+    icon: '💻',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&h=600&fit=crop&auto=format'
+    ]
+  },
+  'accesorios': { 
+    gradient: 'from-green-600 to-green-800', 
+    icon: '⌚',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=1200&h=600&fit=crop&auto=format'
+    ]
+  },
+  'hogar': { 
+    gradient: 'from-orange-600 to-orange-800', 
+    icon: '🏠',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&h=600&fit=crop&auto=format'
+    ]
+  },
+  'deportes': { 
+    gradient: 'from-red-600 to-red-800', 
+    icon: '⚽',
+    backgroundImages: [
+      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=1200&h=600&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=1200&h=600&fit=crop&auto=format'
+    ]
+  }
+}
+
+// Obtener productos por categoría
+const categoryProducts = await Promise.all(
+  categories.map(async (category) => ({
+    category,
+    products: await getProductsByCategory(category.slug, 8)
+  }))
+)
 ---
 
 <BaseLayout 
   title="Catálogo - Tienda Online"
-  description="Explora nuestro catálogo completo de productos tecnológicos"
+  description="Explora nuestra amplia selección de productos organizados por categorías"
 >
-  <!-- Header del catálogo -->
-  <section class="bg-white py-8 border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            Catálogo de productos
-          </h1>
-          <p class="text-gray-600">
-            Descubre nuestra selección de {products.length} productos de calidad
-          </p>
-        </div>
-
-        <!-- Filtros por categoría -->
-        {categories.length > 0 && (
-          <div class="flex flex-wrap gap-2">
-            <a 
-              href="/catalogo"
-              class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-            >
-              Todas
-            </a>
-            {categories.map((category) => (
-              <a 
-                href={`/catalogo?category=${category.slug}`}
-                class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-              >
-                {category.name}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6">
+        Nuestro Catálogo
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+        Descubre una amplia variedad de productos de calidad en todas las categorías
+      </p>
     </div>
   </section>
 
-  <!-- Grid de productos -->
-  <section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <ProductGrid 
-        products={products} 
-        client:load 
-      />
-    </div>
-  </section>
+  <!-- Featured Products -->
+  <ProductCarousel 
+    title="Productos Destacados"
+    subtitle="Nuestras mejores ofertas y productos más populares"
+    products={featuredProducts}
+    client:load 
+  />
 
-  <!-- Script para filtros -->
-  <script>
-    // Obtener parámetro de categoría de la URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const categoryParam = urlParams.get('category')
+  <!-- Category Banners with their respective products -->
+  {categoryBannersData.map((bannerData, index) => {
+    const config = bannerConfigs[bannerData.category.slug as keyof typeof bannerConfigs]
+    if (!config) return null
     
-    if (categoryParam) {
-      // Resaltar el filtro activo
-      const filterLinks = document.querySelectorAll('a[href*="category="]')
-      filterLinks.forEach(link => {
-        if (link.href.includes(`category=${categoryParam}`)) {
-          link.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
-          link.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
-        }
-      })
-    } else {
-      // Resaltar "Todas" si no hay filtro
-      const allLink = document.querySelector('a[href="/catalogo"]')
-      if (allLink) {
-        allLink.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
-        allLink.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
-      }
-    }
-  </script>
+    // Encontrar los productos completos de esta categoría
+    const categoryProductsData = categoryProducts.find(cp => cp.category.slug === bannerData.category.slug)
+    
+    return (
+      <>
+        {/* Banner de la categoría */}
+        <EnhancedCategoryBanner
+          title={bannerData.category.name}
+          subtitle={`Los mejores productos de ${bannerData.category.name.toLowerCase()}`}
+          products={bannerData.products}
+          gradient={config.gradient}
+          icon={config.icon}
+          backgroundImages={config.backgroundImages}
+          height={index % 2 === 0 ? 'medium' : 'small'}
+          client:load
+        />
+        
+        {/* Productos de la categoría */}
+        {categoryProductsData && categoryProductsData.products.length > 0 && (
+          <ProductCarousel 
+            title={`Todos los productos de ${categoryProductsData.category.name}`}
+            subtitle={`Explora nuestra selección completa de ${categoryProductsData.category.name.toLowerCase()}`}
+            products={categoryProductsData.products}
+            className="bg-gray-50"
+            client:load 
+          />
+        )}
+      </>
+    )
+  })}
+
+  <!-- Call to Action -->
+  <section class="py-16 bg-blue-600 text-white">
+    <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold mb-4">
+        ¿No encuentras lo que buscas?
+      </h2>
+      <p class="text-xl mb-8 text-blue-100">
+        Contáctanos y te ayudaremos a encontrar el producto perfecto para ti
+      </p>
+      <a 
+        href="/contacto" 
+        class="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg text-lg font-bold hover:bg-yellow-300 transition-colors inline-block"
+      >
+        Contactar
+      </a>
+    </div>
+  </section>
 </BaseLayout>
