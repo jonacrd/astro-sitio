@@ -1,7 +1,6 @@
 // src/lib/db.ts
 import { PrismaClient } from '@prisma/client'
 
-// Evita múltiples instancias en dev y en serverless
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient }
 
 export const prisma =
@@ -13,3 +12,4 @@ export const prisma =
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
+
