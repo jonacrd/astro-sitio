@@ -1,6 +1,6 @@
 import { defineConfig } from 'astro/config'
 import react from '@astrojs/react'
-import vercel from '@astrojs/vercel/server'   // 👈 este
+import vercel from '@astrojs/vercel/serverless' // 👈 volver a serverless
 import path from 'node:path'
 
 export default defineConfig({
