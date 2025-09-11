@@ -59,9 +59,7 @@ export default function ProductCarousel({
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         const newItemsPerView = getItemsPerView();
-        if (newItemsPerView !== itemsPerView) {
-          setItemsPerView(newItemsPerView);
-        }
+        setItemsPerView(newItemsPerView);
       }, 100);
     };
 
@@ -70,7 +68,7 @@ export default function ProductCarousel({
       window.removeEventListener("resize", handleResize);
       clearTimeout(timeoutId);
     };
-  }, [itemsPerView]);
+  }, []);
 
   useEffect(() => {
     if (!isAutoPlaying || products.length <= Math.floor(itemsPerView)) return;

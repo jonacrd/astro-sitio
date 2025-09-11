@@ -7,8 +7,10 @@ import CategoryBanner from '@components/react/CategoryBanner.tsx'
 import EnhancedCategoryBanner from '@components/react/EnhancedCategoryBanner.tsx'
 
 const categories = await getCategories()
-const featuredProducts = await getFeaturedProducts(8)
-const categoryBannersData = await getCategoryBannersData()
+const featuredProducts = await getFeaturedProducts(6)
+// Temporalmente deshabilitado para evitar problemas de rendimiento
+// const categoryBannersData = await getCategoryBannersData()
+const categoryBannersData = []
 
 // Configuración de banners por categoría
 const bannerConfigs = {
