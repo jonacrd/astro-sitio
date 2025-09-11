@@ -211,20 +211,6 @@ export default function BestSellingBanner({
                 ›
               </button>
 
-              {/* Indicators */}
-              <div className="flex justify-center mt-8 space-x-2">
-                {products.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentIndex(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                      index === currentIndex
-                        ? "bg-red-600 scale-125"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                ))}
-              </div>
             </>
           )}
         </div>
