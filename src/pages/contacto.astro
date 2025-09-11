@@ -1,0 +1,241 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Contacto - Tienda Online">
+  <main class="min-h-screen pt-16">
+    <!-- Hero Section -->
+    <section class="relative py-20 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 overflow-hidden">
+      <!-- Background Animation -->
+      <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce"></div>
+        <div class="absolute top-32 right-20 w-16 h-16 bg-white/10 rounded-full animate-pulse"></div>
+        <div class="absolute bottom-20 left-1/4 w-12 h-12 bg-white/10 rounded-full animate-bounce delay-1000"></div>
+        <div class="absolute bottom-32 right-1/3 w-14 h-14 bg-white/10 rounded-full animate-pulse delay-500"></div>
+      </div>
+      
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold mb-6 animate-fade-in">
+          📞 CONTACTO
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in-up">
+          ¡Hablemos!
+        </h1>
+        <p class="text-xl text-white/90 max-w-2xl mx-auto mb-8 animate-fade-in-up delay-200">
+          Estamos aquí para ayudarte. Contáctanos y te responderemos lo antes posible.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-400">
+          <a href="#formulario" class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg">
+            📝 Enviar Mensaje
+          </a>
+          <a href="tel:+1234567890" class="inline-flex items-center justify-center px-8 py-4 bg-white/20 backdrop-blur-sm text-white font-bold rounded-xl hover:bg-white/30 transition-all duration-300 hover:scale-105">
+            📞 Llamar Ahora
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Info Cards -->
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Información de Contacto
+          </h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Múltiples formas de ponerte en contacto con nosotros
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Teléfono -->
+          <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center group">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors duration-300">
+              <span class="text-2xl">📞</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Teléfono</h3>
+            <p class="text-gray-600 mb-4">Llámanos para atención inmediata</p>
+            <a href="tel:+1234567890" class="text-blue-600 font-semibold hover:text-blue-700 transition-colors">
+              +1 (234) 567-890
+            </a>
+          </div>
+
+          <!-- Email -->
+          <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center group">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors duration-300">
+              <span class="text-2xl">✉️</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Email</h3>
+            <p class="text-gray-600 mb-4">Escríbenos y te responderemos pronto</p>
+            <a href="mailto:contacto@tienda.com" class="text-green-600 font-semibold hover:text-green-700 transition-colors">
+              contacto@tienda.com
+            </a>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-center group">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors duration-300">
+              <span class="text-2xl">📍</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Ubicación</h3>
+            <p class="text-gray-600 mb-4">Visítanos en nuestra tienda física</p>
+            <p class="text-purple-600 font-semibold">
+              Av. Principal 123<br>
+              Ciudad, País
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section id="formulario" class="py-16 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Envíanos un Mensaje
+          </h2>
+          <p class="text-lg text-gray-600">
+            Completa el formulario y nos pondremos en contacto contigo
+          </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-lg">
+          <form class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre Completo
+                </label>
+                <input
+                  type="text"
+                  id="nombre"
+                  name="nombre"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="Tu nombre completo"
+                />
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="tu@email.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="asunto" class="block text-sm font-medium text-gray-700 mb-2">
+                Asunto
+              </label>
+              <input
+                type="text"
+                id="asunto"
+                name="asunto"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="¿En qué podemos ayudarte?"
+              />
+            </div>
+
+            <div>
+              <label for="mensaje" class="block text-sm font-medium text-gray-700 mb-2">
+                Mensaje
+              </label>
+              <textarea
+                id="mensaje"
+                name="mensaje"
+                rows="5"
+                required
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                placeholder="Cuéntanos más detalles..."
+              ></textarea>
+            </div>
+
+            <div class="text-center">
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+              >
+                📤 Enviar Mensaje
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Preguntas Frecuentes
+          </h2>
+          <p class="text-lg text-gray-600">
+            Respuestas a las preguntas más comunes
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Cuáles son los horarios de atención?</h3>
+            <p class="text-gray-600">Estamos disponibles de lunes a viernes de 9:00 AM a 6:00 PM, y sábados de 10:00 AM a 4:00 PM.</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Cuánto tiempo tardan en responder?</h3>
+            <p class="text-gray-600">Normalmente respondemos en menos de 24 horas durante días hábiles.</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Ofrecen soporte técnico?</h3>
+            <p class="text-gray-600">Sí, nuestro equipo técnico está disponible para ayudarte con cualquier problema.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fade-in-up {
+    from { 
+      opacity: 0; 
+      transform: translateY(30px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+    opacity: 0;
+  }
+  
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+  
+  .delay-400 {
+    animation-delay: 0.4s;
+  }
+</style>
