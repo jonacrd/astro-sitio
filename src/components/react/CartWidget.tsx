@@ -38,25 +38,14 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     fetchCart();
 
     // Escuchar eventos de actualización del carrito
-    const handleCartUpdate = (event: CustomEvent) => {
-      setCartData((prev) => ({
-        ...prev,
-        itemCount: event.detail.itemCount,
-        totalCents: event.detail.totalCents,
-      }));
+    const handleCartUpdate = () => {
+      fetchCart();
     };
 
-    window.addEventListener("cart-updated", handleCartUpdate as EventListener);
-
-    // Actualizar cada 30 segundos
-    const interval = setInterval(fetchCart, 30000);
+    window.addEventListener("cart-updated", handleCartUpdate);
 
     return () => {
-      window.removeEventListener(
-        "cart-updated",
-        handleCartUpdate as EventListener,
-      );
-      clearInterval(interval);
+      window.removeEventListener("cart-updated", handleCartUpdate);
     };
   }, []);
 

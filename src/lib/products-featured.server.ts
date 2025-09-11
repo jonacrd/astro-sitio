@@ -20,8 +20,21 @@ export async function getFeaturedProducts(
 ): Promise<ProductWithCategory[]> {
   return await prisma.product.findMany({
     take: limit,
-    include: {
-      category: true,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      stock: true,
+      imageUrl: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -40,8 +53,21 @@ export async function getProductsByCategory(
       },
     },
     take: limit,
-    include: {
-      category: true,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      stock: true,
+      imageUrl: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -95,8 +121,21 @@ export async function getBestSellingProducts(
       },
     },
     take: limit,
-    include: {
-      category: true,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      stock: true,
+      imageUrl: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
     },
     orderBy: {
       stock: "asc", // Menor stock = más vendido
@@ -105,11 +144,44 @@ export async function getBestSellingProducts(
 }
 
 export async function getCategoryBannersData() {
-  const categories = await prisma.category.findMany();
+  const categories = await prisma.category.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  });
 
   const bannersData = await Promise.all(
     categories.map(async (category) => {
-      const products = await getTopProductsByCategory(category.slug, 3);
+      const products = await prisma.product.findMany({
+        where: {
+          category: {
+            slug: category.slug,
+          },
+        },
+        take: 3,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          priceCents: true,
+          stock: true,
+          imageUrl: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: {
+          priceCents: "desc",
+        },
+      });
+      
       return {
         category,
         products,

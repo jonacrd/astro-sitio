@@ -34,53 +34,53 @@ export default function ProductCarousel({
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
 
-  // Responsive items per view
+  // Responsive items per view - simplified
   const getItemsPerView = () => {
     if (typeof window === "undefined") return 2;
     const width = window.innerWidth;
-    if (width < 640) return 1.2; // Mostrar 1.2 productos para indicar que hay más
+    if (width < 640) return 1.2;
     if (width < 768) return 2;
     if (width < 1024) return 3;
     return 4;
   };
 
-  const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
-  const maxIndex = Math.max(0, products.length - itemsPerView);
+  const [itemsPerView, setItemsPerView] = useState(() => {
+    if (typeof window === "undefined") return 2;
+    return getItemsPerView();
+  });
+  
+  const maxIndex = Math.max(0, products.length - Math.floor(itemsPerView));
 
-  // Update items per view on resize
+  // Update items per view on resize - optimized
   useEffect(() => {
-    const handleResize = () => {
-      setItemsPerView(getItemsPerView());
-    };
-
-    // Debounce resize events
     let timeoutId: NodeJS.Timeout;
-    const debouncedResize = () => {
+    
+    const handleResize = () => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleResize, 150);
+      timeoutId = setTimeout(() => {
+        const newItemsPerView = getItemsPerView();
+        if (newItemsPerView !== itemsPerView) {
+          setItemsPerView(newItemsPerView);
+        }
+      }, 100);
     };
 
-    window.addEventListener("resize", debouncedResize);
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener("resize", debouncedResize);
+      window.removeEventListener("resize", handleResize);
       clearTimeout(timeoutId);
     };
-  }, []);
+  }, [itemsPerView]);
 
   useEffect(() => {
-    if (isAutoPlaying && products.length > itemsPerView) {
-      const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-      }, autoPlayInterval);
-      return () => clearInterval(interval);
-    }
-  }, [
-    isAutoPlaying,
-    products.length,
-    itemsPerView,
-    maxIndex,
-    autoPlayInterval,
-  ]);
+    if (!isAutoPlaying || products.length <= Math.floor(itemsPerView)) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, autoPlayInterval);
+    
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, products.length, itemsPerView, maxIndex, autoPlayInterval]);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -154,6 +154,15 @@ export default function ProductCarousel({
   };
 
   const addToCart = async (productId: number) => {
+    const button = document.querySelector(
+      `[data-product-id="${productId}"]`,
+    ) as HTMLButtonElement;
+    
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Agregando...";
+    }
+
     try {
       const response = await fetch("/api/cart/add", {
         method: "POST",
@@ -167,22 +176,40 @@ export default function ProductCarousel({
       });
 
       if (response.ok) {
-        // Mostrar notificación de éxito
-        const button = document.querySelector(
-          `[data-product-id="${productId}"]`,
-        ) as HTMLButtonElement;
         if (button) {
-          const originalText = button.textContent;
           button.textContent = "¡Agregado!";
           button.classList.add("bg-green-500");
           setTimeout(() => {
-            button.textContent = originalText;
+            button.textContent = "Agregar al carrito";
             button.classList.remove("bg-green-500");
+            button.disabled = false;
+          }, 2000);
+        }
+        
+        // Dispatch cart update event
+        window.dispatchEvent(new CustomEvent('cart-updated'));
+      } else {
+        if (button) {
+          button.textContent = "Error";
+          button.classList.add("bg-red-500");
+          setTimeout(() => {
+            button.textContent = "Agregar al carrito";
+            button.classList.remove("bg-red-500");
+            button.disabled = false;
           }, 2000);
         }
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
+      if (button) {
+        button.textContent = "Error";
+        button.classList.add("bg-red-500");
+        setTimeout(() => {
+          button.textContent = "Agregar al carrito";
+          button.classList.remove("bg-red-500");
+          button.disabled = false;
+        }, 2000);
+      }
     }
   };
 
@@ -278,20 +305,21 @@ export default function ProductCarousel({
                             ? `Solo ${product.stock}`
                             : `${product.stock} disponibles`}
                       </p>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          addToCart(product.id);
-                        }}
-                        disabled={isOutOfStock}
-                        className={`w-full min-h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-                          isOutOfStock
-                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
-                        }`}
-                      >
-                        {isOutOfStock ? "Agotado" : "Agregar al carrito"}
-                      </button>
+                       <button
+                         onClick={(e) => {
+                           e.preventDefault();
+                           addToCart(product.id);
+                         }}
+                         disabled={isOutOfStock}
+                         data-product-id={product.id}
+                         className={`w-full min-h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
+                           isOutOfStock
+                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                             : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
+                         }`}
+                       >
+                         {isOutOfStock ? "Agotado" : "Agregar al carrito"}
+                       </button>
                     </div>
                   </a>
                 </div>
