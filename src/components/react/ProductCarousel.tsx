@@ -168,7 +168,7 @@ export default function ProductCarousel({
           {/* Navigation Arrows - Hidden on mobile */}
           <button
             onClick={() => goToSlide((currentIndex - 1 + slidesCount) % slidesCount)}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 size-6 md:size-7 rounded-full bg-white/80 shadow-md hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900 text-sm"
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 z-10 w-6 h-6 rounded-full bg-white/70 shadow-sm hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900 text-xs"
             aria-label="Slide anterior"
           >
             ‹
@@ -176,7 +176,7 @@ export default function ProductCarousel({
           
           <button
             onClick={() => goToSlide((currentIndex + 1) % slidesCount)}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 size-6 md:size-7 rounded-full bg-white/80 shadow-md hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900 text-sm"
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 z-10 w-6 h-6 rounded-full bg-white/70 shadow-sm hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900 text-xs"
             aria-label="Slide siguiente"
           >
             ›

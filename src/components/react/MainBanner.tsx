@@ -142,14 +142,14 @@ export default function MainBanner({
         <>
           <button
             onClick={prevSlide}
-            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 size-6 md:size-7 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 items-center justify-center text-sm"
+            className="hidden sm:flex absolute left-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/20 hover:bg-black/30 text-white transition-all duration-200 items-center justify-center text-xs"
             aria-label="Slide anterior"
           >
             ‹
           </button>
           <button
             onClick={nextSlide}
-            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 size-6 md:size-7 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 items-center justify-center text-sm"
+            className="hidden sm:flex absolute right-1 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-black/20 hover:bg-black/30 text-white transition-all duration-200 items-center justify-center text-xs"
             aria-label="Slide siguiente"
           >
             ›

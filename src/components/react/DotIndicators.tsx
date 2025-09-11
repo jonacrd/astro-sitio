@@ -18,7 +18,7 @@ export default function DotIndicators({ total, active, onDotClick, className = '
           onClick={() => onDotClick?.(i)}
           className={[
             'rounded-full transition-all duration-200',
-            'size-1.5 md:size-2',                // tamaños muy pequeños
+            'w-1.5 h-1.5 md:w-2 md:h-2',                // tamaños muy pequeños
             i === active ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400',
           ].join(' ')}
         />
