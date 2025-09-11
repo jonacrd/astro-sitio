@@ -133,29 +133,16 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
       </button>
 
       {/* Drawer/Modal del carrito */}
-      <div
-        className={`
-        fixed inset-0 z-50
-        ${isOpen ? "pointer-events-auto" : "pointer-events-none"}
-      `}
-      >
-        {/* Backdrop */}
-        <div
-          className={`
-            absolute inset-0 bg-black/40 transition-opacity
-            ${isOpen ? "opacity-100" : "opacity-0"}
-          `}
-          onClick={closeCart}
-        />
+      {isOpen && (
+        <div className="fixed inset-0 z-50 pointer-events-auto">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 transition-opacity opacity-100"
+            onClick={closeCart}
+          />
 
-        {/* Panel del carrito */}
-        <aside
-          className={`
-          absolute right-0 top-0 h-dvh w-full sm:w-[420px] bg-white shadow-xl 
-          transition-transform
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-        `}
-        >
+          {/* Panel del carrito */}
+          <aside className="absolute right-0 top-0 h-dvh w-full sm:w-[420px] bg-white shadow-xl transition-transform translate-x-0">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -265,8 +252,9 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
               </div>
             </div>
           )}
-        </aside>
-      </div>
+          </aside>
+        </div>
+      )}
     </>
   );
 }
