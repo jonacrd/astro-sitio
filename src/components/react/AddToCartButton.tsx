@@ -63,12 +63,13 @@ export default function AddToCartButton({
       onClick={handleAddToCart}
       disabled={isDisabled}
       className={`
-        px-4 py-2 rounded-lg font-medium transition-all duration-200
+        min-h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200
+        text-sm sm:text-base
         ${isDisabled 
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
           : added
             ? 'bg-green-500 text-white'
-            : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+            : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]'
         }
         ${className}
       `}

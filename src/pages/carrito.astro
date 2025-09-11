@@ -9,17 +9,17 @@ import CheckoutButton from '@components/react/CheckoutButton.tsx'
   description="Revisa y confirma tu pedido"
 >
   <!-- Header del carrito -->
-  <section class="bg-white py-8 border-b">
+  <section class="bg-white py-6 sm:py-8 border-b">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3 sm:gap-4">
         <a 
           href="/catalogo" 
-          class="text-blue-600 hover:text-blue-700 transition-colors"
+          class="text-blue-600 hover:text-blue-700 transition-colors text-sm sm:text-base"
         >
           ← Volver al catálogo
         </a>
-        <div class="h-6 w-px bg-gray-300"></div>
-        <h1 class="text-3xl font-bold text-gray-900">
+        <div class="h-4 sm:h-6 w-px bg-gray-300"></div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
           Tu carrito de compras
         </h1>
       </div>
@@ -27,9 +27,9 @@ import CheckoutButton from '@components/react/CheckoutButton.tsx'
   </section>
 
   <!-- Contenido del carrito -->
-  <section class="py-12">
+  <section class="py-8 sm:py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <!-- Tabla del carrito -->
         <div class="lg:col-span-2">
           <CartTable client:load />
@@ -37,13 +37,13 @@ import CheckoutButton from '@components/react/CheckoutButton.tsx'
 
         <!-- Panel de checkout -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-            <h3 class="text-lg font-bold mb-4">Resumen del pedido</h3>
+          <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 sticky top-20 sm:top-24">
+            <h3 class="text-base sm:text-lg font-bold mb-3 sm:mb-4">Resumen del pedido</h3>
             
             <!-- El botón de checkout manejará internamente la obtención del total -->
             <CheckoutButton client:idle />
             
-            <div class="mt-4 text-sm text-gray-500 space-y-2">
+            <div class="mt-4 text-xs sm:text-sm text-gray-500 space-y-2">
               <p>✓ Envío gratuito en pedidos superiores a $50</p>
               <p>✓ Garantía de devolución de 30 días</p>
               <p>✓ Soporte técnico incluido</p>

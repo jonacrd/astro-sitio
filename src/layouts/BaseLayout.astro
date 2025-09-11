@@ -1,5 +1,6 @@
 ---
 import CartWidget from '@components/react/CartWidget.tsx'
+import '../styles/global.css'
 
 export interface Props {
   title?: string
@@ -23,47 +24,45 @@ const {
 </head>
 <body class="bg-gray-50">
   <!-- Header -->
-  <header class="bg-white shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <a href="/" class="text-2xl font-bold text-blue-600">
-            🛍️ Tienda
-          </a>
-        </div>
+  <header class="bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50 border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center">
+        <a href="/" class="text-xl sm:text-2xl font-bold text-blue-600">
+          🛍️ Tienda
+        </a>
+      </div>
 
-        <!-- Navegación -->
-        <nav class="hidden md:flex items-center space-x-8">
-          <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors">
-            Inicio
-          </a>
-          <a href="/catalogo" class="text-gray-700 hover:text-blue-600 transition-colors">
-            Catálogo
-          </a>
-        </nav>
+      <!-- Navegación Desktop -->
+      <nav class="hidden md:flex items-center space-x-6 lg:space-x-8">
+        <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors text-sm lg:text-base">
+          Inicio
+        </a>
+        <a href="/catalogo" class="text-gray-700 hover:text-blue-600 transition-colors text-sm lg:text-base">
+          Catálogo
+        </a>
+      </nav>
 
-        <!-- Carrito Widget -->
-        <div class="flex items-center">
-          <CartWidget client:load />
-        </div>
+      <!-- Carrito Widget -->
+      <div class="flex items-center">
+        <CartWidget client:load />
       </div>
     </div>
   </header>
 
   <!-- Contenido principal -->
-  <main class="min-h-screen">
+  <main class="min-h-screen pt-16">
     <slot />
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-12">
+  <footer class="bg-gray-900 text-white py-8 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
         <!-- Información de la tienda -->
-        <div class="col-span-1 md:col-span-2">
-          <h3 class="text-xl font-bold mb-4">🛍️ Tienda Online</h3>
-          <p class="text-gray-400 mb-4">
+        <div class="sm:col-span-2">
+          <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">🛍️ Tienda Online</h3>
+          <p class="text-gray-400 mb-4 text-sm sm:text-base">
             Tu tienda de confianza para productos de tecnología y mucho más. 
             Calidad garantizada y envíos rápidos.
           </p>
@@ -71,8 +70,8 @@ const {
 
         <!-- Enlaces rápidos -->
         <div>
-          <h4 class="font-semibold mb-4">Enlaces</h4>
-          <ul class="space-y-2 text-gray-400">
+          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Enlaces</h4>
+          <ul class="space-y-2 text-gray-400 text-sm sm:text-base">
             <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
             <li><a href="/catalogo" class="hover:text-white transition-colors">Catálogo</a></li>
             <li><a href="/carrito" class="hover:text-white transition-colors">Carrito</a></li>
@@ -81,8 +80,8 @@ const {
 
         <!-- Contacto -->
         <div>
-          <h4 class="font-semibold mb-4">Contacto</h4>
-          <ul class="space-y-2 text-gray-400">
+          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Contacto</h4>
+          <ul class="space-y-2 text-gray-400 text-sm sm:text-base">
             <li>📧 info@tienda.com</li>
             <li>📱 +1 234 567 8900</li>
             <li>📍 Ciudad, País</li>
@@ -90,7 +89,7 @@ const {
         </div>
       </div>
 
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+      <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
         <p>&copy; {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.</p>
       </div>
     </div>
