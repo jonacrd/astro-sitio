@@ -153,3 +153,4 @@ export async function getCategorySections(): Promise<CategorySection[]> {
     return [];
   }
 }
+

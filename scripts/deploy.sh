@@ -20,3 +20,4 @@ echo "🏗️ Construyendo aplicación..."
 npm run build
 
 echo "✅ Deploy completado!"
+

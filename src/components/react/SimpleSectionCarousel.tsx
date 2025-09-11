@@ -54,3 +54,4 @@ export default function SimpleSectionCarousel() {
     </section>
   );
 }
+

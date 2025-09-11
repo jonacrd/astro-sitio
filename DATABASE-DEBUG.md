@@ -44,3 +44,4 @@ npx prisma studio
 - 6 categorías: Ropa Hombre, Ropa Mujer, Tecnología, Accesorios, Hogar, Deportes
 - 24 productos distribuidos en las categorías
 - Imágenes de Unsplash para cada producto
+

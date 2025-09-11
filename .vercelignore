@@ -6,3 +6,4 @@ prisma/migrations
 *.log
 .DS_Store
 .vscode
+
