@@ -142,14 +142,14 @@ export default function MainBanner({
         <>
           <button
             onClick={prevSlide}
-            className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-9 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 items-center justify-center"
+            className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 size-6 md:size-7 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 items-center justify-center text-sm"
             aria-label="Slide anterior"
           >
             ‹
           </button>
           <button
             onClick={nextSlide}
-            className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-9 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 items-center justify-center"
+            className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 size-6 md:size-7 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 items-center justify-center text-sm"
             aria-label="Slide siguiente"
           >
             ›
@@ -159,11 +159,12 @@ export default function MainBanner({
 
       {/* Dot Indicators */}
       {bannerSlides.length > 1 && (
-        <div className="absolute bottom-4 inset-x-0">
+        <div className="absolute bottom-3 inset-x-0">
           <DotIndicators
             total={bannerSlides.length}
             active={currentSlide}
             onDotClick={goToSlide}
+            className="opacity-80"
           />
         </div>
       )}

@@ -154,11 +154,7 @@ export default function EnhancedCategoryBanner({
                       <div
                         key={product.id}
                         className={`flex-shrink-0 w-full transition-transform duration-500 ease-out ${
-                          index === currentIndex
-                            ? "translate-x-0"
-                            : index < currentIndex
-                              ? "-translate-x-full"
-                              : "translate-x-full"
+                          index === currentIndex ? "translate-x-0" : "translate-x-full"
                         }`}
                         style={{
                           transform: `translateX(-${currentIndex * 100}%)`,
@@ -217,13 +213,13 @@ export default function EnhancedCategoryBanner({
                   <>
                     <button
                       onClick={prevSlide}
-                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
+                      className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-1 rounded-full transition-all duration-200 text-xs"
                     >
                       ‹
                     </button>
                     <button
                       onClick={nextSlide}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white p-1 rounded-full transition-all duration-200 text-xs"
                     >
                       ›
                     </button>
@@ -232,7 +228,7 @@ export default function EnhancedCategoryBanner({
 
                 {/* Dot Indicators */}
                 {products.length > 1 && (
-                  <div className="absolute bottom-3 inset-x-0">
+                  <div className="absolute bottom-2 inset-x-0">
                     <DotIndicators
                       total={products.length}
                       active={currentIndex}
@@ -241,6 +237,7 @@ export default function EnhancedCategoryBanner({
                         setIsAutoPlaying(false);
                         setTimeout(() => setIsAutoPlaying(true), 5000);
                       }}
+                      className="opacity-70"
                     />
                   </div>
                 )}
