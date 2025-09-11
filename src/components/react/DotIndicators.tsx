@@ -8,21 +8,14 @@ type Props = {
 };
 
 export default function DotIndicators({ total, active, onDotClick, className = '' }: Props) {
+  // Si solo hay 1 elemento, no mostrar nada
+  if (total <= 1) return null;
+
   return (
-    <div className={`flex items-center justify-center gap-2 ${className}`}>
-      {Array.from({ length: total }).map((_, i) => (
-        <button
-          key={i}
-          aria-label={`Ir al slide ${i + 1}`}
-          aria-current={i === active}
-          onClick={() => onDotClick?.(i)}
-          className={[
-            'rounded-full transition-all duration-200',
-            'w-2 h-2',                // 8px - diminutos
-            i === active ? 'bg-blue-600' : 'bg-gray-300 hover:bg-gray-400',
-          ].join(' ')}
-        />
-      ))}
+    <div className={`flex items-center justify-center ${className}`}>
+      <span className="text-xs text-white/70 bg-black/20 px-2 py-1 rounded-full">
+        {active + 1}/{total}
+      </span>
     </div>
   );
 }
