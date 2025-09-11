@@ -134,7 +134,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
       {/* Drawer/Modal del carrito */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 pointer-events-auto">
+        <div className="fixed inset-0 z-[60] pointer-events-auto">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 transition-opacity opacity-100"
