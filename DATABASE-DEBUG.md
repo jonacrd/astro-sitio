@@ -45,3 +45,4 @@ npx prisma studio
 - 24 productos distribuidos en las categorías
 - Imágenes de Unsplash para cada producto
 
+

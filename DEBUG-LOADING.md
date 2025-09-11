@@ -42,3 +42,4 @@ export async function getCategoryBannersData() {
 - Tiempo de carga producción: < 5 segundos
 - Sin errores en consola del navegador
 
+

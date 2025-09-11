@@ -58,3 +58,4 @@ git push origin main
 - Después de agregar la variable, Vercel redeployará automáticamente
 - Si no funciona, puedes forzar un redeploy manual en Vercel
 
+
