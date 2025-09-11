@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import DotIndicators from "./DotIndicators";
 
 interface BannerSlide {
   id: string;
@@ -7,6 +8,7 @@ interface BannerSlide {
   ctaText: string;
   ctaLink?: string;
   gradient: string;
+  backgroundImage?: string;
 }
 
 interface MainBannerProps {
@@ -28,11 +30,11 @@ export default function MainBanner({
     {
       id: "slide1",
       title: "¡LAS MEJORES MARCAS!",
-      subtitle:
-        "ENCUENTRA SOLO MARCAS RECONOCIDAS - EL MEJOR PRECIO DEL MERCADO",
+      subtitle: "ENCUENTRA SOLO MARCAS RECONOCIDAS - EL MEJOR PRECIO DEL MERCADO",
       ctaText: "Ver Ofertas",
       ctaLink: "/catalogo?filter=ofertas",
       gradient: "linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)",
+      backgroundImage: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=600&fit=crop&auto=format",
     },
     {
       id: "slide2",
@@ -41,6 +43,7 @@ export default function MainBanner({
       ctaText: "Ver Colección",
       ctaLink: "/catalogo?filter=moda",
       gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+      backgroundImage: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=600&fit=crop&auto=format",
     },
     {
       id: "slide3",
@@ -49,132 +52,119 @@ export default function MainBanner({
       ctaText: "Ver Herramientas",
       ctaLink: "/catalogo?filter=herramientas",
       gradient: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
+      backgroundImage: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1200&h=600&fit=crop&auto=format",
     },
     {
       id: "slide4",
-      title: "ZAPATILLAS DEPORTIVAS",
-      subtitle: "ADIDAS - NIKE - LA MEJOR CALIDAD",
-      ctaText: "Ver Zapatillas",
-      ctaLink: "/catalogo?filter=zapatillas",
-      gradient: "linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)",
-    },
-    {
-      id: "slide5",
-      title: "ACCESORIOS DE MODA",
-      subtitle: "MOCHILAS - LENTES - RELOJES - JOYERIA",
-      ctaText: "Ver Accesorios",
-      ctaLink: "/catalogo?filter=accesorios",
+      title: "TECNOLOGÍA DE VANGUARDIA",
+      subtitle: "SMARTPHONES - LAPTOPS - ACCESORIOS TECH",
+      ctaText: "Ver Tecnología",
+      ctaLink: "/catalogo?filter=tecnologia",
       gradient: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+      backgroundImage: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&h=600&fit=crop&auto=format",
     },
   ];
 
-  const displaySlides = slides.length > 0 ? slides : defaultSlides;
+  const bannerSlides = slides.length > 0 ? slides : defaultSlides;
 
-  // Auto-play functionality
+  // Auto-play
   useEffect(() => {
-    if (!isAutoPlaying || displaySlides.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % displaySlides.length);
-    }, autoPlayInterval);
-
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, displaySlides.length, autoPlayInterval]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % displaySlides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide(
-      (prev) => (prev - 1 + displaySlides.length) % displaySlides.length,
-    );
-  };
+    if (isAutoPlaying && bannerSlides.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+      }, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [isAutoPlaying, bannerSlides.length, autoPlayInterval]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 5000); // Reanudar auto-play después de 5s
   };
 
-  const handleMouseEnter = () => setIsAutoPlaying(false);
-  const handleMouseLeave = () => setIsAutoPlaying(true);
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+  };
 
-  if (displaySlides.length === 0) {
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+  };
+
+  if (bannerSlides.length === 0) {
     return null;
   }
 
+  const currentSlideData = bannerSlides[currentSlide];
+
   return (
-    <section
-      className={`relative w-full h-96 md:h-[500px] overflow-hidden mb-16 max-w-6xl mx-auto z-10 ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+    <section 
+      className={`relative w-full aspect-[4/3] md:aspect-[16/9] overflow-hidden ${className}`}
+      onMouseEnter={() => setIsAutoPlaying(false)}
+      onMouseLeave={() => setIsAutoPlaying(true)}
     >
-      {/* Slides */}
-      {displaySlides.map((slide, index) => (
+      {/* Background Image */}
+      {currentSlideData.backgroundImage && (
         <div
-          key={slide.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ background: slide.gradient }}
-        >
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-black/20 flex items-center justify-center text-center text-white z-20">
-            <div className="max-w-4xl px-5">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-5 drop-shadow-lg leading-tight">
-                {slide.title}
-              </h1>
-              <p className="text-lg md:text-xl lg:text-2xl mb-8 drop-shadow-md">
-                {slide.subtitle}
-              </p>
-              {slide.ctaLink ? (
-                <a
-                  href={slide.ctaLink}
-                  className="inline-block bg-gradient-to-r from-red-500 to-red-600 text-white border-none px-10 py-4 rounded-full text-lg md:text-xl font-bold cursor-pointer transition-all duration-300 shadow-lg hover:from-red-600 hover:to-red-700 hover:-translate-y-1 hover:shadow-xl"
-                >
-                  {slide.ctaText}
-                </a>
-              ) : (
-                <button className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none px-10 py-4 rounded-full text-lg md:text-xl font-bold cursor-pointer transition-all duration-300 shadow-lg hover:from-red-600 hover:to-red-700 hover:-translate-y-1 hover:shadow-xl">
-                  {slide.ctaText}
-                </button>
-              )}
-            </div>
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${currentSlideData.backgroundImage})` }}
+        />
+      )}
+
+      {/* Gradient Overlay */}
+      <div
+        className="absolute inset-0 opacity-80"
+        style={{ background: currentSlideData.gradient }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="text-center text-white">
+            <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 md:mb-6 drop-shadow-lg">
+              {currentSlideData.title}
+            </h1>
+            <p className="text-sm md:text-lg lg:text-xl mb-6 md:mb-8 max-w-3xl mx-auto drop-shadow-md">
+              {currentSlideData.subtitle}
+            </p>
+            <a
+              href={currentSlideData.ctaLink || "/catalogo"}
+              className="inline-block bg-white text-gray-900 px-6 py-3 md:px-8 md:py-4 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg h-10 md:h-11 text-sm md:text-base"
+            >
+              {currentSlideData.ctaText}
+            </a>
           </div>
         </div>
-      ))}
+      </div>
 
-      {/* Navigation Arrows */}
-      {displaySlides.length > 1 && (
+      {/* Navigation Arrows - Hidden on mobile */}
+      {bannerSlides.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/20 text-white border-none w-10 h-10 md:w-12 md:h-12 rounded-full cursor-pointer text-xl md:text-2xl transition-all duration-300 backdrop-blur-md hover:bg-white/30 hover:scale-110 z-30"
+            className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-9 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 items-center justify-center"
+            aria-label="Slide anterior"
           >
             ‹
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/20 text-white border-none w-10 h-10 md:w-12 md:h-12 rounded-full cursor-pointer text-xl md:text-2xl transition-all duration-300 backdrop-blur-md hover:bg-white/30 hover:scale-110 z-30"
+            className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 size-8 md:size-9 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-200 items-center justify-center"
+            aria-label="Slide siguiente"
           >
             ›
           </button>
         </>
       )}
 
-      {/* Indicators */}
-      {displaySlides.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-30">
-          {displaySlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-300 ${
-                index === currentSlide
-                  ? "bg-white scale-125"
-                  : "bg-white/50 hover:bg-white/75"
-              }`}
-            />
-          ))}
+      {/* Dot Indicators */}
+      {bannerSlides.length > 1 && (
+        <div className="absolute bottom-4 inset-x-0">
+          <DotIndicators
+            total={bannerSlides.length}
+            active={currentSlide}
+            onDotClick={goToSlide}
+          />
         </div>
       )}
     </section>

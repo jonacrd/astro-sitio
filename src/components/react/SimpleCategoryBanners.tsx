@@ -35,42 +35,40 @@ export default function SimpleCategoryBanners() {
   ];
 
   return (
-    <section className="py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-gray-100">
+    <section className="py-10 md:py-14 lg:py-16 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 md:mb-3">
             Explora nuestras categorías
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-            Encuentra exactamente lo que buscas en nuestras categorías
-            organizadas
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
+            Encuentra exactamente lo que buscas en nuestras categorías organizadas
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
           {categories.map((category, index) => (
             <a
               key={index}
               href={category.href}
-              className="bg-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group hover:scale-105"
+              className="bg-white rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group hover:scale-105"
             >
               <div
-                className="aspect-[4/3] bg-cover bg-center relative"
+                className="aspect-[4/3] md:aspect-[16/9] bg-cover bg-center relative"
                 style={{
-                  backgroundImage: `url(${category.backgroundImage})`,
+                  backgroundImage: `url(${category.backgroundImage})`
                 }}
               >
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl lg:text-4xl">
-                    {category.icon}
-                  </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+                <div className="absolute inset-x-0 bottom-0 p-3 md:p-4">
+                  <span className="text-2xl md:text-3xl lg:text-4xl block mb-2">{category.icon}</span>
                 </div>
               </div>
-              <div className="p-3 sm:p-4 text-center">
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors">
+              <div className="p-3 md:p-4 text-center">
+                <h3 className="text-sm md:text-base lg:text-lg font-bold text-gray-900 mb-1 md:mb-2 group-hover:text-blue-600 transition-colors">
                   {category.title}
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 group-hover:text-gray-700 transition-colors">
+                <p className="text-xs md:text-sm text-gray-600 group-hover:text-gray-700 transition-colors">
                   {category.description}
                 </p>
               </div>

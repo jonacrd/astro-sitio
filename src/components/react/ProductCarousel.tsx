@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import DotIndicators from "./DotIndicators";
 
 interface Product {
   id: number;
@@ -30,132 +31,66 @@ export default function ProductCarousel({
 }: ProductCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [currentX, setCurrentX] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Responsive items per view - simplified
-  const getItemsPerView = () => {
-    if (typeof window === "undefined") return 2;
+  // Calcular cuántos slides necesitamos basado en el ancho de la pantalla
+  const getSlidesCount = () => {
+    if (typeof window === "undefined") return Math.ceil(products.length / 2);
     const width = window.innerWidth;
-    if (width < 640) return 1.2;
-    if (width < 768) return 2;
-    if (width < 1024) return 3;
-    return 4;
+    if (width < 640) return products.length; // 1 por slide en mobile
+    if (width < 768) return Math.ceil(products.length / 2); // 2 por slide
+    if (width < 1024) return Math.ceil(products.length / 3); // 3 por slide
+    return Math.ceil(products.length / 4); // 4 por slide
   };
 
-  const [itemsPerView, setItemsPerView] = useState(() => {
-    if (typeof window === "undefined") return 2;
-    return getItemsPerView();
-  });
-  
-  const maxIndex = Math.max(0, products.length - Math.floor(itemsPerView));
+  const [slidesCount, setSlidesCount] = useState(() => getSlidesCount());
 
-  // Update items per view on resize - optimized
+  // Auto-play
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
+    if (isAutoPlaying && products.length > 0 && slidesCount > 1) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % slidesCount);
+      }, autoPlayInterval);
+      return () => clearInterval(interval);
+    }
+  }, [isAutoPlaying, products.length, autoPlayInterval, slidesCount]);
+
+  // Scroll al slide actual
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const cardWidth = 280; // Ancho aproximado de cada card
+      const gap = 16; // gap-4 = 16px
+      const scrollPosition = currentIndex * (cardWidth + gap);
+      
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentIndex]);
+
+  // Resize handler
+  useEffect(() => {
     const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        const newItemsPerView = getItemsPerView();
-        setItemsPerView(newItemsPerView);
-      }, 100);
+      setSlidesCount(getSlidesCount());
     };
 
     window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isAutoPlaying || products.length <= Math.floor(itemsPerView)) return;
-    
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, autoPlayInterval);
-    
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, products.length, itemsPerView, maxIndex, autoPlayInterval]);
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
-  };
+    return () => window.removeEventListener("resize", handleResize);
+  }, [products.length]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-  };
-
-  const handleMouseEnter = () => setIsAutoPlaying(false);
-  const handleMouseLeave = () => setIsAutoPlaying(true);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-    setCurrentX(e.clientX);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setCurrentX(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    if (!isDragging) return;
-
-    const diff = startX - currentX;
-    const threshold = 50;
-
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0) {
-        nextSlide();
-      } else {
-        prevSlide();
-      }
-    }
-
-    setIsDragging(false);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].clientX);
-    setCurrentX(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    setCurrentX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
-
-    const diff = startX - currentX;
-    const threshold = 50;
-
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0) {
-        nextSlide();
-      } else {
-        prevSlide();
-      }
-    }
-
-    setIsDragging(false);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 5000); // Reanudar auto-play después de 5s
   };
 
   const addToCart = async (productId: number) => {
     const button = document.querySelector(
       `[data-product-id="${productId}"]`,
     ) as HTMLButtonElement;
-    
+
     if (button) {
       button.disabled = true;
       button.textContent = "Agregando...";
@@ -183,7 +118,7 @@ export default function ProductCarousel({
             button.disabled = false;
           }, 2000);
         }
-        
+
         // Dispatch cart update event
         window.dispatchEvent(new CustomEvent('cart-updated'));
       } else {
@@ -211,152 +146,112 @@ export default function ProductCarousel({
     }
   };
 
-  if (!products || products.length === 0) {
+  if (products.length === 0) {
     return null;
   }
 
   return (
-    <section className={`py-8 sm:py-12 lg:py-16 bg-white ${className}`}>
+    <section className={`py-10 md:py-14 lg:py-16 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 md:mb-3">
             {title}
           </h2>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
             {subtitle}
           </p>
         </div>
 
-        {/* Carousel - Always visible */}
-        <div
-          className="relative overflow-hidden"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          {/* Products Track */}
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows - Hidden on mobile */}
+          <button
+            onClick={() => goToSlide((currentIndex - 1 + slidesCount) % slidesCount)}
+            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 size-8 md:size-9 rounded-full bg-white/90 shadow-lg hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900"
+            aria-label="Slide anterior"
+          >
+            ‹
+          </button>
+          
+          <button
+            onClick={() => goToSlide((currentIndex + 1) % slidesCount)}
+            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 size-8 md:size-9 rounded-full bg-white/90 shadow-lg hover:bg-white transition-all duration-200 items-center justify-center text-gray-600 hover:text-gray-900"
+            aria-label="Slide siguiente"
+          >
+            ›
+          </button>
+
+          {/* Products Container */}
           <div
-            className="flex transition-transform duration-500 ease-out"
-            style={{
-              transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-              cursor: isDragging ? "grabbing" : "grab",
-            }}
+            ref={scrollContainerRef}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth scroller"
+            onMouseEnter={() => setIsAutoPlaying(false)}
+            onMouseLeave={() => setIsAutoPlaying(true)}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {products.map((product) => {
               const price = product.priceCents / 100;
               const isOutOfStock = product.stock === 0;
-              const isLowStock = product.stock > 0 && product.stock < 10;
 
               return (
                 <div
                   key={product.id}
-                  className={`flex-shrink-0 px-2 sm:px-3 ${
-                    itemsPerView === 1.2
-                      ? "w-[83.33%]" // 100/1.2
-                      : itemsPerView === 2
-                        ? "w-1/2"
-                        : itemsPerView === 3
-                          ? "w-1/3"
-                          : "w-1/4"
-                  }`}
+                  className="snap-center shrink-0 w-[260px] sm:w-[280px] md:w-[300px]"
                 >
-                  <a
-                    href={`/catalogo?pid=${product.id}`}
-                    className="group rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden hover:scale-[1.02] active:scale-[0.98] block"
-                  >
-                    <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                  <div className="group rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden hover:scale-[1.02] active:scale-[0.98]">
+                    {/* Product Image */}
+                    <div className="aspect-[4/3] md:aspect-[16/10] w-full overflow-hidden bg-gray-100">
                       <img
                         src={
-                          product.imageUrl || "/images/placeholder-product.jpg"
+                          product.imageUrl ||
+                          "/images/placeholder-product.jpg"
                         }
                         alt={product.name}
                         className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                         loading="lazy"
                         decoding="async"
                       />
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                          <span className="bg-red-500 text-white px-3 py-2 rounded-lg font-bold text-sm">
-                            AGOTADO
-                          </span>
-                        </div>
-                      )}
                     </div>
 
-                    <div className="p-3 sm:p-4">
-                      <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 mb-1">
+                    {/* Product Info */}
+                    <div className="p-3 md:p-4">
+                      <h3 className="font-medium text-gray-900 text-sm md:text-base line-clamp-2 mb-1">
                         {product.name}
                       </h3>
-                      <p className="text-blue-600 font-semibold text-sm sm:text-base mb-2">
+                      <p className="text-blue-600 font-semibold text-lg md:text-xl mb-2">
                         ${price.toFixed(2)}
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-500 mb-3">
-                        {isOutOfStock
-                          ? "Agotado"
-                          : isLowStock
-                            ? `Solo ${product.stock}`
-                            : `${product.stock} disponibles`}
+                      <p className="text-xs md:text-sm text-gray-500 mb-3">
+                        {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
                       </p>
-                       <button
-                         onClick={(e) => {
-                           e.preventDefault();
-                           addToCart(product.id);
-                         }}
-                         disabled={isOutOfStock}
-                         data-product-id={product.id}
-                         className={`w-full min-h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm sm:text-base ${
-                           isOutOfStock
-                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                             : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
-                         }`}
-                       >
-                         {isOutOfStock ? "Agotado" : "Agregar al carrito"}
-                       </button>
+                      <button
+                        data-product-id={product.id}
+                        onClick={() => addToCart(product.id)}
+                        disabled={isOutOfStock}
+                        className={`w-full h-10 md:h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm md:text-base ${
+                          isOutOfStock
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
+                        }`}
+                      >
+                        {isOutOfStock ? "Agotado" : "Agregar al carrito"}
+                      </button>
                     </div>
-                  </a>
+                  </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Navigation Buttons */}
-          {products.length > itemsPerView && (
-            <>
-              <button
-                onClick={prevSlide}
-                className="absolute left-1 sm:left-2 lg:left-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:shadow-xl text-gray-600 hover:text-blue-600 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
-              >
-                ‹
-              </button>
-              <button
-                onClick={nextSlide}
-                className="absolute right-1 sm:right-2 lg:right-4 top-1/2 transform -translate-y-1/2 bg-white shadow-lg hover:shadow-xl text-gray-600 hover:text-blue-600 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 z-10"
-              >
-                ›
-              </button>
-            </>
-          )}
-
-          {/* Indicators */}
-          {products.length > itemsPerView && (
-            <div className="flex justify-center mt-4 sm:mt-6 lg:mt-8 space-x-2">
-              {Array.from({ length: maxIndex + 1 }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-200 ${
-                    index === currentIndex
-                      ? "bg-blue-600 scale-110"
-                      : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                />
-              ))}
+          {/* Dot Indicators */}
+          {slidesCount > 1 && (
+            <div className="mt-4 md:mt-6">
+              <DotIndicators
+                total={slidesCount}
+                active={currentIndex}
+                onDotClick={goToSlide}
+              />
             </div>
           )}
         </div>

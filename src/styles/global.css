@@ -71,6 +71,22 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Suavizar scroll horizontal de carruseles */
+.scroller {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ocultar scrollbar en carruseles */
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.scroller {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Mejoras para texto pequeño en móviles */
 @media (max-width: 640px) {
   .text-xs {
