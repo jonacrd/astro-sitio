@@ -90,12 +90,27 @@ const categoryProducts = await Promise.all(
       <p class="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 text-blue-100 max-w-3xl mx-auto">
         Descubre una amplia variedad de productos de calidad en todas las categorías
       </p>
+      
+      <!-- Category Filters -->
+      <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
+        <a href="/catalogo" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm sm:text-base transition-colors">
+          Todos
+        </a>
+        {categories.map((category) => (
+          <a 
+            href={`/catalogo?category=${category.slug}`}
+            class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm sm:text-base transition-colors"
+          >
+            {category.name}
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 
   <!-- Featured Products -->
   <ProductCarousel 
-    title="Productos Destacados"
+    title="⭐ Productos Destacados"
     subtitle="Nuestras mejores ofertas y productos más populares"
     products={featuredProducts}
     client:load 
@@ -120,6 +135,7 @@ const categoryProducts = await Promise.all(
           icon={config.icon}
           backgroundImages={config.backgroundImages}
           height={index % 2 === 0 ? 'medium' : 'small'}
+          categorySlug={bannerData.category.slug}
           client:load
         />
         

@@ -3,15 +3,18 @@
 ## ⚠️ Problemas Identificados y Soluciones
 
 ### Problema Principal: SQLite no funciona en Vercel
+
 Vercel es serverless y no puede usar archivos SQLite. **Solución aplicada**: Cambio a PostgreSQL.
 
 ## 🔧 Cambios Realizados para Vercel
 
 ### 1. ✅ Configuración de Base de Datos
+
 - Cambiado `prisma/schema.prisma` de SQLite a PostgreSQL
 - Agregado soporte para `DATABASE_URL` environment variable
 
 ### 2. ✅ Scripts de Build Optimizados
+
 ```json
 {
   "build": "prisma generate && prisma db push && astro build"
@@ -19,9 +22,11 @@ Vercel es serverless y no puede usar archivos SQLite. **Solución aplicada**: Ca
 ```
 
 ### 3. ✅ Configuración Vercel
+
 Eliminado `vercel.json` - Vercel detecta automáticamente Astro con el adaptador oficial.
 
 ### 4. ✅ Variables de Entorno
+
 Documentado en `env.example` las variables necesarias.
 
 ## 📋 Pasos para Deployment
@@ -29,18 +34,21 @@ Documentado en `env.example` las variables necesarias.
 ### Paso 1: Crear Base de Datos PostgreSQL
 
 **Opción A: Vercel Postgres (Recomendado)**
+
 1. Ve a tu dashboard de Vercel
 2. Selecciona tu proyecto
 3. Ve a "Storage" → "Create Database" → "Postgres"
 4. Copia la `DATABASE_URL` generada
 
 **Opción B: Neon (Gratuito)**
+
 1. Ve a [neon.tech](https://neon.tech)
 2. Crea una cuenta gratuita
 3. Crea una nueva base de datos
 4. Copia la connection string
 
 **Opción C: Supabase**
+
 1. Ve a [supabase.com](https://supabase.com)
 2. Crea proyecto
 3. Ve a Settings → Database
@@ -92,31 +100,41 @@ npm run seed
 ## 🐛 Solución de Problemas Comunes
 
 ### Error: "Function Runtimes must have a valid version"
+
 **Causa**: Configuración incorrecta en `vercel.json`
-**Solución**: 
+**Solución**:
+
 1. Eliminar `vercel.json` (no es necesario con `@astrojs/vercel`)
 2. Vercel detecta automáticamente la configuración de Astro
 
 ### Error: "Module '@prisma/client' not found"
+
 **Solución**: Verificar que `postinstall: "prisma generate"` esté en package.json
 
 ### Error: "Database connection failed"
-**Solución**: 
+
+**Solución**:
+
 1. Verificar que `DATABASE_URL` esté configurada en Vercel
 2. Confirmar que la base de datos esté accesible públicamente
 3. Verificar formato de connection string
 
 ### Error: "Table doesn't exist"
-**Solución**: 
+
+**Solución**:
+
 1. El build command ejecuta `prisma db push` automáticamente
 2. Si falla, ejecutar manualmente: `npx prisma db push`
 
 ### Error: "Build timeout"
-**Solución**: 
+
+**Solución**:
+
 1. Verificar que la base de datos responda rápido
 2. Considerar usar `prisma migrate deploy` en lugar de `db push`
 
 ### Error: "Function timeout"
+
 **Solución**: Las funciones serverless de Vercel tienen límite de tiempo. Optimizar queries de base de datos.
 
 ## ✅ Checklist Pre-Deploy

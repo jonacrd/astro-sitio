@@ -1,25 +1,25 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 interface Section {
-  title: string
-  description: string
-  imageUrl?: string
-  href?: string
-  icon?: string
+  title: string;
+  description: string;
+  imageUrl?: string;
+  href?: string;
+  icon?: string;
 }
 
 interface SectionCarouselProps {
-  sections?: Section[]
-  title?: string
-  subtitle?: string
-  className?: string
+  sections?: Section[];
+  title?: string;
+  subtitle?: string;
+  className?: string;
 }
 
-export default function SectionCarousel({ 
+export default function SectionCarousel({
   sections = [],
   title = "¿Por qué elegirnos?",
   subtitle = "Descubre todas las ventajas que tenemos para ofrecerte",
-  className = ""
+  className = "",
 }: SectionCarouselProps) {
   // Secciones por defecto si no se proporcionan
   const defaultSections: Section[] = [
@@ -27,32 +27,34 @@ export default function SectionCarousel({
       title: "Nuevas Colecciones",
       description: "Descubre las últimas tendencias de la temporada",
       icon: "✨",
-      href: "/catalogo?filter=nuevo"
+      href: "/catalogo?filter=nuevo",
     },
     {
       title: "Ofertas Especiales",
       description: "Hasta 50% de descuento en productos seleccionados",
       icon: "🔥",
-      href: "/catalogo?filter=oferta"
+      href: "/catalogo?filter=oferta",
     },
     {
       title: "Envío Gratis",
       description: "En compras superiores a $50.000",
       icon: "🚚",
-      href: "/catalogo"
+      href: "/catalogo",
     },
     {
       title: "Soporte 24/7",
       description: "Estamos aquí para ayudarte siempre",
       icon: "💬",
-      href: "/contacto"
-    }
-  ]
+      href: "/contacto",
+    },
+  ];
 
-  const displaySections = sections.length > 0 ? sections : defaultSections
+  const displaySections = sections.length > 0 ? sections : defaultSections;
 
   return (
-    <section className={`py-16 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 relative overflow-hidden ${className}`}>
+    <section
+      className={`py-16 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-600 relative overflow-hidden ${className}`}
+    >
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
@@ -66,9 +68,7 @@ export default function SectionCarousel({
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
             {title}
           </h2>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
-            {subtitle}
-          </p>
+          <p className="text-lg text-slate-300 max-w-2xl mx-auto">{subtitle}</p>
         </div>
 
         {/* Sections Grid */}
@@ -80,24 +80,24 @@ export default function SectionCarousel({
             >
               {/* Background Gradient on Hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
+
               {/* Icon */}
               {section.icon && (
                 <span className="text-5xl mb-5 block drop-shadow-lg relative z-10">
                   {section.icon}
                 </span>
               )}
-              
+
               {/* Title */}
               <h3 className="text-xl font-semibold text-slate-100 mb-4 relative z-10">
                 {section.title}
               </h3>
-              
+
               {/* Description */}
               <p className="text-slate-300 leading-relaxed mb-6 relative z-10">
                 {section.description}
               </p>
-              
+
               {/* Link */}
               {section.href && (
                 <a
@@ -112,5 +112,5 @@ export default function SectionCarousel({
         </div>
       </div>
     </section>
-  )
+  );
 }

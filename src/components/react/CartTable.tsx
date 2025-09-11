@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react'
-import { formatPrice } from '@lib/money'
+import { useState, useEffect } from "react";
+import { formatPrice } from "@lib/money";
 
 interface CartItem {
-  id: number
-  quantity: number
+  id: number;
+  quantity: number;
   product: {
-    id: number
-    name: string
-    priceCents: number
-    imageUrl?: string
-    stock: number
-  }
+    id: number;
+    name: string;
+    priceCents: number;
+    imageUrl?: string;
+    stock: number;
+  };
 }
 
 interface CartData {
-  success: boolean
-  items: CartItem[]
-  totalCents: number
-  itemCount: number
+  success: boolean;
+  items: CartItem[];
+  totalCents: number;
+  itemCount: number;
 }
 
 interface CartTableProps {
-  className?: string
+  className?: string;
 }
 
 export default function CartTable({ className = "" }: CartTableProps) {
@@ -29,119 +29,133 @@ export default function CartTable({ className = "" }: CartTableProps) {
     success: true,
     items: [],
     totalCents: 0,
-    itemCount: 0
-  })
-  const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState<number | null>(null)
+    itemCount: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<number | null>(null);
 
   const fetchCart = async () => {
     try {
-      const response = await fetch('/api/cart/get')
-      const data = await response.json()
-      setCartData(data)
+      const response = await fetch("/api/cart/get");
+      const data = await response.json();
+      setCartData(data);
     } catch (error) {
-      console.error('Error fetching cart:', error)
+      console.error("Error fetching cart:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const updateQuantity = async (productId: number, newQuantity: number) => {
-    setUpdating(productId)
-    
-    try {
-      const response = await fetch('/api/cart/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId, quantity: newQuantity })
-      })
+    setUpdating(productId);
 
-      const data = await response.json()
+    try {
+      const response = await fetch("/api/cart/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId, quantity: newQuantity }),
+      });
+
+      const data = await response.json();
 
       if (data.success) {
-        setCartData(data)
-        
+        setCartData(data);
+
         // Disparar evento para actualizar el widget
-        window.dispatchEvent(new CustomEvent('cart-updated', { 
-          detail: { 
-            itemCount: data.itemCount,
-            totalCents: data.totalCents
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent("cart-updated", {
+            detail: {
+              itemCount: data.itemCount,
+              totalCents: data.totalCents,
+            },
+          }),
+        );
       } else {
-        alert(data.error || 'Error al actualizar cantidad')
+        alert(data.error || "Error al actualizar cantidad");
       }
     } catch (error) {
-      console.error('Error updating quantity:', error)
-      alert('Error al actualizar cantidad')
+      console.error("Error updating quantity:", error);
+      alert("Error al actualizar cantidad");
     } finally {
-      setUpdating(null)
+      setUpdating(null);
     }
-  }
+  };
 
   const removeItem = async (productId: number) => {
-    if (!confirm('¿Estás seguro de que quieres remover este producto?')) {
-      return
+    if (!confirm("¿Estás seguro de que quieres remover este producto?")) {
+      return;
     }
 
-    setUpdating(productId)
-    
-    try {
-      const response = await fetch('/api/cart/remove', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId })
-      })
+    setUpdating(productId);
 
-      const data = await response.json()
+    try {
+      const response = await fetch("/api/cart/remove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      const data = await response.json();
 
       if (data.success) {
-        setCartData(data)
-        
+        setCartData(data);
+
         // Disparar evento para actualizar el widget
-        window.dispatchEvent(new CustomEvent('cart-updated', { 
-          detail: { 
-            itemCount: data.itemCount,
-            totalCents: data.totalCents
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent("cart-updated", {
+            detail: {
+              itemCount: data.itemCount,
+              totalCents: data.totalCents,
+            },
+          }),
+        );
       } else {
-        alert(data.error || 'Error al remover producto')
+        alert(data.error || "Error al remover producto");
       }
     } catch (error) {
-      console.error('Error removing item:', error)
-      alert('Error al remover producto')
+      console.error("Error removing item:", error);
+      alert("Error al remover producto");
     } finally {
-      setUpdating(null)
+      setUpdating(null);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchCart()
-  }, [])
+    fetchCart();
+  }, []);
 
   if (loading) {
     return (
       <div className={`animate-pulse ${className}`}>
         <div className="space-y-4">
-          {[1, 2, 3].map(i => (
+          {[1, 2, 3].map((i) => (
             <div key={i} className="bg-gray-200 rounded-lg h-24"></div>
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (cartData.items.length === 0) {
     return (
       <div className={`text-center py-16 ${className}`}>
         <div className="text-gray-400 mb-4">
-          <svg className="w-24 h-24 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6.5-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+          <svg
+            className="w-24 h-24 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6.5-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
+            />
           </svg>
         </div>
         <h3 className="text-xl font-medium text-gray-700 mb-2">
@@ -150,14 +164,14 @@ export default function CartTable({ className = "" }: CartTableProps) {
         <p className="text-gray-500 mb-6">
           Agrega algunos productos para comenzar
         </p>
-        <a 
-          href="/catalogo" 
+        <a
+          href="/catalogo"
           className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
         >
           Ver catálogo
         </a>
       </div>
-    )
+    );
   }
 
   return (
@@ -165,14 +179,14 @@ export default function CartTable({ className = "" }: CartTableProps) {
       {/* Items del carrito */}
       <div className="space-y-4 mb-8">
         {cartData.items.map((item) => (
-          <div 
-            key={item.id} 
+          <div
+            key={item.id}
             className="bg-white rounded-lg shadow-md p-6 flex items-center gap-4"
           >
             {/* Imagen */}
             <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={item.product.imageUrl || '/images/placeholder-product.jpg'}
+              <img
+                src={item.product.imageUrl || "/images/placeholder-product.jpg"}
                 alt={item.product.name}
                 className="w-full h-full object-cover"
               />
@@ -194,20 +208,27 @@ export default function CartTable({ className = "" }: CartTableProps) {
             {/* Controles de cantidad */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                onClick={() =>
+                  updateQuantity(item.product.id, item.quantity - 1)
+                }
                 disabled={updating === item.product.id || item.quantity <= 1}
                 className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 -
               </button>
-              
+
               <span className="w-12 text-center font-medium">
-                {updating === item.product.id ? '...' : item.quantity}
+                {updating === item.product.id ? "..." : item.quantity}
               </span>
-              
+
               <button
-                onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                disabled={updating === item.product.id || item.quantity >= item.product.stock}
+                onClick={() =>
+                  updateQuantity(item.product.id, item.quantity + 1)
+                }
+                disabled={
+                  updating === item.product.id ||
+                  item.quantity >= item.product.stock
+                }
                 className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 +
@@ -224,7 +245,7 @@ export default function CartTable({ className = "" }: CartTableProps) {
                 disabled={updating === item.product.id}
                 className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
-                {updating === item.product.id ? 'Removiendo...' : 'Remover'}
+                {updating === item.product.id ? "Removiendo..." : "Remover"}
               </button>
             </div>
           </div>
@@ -240,11 +261,10 @@ export default function CartTable({ className = "" }: CartTableProps) {
           </span>
         </div>
         <p className="text-sm text-gray-500 mt-1">
-          {cartData.itemCount} {cartData.itemCount === 1 ? 'producto' : 'productos'}
+          {cartData.itemCount}{" "}
+          {cartData.itemCount === 1 ? "producto" : "productos"}
         </p>
       </div>
     </div>
-  )
+  );
 }
-
-

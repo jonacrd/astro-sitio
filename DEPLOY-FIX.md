@@ -3,16 +3,19 @@
 ## ✅ Problemas Corregidos
 
 ### 1. **Error de Prisma Schema**
+
 - **Problema**: `Unknown field 'product' for include statement on model 'OrderItem'`
 - **Solución**: Agregada relación `product` en el modelo `OrderItem`
 - **Archivo**: `prisma/schema.prisma`
 
 ### 2. **Configuración de Vercel**
+
 - **Problema**: Build fallando en producción
 - **Solución**: Configuración optimizada en `vercel.json`
 - **Scripts**: Actualizados en `package.json`
 
 ### 3. **Base de Datos**
+
 - **Problema**: Esquema no sincronizado
 - **Solución**: `npx prisma db push` ejecutado
 - **Cliente**: Regenerado con `npx prisma generate`
@@ -20,12 +23,15 @@
 ## 🔧 Pasos para Deploy en Vercel
 
 ### 1. **Configurar Variables de Entorno**
+
 En el panel de Vercel, agregar:
+
 ```
 DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
 ```
 
 ### 2. **Configuración del Proyecto**
+
 - **Framework Preset**: Astro
 - **Root Directory**: `astro-sitio`
 - **Build Command**: `npm run build:vercel`
@@ -33,6 +39,7 @@ DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
 - **Output Directory**: `dist`
 
 ### 3. **Deploy Automático**
+
 ```bash
 # Los cambios se aplicarán automáticamente al hacer push
 git add .
@@ -76,6 +83,7 @@ npm run prisma:deploy
 ## 📞 Soporte
 
 Si necesitas ayuda adicional, revisa:
+
 - [Logs de Vercel](https://vercel.com/dashboard)
 - [Documentación de Prisma](https://www.prisma.io/docs)
 - [Documentación de Astro](https://docs.astro.build)

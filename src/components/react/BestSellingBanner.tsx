@@ -1,78 +1,85 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 interface Product {
-  id: number
-  name: string
-  priceCents: number
-  stock: number
-  imageUrl?: string
+  id: number;
+  name: string;
+  priceCents: number;
+  stock: number;
+  imageUrl?: string;
   category?: {
-    name: string
-  }
+    name: string;
+  };
 }
 
 interface BestSellingBannerProps {
-  products: Product[]
-  className?: string
+  products: Product[];
+  className?: string;
 }
 
-export default function BestSellingBanner({ products, className = "" }: BestSellingBannerProps) {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+export default function BestSellingBanner({
+  products,
+  className = "",
+}: BestSellingBannerProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   useEffect(() => {
     if (isAutoPlaying && products.length > 0) {
       const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % products.length)
-      }, 3000)
-      return () => clearInterval(interval)
+        setCurrentIndex((prev) => (prev + 1) % products.length);
+      }, 3000);
+      return () => clearInterval(interval);
     }
-  }, [isAutoPlaying, products.length])
+  }, [isAutoPlaying, products.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % products.length)
-  }
+    setCurrentIndex((prev) => (prev + 1) % products.length);
+  };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length)
-  }
+    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
+  };
 
   const addToCart = async (productId: number) => {
     try {
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
+      const response = await fetch("/api/cart/add", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           productId,
-          quantity: 1
-        })
-      })
+          quantity: 1,
+        }),
+      });
 
       if (response.ok) {
-        const button = document.querySelector(`[data-product-id="${productId}"]`) as HTMLButtonElement
+        const button = document.querySelector(
+          `[data-product-id="${productId}"]`,
+        ) as HTMLButtonElement;
         if (button) {
-          const originalText = button.textContent
-          button.textContent = '¡Agregado!'
-          button.classList.add('bg-green-500')
+          const originalText = button.textContent;
+          button.textContent = "¡Agregado!";
+          button.classList.add("bg-green-500");
           setTimeout(() => {
-            button.textContent = originalText
-            button.classList.remove('bg-green-500')
-          }, 2000)
+            button.textContent = originalText;
+            button.classList.remove("bg-green-500");
+          }, 2000);
         }
       }
     } catch (error) {
-      console.error('Error adding to cart:', error)
+      console.error("Error adding to cart:", error);
     }
-  }
+  };
 
   if (!products || products.length === 0) {
-    return null
+    return null;
   }
 
   return (
-    <section className={`py-16 bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 ${className}`}>
+    <section
+      className={`py-16 bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 ${className}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -83,21 +90,22 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
             Los Más Vendidos
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Los productos que nuestros clientes más compran. ¡No te quedes sin el tuyo!
+            Los productos que nuestros clientes más compran. ¡No te quedes sin
+            el tuyo!
           </p>
         </div>
 
         {/* Products Carousel */}
-        <div 
+        <div
           className="relative"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
           <div className="flex overflow-hidden">
             {products.map((product, index) => {
-              const price = product.priceCents / 100
-              const isOutOfStock = product.stock === 0
-              const isLowStock = product.stock > 0 && product.stock < 10
+              const price = product.priceCents / 100;
+              const isOutOfStock = product.stock === 0;
+              const isLowStock = product.stock > 0 && product.stock < 10;
 
               return (
                 <div
@@ -110,12 +118,15 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
                       {/* Product Image */}
                       <div className="w-32 h-32 md:w-48 md:h-48 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
                         <img
-                          src={product.imageUrl || '/images/placeholder-product.jpg'}
+                          src={
+                            product.imageUrl ||
+                            "/images/placeholder-product.jpg"
+                          }
                           alt={product.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.src = '/images/placeholder-product.jpg'
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/images/placeholder-product.jpg";
                           }}
                         />
                       </div>
@@ -125,11 +136,11 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
                         <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-bold mb-3">
                           ⭐ #{index + 1} Más Vendido
                         </div>
-                        
+
                         <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                           {product.name}
                         </h3>
-                        
+
                         {product.category && (
                           <p className="text-gray-600 mb-4">
                             Categoría: {product.category.name}
@@ -141,14 +152,20 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
                             ${price.toFixed(2)}
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${
-                              isOutOfStock ? 'text-red-500' : 
-                              isLowStock ? 'text-orange-500' : 
-                              'text-green-500'
-                            }`}>
-                              {isOutOfStock ? 'Agotado' : 
-                               isLowStock ? `Solo ${product.stock} disponibles` : 
-                               `${product.stock} disponibles`}
+                            <span
+                              className={`text-sm font-medium ${
+                                isOutOfStock
+                                  ? "text-red-500"
+                                  : isLowStock
+                                    ? "text-orange-500"
+                                    : "text-green-500"
+                              }`}
+                            >
+                              {isOutOfStock
+                                ? "Agotado"
+                                : isLowStock
+                                  ? `Solo ${product.stock} disponibles`
+                                  : `${product.stock} disponibles`}
                             </span>
                             {isLowStock && !isOutOfStock && (
                               <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-bold">
@@ -164,17 +181,17 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
                           data-product-id={product.id}
                           className={`px-8 py-3 rounded-lg font-bold text-lg transition-all ${
                             isOutOfStock
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-red-600 text-white hover:bg-red-700 hover:scale-105 shadow-lg'
+                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              : "bg-red-600 text-white hover:bg-red-700 hover:scale-105 shadow-lg"
                           }`}
                         >
-                          {isOutOfStock ? 'Agotado' : '🔥 Agregar al Carrito'}
+                          {isOutOfStock ? "Agotado" : "🔥 Agregar al Carrito"}
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
 
@@ -202,8 +219,8 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
                     onClick={() => setCurrentIndex(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-200 ${
                       index === currentIndex
-                        ? 'bg-red-600 scale-125'
-                        : 'bg-gray-300 hover:bg-gray-400'
+                        ? "bg-red-600 scale-125"
+                        : "bg-gray-300 hover:bg-gray-400"
                     }`}
                   />
                 ))}
@@ -213,5 +230,5 @@ export default function BestSellingBanner({ products, className = "" }: BestSell
         </div>
       </div>
     </section>
-  )
+  );
 }

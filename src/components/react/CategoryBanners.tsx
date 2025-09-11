@@ -1,21 +1,21 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 interface Category {
-  title: string
-  href: string
-  imageUrl?: string
-  description?: string
-  icon?: string
+  title: string;
+  href: string;
+  imageUrl?: string;
+  description?: string;
+  icon?: string;
 }
 
 interface CategoryBannersProps {
-  categories?: Category[]
-  className?: string
+  categories?: Category[];
+  className?: string;
 }
 
-export default function CategoryBanners({ 
-  categories = [], 
-  className = "" 
+export default function CategoryBanners({
+  categories = [],
+  className = "",
 }: CategoryBannersProps) {
   // Categorías por defecto si no se proporcionan
   const defaultCategories: Category[] = [
@@ -23,36 +23,39 @@ export default function CategoryBanners({
       title: "Hombre",
       href: "/catalogo?cat=hombre",
       description: "Explora poleras, jeans y más.",
-      icon: "👔"
+      icon: "👔",
     },
     {
-      title: "Mujer", 
+      title: "Mujer",
       href: "/catalogo?cat=mujer",
       description: "Novedades y básicos.",
-      icon: "👗"
+      icon: "👗",
     },
     {
       title: "Niños",
-      href: "/catalogo?cat=ninos", 
+      href: "/catalogo?cat=ninos",
       description: "Comodidad y estilo.",
-      icon: "👶"
+      icon: "👶",
     },
     {
       title: "Accesorios",
       href: "/catalogo?cat=accesorios",
       description: "Completa tu outfit.",
-      icon: "⌚"
-    }
-  ]
+      icon: "⌚",
+    },
+  ];
 
-  const displayCategories = categories.length > 0 ? categories : defaultCategories
+  const displayCategories =
+    categories.length > 0 ? categories : defaultCategories;
 
   return (
-    <section className={`py-6 bg-gradient-to-br from-gray-50 to-gray-200 max-h-80 overflow-hidden ${className}`}>
+    <section
+      className={`py-6 bg-gradient-to-br from-gray-50 to-gray-200 max-h-80 overflow-hidden ${className}`}
+    >
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 max-h-64">
           {displayCategories.map((category, index) => (
-            <a 
+            <a
               key={index}
               href={category.href}
               className="group bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl text-inherit no-underline block h-48 max-h-48"
@@ -61,10 +64,10 @@ export default function CategoryBanners({
               <div className="h-28 bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center relative overflow-hidden flex-shrink-0">
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-                
+
                 {category.imageUrl ? (
-                  <img 
-                    src={category.imageUrl} 
+                  <img
+                    src={category.imageUrl}
                     alt={category.title}
                     className="w-full h-full object-cover"
                   />
@@ -74,7 +77,7 @@ export default function CategoryBanners({
                   </span>
                 )}
               </div>
-              
+
               {/* Category Content */}
               <div className="p-4 h-20 flex flex-col justify-center flex-shrink-0">
                 <h3 className="text-lg font-bold text-gray-800 mb-1 leading-tight">
@@ -91,5 +94,5 @@ export default function CategoryBanners({
         </div>
       </div>
     </section>
-  )
+  );
 }

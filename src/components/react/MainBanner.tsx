@@ -1,106 +1,109 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 interface BannerSlide {
-  id: string
-  title: string
-  subtitle: string
-  ctaText: string
-  ctaLink?: string
-  gradient: string
+  id: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink?: string;
+  gradient: string;
 }
 
 interface MainBannerProps {
-  slides?: BannerSlide[]
-  autoPlayInterval?: number
-  className?: string
+  slides?: BannerSlide[];
+  autoPlayInterval?: number;
+  className?: string;
 }
 
-export default function MainBanner({ 
+export default function MainBanner({
   slides = [],
   autoPlayInterval = 5000,
-  className = ""
+  className = "",
 }: MainBannerProps) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Slides por defecto si no se proporcionan
   const defaultSlides: BannerSlide[] = [
     {
-      id: 'slide1',
-      title: '¡LAS MEJORES MARCAS!',
-      subtitle: 'ENCUENTRA SOLO MARCAS RECONOCIDAS - EL MEJOR PRECIO DEL MERCADO',
-      ctaText: 'Ver Ofertas',
-      ctaLink: '/catalogo?filter=ofertas',
-      gradient: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)'
+      id: "slide1",
+      title: "¡LAS MEJORES MARCAS!",
+      subtitle:
+        "ENCUENTRA SOLO MARCAS RECONOCIDAS - EL MEJOR PRECIO DEL MERCADO",
+      ctaText: "Ver Ofertas",
+      ctaLink: "/catalogo?filter=ofertas",
+      gradient: "linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%)",
     },
     {
-      id: 'slide2', 
-      title: 'MODA DE DAMAS Y CABALLEROS',
-      subtitle: 'OSTER - THOMAS - 10 AÑOS DE GARANTÍA',
-      ctaText: 'Ver Colección',
-      ctaLink: '/catalogo?filter=moda',
-      gradient: 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
+      id: "slide2",
+      title: "MODA DE DAMAS Y CABALLEROS",
+      subtitle: "OSTER - THOMAS - 10 AÑOS DE GARANTÍA",
+      ctaText: "Ver Colección",
+      ctaLink: "/catalogo?filter=moda",
+      gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
     },
     {
-      id: 'slide3',
-      title: 'HERRAMIENTAS PROFESIONALES',
-      subtitle: 'MAKITA - DEWALT - CALIDAD GARANTIZADA',
-      ctaText: 'Ver Herramientas',
-      ctaLink: '/catalogo?filter=herramientas',
-      gradient: 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)'
+      id: "slide3",
+      title: "HERRAMIENTAS PROFESIONALES",
+      subtitle: "MAKITA - DEWALT - CALIDAD GARANTIZADA",
+      ctaText: "Ver Herramientas",
+      ctaLink: "/catalogo?filter=herramientas",
+      gradient: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
     },
     {
-      id: 'slide4',
-      title: 'ZAPATILLAS DEPORTIVAS',
-      subtitle: 'ADIDAS - NIKE - LA MEJOR CALIDAD',
-      ctaText: 'Ver Zapatillas',
-      ctaLink: '/catalogo?filter=zapatillas',
-      gradient: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)'
+      id: "slide4",
+      title: "ZAPATILLAS DEPORTIVAS",
+      subtitle: "ADIDAS - NIKE - LA MEJOR CALIDAD",
+      ctaText: "Ver Zapatillas",
+      ctaLink: "/catalogo?filter=zapatillas",
+      gradient: "linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)",
     },
     {
-      id: 'slide5',
-      title: 'ACCESORIOS DE MODA',
-      subtitle: 'MOCHILAS - LENTES - RELOJES - JOYERIA',
-      ctaText: 'Ver Accesorios',
-      ctaLink: '/catalogo?filter=accesorios',
-      gradient: 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)'
-    }
-  ]
+      id: "slide5",
+      title: "ACCESORIOS DE MODA",
+      subtitle: "MOCHILAS - LENTES - RELOJES - JOYERIA",
+      ctaText: "Ver Accesorios",
+      ctaLink: "/catalogo?filter=accesorios",
+      gradient: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+    },
+  ];
 
-  const displaySlides = slides.length > 0 ? slides : defaultSlides
+  const displaySlides = slides.length > 0 ? slides : defaultSlides;
 
   // Auto-play functionality
   useEffect(() => {
-    if (!isAutoPlaying || displaySlides.length <= 1) return
+    if (!isAutoPlaying || displaySlides.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % displaySlides.length)
-    }, autoPlayInterval)
+      setCurrentSlide((prev) => (prev + 1) % displaySlides.length);
+    }, autoPlayInterval);
 
-    return () => clearInterval(interval)
-  }, [isAutoPlaying, displaySlides.length, autoPlayInterval])
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, displaySlides.length, autoPlayInterval]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % displaySlides.length)
-  }
+    setCurrentSlide((prev) => (prev + 1) % displaySlides.length);
+  };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + displaySlides.length) % displaySlides.length)
-  }
+    setCurrentSlide(
+      (prev) => (prev - 1 + displaySlides.length) % displaySlides.length,
+    );
+  };
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
+    setCurrentSlide(index);
+  };
 
-  const handleMouseEnter = () => setIsAutoPlaying(false)
-  const handleMouseLeave = () => setIsAutoPlaying(true)
+  const handleMouseEnter = () => setIsAutoPlaying(false);
+  const handleMouseLeave = () => setIsAutoPlaying(true);
 
   if (displaySlides.length === 0) {
-    return null
+    return null;
   }
 
   return (
-    <section 
+    <section
       className={`relative w-full h-96 md:h-[500px] overflow-hidden mb-16 max-w-6xl mx-auto z-10 ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -110,7 +113,7 @@ export default function MainBanner({
         <div
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentSlide ? 'opacity-100' : 'opacity-0'
+            index === currentSlide ? "opacity-100" : "opacity-0"
           }`}
           style={{ background: slide.gradient }}
         >
@@ -166,14 +169,14 @@ export default function MainBanner({
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/50 hover:bg-white/75'
+                index === currentSlide
+                  ? "bg-white scale-125"
+                  : "bg-white/50 hover:bg-white/75"
               }`}
             />
           ))}
         </div>
       )}
     </section>
-  )
+  );
 }
