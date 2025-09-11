@@ -160,7 +160,7 @@ export default function EnhancedCategoryBanner({
               onMouseEnter={() => setIsAutoPlaying(false)}
               onMouseLeave={() => setIsAutoPlaying(true)}
             >
-              <div className="flex overflow-hidden">
+              <div className="flex overflow-hidden max-w-full">
                 {products.map((product, index) => {
                   const price = product.priceCents / 100;
                   const isOutOfStock = product.stock === 0;
@@ -263,9 +263,9 @@ export default function EnhancedCategoryBanner({
                       <button
                         key={index}
                         onClick={() => setCurrentIndex(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
                           index === currentIndex
-                            ? "bg-white scale-125"
+                            ? "bg-white scale-110"
                             : "bg-white/50"
                         }`}
                       />

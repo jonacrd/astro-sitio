@@ -350,9 +350,9 @@ export default function ProductCarousel({
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-200 ${
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-200 ${
                     index === currentIndex
-                      ? "bg-blue-600 scale-125"
+                      ? "bg-blue-600 scale-110"
                       : "bg-gray-300 hover:bg-gray-400"
                   }`}
                 />
