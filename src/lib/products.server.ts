@@ -10,8 +10,27 @@ export type ProductWithCategory = Product & {
  */
 export async function listProducts(): Promise<ProductWithCategory[]> {
   return await prisma.product.findMany({
-    include: {
-      category: true,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      stock: true,
+      imageUrl: true,
+      categoryId: true,
+      createdAt: true,
+      updatedAt: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -31,8 +50,27 @@ export async function getProductsByCategory(
         slug: categorySlug,
       },
     },
-    include: {
-      category: true,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      stock: true,
+      imageUrl: true,
+      categoryId: true,
+      createdAt: true,
+      updatedAt: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
