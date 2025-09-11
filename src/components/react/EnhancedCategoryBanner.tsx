@@ -44,9 +44,9 @@ export default function EnhancedCategoryBanner({
   const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
 
   const aspectClasses = {
-    small: "aspect-[4/3] md:aspect-[16/9]",
-    medium: "aspect-[4/3] md:aspect-[16/9]",
-    large: "aspect-[4/3] md:aspect-[16/9]",
+    small: "aspect-[3/2] md:aspect-[16/9]",
+    medium: "aspect-[3/2] md:aspect-[16/9]", 
+    large: "aspect-[3/2] md:aspect-[16/9]",
   };
 
   // Auto-play para productos
@@ -91,7 +91,6 @@ export default function EnhancedCategoryBanner({
       });
 
       if (response.ok) {
-        // Dispatch cart update event
         window.dispatchEvent(new CustomEvent('cart-updated'));
       }
     } catch (error) {
@@ -100,39 +99,44 @@ export default function EnhancedCategoryBanner({
   };
 
   return (
-    <section className={`relative w-full ${aspectClasses[height]} overflow-hidden mb-8 ${className}`}>
+    <section className={`relative w-full ${aspectClasses[height]} mb-6 ${className}`}>
       {/* Background Images with Transition */}
       {backgroundImages.map((image, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
+          className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
             index === currentBgIndex ? "opacity-100" : "opacity-0"
           }`}
-        >
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{ backgroundImage: `url(${image})` }}
-          />
-        </div>
+          style={{ backgroundImage: `url(${image})` }}
+        />
       ))}
 
       {/* Gradient Overlay */}
-      <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-80`} />
+      <div className={`absolute inset-0 ${gradient}`} />
 
       {/* Content */}
       <div className="relative z-10 h-full flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center">
             {/* Left Side - Category Info */}
-            <div className="text-white">
-              <div className="text-4xl md:text-6xl mb-4 animate-bounce">{icon}</div>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">{title}</h2>
-              <p className="text-white/90 text-sm md:text-base mb-6">
-                {subtitle}
-              </p>
+            <div className="text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                  <span className="text-xl md:text-2xl">{icon}</span>
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-1">
+                    {title}
+                  </h2>
+                  <p className="text-white/90 text-sm">
+                    {subtitle}
+                  </p>
+                </div>
+              </div>
+
               <a
-                href={`/catalogo?category=${categorySlug || products[0]?.category?.name.toLowerCase().replace(/\s+/g, "-")}`}
-                className="inline-block bg-white text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg h-10 md:h-11 text-sm md:text-base"
+                href={`/catalogo?category=${categorySlug}`}
+                className="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-900 font-medium rounded-lg hover:bg-gray-100 transition-colors duration-200 text-sm"
               >
                 Ver Todo
               </a>
@@ -140,67 +144,47 @@ export default function EnhancedCategoryBanner({
 
             {/* Right Side - Products Carousel */}
             {products.length > 0 && (
-              <div
-                className="relative"
-                onMouseEnter={() => setIsAutoPlaying(false)}
-                onMouseLeave={() => setIsAutoPlaying(true)}
-              >
-                <div className="flex overflow-hidden max-w-full">
+              <div className="relative">
+                <div className="bg-white/95 backdrop-blur-sm rounded-xl p-3 md:p-4 shadow-lg">
                   {products.map((product, index) => {
                     const price = product.priceCents / 100;
                     const isOutOfStock = product.stock === 0;
 
-                    return (
-                      <div
-                        key={product.id}
-                        className={`flex-shrink-0 w-full transition-transform duration-500 ease-out`}
-                        style={{
-                          transform: `translateX(-${currentIndex * 100}%)`,
-                          display: index === currentIndex ? 'block' : 'none'
-                        }}
-                      >
-                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-lg">
-                          <div className="flex gap-4">
-                            {/* Product Image */}
-                            <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                              <img
-                                src={
-                                  product.imageUrl ||
-                                  "/images/placeholder-product.jpg"
-                                }
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = "/images/placeholder-product.jpg";
-                                }}
-                              />
-                            </div>
+                    if (index !== currentIndex) return null;
 
-                            {/* Product Info */}
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-2 mb-1">
-                                {product.name}
-                              </h3>
-                              <p className="text-blue-600 font-bold text-lg md:text-xl mb-2">
-                                ${price.toFixed(2)}
-                              </p>
-                              <p className="text-xs md:text-sm text-gray-500 mb-3">
-                                {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
-                              </p>
-                              <button
-                                onClick={() => addToCart(product.id)}
-                                disabled={isOutOfStock}
-                                className={`w-full py-2 px-3 rounded-lg text-sm font-bold transition-all duration-200 ${
-                                  isOutOfStock
-                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-blue-600 text-white hover:bg-blue-700 hover:scale-105"
-                                }`}
-                              >
-                                {isOutOfStock ? "Agotado" : "Agregar"}
-                              </button>
-                            </div>
-                          </div>
+                    return (
+                      <div key={product.id} className="flex gap-3">
+                        {/* Product Image */}
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                          <img
+                            src={product.imageUrl || "/images/placeholder-product.jpg"}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        {/* Product Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
+                            {product.name}
+                          </h3>
+                          <p className="text-blue-600 font-bold text-base mb-1">
+                            ${price.toFixed(2)}
+                          </p>
+                          <p className="text-gray-500 text-xs mb-2">
+                            {isOutOfStock ? "Agotado" : `${product.stock} disponibles`}
+                          </p>
+                          <button
+                            onClick={() => addToCart(product.id)}
+                            className={`w-full py-1.5 px-3 rounded-lg font-medium text-xs transition-colors duration-200 ${
+                              isOutOfStock
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-blue-600 text-white hover:bg-blue-700"
+                            }`}
+                            disabled={isOutOfStock}
+                          >
+                            {isOutOfStock ? "Agotado" : "Agregar"}
+                          </button>
                         </div>
                       </div>
                     );
@@ -212,13 +196,13 @@ export default function EnhancedCategoryBanner({
                   <>
                     <button
                       onClick={prevSlide}
-                      className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/30 text-white p-1 rounded-full transition-all duration-200 text-xs w-6 h-6 flex items-center justify-center"
+                      className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/30 text-white p-1 rounded-full transition-all duration-200 text-xs w-5 h-5 flex items-center justify-center"
                     >
                       ‹
                     </button>
                     <button
                       onClick={nextSlide}
-                      className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/30 text-white p-1 rounded-full transition-all duration-200 text-xs w-6 h-6 flex items-center justify-center"
+                      className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black/20 hover:bg-black/30 text-white p-1 rounded-full transition-all duration-200 text-xs w-5 h-5 flex items-center justify-center"
                     >
                       ›
                     </button>
@@ -227,7 +211,7 @@ export default function EnhancedCategoryBanner({
 
                 {/* Dot Indicators */}
                 {products.length > 1 && (
-                  <div className="absolute bottom-1 inset-x-0">
+                  <div className="absolute -bottom-2 inset-x-0">
                     <DotIndicators
                       total={products.length}
                       active={currentIndex}
@@ -236,7 +220,7 @@ export default function EnhancedCategoryBanner({
                         setIsAutoPlaying(false);
                         setTimeout(() => setIsAutoPlaying(true), 5000);
                       }}
-                      className="opacity-60"
+                      className="opacity-50"
                     />
                   </div>
                 )}

@@ -144,7 +144,9 @@ export async function getBestSellingProducts(
 }
 
 export async function getCategoryBannersData() {
+  // Optimización: obtener solo las primeras 3 categorías para mejorar velocidad
   const categories = await prisma.category.findMany({
+    take: 3,
     select: {
       id: true,
       name: true,
@@ -160,22 +162,13 @@ export async function getCategoryBannersData() {
             slug: category.slug,
           },
         },
-        take: 3,
+        take: 2, // Reducir a 2 productos por categoría
         select: {
           id: true,
           name: true,
-          slug: true,
-          description: true,
           priceCents: true,
           stock: true,
           imageUrl: true,
-          category: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-            },
-          },
         },
         orderBy: {
           priceCents: "desc",

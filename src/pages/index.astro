@@ -9,8 +9,8 @@ import ProductCarousel from '@components/react/ProductCarousel.tsx'
 import BestSellingBanner from '@components/react/BestSellingBanner.tsx'
 
 const categories = await getCategories()
-const featuredProducts = await getFeaturedProducts(8)
-const bestSellingProducts = await getBestSellingProducts(4)
+const featuredProducts = await getFeaturedProducts(4) // Reducir de 8 a 4
+const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
 ---
 
 <style>
