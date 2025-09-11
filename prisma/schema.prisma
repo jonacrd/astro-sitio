@@ -17,18 +17,19 @@ model Category {
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   name        String
-  slug        String     @unique
+  slug        String      @unique
   description String
   priceCents  Int
-  stock       Int        @default(0)
+  stock       Int         @default(0)
   imageUrl    String?
   categoryId  Int
-  category    Category   @relation(fields: [categoryId], references: [id])
+  category    Category    @relation(fields: [categoryId], references: [id])
   cartItems   CartItem[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Cart {
@@ -62,10 +63,11 @@ model Order {
 }
 
 model OrderItem {
-  id         Int    @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   orderId    Int
-  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId  Int
+  product    Product @relation(fields: [productId], references: [id])
   name       String
   priceCents Int
   quantity   Int

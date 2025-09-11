@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npx prisma generate && npx prisma db push && npm run build",
+  "installCommand": "npm install",
+  "framework": "astro",
+  "functions": {
+    "src/pages/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "DATABASE_URL": "@database_url"
+  }
+}
