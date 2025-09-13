@@ -45,25 +45,15 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
       fetchCart();
     };
 
-    // Escuchar eventos de localStorage para comunicación entre pestañas
-    const handleStorageUpdate = (event) => {
-      if (event.key === 'cart-updated' && event.newValue) {
-        try {
-          const cartData = JSON.parse(event.newValue);
-          console.log('Cart update from localStorage:', cartData);
-          fetchCart();
-        } catch (error) {
-          console.error('Error parsing cart update data:', error);
-        }
-      }
-    };
+    // Polling automático para mantener el carrito sincronizado
+    const pollInterval = setInterval(() => {
+      fetchCart();
+    }, 3000); // Actualizar cada 3 segundos
 
-    // Escuchar eventos de storage (entre pestañas)
-    window.addEventListener("storage", handleStorageUpdate);
     window.addEventListener("cart-updated", handleCartUpdate);
 
     return () => {
-      window.removeEventListener("storage", handleStorageUpdate);
+      clearInterval(pollInterval);
       window.removeEventListener("cart-updated", handleCartUpdate);
     };
   }, []);
@@ -140,21 +130,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
-        // Usar localStorage como puente para comunicación entre pestañas
-        const cartUpdateData = {
-          itemCount: data.itemCount,
-          totalCents: data.totalCents,
-          productId: productId,
-          action: 'remove',
-          timestamp: Date.now(),
-        };
-        
-        localStorage.setItem('cart-updated', JSON.stringify(cartUpdateData));
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'cart-updated',
-          newValue: JSON.stringify(cartUpdateData),
-          url: window.location.href
-        }));
+        // Actualización simple - el polling se encargará del resto
         
         console.log('Product removed from cart:', productId);
       } else {
@@ -202,20 +178,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
-        // Usar localStorage como puente para comunicación entre pestañas
-        const cartUpdateData = {
-          itemCount: 0,
-          totalCents: 0,
-          action: 'clear',
-          timestamp: Date.now(),
-        };
-        
-        localStorage.setItem('cart-updated', JSON.stringify(cartUpdateData));
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'cart-updated',
-          newValue: JSON.stringify(cartUpdateData),
-          url: window.location.href
-        }));
+        // Actualización simple - el polling se encargará del resto
         
         console.log('Cart cleared successfully');
       } else {
