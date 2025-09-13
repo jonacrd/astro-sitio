@@ -90,6 +90,96 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     setIsOpen(false);
   };
 
+  const removeFromCart = async (productId: number) => {
+    try {
+      const response = await fetch("/api/cart/remove", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Actualizar el estado local del carrito
+        setCartData({
+          success: true,
+          items: data.cart.items,
+          totalCents: data.totalCents,
+          itemCount: data.itemCount,
+        });
+
+        // Disparar evento personalizado para actualizar otros componentes
+        const cartUpdateEvent = new CustomEvent("cart-updated", {
+          detail: {
+            itemCount: data.itemCount,
+            totalCents: data.totalCents,
+            productId: productId,
+            action: 'remove'
+          },
+        });
+        
+        window.dispatchEvent(cartUpdateEvent);
+        document.dispatchEvent(cartUpdateEvent);
+        
+        console.log('Product removed from cart:', productId);
+      } else {
+        throw new Error(data.error || "Error al remover del carrito");
+      }
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+      // Podrías agregar un toast o notificación de error aquí
+    }
+  };
+
+  const clearCart = async () => {
+    if (!confirm("¿Estás seguro de que quieres vaciar todo el carrito?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/cart/clear", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Actualizar el estado local del carrito
+        setCartData({
+          success: true,
+          items: [],
+          totalCents: 0,
+          itemCount: 0,
+        });
+
+        // Disparar evento personalizado para actualizar otros componentes
+        const cartUpdateEvent = new CustomEvent("cart-updated", {
+          detail: {
+            itemCount: 0,
+            totalCents: 0,
+            action: 'clear'
+          },
+        });
+        
+        window.dispatchEvent(cartUpdateEvent);
+        document.dispatchEvent(cartUpdateEvent);
+        
+        console.log('Cart cleared successfully');
+      } else {
+        throw new Error(data.error || "Error al vaciar el carrito");
+      }
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      // Podrías agregar un toast o notificación de error aquí
+    }
+  };
+
   if (loading) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>
@@ -173,24 +263,50 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
             <h2 className="text-lg font-semibold text-gray-900">
               Carrito ({cartData.itemCount})
             </h2>
-            <button
-              onClick={closeCart}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="flex items-center gap-2">
+              {/* Botón para vaciar carrito */}
+              {cartData.items.length > 0 && (
+                <button
+                  onClick={clearCart}
+                  className="p-2 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
+                  title="Vaciar carrito"
+                  aria-label="Vaciar todo el carrito"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              )}
+              {/* Botón para cerrar */}
+              <button
+                onClick={closeCart}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Contenido del carrito */}
@@ -242,6 +358,29 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
                           item.product?.priceCents * item.quantity || 0,
                         )}
                       </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {/* Botón para remover producto */}
+                      <button
+                        onClick={() => removeFromCart(item.productId)}
+                        className="p-2 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
+                        title="Remover del carrito"
+                        aria-label={`Remover ${item.product?.name || 'producto'} del carrito`}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 ))}
