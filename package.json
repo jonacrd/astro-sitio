@@ -15,7 +15,7 @@
     "postinstall": "prisma generate",
     "prisma:deploy": "prisma db push",
     "prisma:generate": "prisma generate",
-    "seed": "node prisma/seed-with-images.js",
+    "seed": "node prisma/seed-fixed-images.js",
     "deploy": "npm run prisma:generate && npm run prisma:deploy && npm run seed && npm run build"
   },
   "dependencies": {
