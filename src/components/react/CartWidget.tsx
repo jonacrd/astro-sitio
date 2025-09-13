@@ -24,8 +24,10 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
   const fetchCart = async () => {
     try {
+      console.log('Fetching cart data...');
       const response = await fetch("/api/cart/get");
       const data = await response.json();
+      console.log('Cart data received:', data);
       setCartData(data);
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -53,18 +55,40 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
   // Manejar scroll del body cuando el drawer está abierto
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      // Guardar la posición actual del scroll
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = "unset";
+      // Restaurar el scroll
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
 
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
     };
   }, [isOpen]);
 
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const openCart = () => {
+    console.log('Opening cart, current items:', cartData.items.length);
+    setIsOpen(true);
+  };
+  const closeCart = () => {
+    console.log('Closing cart');
+    setIsOpen(false);
+  };
 
   if (loading) {
     return (
@@ -143,7 +167,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
           />
 
           {/* Panel del carrito */}
-          <aside className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-xl transition-transform translate-x-0 max-h-screen overflow-hidden flex flex-col">
+          <aside className="absolute right-0 top-0 h-screen w-full sm:w-[420px] bg-white shadow-xl transition-transform translate-x-0 overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -187,6 +211,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
                   />
                 </svg>
                 <p className="text-gray-500 text-sm">Tu carrito está vacío</p>
+                <p className="text-gray-400 text-xs mt-2">Agrega productos desde el catálogo</p>
               </div>
             ) : (
               <div className="space-y-4">
