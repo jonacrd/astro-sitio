@@ -18,6 +18,8 @@ export const GET: APIRoute = async () => {
         recentLeads,
         totalRevenue,
         totalOrders,
+        totalProducts,
+        totalLeads,
         topSellingProducts,
         stockMovements
       ] = await Promise.all([
@@ -101,6 +103,12 @@ export const GET: APIRoute = async () => {
 
         // Total de órdenes
         prisma.order.count(),
+
+        // Total de productos
+        prisma.product.count(),
+
+        // Total de leads
+        prisma.lead.count(),
 
         // Productos más vendidos
         prisma.orderItem.groupBy({
