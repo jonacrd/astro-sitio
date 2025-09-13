@@ -48,6 +48,23 @@ export default function AddToCartButton({
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
+        // Usar localStorage como puente para comunicación entre pestañas
+        const cartUpdateData = {
+          itemCount: data.itemCount,
+          totalCents: data.totalCents,
+          productId: productId,
+          timestamp: Date.now(),
+        };
+        
+        localStorage.setItem('cart-updated', JSON.stringify(cartUpdateData));
+        
+        // Trigger storage event para otras pestañas
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'cart-updated',
+          newValue: JSON.stringify(cartUpdateData),
+          url: window.location.href
+        }));
+        
         console.log('Cart update event dispatched:', cartUpdateEvent.detail);
 
         // Resetear estado después de 2 segundos
