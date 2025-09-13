@@ -8,92 +8,144 @@ export const GET: APIRoute = async () => {
     const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
     const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
 
-    // Obtener estadísticas en paralelo
-    const [
-      leadsToday,
-      ordersToday,
-      lowStockProducts,
-      totalRevenueToday,
-      recentOrders,
-      recentLeads
-    ] = await Promise.all([
-      // Leads de hoy
-      prisma.lead.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lt: endOfDay
+      // Obtener estadísticas en paralelo
+      const [
+        leadsToday,
+        ordersToday,
+        lowStockProducts,
+        totalRevenueToday,
+        recentOrders,
+        recentLeads,
+        totalRevenue,
+        totalOrders,
+        topSellingProducts,
+        stockMovements
+      ] = await Promise.all([
+        // Leads de hoy
+        prisma.lead.count({
+          where: {
+            createdAt: {
+              gte: startOfDay,
+              lt: endOfDay
+            }
           }
-        }
-      }),
+        }),
 
-      // Órdenes de hoy
-      prisma.order.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lt: endOfDay
+        // Órdenes de hoy
+        prisma.order.count({
+          where: {
+            createdAt: {
+              gte: startOfDay,
+              lt: endOfDay
+            }
           }
-        }
-      }),
+        }),
 
-      // Productos con stock bajo (menos de 10 unidades)
-      prisma.product.count({
-        where: {
-          stock: {
-            lt: 10
+        // Productos con stock bajo (menos de 10 unidades)
+        prisma.product.count({
+          where: {
+            stock: {
+              lt: 10
+            }
           }
-        }
-      }),
+        }),
 
-      // Revenue de hoy
-      prisma.order.aggregate({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lt: endOfDay
+        // Revenue de hoy
+        prisma.order.aggregate({
+          where: {
+            createdAt: {
+              gte: startOfDay,
+              lt: endOfDay
+            }
+          },
+          _sum: {
+            totalCents: true
           }
-        },
-        _sum: {
-          totalCents: true
-        }
-      }),
+        }),
 
-      // Últimas 10 órdenes
-      prisma.order.findMany({
-        take: 10,
-        orderBy: {
-          createdAt: 'desc'
-        },
-        include: {
-          items: {
-            include: {
-              product: {
-                select: {
-                  name: true,
-                  imageUrl: true
+        // Últimas 10 órdenes
+        prisma.order.findMany({
+          take: 10,
+          orderBy: {
+            createdAt: 'desc'
+          },
+          include: {
+            items: {
+              include: {
+                product: {
+                  select: {
+                    name: true,
+                    imageUrl: true,
+                    stock: true
+                  }
                 }
               }
             }
           }
-        }
-      }),
+        }),
 
-      // Últimos 10 leads
-      prisma.lead.findMany({
-        take: 10,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      })
-    ])
+        // Últimos 10 leads
+        prisma.lead.findMany({
+          take: 10,
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }),
+
+        // Revenue total
+        prisma.order.aggregate({
+          _sum: {
+            totalCents: true
+          }
+        }),
+
+        // Total de órdenes
+        prisma.order.count(),
+
+        // Productos más vendidos
+        prisma.orderItem.groupBy({
+          by: ['productId'],
+          _sum: {
+            quantity: true
+          },
+          _count: {
+            id: true
+          },
+          orderBy: {
+            _sum: {
+              quantity: 'desc'
+            }
+          },
+          take: 5
+        }),
+
+        // Movimientos de stock (productos que han cambiado de stock)
+        prisma.product.findMany({
+          where: {
+            stock: {
+              lt: 20 // Productos con stock bajo para mostrar movimientos
+            }
+          },
+          select: {
+            id: true,
+            name: true,
+            stock: true,
+            imageUrl: true,
+            updatedAt: true
+          },
+          orderBy: {
+            updatedAt: 'desc'
+          },
+          take: 10
+        })
+      ])
 
     const revenueToday = totalRevenueToday._sum.totalCents || 0
+    const totalRevenueAll = totalRevenue._sum.totalCents || 0
 
     // Calcular estadísticas adicionales
     const totalProducts = await prisma.product.count()
     const totalLeads = await prisma.lead.count()
-    const totalOrders = await prisma.order.count()
 
     return new Response(JSON.stringify({
       success: true,
@@ -108,6 +160,23 @@ export const GET: APIRoute = async () => {
         total_products: totalProducts,
         total_leads: totalLeads,
         total_orders: totalOrders,
+        total_revenue: totalRevenueAll,
+
+        // Productos más vendidos
+        top_selling_products: topSellingProducts.map(item => ({
+          productId: item.productId,
+          totalQuantity: item._sum.quantity,
+          orderCount: item._count.id
+        })),
+
+        // Movimientos de stock
+        stock_movements: stockMovements.map(product => ({
+          id: product.id,
+          name: product.name,
+          stock: product.stock,
+          imageUrl: product.imageUrl,
+          lastUpdated: product.updatedAt
+        })),
 
         // Datos detallados
         recent_orders: recentOrders.map(order => ({
