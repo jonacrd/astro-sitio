@@ -1,0 +1,539 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getProducts } from '@lib/products.server'
+import CheckoutModal from '@/components/react/CheckoutModal.tsx'
+
+// Obtener productos para el demo
+const products = await getProducts()
+---
+
+<BaseLayout 
+  title="Demo Funcional - Tienda Online"
+  description="Demo completo con carrito, checkout, leads y chatbot integrado"
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
+        🛍️ Demo Funcional
+      </h1>
+      <p class="text-lg sm:text-xl text-blue-100 mb-6 sm:mb-8 max-w-3xl mx-auto">
+        Prueba nuestro sistema completo: productos, carrito, checkout, captura de leads y chatbot
+      </p>
+      <div class="flex flex-wrap justify-center gap-4 text-sm sm:text-base">
+        <span class="bg-white/20 px-4 py-2 rounded-full">✅ Carrito de compras</span>
+        <span class="bg-white/20 px-4 py-2 rounded-full">✅ Checkout simulado</span>
+        <span class="bg-white/20 px-4 py-2 rounded-full">✅ Captura de leads</span>
+        <span class="bg-white/20 px-4 py-2 rounded-full">✅ Chatbot integrado</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grid de Productos Demo -->
+  <section class="py-8 sm:py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          Productos de Demo
+        </h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">
+          Agrega productos al carrito y prueba el flujo completo de compra
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {products.slice(0, 8).map((product) => (
+          <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <div class="aspect-[4/3] bg-gray-200 overflow-hidden">
+              <img 
+                src={product.imageUrl || '/images/placeholder-product.jpg'} 
+                alt={product.name}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div class="p-4 sm:p-6">
+              <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                {product.name}
+              </h3>
+              <p class="text-gray-600 text-sm sm:text-base mb-3 line-clamp-2">
+                {product.description}
+              </p>
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-2xl sm:text-3xl font-bold text-blue-600">
+                  ${(product.priceCents / 100).toFixed(2)}
+                </span>
+                <span class={`text-sm px-2 py-1 rounded-full ${
+                  product.stock > 10 ? 'bg-green-100 text-green-800' : 
+                  product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
+                </span>
+              </div>
+              <button 
+                class="w-full min-h-11 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                disabled={product.stock === 0}
+                data-product-id={product.id}
+                data-product-name={product.name}
+                data-product-price={product.priceCents / 100}
+                data-product-image={product.imageUrl || '/images/placeholder-product.jpg'}
+                data-stock={product.stock}
+                onclick={`addToCartDemo(${product.id}, '${product.name}', ${product.priceCents / 100}, '${product.imageUrl || ''}', ${product.stock})`}
+              >
+                {product.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulario de Leads -->
+  <section class="py-8 sm:py-12 bg-white">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+          ¿Interesado en nuestros productos?
+        </h2>
+        <p class="text-gray-600">
+          Déjanos tus datos y te contactaremos con ofertas especiales
+        </p>
+      </div>
+
+      <form id="leadForm" class="space-y-4 sm:space-y-6">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+            Nombre completo *
+          </label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            required
+            class="w-full min-h-11 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Tu nombre completo"
+          />
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            Email *
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required
+            class="w-full min-h-11 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="tu@email.com"
+          />
+        </div>
+
+        <div>
+          <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-2">
+            WhatsApp *
+          </label>
+          <input 
+            type="tel" 
+            id="whatsapp" 
+            name="whatsapp" 
+            required
+            class="w-full min-h-11 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="+1 234 567 8900"
+          />
+        </div>
+
+        <button 
+          type="submit"
+          class="w-full min-h-11 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+        >
+          Enviar Información
+        </button>
+      </form>
+
+      <div id="leadMessage" class="hidden mt-4 p-4 rounded-lg text-center"></div>
+    </div>
+  </section>
+
+  <!-- Información del Demo -->
+  <section class="py-8 sm:py-12 bg-gray-100">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 text-center">
+          Características del Demo
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">🛒 Carrito & Checkout</h3>
+            <ul class="space-y-2 text-gray-600">
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Agregar productos al carrito</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Checkout simulado con datos demo</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Descuento automático de stock</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Generación de número de orden</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">📊 Dashboard & Analytics</h3>
+            <ul class="space-y-2 text-gray-600">
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Métricas en tiempo real</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Captura y almacenamiento de leads</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Integración con Google Sheets</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-1">✓</span>
+                <span>Notificaciones por email</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-8 text-center">
+          <a 
+            href="/dashboard" 
+            class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Ver Dashboard en Vivo
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Botón flotante de WhatsApp -->
+  <div id="whatsappButton" class="fixed bottom-4 right-4 z-40">
+    <a 
+      href={import.meta.env.PUBLIC_WHATSAPP_LINK || 'https://wa.me/1234567890'}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+      aria-label="Contactar por WhatsApp"
+    >
+      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Checkout Modal -->
+  <CheckoutModal 
+    client:load
+    isOpen={false}
+    onClose={() => {}}
+    cartItems={[]}
+    totalCents={0}
+  />
+
+  <!-- Chatbot -->
+  <div id="chatbotContainer" class="fixed bottom-20 right-4 z-40">
+    <button 
+      id="chatbotToggle"
+      class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+      aria-label="Abrir chatbot"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+    </button>
+    
+    <div id="chatbotWindow" class="hidden absolute bottom-16 right-0 w-80 h-96 bg-white rounded-lg shadow-2xl border">
+      <div class="flex items-center justify-between p-4 border-b bg-blue-600 text-white rounded-t-lg">
+        <h3 class="font-semibold">Chat de Soporte</h3>
+        <button id="chatbotClose" class="text-white hover:text-gray-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="chatbotMessages" class="h-64 overflow-y-auto p-4 space-y-3">
+        <div class="flex justify-start">
+          <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+            <p class="text-sm">¡Hola! ¿En qué puedo ayudarte hoy?</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t">
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="chatbotInput" 
+            placeholder="Escribe tu mensaje..."
+            class="flex-1 min-h-10 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          />
+          <button 
+            id="chatbotSend"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales para el carrito demo
+    let demoCart = [];
+    let checkoutModal = null;
+
+    // Función para agregar productos al carrito en el demo
+    function addToCartDemo(productId, productName, price, imageUrl, stock) {
+      if (stock === 0) {
+        alert('Este producto está agotado');
+        return;
+      }
+
+      // Verificar si el producto ya está en el carrito
+      const existingItem = demoCart.find(item => item.id === productId);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        demoCart.push({
+          id: productId,
+          name: productName,
+          priceCents: price * 100,
+          quantity: 1,
+          imageUrl: imageUrl
+        });
+      }
+
+      // Mostrar confirmación
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = '✓ Agregado';
+      button.disabled = true;
+      button.classList.add('bg-green-600', 'hover:bg-green-600');
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.disabled = false;
+        button.classList.remove('bg-green-600', 'hover:bg-green-600');
+      }, 2000);
+
+      // Actualizar contador del carrito si existe
+      updateCartCounter();
+      
+      console.log('Carrito demo actualizado:', demoCart);
+    }
+
+    // Función para actualizar el contador del carrito
+    function updateCartCounter() {
+      const totalItems = demoCart.reduce((sum, item) => sum + item.quantity, 0);
+      const cartCounter = document.getElementById('cartCounter');
+      if (cartCounter) {
+        cartCounter.textContent = totalItems;
+        cartCounter.style.display = totalItems > 0 ? 'block' : 'none';
+      }
+    }
+
+    // Función para abrir checkout
+    function openCheckout() {
+      if (demoCart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+      }
+
+      if (checkoutModal) {
+        const totalCents = demoCart.reduce((sum, item) => sum + (item.priceCents * item.quantity), 0);
+        
+        // Actualizar props del modal
+        checkoutModal.setAttribute('is-open', 'true');
+        checkoutModal.setAttribute('cart-items', JSON.stringify(demoCart));
+        checkoutModal.setAttribute('total-cents', totalCents.toString());
+        
+        // Trigger re-render del componente React
+        checkoutModal.dispatchEvent(new CustomEvent('update-props', {
+          detail: {
+            isOpen: true,
+            cartItems: demoCart,
+            totalCents: totalCents
+          }
+        }));
+      }
+    }
+
+    // Función para limpiar carrito
+    function clearDemoCart() {
+      demoCart = [];
+      updateCartCounter();
+    }
+
+    // Agregar botón de checkout flotante
+    function addCheckoutButton() {
+      if (document.getElementById('demoCheckoutButton')) return;
+
+      const checkoutButton = document.createElement('button');
+      checkoutButton.id = 'demoCheckoutButton';
+      checkoutButton.className = 'fixed bottom-20 left-4 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40';
+      checkoutButton.innerHTML = `
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          <span class="text-sm font-semibold">Finalizar Compra</span>
+          <span id="cartCounter" class="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" style="display: none;">0</span>
+        </div>
+      `;
+      
+      checkoutButton.addEventListener('click', openCheckout);
+      document.body.appendChild(checkoutButton);
+    }
+
+    // Manejo del formulario de leads
+    document.getElementById('leadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target);
+      const leadData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        whatsapp: formData.get('whatsapp')
+      };
+
+      try {
+        const response = await fetch('/api/lead', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(leadData)
+        });
+
+        const result = await response.json();
+        
+        const messageDiv = document.getElementById('leadMessage');
+        if (response.ok) {
+          messageDiv.className = 'mt-4 p-4 rounded-lg text-center bg-green-100 text-green-800';
+          messageDiv.textContent = '¡Gracias! Tu información ha sido enviada correctamente.';
+          e.target.reset();
+        } else {
+          messageDiv.className = 'mt-4 p-4 rounded-lg text-center bg-red-100 text-red-800';
+          messageDiv.textContent = result.error || 'Error al enviar la información.';
+        }
+        messageDiv.classList.remove('hidden');
+        
+        setTimeout(() => {
+          messageDiv.classList.add('hidden');
+        }, 5000);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        const messageDiv = document.getElementById('leadMessage');
+        messageDiv.className = 'mt-4 p-4 rounded-lg text-center bg-red-100 text-red-800';
+        messageDiv.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        messageDiv.classList.remove('hidden');
+      }
+    });
+
+    // Chatbot simulado
+    let chatbotOpen = false;
+    const chatbotToggle = document.getElementById('chatbotToggle');
+    const chatbotWindow = document.getElementById('chatbotWindow');
+    const chatbotClose = document.getElementById('chatbotClose');
+    const chatbotInput = document.getElementById('chatbotInput');
+    const chatbotSend = document.getElementById('chatbotSend');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+
+    const responses = [
+      'Gracias por contactarnos. ¿En qué producto estás interesado?',
+      'Tenemos excelentes ofertas disponibles. ¿Te gustaría recibir más información?',
+      'Nuestro equipo de soporte te contactará pronto. ¡Gracias por tu interés!'
+    ];
+
+    chatbotToggle.addEventListener('click', () => {
+      chatbotOpen = !chatbotOpen;
+      chatbotWindow.classList.toggle('hidden', !chatbotOpen);
+    });
+
+    chatbotClose.addEventListener('click', () => {
+      chatbotOpen = false;
+      chatbotWindow.classList.add('hidden');
+    });
+
+    function addMessage(message, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = `${isUser ? 'bg-blue-600 text-white' : 'bg-gray-100'} rounded-lg p-3 max-w-xs`;
+      bubbleDiv.innerHTML = `<p class="text-sm">${message}</p>`;
+      
+      messageDiv.appendChild(bubbleDiv);
+      chatbotMessages.appendChild(messageDiv);
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+      const message = chatbotInput.value.trim();
+      if (!message) return;
+
+      addMessage(message, true);
+      chatbotInput.value = '';
+
+      // Respuesta automática
+      setTimeout(() => {
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        addMessage(randomResponse);
+      }, 1000);
+    }
+
+    chatbotSend.addEventListener('click', sendMessage);
+    chatbotInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    // Inicialización cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Agregar botón de checkout
+      addCheckoutButton();
+      
+      // Buscar el modal de checkout
+      checkoutModal = document.querySelector('checkout-modal');
+      
+      // Escuchar evento de carrito limpiado
+      window.addEventListener('cart-cleared', clearDemoCart);
+    });
+
+    // Integración con Landbot si está disponible
+    const chatbotEmbedUrl = import.meta.env.PUBLIC_CHATBOT_EMBED_URL;
+    if (chatbotEmbedUrl) {
+      // Ocultar chatbot simulado y mostrar Landbot
+      document.getElementById('chatbotContainer').innerHTML = `
+        <div id="landbot-container" class="fixed bottom-4 right-4 z-40">
+          <iframe 
+            src="${chatbotEmbedUrl}" 
+            width="350" 
+            height="500" 
+            frameborder="0"
+            class="rounded-lg shadow-2xl"
+          ></iframe>
+        </div>
+      `;
+    }
+  </script>
+</BaseLayout>

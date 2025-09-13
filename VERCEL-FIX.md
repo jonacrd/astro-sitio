@@ -59,3 +59,4 @@ git push origin main
 - Si no funciona, puedes forzar un redeploy manual en Vercel
 
 
+

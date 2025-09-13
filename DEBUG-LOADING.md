@@ -43,3 +43,4 @@ export async function getCategoryBannersData() {
 - Sin errores en consola del navegador
 
 
+

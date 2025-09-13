@@ -72,3 +72,16 @@ model OrderItem {
   priceCents Int
   quantity   Int
 }
+
+model Lead {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  whatsapp  String
+  source    String   @default("demo")
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email])
+}
