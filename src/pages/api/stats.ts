@@ -143,9 +143,7 @@ export const GET: APIRoute = async () => {
     const revenueToday = totalRevenueToday._sum.totalCents || 0
     const totalRevenueAll = totalRevenue._sum.totalCents || 0
 
-    // Calcular estadísticas adicionales
-    const totalProducts = await prisma.product.count()
-    const totalLeads = await prisma.lead.count()
+    // Las estadísticas adicionales ya están incluidas en las consultas principales
 
     return new Response(JSON.stringify({
       success: true,

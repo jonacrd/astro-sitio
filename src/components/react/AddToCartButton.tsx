@@ -36,14 +36,19 @@ export default function AddToCartButton({
         setAdded(true);
 
         // Disparar evento personalizado para actualizar el widget del carrito
-        window.dispatchEvent(
-          new CustomEvent("cart-updated", {
-            detail: {
-              itemCount: data.itemCount,
-              totalCents: data.totalCents,
-            },
-          }),
-        );
+        const cartUpdateEvent = new CustomEvent("cart-updated", {
+          detail: {
+            itemCount: data.itemCount,
+            totalCents: data.totalCents,
+            productId: productId,
+          },
+        });
+        
+        // Disparar en window y document para asegurar que se capture
+        window.dispatchEvent(cartUpdateEvent);
+        document.dispatchEvent(cartUpdateEvent);
+        
+        console.log('Cart update event dispatched:', cartUpdateEvent.detail);
 
         // Resetear estado después de 2 segundos
         setTimeout(() => setAdded(false), 2000);

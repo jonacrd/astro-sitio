@@ -38,7 +38,8 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     fetchCart();
 
     // Escuchar eventos de actualización del carrito
-    const handleCartUpdate = () => {
+    const handleCartUpdate = (event) => {
+      console.log('Cart update event received:', event.detail);
       fetchCart();
     };
 
@@ -142,7 +143,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
           />
 
           {/* Panel del carrito */}
-          <aside className="absolute right-0 top-0 h-dvh w-full sm:w-[420px] bg-white shadow-xl transition-transform translate-x-0">
+          <aside className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-xl transition-transform translate-x-0 max-h-screen overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <h2 className="text-lg font-semibold text-gray-900">
@@ -169,7 +170,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
           </div>
 
           {/* Contenido del carrito */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 min-h-0">
             {cartData.items.length === 0 ? (
               <div className="text-center py-12">
                 <svg
@@ -225,7 +226,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
           {/* Footer con total y botones */}
           {cartData.items.length > 0 && (
-            <div className="border-t p-4 space-y-3">
+            <div className="border-t p-4 space-y-3 flex-shrink-0 bg-white">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-900">
                   Total:
