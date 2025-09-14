@@ -132,6 +132,19 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
             </div>
 
             <div>
+              <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp (opcional)
+              </label>
+              <input
+                type="tel"
+                id="whatsapp"
+                name="whatsapp"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="+1 234 567 8900"
+              />
+            </div>
+
+            <div>
               <label for="asunto" class="block text-sm font-medium text-gray-700 mb-2">
                 Asunto
               </label>
@@ -239,6 +252,89 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     animation-delay: 0.4s;
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    if (form) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        try {
+          // Deshabilitar botón y mostrar loading
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '⏳ Enviando...';
+          
+          // Obtener datos del formulario
+          const formData = new FormData(form);
+          const data = {
+            name: formData.get('nombre'),
+            email: formData.get('email'),
+            whatsapp: formData.get('whatsapp') || 'No proporcionado',
+            source: 'contacto'
+          };
+          
+          // Enviar a la API
+          const response = await fetch('/api/lead', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            // Mostrar mensaje de éxito
+            submitBtn.innerHTML = '✅ ¡Enviado!';
+            submitBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+            submitBtn.classList.add('bg-green-500');
+            
+            // Limpiar formulario
+            form.reset();
+            
+            // Mostrar mensaje de éxito
+            alert('¡Mensaje enviado exitosamente! Nos pondremos en contacto contigo pronto.');
+            
+            // Restaurar botón después de 3 segundos
+            setTimeout(() => {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = originalText;
+              submitBtn.classList.remove('bg-green-500');
+              submitBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+            }, 3000);
+            
+          } else {
+            throw new Error(result.error || 'Error al enviar el mensaje');
+          }
+          
+        } catch (error) {
+          console.error('Error enviando formulario:', error);
+          
+          // Mostrar mensaje de error
+          submitBtn.innerHTML = '❌ Error';
+          submitBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+          submitBtn.classList.add('bg-red-500');
+          
+          alert('Error al enviar el mensaje. Por favor, inténtalo de nuevo.');
+          
+          // Restaurar botón después de 3 segundos
+          setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            submitBtn.classList.remove('bg-red-500');
+            submitBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-purple-600');
+          }, 3000);
+        }
+      });
+    }
+  });
+</script>
 
 
 
