@@ -2,7 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getCategories } from '@lib/products.server'
 import { getFeaturedProducts, getBestSellingProducts } from '@lib/products-featured.server'
-import MainBanner from '@components/react/MainBanner.tsx'
+import Banner from '@components/Banner.astro'
 import SimpleCategoryBanners from '@components/react/SimpleCategoryBanners.tsx'
 import SimpleSectionCarousel from '@components/react/SimpleSectionCarousel.tsx'
 import ProductCarousel from '@components/react/ProductCarousel.tsx'
@@ -35,11 +35,29 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
 </style>
 
 <BaseLayout 
-  title="Tienda Online - Inicio"
-  description="Descubre nuestra amplia selección de productos de calidad - Optimizado para rendimiento"
+  title="Town - Compra rápido con IA"
+  description="Compra rápido, con IA y descuentos locales - Town"
 >
-  <!-- Main Banner -->
-  <MainBanner client:load />
+  <!-- Hero Section with Landbot -->
+  <section class="min-h-[60vh] flex items-center justify-center bg-slate-50 px-4">
+    <div class="max-w-5xl w-full">
+      <h1 class="text-3xl font-bold mb-2 text-center">Town</h1>
+      <p class="text-slate-600 mb-4 text-center">Compra rápido, con IA y descuentos locales.</p>
+      
+      <!-- Landbot embed -->
+      <script type="module" src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.mjs"></script>
+      <div id="myLandbot" style="width: 100%; height: 50px"></div>
+      <script type="module">
+        var myLandbot = new Landbot.Container({
+          container: '#myLandbot',
+          configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3131692-XMRW5AQKBIILVQQU/index.json',
+        });
+      </script>
+    </div>
+  </section>
+
+  <!-- Banner Section -->
+  <Banner />
 
   <!-- Best Selling Products Banner -->
   <BestSellingBanner 
@@ -179,7 +197,6 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
                 <div class="aspect-[4/3] bg-cover bg-center relative overflow-hidden">
                   {imageSequence.map((imageUrl, imgIndex) => (
                     <img 
-                      key={imgIndex}
                       src={imageUrl}
                       alt={category.name}
                       class={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${

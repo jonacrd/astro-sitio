@@ -8,8 +8,8 @@ export interface Props {
 }
 
 const { 
-  title = "Tienda Online - Productos de Calidad",
-  description = "Encuentra los mejores productos tecnológicos al mejor precio" 
+  title = "Town - Compra rápido con IA",
+  description = "Compra rápido, con IA y descuentos locales" 
 } = Astro.props
 ---
 
@@ -30,7 +30,7 @@ const {
       <!-- Logo -->
       <div class="flex items-center">
         <a href="/" class="text-xl sm:text-2xl font-bold text-blue-600">
-          🛍️ Tienda
+          🏘️ Town
         </a>
       </div>
 
@@ -87,7 +87,7 @@ const {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
         <!-- Información de la tienda -->
         <div class="sm:col-span-2">
-          <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">🛍️ Tienda Online</h3>
+          <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">🏘️ Town</h3>
           <p class="text-gray-400 mb-4 text-sm sm:text-base">
             Tu tienda de confianza para productos de tecnología y mucho más. 
             Calidad garantizada y envíos rápidos.
@@ -116,47 +116,23 @@ const {
       </div>
 
       <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-        <p>&copy; {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} Town. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
 
   <!-- WhatsApp integrado en chatbot (sin botón flotante) -->
 
-  <!-- Chatbot Landbot -->
+  <!-- Chatbot Landbot - Simplificado para evitar conflictos con hero -->
   <script>
-    // Solo cargar Landbot si no estamos en la página de dashboard
-    if (!window.location.pathname.includes('/dashboard')) {
-      window.addEventListener('mouseover', initLandbot, { once: true });
-      window.addEventListener('touchstart', initLandbot, { once: true });
-      
-      var myLandbot;
-      function initLandbot() {
-        if (!myLandbot) {
-          var s = document.createElement('script');
-          s.type = "module"
-          s.async = true;
-          s.addEventListener('load', function() {
-            try {
-              myLandbot = new Landbot.Livechat({
-                configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3131692-XMRW5AQKBIILVQQU/index.json',
-              });
-            } catch (error) {
-              console.log('Error inicializando Landbot:', error);
-            }
-          });
-          s.src = 'https://cdn.landbot.io/landbot-3/landbot-3.0.0.mjs';
-          var x = document.getElementsByTagName('script')[0];
-          x.parentNode.insertBefore(s, x);
-        }
-      }
-    }
+    // Landbot ya está manejado en el hero, este script solo maneja fallbacks
+    console.log('BaseLayout cargado - Landbot manejado en hero');
   </script>
 
   <!-- Botón de WhatsApp inteligente -->
   <script>
     // Función para abrir WhatsApp
-    window.openWhatsApp = function(message = '') {
+    (window as any).openWhatsApp = function(message = '') {
       const whatsappNumber = '1234567890'; // Cambiar por tu número real
       const encodedMessage = encodeURIComponent(message || 'Hola! Me interesa conocer más sobre sus productos.');
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
