@@ -43,7 +43,7 @@ export default function ProductCarousel({
     return Math.ceil(products.length / 4); // 4 por slide
   };
 
-  const [slidesCount, setSlidesCount] = useState(() => getSlidesCount());
+  const [slidesCount, setSlidesCount] = useState(Math.ceil(products.length / 2)); // Valor por defecto consistente
 
   // Auto-play
   useEffect(() => {
@@ -69,6 +69,11 @@ export default function ProductCarousel({
       });
     }
   }, [currentIndex]);
+
+  // Calcular slidesCount inicial después de la hidratación
+  useEffect(() => {
+    setSlidesCount(getSlidesCount());
+  }, [products.length]);
 
   // Resize handler
   useEffect(() => {

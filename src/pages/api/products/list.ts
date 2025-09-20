@@ -1,5 +1,113 @@
 import type { APIRoute } from "astro";
-import { prisma } from "@lib/db";
+
+// Datos mock temporales mientras se configura la base de datos
+const mockProducts = [
+  {
+    id: "mock-1",
+    name: "Arepa Reina Pepiada",
+    slug: "arepa-reina-pepiada",
+    description: "Deliciosa arepa venezolana con pollo y aguacate",
+    priceCents: 2500,
+    discountCents: 300,
+    stock: 15,
+    imageUrl: "/img/placeholders/comida.jpg",
+    category: {
+      id: "cat-1",
+      name: "Comida",
+      slug: "comida"
+    },
+    origin: "ven",
+    rating: 4.8,
+    active: true,
+    sellerOnline: true,
+    deliveryETA: "30-40m",
+    effectivePrice: 2200
+  },
+  {
+    id: "mock-2", 
+    name: "Completo Italiano",
+    slug: "completo-italiano",
+    description: "Clásico hot dog chileno con tomate, palta y mayonesa",
+    priceCents: 1800,
+    discountCents: 0,
+    stock: 8,
+    imageUrl: "/img/placeholders/comida.jpg",
+    category: {
+      id: "cat-1",
+      name: "Comida", 
+      slug: "comida"
+    },
+    origin: "chi",
+    rating: 4.5,
+    active: true,
+    sellerOnline: true,
+    deliveryETA: "25-35m",
+    effectivePrice: 1800
+  },
+  {
+    id: "mock-3",
+    name: "Polera Básica",
+    slug: "polera-basica", 
+    description: "Polera de algodón suave y cómoda",
+    priceCents: 5990,
+    discountCents: 0,
+    stock: 12,
+    imageUrl: "/img/placeholders/ropa.jpg",
+    category: {
+      id: "cat-2",
+      name: "Ropa",
+      slug: "ropa"
+    },
+    origin: "chi",
+    rating: 4.2,
+    active: true,
+    sellerOnline: true,
+    deliveryETA: "2-3 días",
+    effectivePrice: 5990
+  },
+  {
+    id: "mock-4",
+    name: "Smartphone XYZ",
+    slug: "smartphone-xyz",
+    description: "Último modelo de smartphone con cámara de alta resolución",
+    priceCents: 80000,
+    discountCents: 5000,
+    stock: 5,
+    imageUrl: "/img/placeholders/tecnologia.jpg",
+    category: {
+      id: "cat-3",
+      name: "Tecnología",
+      slug: "tecnologia"
+    },
+    origin: "ven",
+    rating: 4.9,
+    active: true,
+    sellerOnline: false,
+    deliveryETA: "1-2 días",
+    effectivePrice: 75000
+  },
+  {
+    id: "mock-5",
+    name: "Juego de Sábanas",
+    slug: "juego-de-sabanas",
+    description: "Set de sábanas de algodón egipcio para cama king size",
+    priceCents: 30000,
+    discountCents: 0,
+    stock: 20,
+    imageUrl: "/img/placeholders/hogar.jpg",
+    category: {
+      id: "cat-4",
+      name: "Hogar",
+      slug: "hogar"
+    },
+    origin: "chi",
+    rating: 4.7,
+    active: true,
+    sellerOnline: true,
+    deliveryETA: "3-5 días",
+    effectivePrice: 30000
+  }
+];
 
 export const GET: APIRoute = async ({ url }) => {
   try {
@@ -9,84 +117,39 @@ export const GET: APIRoute = async ({ url }) => {
     const q = url.searchParams.get("q"); // búsqueda
     const limit = parseInt(url.searchParams.get("limit") || "50");
 
-    // Construir filtros
-    const where: any = {
-      active: true,
-    };
+    // Filtrar productos mock
+    let filteredProducts = mockProducts;
 
     if (category) {
-      where.category = {
-        slug: category,
-      };
+      filteredProducts = filteredProducts.filter(p => p.category.slug === category);
     }
 
     if (origin) {
-      where.origin = origin;
+      filteredProducts = filteredProducts.filter(p => p.origin === origin);
+    }
+
+    if (online === "true") {
+      filteredProducts = filteredProducts.filter(p => p.sellerOnline);
     }
 
     if (q) {
-      where.OR = [
-        {
-          name: {
-            contains: q,
-            mode: 'insensitive',
-          },
-        },
-        {
-          description: {
-            contains: q,
-            mode: 'insensitive',
-          },
-        },
-      ];
-    }
-
-    // Obtener productos con vendedores
-    const products = await prisma.product.findMany({
-      where,
-      include: {
-        category: true,
-        sellers: {
-          include: {
-            seller: true,
-          },
-        },
-      },
-      take: limit,
-      orderBy: getOrderBy(q),
-    });
-
-    // Filtrar por vendedores online si se solicita
-    let filteredProducts = products as ProductWithDetails[];
-    
-    if (online === 'true') {
-      filteredProducts = products.filter(product => 
-        product.sellers.some(sp => sp.seller.online)
+      filteredProducts = filteredProducts.filter(p => 
+        p.name.toLowerCase().includes(q.toLowerCase()) || 
+        p.description?.toLowerCase().includes(q.toLowerCase())
       );
     }
 
-    // Convertir al formato de UI
-    const uiProducts = mapProductsToUI(filteredProducts);
+    // Aplicar límite
+    const limitedProducts = filteredProducts.slice(0, limit);
 
     return new Response(
       JSON.stringify({
         success: true,
-        products: uiProducts,
-        total: uiProducts.length,
-        filters: {
-          category,
-          origin,
-          online,
-          q,
-          limit,
-        },
+        products: limitedProducts,
+        total: filteredProducts.length,
+        filters: { category, origin, online, q, limit },
       }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -95,38 +158,7 @@ export const GET: APIRoute = async ({ url }) => {
         success: false,
         error: "Error al obtener productos",
       }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 };
-
-/**
- * Determina el ordenamiento basado en la búsqueda
- */
-function getOrderBy(q: string | null) {
-  if (!q) {
-    return { createdAt: "desc" as const };
-  }
-
-  const query = q.toLowerCase();
-  
-  // Si busca "barato", "oferta", "descuento", ordenar por precio efectivo
-  if (query.includes('barato') || query.includes('oferta') || query.includes('descuento')) {
-    return [
-      { discountCents: "desc" as const },
-      { priceCents: "asc" as const },
-    ];
-  }
-
-  // Por defecto: rating alto y descuentos primero
-  return [
-    { rating: "desc" as const },
-    { discountCents: "desc" as const },
-    { createdAt: "desc" as const },
-  ];
-}
