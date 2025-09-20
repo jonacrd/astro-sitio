@@ -1,8 +1,9 @@
 import { prisma } from "./db";
-import type { Product, Category } from "@prisma/client";
+import type { Product, Category, Seller, SellerProduct } from "@prisma/client";
 
 export type ProductWithCategory = Product & {
   category: Category;
+  sellers: (SellerProduct & { seller: Seller })[];
 };
 
 /**
@@ -16,18 +17,31 @@ export async function listProducts(): Promise<ProductWithCategory[]> {
       slug: true,
       description: true,
       priceCents: true,
-      stock: true,
+      discountCents: true,
       imageUrl: true,
+      origin: true,
+      active: true,
+      rating: true,
       categoryId: true,
       createdAt: true,
-      updatedAt: true,
       category: {
         select: {
           id: true,
           name: true,
-          slug: true,
-          createdAt: true,
-          updatedAt: true,
+        },
+      },
+      sellers: {
+        select: {
+          stock: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              online: true,
+              deliveryEnabled: true,
+              deliveryETA: true,
+            },
+          },
         },
       },
     },
@@ -46,7 +60,7 @@ export async function getProductsByCategory(
   return await prisma.product.findMany({
     where: {
       category: {
-        slug: categorySlug,
+        name: categorySlug, // En el nuevo schema no hay slug en Category
       },
     },
     select: {
@@ -55,18 +69,31 @@ export async function getProductsByCategory(
       slug: true,
       description: true,
       priceCents: true,
-      stock: true,
+      discountCents: true,
       imageUrl: true,
+      origin: true,
+      active: true,
+      rating: true,
       categoryId: true,
       createdAt: true,
-      updatedAt: true,
       category: {
         select: {
           id: true,
           name: true,
-          slug: true,
-          createdAt: true,
-          updatedAt: true,
+        },
+      },
+      sellers: {
+        select: {
+          stock: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              online: true,
+              deliveryEnabled: true,
+              deliveryETA: true,
+            },
+          },
         },
       },
     },
@@ -86,6 +113,11 @@ export async function getProductBySlug(
     where: { slug },
     include: {
       category: true,
+      sellers: {
+        include: {
+          seller: true,
+        },
+      },
     },
   });
 }
@@ -93,7 +125,7 @@ export async function getProductBySlug(
 /**
  * Obtener producto por ID
  */
-export async function getProductById(id: number): Promise<Product | null> {
+export async function getProductById(id: string): Promise<Product | null> {
   return await prisma.product.findUnique({
     where: { id },
   });
@@ -107,6 +139,55 @@ export async function getCategories(): Promise<Category[]> {
     orderBy: {
       name: "asc",
     },
+  });
+}
+
+/**
+ * Obtener productos destacados
+ */
+export async function getFeaturedProducts(limit: number = 4): Promise<ProductWithCategory[]> {
+  return await prisma.product.findMany({
+    where: {
+      active: true,
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      priceCents: true,
+      discountCents: true,
+      imageUrl: true,
+      origin: true,
+      active: true,
+      rating: true,
+      categoryId: true,
+      createdAt: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      sellers: {
+        select: {
+          stock: true,
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              online: true,
+              deliveryEnabled: true,
+              deliveryETA: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: limit,
   });
 }
 
@@ -133,6 +214,11 @@ export async function searchProducts(
     },
     include: {
       category: true,
+      sellers: {
+        include: {
+          seller: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
