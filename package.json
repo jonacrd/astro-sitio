@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "prisma generate && prisma db push && astro build",
-    "build:vercel": "prisma generate && prisma db push && astro build",
+    "build:vercel": "prisma generate && prisma migrate deploy && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "postinstall": "prisma generate",
