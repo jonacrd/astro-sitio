@@ -13,11 +13,12 @@
     "preview": "astro preview",
     "astro": "astro",
     "postinstall": "prisma generate",
+    "prisma:gen": "prisma generate",
+    "prisma:migrate": "prisma migrate dev -n init",
     "prisma:deploy": "prisma db push",
-    "prisma:generate": "prisma generate",
-    "seed": "node prisma/seed-fixed-images.js",
+    "seed": "tsx scripts/seedProducts.ts",
     "seed:products": "tsx scripts/seedProducts.ts",
-    "deploy": "npm run prisma:generate && npm run prisma:deploy && npm run seed && npm run build"
+    "deploy": "npm run prisma:gen && npm run prisma:deploy && npm run seed && npm run build"
   },
   "dependencies": {
     "@astrojs/react": "^3.6.0",

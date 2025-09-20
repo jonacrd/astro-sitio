@@ -3,139 +3,75 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite" // dev local; en prod cambiamos a postgresql con env var
   url      = env("DATABASE_URL")
 }
-
-model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  slug      String    @unique
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Product {
-  id            Int         @id @default(autoincrement())
-  name          String
-  slug          String      @unique
-  description   String
-  priceCents    Int
-  discountCents Int?        @default(0)
-  stock         Int         @default(0)
-  origin        String      @default("chi") // 'chi' | 'ven' | otros
-  rating        Float       @default(4.5)
-  active        Boolean     @default(true)
-  imageUrl      String?
-  categoryId    Int
-  category      Category    @relation(fields: [categoryId], references: [id])
-  cartItems     CartItem[]
-  orderItems    OrderItem[]
-  sellers       SellerProduct[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
-  @@index([categoryId, active])
-  @@index([origin, active])
-}
-
-model Cart {
-  id         String     @id                    // 👈 usar sessionId como ID principal
-  items      CartItem[]
-  createdAt  DateTime   @default(now())
-}
-
-model CartItem {
-  id        Int     @id @default(autoincrement())
-  cartId    String                   // 👈 debe matchear Cart.id (que es String)
-  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-  quantity  Int
-
-  @@unique([cartId, productId], name: "cartId_productId")   // 👈 nombre para usar en where
-}
-
-
-
-model Order {
-  id            Int         @id @default(autoincrement())
-  orderCode     String      @unique
-  cartId        String
-  userId        String?     // Opcional para mantener compatibilidad
-  user          User?       @relation(fields: [userId], references: [id])
-  totalCents    Int
-  customerName  String?
-  customerEmail String?
-  items         OrderItem[]
-  createdAt     DateTime    @default(now())
-}
-
-model OrderItem {
-  id         Int     @id @default(autoincrement())
-  orderId    Int
-  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId  Int
-  product    Product @relation(fields: [productId], references: [id])
-  name       String
-  priceCents Int
-  quantity   Int
-}
-
-model Lead {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  whatsapp  String
-  source    String   @default("demo")
-  status    String   @default("new")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([email])
-}
-
-// ===== NUEVOS MODELOS PARA SISTEMA MULTI-VENDEDOR =====
 
 model User {
   id        String   @id @default(cuid())
   name      String
   phone     String   @unique
-  role      Role     @default(CUSTOMER)
+  role      String   @default("CUSTOMER") // 'CUSTOMER' | 'SELLER'
   points    Int      @default(0)
   orders    Order[]
-  seller    Seller?
+  sellers   Seller[]
   createdAt DateTime @default(now())
 }
 
 model Seller {
   id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id])
-  storeName       String
+  name            String
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
   online          Boolean  @default(false)
   deliveryEnabled Boolean  @default(true)
-  deliveryETA     String?  // "30-40m"
+  deliveryETA     String?
   products        SellerProduct[]
   createdAt       DateTime @default(now())
 }
 
-// Extender Product existente con nuevos campos
-// (No tocamos el modelo Product existente para no romper nada)
+model Category {
+  id       String   @id @default(cuid())
+  name     String   @unique
+  products Product[]
+}
+
+model Product {
+  id            String     @id @default(cuid())
+  name          String
+  slug          String     @unique
+  description   String?
+  categoryId    String?
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  origin        String?    // 'chi' | 'ven' | otros
+  priceCents    Int
+  discountCents Int        @default(0)
+  imageUrl      String?
+  active        Boolean    @default(true)
+  rating        Float      @default(4.5)
+  createdAt     DateTime   @default(now())
+  sellers       SellerProduct[]
+  @@index([active, categoryId])
+}
 
 model SellerProduct {
   id        String  @id @default(cuid())
   sellerId  String
-  productId Int     // Usar el ID existente de Product
+  productId String
   seller    Seller  @relation(fields: [sellerId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
-  quantity  Int     @default(0)
-  
+  stock     Int     @default(0)
+
   @@unique([sellerId, productId])
 }
 
-enum Role { 
-  CUSTOMER 
-  SELLER 
+model Order {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  totalCents Int
+  createdAt  DateTime @default(now())
 }
+
+// Enum Role convertido a String para compatibilidad con SQLite
+// Valores: 'CUSTOMER' | 'SELLER'
