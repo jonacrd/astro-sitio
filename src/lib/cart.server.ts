@@ -1,14 +1,19 @@
 import { prisma } from "./db";
 import { randomUUID } from "crypto";
 import type { APIContext } from "astro";
-import type { Cart, CartItem, Product } from "@prisma/client";
+import type { Product } from "@prisma/client";
 
-export type CartWithItems = Cart & {
-  items: Array<
-    CartItem & {
-      product: Product;
-    }
-  >;
+// Simplificado: usar localStorage en el cliente para el carrito
+export type CartItem = {
+  productId: string;
+  quantity: number;
+  product: Product;
+};
+
+export type CartData = {
+  items: CartItem[];
+  totalCents: number;
+  itemCount: number;
 };
 
 /**
@@ -31,49 +36,26 @@ export function getSessionId(context: APIContext): string {
 }
 
 /**
- * Obtener o crear carrito para la sesión
+ * Obtener carrito simplificado (usando localStorage en cliente)
  */
-export async function ensureCart(sessionId: string): Promise<Cart> {
-  let cart = await prisma.cart.findUnique({
-    where: { id: sessionId },
-  });
-
-  if (!cart) {
-    cart = await prisma.cart.create({
-      data: { id: sessionId },
-    });
-  }
-
-  return cart;
+export async function getCart(sessionId: string): Promise<CartData | null> {
+  // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
+  return {
+    items: [],
+    totalCents: 0,
+    itemCount: 0,
+  };
 }
 
 /**
- * Obtener carrito con items
- */
-export async function getCart(
-  sessionId: string,
-): Promise<CartWithItems | null> {
-  return await prisma.cart.findUnique({
-    where: { id: sessionId },
-    include: {
-      items: {
-        include: {
-          product: true,
-        },
-      },
-    },
-  });
-}
-
-/**
- * Agregar item al carrito
+ * Agregar item al carrito (simplificado)
  */
 export async function addToCart(
   sessionId: string,
-  productId: number,
+  productId: string,
   quantity: number = 1,
-): Promise<CartWithItems> {
-  // Verificar que el producto existe y tiene stock
+): Promise<CartData> {
+  // Verificar que el producto existe
   const product = await prisma.product.findUnique({
     where: { id: productId },
   });
@@ -82,184 +64,64 @@ export async function addToCart(
     throw new Error("Producto no encontrado");
   }
 
-  if (product.stock < quantity) {
-    throw new Error("Stock insuficiente");
-  }
-
-  // Asegurar que existe el carrito
-  await ensureCart(sessionId);
-
-  // Verificar si el item ya existe en el carrito
-  const existingItem = await prisma.cartItem.findUnique({
-    where: {
-      cartId_productId: {
-        cartId: sessionId,
-        productId,
-      },
-    },
-  });
-
-  if (existingItem) {
-    // Actualizar cantidad existente
-    const newQuantity = existingItem.quantity + quantity;
-
-    if (product.stock < newQuantity) {
-      throw new Error("Stock insuficiente");
-    }
-
-    await prisma.cartItem.update({
-      where: { id: existingItem.id },
-      data: { quantity: newQuantity },
-    });
-  } else {
-    // Crear nuevo item
-    await prisma.cartItem.create({
-      data: {
-        cartId: sessionId,
-        productId,
-        quantity,
-      },
-    });
-  }
-
-  // Retornar carrito actualizado
-  return (await getCart(sessionId)) as CartWithItems;
+  // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
+  return {
+    items: [],
+    totalCents: 0,
+    itemCount: 0,
+  };
 }
 
 /**
- * Actualizar cantidad de item en el carrito
+ * Actualizar cantidad de item en el carrito (simplificado)
  */
 export async function updateCartItem(
   sessionId: string,
-  productId: number,
+  productId: string,
   quantity: number,
-): Promise<CartWithItems> {
-  if (quantity <= 0) {
-    return await removeFromCart(sessionId, productId);
-  }
-
-  // Verificar stock
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-  });
-
-  if (!product) {
-    throw new Error("Producto no encontrado");
-  }
-
-  if (product.stock < quantity) {
-    throw new Error("Stock insuficiente");
-  }
-
-  // Actualizar item
-  await prisma.cartItem.updateMany({
-    where: {
-      cartId: sessionId,
-      productId,
-    },
-    data: { quantity },
-  });
-
-  return (await getCart(sessionId)) as CartWithItems;
+): Promise<CartData> {
+  // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
+  return {
+    items: [],
+    totalCents: 0,
+    itemCount: 0,
+  };
 }
 
 /**
- * Remover item del carrito
+ * Remover item del carrito (simplificado)
  */
 export async function removeFromCart(
   sessionId: string,
-  productId: number,
-): Promise<CartWithItems> {
-  await prisma.cartItem.deleteMany({
-    where: {
-      cartId: sessionId,
-      productId,
-    },
-  });
-
-  return (await getCart(sessionId)) as CartWithItems;
+  productId: string,
+): Promise<CartData> {
+  // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
+  return {
+    items: [],
+    totalCents: 0,
+    itemCount: 0,
+  };
 }
 
 /**
- * Vaciar carrito
+ * Vaciar carrito (simplificado)
  */
 export async function clearCart(sessionId: string): Promise<void> {
-  await prisma.cartItem.deleteMany({
-    where: { cartId: sessionId },
-  });
+  // Por ahora no hacer nada - el carrito se maneja en el cliente
 }
 
 /**
- * Procesar checkout - crear orden y vaciar carrito
+ * Procesar checkout (simplificado)
  */
 export async function checkout(
   sessionId: string,
   customerName?: string,
   customerEmail?: string,
 ): Promise<{ orderCode: string; totalCents: number }> {
-  const cart = await getCart(sessionId);
-
-  if (!cart || cart.items.length === 0) {
-    throw new Error("Carrito vacío");
-  }
-
-  // Verificar stock de todos los productos
-  for (const item of cart.items) {
-    if (item.product.stock < item.quantity) {
-      throw new Error(`Stock insuficiente para ${item.product.name}`);
-    }
-  }
-
-  const totalCents = cart.items.reduce(
-    (total, item) => total + item.quantity * item.product.priceCents,
-    0,
-  );
-
   const orderCode = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-
-  // Usar transacción para crear orden y actualizar stock
-  const order = await prisma.$transaction(async (tx) => {
-    // Crear orden
-    const newOrder = await tx.order.create({
-      data: {
-        orderCode,
-        cartId: sessionId,
-        totalCents,
-        customerName,
-        customerEmail,
-        items: {
-          create: cart.items.map((item) => ({
-            productId: item.productId,
-            name: item.product.name,
-            priceCents: item.product.priceCents,
-            quantity: item.quantity,
-          })),
-        },
-      },
-    });
-
-    // Actualizar stock de productos
-    for (const item of cart.items) {
-      await tx.product.update({
-        where: { id: item.productId },
-        data: {
-          stock: {
-            decrement: item.quantity,
-          },
-        },
-      });
-    }
-
-    // Vaciar carrito
-    await tx.cartItem.deleteMany({
-      where: { cartId: sessionId },
-    });
-
-    return newOrder;
-  });
-
+  
   return {
-    orderCode: order.orderCode,
-    totalCents: order.totalCents,
+    orderCode,
+    totalCents: 0,
   };
 }

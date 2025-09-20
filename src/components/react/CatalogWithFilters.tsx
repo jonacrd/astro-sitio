@@ -59,7 +59,7 @@ export default function CatalogWithFilters({ initialCategory }: CatalogWithFilte
       if (filters.q) params.append('q', filters.q);
       params.append('limit', filters.limit.toString());
 
-      const response = await fetch(`/api/products/index?${params}`);
+      const response = await fetch(`/api/products/list?${params}`);
       const data = await response.json();
 
       if (data.success) {
