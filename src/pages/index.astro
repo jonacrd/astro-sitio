@@ -370,7 +370,7 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
     const btnLogout = $('#btn-logout'), linkDash = $('#link-dashboard');
 
     async function refreshMe() {
-      const r = await fetch('/api/auth/me'); 
+      const r = await fetch('/api/auth/me-simple'); 
       const { user } = await r.json();
       
       if (user) {
@@ -413,7 +413,7 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
       const body = Object.fromEntries(new FormData(e.target).entries());
       
       try {
-        const r = await fetch('/api/auth/login', { 
+        const r = await fetch('/api/auth/login-simple', { 
           method: 'POST', 
           headers: { 'content-type': 'application/json' }, 
           body: JSON.stringify(body) 
@@ -436,7 +436,7 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
       const body = Object.fromEntries(new FormData(e.target).entries());
       
       try {
-        const r = await fetch('/api/auth/register', { 
+        const r = await fetch('/api/auth/register-simple', { 
           method: 'POST', 
           headers: { 'content-type': 'application/json' }, 
           body: JSON.stringify(body) 
