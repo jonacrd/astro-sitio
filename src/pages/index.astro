@@ -44,24 +44,27 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     <!-- Hero Section with Chat IA -->
     <section class="min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-700 px-4">
       <div class="max-w-6xl w-full">
-        <!-- Auth Navigation -->
-        <nav class="flex justify-end gap-3 mb-6">
-          <button id="btn-login" class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors">
-            Entrar
-          </button>
-          <button id="btn-register" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
-            Registrarse
-          </button>
-          <a id="link-vender" class="text-sm underline text-white/80 hover:text-white cursor-pointer hidden">
-            VENDER
-          </a>
-          <a href="/dashboard" id="link-dashboard" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors hidden">
-            Dashboard
-          </a>
-          <button id="btn-logout" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors hidden">
-            Salir
-          </button>
-        </nav>
+                <!-- Auth Navigation -->
+                <nav class="flex justify-end gap-3 mb-6">
+                  <button id="btn-login" class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors">
+                    Entrar
+                  </button>
+                  <button id="btn-register" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
+                    Registrarse
+                  </button>
+                  <a id="link-vender" class="text-sm underline text-white/80 hover:text-white cursor-pointer hidden">
+                    VENDER
+                  </a>
+                  <a href="/dashboard" id="link-dashboard" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors hidden">
+                    Dashboard
+                  </a>
+                  <button id="btn-logout" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors hidden">
+                    Salir
+                  </button>
+                  <button id="btn-refresh" class="px-2 py-1 rounded bg-yellow-600 text-white text-xs hover:bg-yellow-700 transition-colors">
+                    🔄
+                  </button>
+                </nav>
 
         <!-- Hero Content -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -95,7 +98,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
 
           <!-- Chat IA Widget -->
           <div class="flex justify-center">
-            <div>
+            <div">
               <div id="myLandbot" style="width: 120%; height: 400px; border: none; border-radius: 8px; overflow: hidden;"></div>
             </div>
           </div>
@@ -119,7 +122,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   <dialog id="dlg-login" class="backdrop:bg-black/50 bg-white rounded-lg p-6 max-w-md w-full">
     <form id="form-login" class="space-y-4">
       <h3 class="text-lg font-bold">Iniciar Sesión</h3>
-      <input name="phone" type="tel" placeholder="Teléfono" required class="w-full p-2 border rounded" />
+      <input name="phone" type="text" placeholder="Teléfono o Username (ej: user1)" required class="w-full p-2 border rounded" />
       <input name="password" type="password" placeholder="Contraseña" required class="w-full p-2 border rounded" />
       <div class="flex gap-2">
         <button type="submit" class="flex-1 bg-blue-600 text-white p-2 rounded">Entrar</button>
@@ -165,6 +168,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   const btnLogin = document.getElementById('btn-login');
   const btnRegister = document.getElementById('btn-register');
   const btnLogout = document.getElementById('btn-logout');
+  const btnRefresh = document.getElementById('btn-refresh');
   const linkVender = document.getElementById('link-vender');
   const linkDash = document.getElementById('link-dashboard');
   
@@ -180,15 +184,20 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   async function refreshMe() {
     try {
       const r = await fetch('/api/auth/me-universal');
-      const user = r.ok ? await r.json() : null;
+      const data = r.ok ? await r.json() : { user: null };
+      const user = data?.user;
+      
+      console.log('Auth state:', user ? `Logged in as ${user.name} (${user.role})` : 'Not logged in');
       
       if (user) {
+        // Usuario logueado - mostrar logout y dashboard
         btnLogin?.classList.add('hidden');
         btnRegister?.classList.add('hidden');
         linkVender?.classList.add('hidden');
         btnLogout?.classList.remove('hidden');
         linkDash?.classList.remove('hidden');
       } else {
+        // Usuario no logueado - mostrar login y registro
         btnLogin?.classList.remove('hidden');
         btnRegister?.classList.remove('hidden');
         linkVender?.classList.remove('hidden');
@@ -197,12 +206,22 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
       }
     } catch (error) {
       console.error('Error checking auth:', error);
+      // En caso de error, asumir que no hay usuario logueado
+      btnLogin?.classList.remove('hidden');
+      btnRegister?.classList.remove('hidden');
+      linkVender?.classList.remove('hidden');
+      btnLogout?.classList.add('hidden');
+      linkDash?.classList.add('hidden');
     }
   }
 
   // Event listeners para botones
   btnLogin?.addEventListener('click', () => dlgLogin?.showModal());
   btnRegister?.addEventListener('click', () => dlgRegister?.showModal());
+  btnRefresh?.addEventListener('click', () => {
+    console.log('Manual refresh clicked');
+    refreshMe();
+  });
   linkVender?.addEventListener('click', () => dlgVender?.showModal());
 
   // Cerrar modales
@@ -292,11 +311,21 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
 
   // Logout
   btnLogout?.addEventListener('click', async () => {
+    console.log('Logout clicked');
     try {
-      await fetch('/api/auth/logout', { method: 'POST' }); 
-      refreshMe(); 
+      const response = await fetch('/api/auth/logout', { method: 'POST' }); 
+      console.log('Logout response:', response.ok);
+      
+      // Forzar refreshMe inmediatamente y también después de un delay
+      refreshMe();
+      setTimeout(() => {
+        console.log('Refreshing after timeout');
+        refreshMe(); 
+      }, 200);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+      // Forzar refreshMe incluso si hay error
+      refreshMe();
     }
   });
 

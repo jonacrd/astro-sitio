@@ -94,6 +94,32 @@ const productsImpl: ProductRepo = {
   }
 };
 
+// ====== Usuarios de vendedores ======
+type SellerUser = { 
+  id:string; 
+  username:string; 
+  password:string; 
+  name:string; 
+  phone:string; 
+  email?:string; 
+  sellerId:string; 
+  role:'seller'; 
+  active:boolean;
+  createdAt:Date;
+};
+
+const SELLER_USERS: SellerUser[] = [
+  { id:'u1', username:'user1', password:'1', name:'Juan Pérez', phone:'+56912345678', email:'user1@carnesdelzulia.com', sellerId:'s1', role:'seller', active:true, createdAt:new Date('2024-01-01') },
+  { id:'u2', username:'user2', password:'2', name:'María González', phone:'+56912345679', email:'user2@postresydulces.com', sellerId:'s2', role:'seller', active:true, createdAt:new Date('2024-01-02') },
+  { id:'u3', username:'user3', password:'3', name:'Carlos López', phone:'+56912345680', email:'user3@licorespremium.com', sellerId:'s3', role:'seller', active:false, createdAt:new Date('2024-01-03') },
+  { id:'u4', username:'user4', password:'4', name:'Ana Rodríguez', phone:'+56912345681', email:'user4@bellezayestilo.com', sellerId:'s4', role:'seller', active:true, createdAt:new Date('2024-01-04') },
+  { id:'u5', username:'user5', password:'5', name:'Pedro Martínez', phone:'+56912345682', email:'user5@automecanicapro.com', sellerId:'s5', role:'seller', active:false, createdAt:new Date('2024-01-05') },
+  { id:'u6', username:'user6', password:'6', name:'Laura Sánchez', phone:'+56912345683', email:'user6@saborestradicionales.com', sellerId:'s6', role:'seller', active:true, createdAt:new Date('2024-01-06') },
+  { id:'u7', username:'user7', password:'7', name:'Roberto Torres', phone:'+56912345684', email:'user7@comidasrapidasexpress.com', sellerId:'s7', role:'seller', active:true, createdAt:new Date('2024-01-07') },
+  { id:'u8', username:'user8', password:'8', name:'Carmen Flores', phone:'+56912345685', email:'user8@almuerzosejecutivos.com', sellerId:'s8', role:'seller', active:true, createdAt:new Date('2024-01-08') },
+  { id:'u9', username:'user9', password:'9', name:'Diego Herrera', phone:'+56912345686', email:'user9@parrillaymariscos.com', sellerId:'s9', role:'seller', active:true, createdAt:new Date('2024-01-09') }
+];
+
 // ====== Estado vendedores ======
 type SellerState = { id:string; storeName:string; onlineManual:boolean; lastSeen?:Date; timezone:string; hoursJson:any; };
 let SELLERS: SellerState[] = [
@@ -715,6 +741,55 @@ function projectSellerCompat(s: any): any {
     available 
   };
 }
+
+// ====== Autenticación de vendedores ======
+export const sellerAuthRepo = {
+  async login(username: string, password: string) {
+    const user = SELLER_USERS.find(u => u.username === username && u.password === password && u.active);
+    if (!user) {
+      throw new Error('Credenciales inválidas');
+    }
+    
+    // Actualizar último acceso
+    const seller = SELLERS.find(s => s.id === user.sellerId);
+    if (seller) {
+      seller.lastSeen = new Date();
+    }
+    
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        sellerId: user.sellerId,
+        role: user.role
+      },
+      seller: seller ? {
+        id: seller.id,
+        storeName: seller.storeName,
+        online: seller.onlineManual,
+        open: isOpen(seller.hoursJson),
+        available: isOpen(seller.hoursJson) && seller.onlineManual
+      } : null
+    };
+  },
+  
+  async getUserByUsername(username: string) {
+    return SELLER_USERS.find(u => u.username === username);
+  },
+  
+  async getUserById(userId: string) {
+    return SELLER_USERS.find(u => u.id === userId);
+  },
+  
+  async getSellerByUserId(userId: string) {
+    const user = SELLER_USERS.find(u => u.id === userId);
+    if (!user) return null;
+    return SELLERS.find(s => s.id === user.sellerId);
+  }
+};
 
 // Repositorio de estado mock (compatibilidad)
 export const sellerStatusRepo: any = {
