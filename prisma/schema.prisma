@@ -3,14 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // PostgreSQL para desarrollo y producción
+  provider = "sqlite" // SQLite para desarrollo, PostgreSQL para producción
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  CUSTOMER
-  SELLER
-  ADMIN
 }
 
 model User {
@@ -18,7 +12,7 @@ model User {
   name         String
   phone        String   @unique
   passwordHash String
-  role         Role     @default(CUSTOMER)
+  role         String   @default("CUSTOMER") // CUSTOMER, SELLER, ADMIN
   points       Int      @default(0)
   seller       Seller?
   orders       Order[]
@@ -30,11 +24,18 @@ model Seller {
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id])
   storeName       String
+  firstName       String
+  lastName        String
+  addressLine1    String   // calle y número
+  addressLine2    String?  // torre, depto
+  comuna          String
+  ciudad          String
+  phoneContact    String
   online          Boolean  @default(false)
   deliveryEnabled Boolean  @default(true)
   deliveryETA     String?
-  products        SellerProduct[]
   createdAt       DateTime @default(now())
+  products        SellerProduct[]
 }
 
 model Category {
@@ -68,6 +69,7 @@ model SellerProduct {
   seller    Seller  @relation(fields: [sellerId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
   stock     Int     @default(0)
+  active    Boolean @default(true)
 
   @@unique([sellerId, productId])
 }

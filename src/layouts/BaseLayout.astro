@@ -1,6 +1,5 @@
 ---
 import CartWidget from '@components/react/CartWidget.tsx'
-import '../styles/global.css'
 
 export interface Props {
   title?: string
@@ -8,8 +7,8 @@ export interface Props {
 }
 
 const { 
-  title = "Town - Compra rápido con IA",
-  description = "Compra rápido, con IA y descuentos locales" 
+  title = "Tienda Online - Productos de Calidad",
+  description = "Encuentra los mejores productos tecnológicos al mejor precio" 
 } = Astro.props
 ---
 
@@ -21,74 +20,50 @@ const {
   <title>{title}</title>
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/global.css">
 </head>
-<body class="bg-black">
+<body class="bg-blue-600">
   <!-- Header -->
-  <header id="main-header" class="bg-black/95 backdrop-blur-md supports-[backdrop-filter]:bg-black-900/80 fixed top-0 left-0 right-0 z-50 border-b shadow-sm transition-all duration-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Logo -->
-      <div class="flex items-center">
-        <a href="/" class="text-xl sm:text-2xl font-bold text-blue-200">
-          🏘️ Town
-        </a>
-      </div>
+  <header class="bg-blue-900 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="/" class="text-2xl font-bold text-black">
+            🛍️ Tienda
+          </a>
+        </div>
 
-      <!-- Navegación Desktop -->
-      <nav class="hidden md:flex items-center space-x-6 lg:space-x-8">
-        <a href="/" class="text-white hover:text-blue-600 transition-colors text-sm lg:text-base">
-          Inicio
-        </a>
-        <a href="/catalogo" class="text-white hover:text-blue-600 transition-colors text-sm lg:text-base">
-          Catálogo
-        </a>
-        <a href="/dashboard" class="text-white hover:text-blue-600 transition-colors text-sm lg:text-base">
-          Dashboard
-        </a>
-        <a href="/quienes-somos" class="text-white hover:text-blue-600 transition-colors text-sm lg:text-base">
-          Quiénes Somos
-        </a>
-        <a href="/contacto" class="text-white hover:text-blue-600 transition-colors text-sm lg:text-base">
-          Contacto
-        </a>
-      </nav>
+        <!-- Navegación -->
+        <nav class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-white hover:text-black transition-colors">
+            Inicio
+          </a>
+          <a href="/catalogo" class="text-white hover:text-blue-600 transition-colors">
+            Catálogo
+          </a>
+        </nav>
 
-      <!-- Navegación Móvil -->
-      <nav class="md:hidden flex items-center space-x-1">
-        <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors text-xs px-1 py-1 rounded">
-          Inicio
-        </a>
-        <a href="/catalogo" class="text-gray-700 hover:text-blue-600 transition-colors text-xs px-1 py-1 rounded">
-          Catálogo
-        </a>
-        <a href="/dashboard" class="text-gray-700 hover:text-blue-600 transition-colors text-xs px-1 py-1 rounded">
-          Stats
-        </a>
-        <a href="/contacto" class="text-gray-700 hover:text-blue-600 transition-colors text-xs px-1 py-1 rounded">
-          Contacto
-        </a>
-      </nav>
-
-      <!-- Carrito Widget -->
-      <div class="flex items-center">
-        <CartWidget client:load />
+        <!-- Carrito Widget -->
+        <div class="flex items-center">
+          <CartWidget client:load />
+        </div>
       </div>
     </div>
   </header>
 
   <!-- Contenido principal -->
-  <main class="min-h-screen pt-16">
+  <main class="min-h-screen">
     <slot />
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-8 sm:py-12">
+  <footer class="bg-gray-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Información de la tienda -->
-        <div class="sm:col-span-2">
-          <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">🏘️ Town</h3>
-          <p class="text-gray-400 mb-4 text-sm sm:text-base">
+        <div class="col-span-1 md:col-span-2">
+          <h3 class="text-xl font-bold mb-4">🛍️ Tienda Online</h3>
+          <p class="text-gray-400 mb-4">
             Tu tienda de confianza para productos de tecnología y mucho más. 
             Calidad garantizada y envíos rápidos.
           </p>
@@ -96,8 +71,8 @@ const {
 
         <!-- Enlaces rápidos -->
         <div>
-          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Enlaces</h4>
-          <ul class="space-y-2 text-gray-400 text-sm sm:text-base">
+          <h4 class="font-semibold mb-4">Enlaces</h4>
+          <ul class="space-y-2 text-gray-400">
             <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
             <li><a href="/catalogo" class="hover:text-white transition-colors">Catálogo</a></li>
             <li><a href="/carrito" class="hover:text-white transition-colors">Carrito</a></li>
@@ -106,8 +81,8 @@ const {
 
         <!-- Contacto -->
         <div>
-          <h4 class="font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Contacto</h4>
-          <ul class="space-y-2 text-gray-400 text-sm sm:text-base">
+          <h4 class="font-semibold mb-4">Contacto</h4>
+          <ul class="space-y-2 text-gray-400">
             <li>📧 info@tienda.com</li>
             <li>📱 +1 234 567 8900</li>
             <li>📍 Ciudad, País</li>
@@ -115,96 +90,10 @@ const {
         </div>
       </div>
 
-      <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
-        <p>&copy; {new Date().getFullYear()} Town. Todos los derechos reservados.</p>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
-
-  <!-- WhatsApp integrado en chatbot (sin botón flotante) -->
-
-  <!-- Chatbot Landbot - Simplificado para evitar conflictos con hero -->
-  <script>
-    // Landbot ya está manejado en el hero, este script solo maneja fallbacks
-    console.log('BaseLayout cargado - Landbot manejado en hero');
-  </script>
-
-  <!-- Botón de WhatsApp inteligente -->
-  <script>
-    // Función para abrir WhatsApp
-    (window as any).openWhatsApp = function(message = '') {
-      const whatsappNumber = '1234567890'; // Cambiar por tu número real
-      const encodedMessage = encodeURIComponent(message || 'Hola! Me interesa conocer más sobre sus productos.');
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-      window.open(whatsappUrl, '_blank');
-    };
-
-    // Crear botón de WhatsApp que aparece solo cuando es necesario
-    document.addEventListener('DOMContentLoaded', function() {
-      // Solo mostrar en páginas donde no hay chatbot o si el chatbot falla
-      if (!window.location.pathname.includes('/dashboard')) {
-        setTimeout(() => {
-          // Verificar si el chatbot se cargó correctamente
-          const chatbotLoaded = document.querySelector('[data-testid="landbot-container"]') || 
-                                document.querySelector('.landbot-container') ||
-                                document.querySelector('[class*="landbot"]');
-          
-          // Si no hay chatbot visible después de 5 segundos, mostrar WhatsApp
-          if (!chatbotLoaded) {
-            const whatsappButton = document.createElement('div');
-            whatsappButton.innerHTML = `
-              <button 
-                onclick="window.openWhatsApp()" 
-                class="fixed bottom-4 right-4 z-50 bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 animate-pulse"
-                title="Contactar por WhatsApp"
-                aria-label="Contactar por WhatsApp"
-              >
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-                </svg>
-              </button>
-            `;
-            document.body.appendChild(whatsappButton);
-          }
-        }, 5000); // Esperar 5 segundos antes de mostrar WhatsApp
-      }
-    });
-  </script>
-
-  <!-- Efecto de scroll para el header -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const header = document.getElementById('main-header');
-      let lastScrollY = window.scrollY;
-      
-      function updateHeader() {
-        const currentScrollY = window.scrollY;
-        
-        if (currentScrollY > 100) {
-          // Cuando se hace scroll hacia abajo, hacer el header más opaco
-          header.classList.remove('bg-white/95', 'backdrop-blur-md');
-          header.classList.add('bg-white/98', 'backdrop-blur-lg', 'shadow-lg');
-        } else {
-          // Cuando está en la parte superior, header normal
-          header.classList.remove('bg-white/98', 'backdrop-blur-lg', 'shadow-lg');
-          header.classList.add('bg-white/95', 'backdrop-blur-md');
-        }
-        
-        lastScrollY = currentScrollY;
-      }
-      
-      // Throttle el evento de scroll para mejor rendimiento
-      let ticking = false;
-      function onScroll() {
-        if (!ticking) {
-          requestAnimationFrame(updateHeader);
-          ticking = true;
-          setTimeout(() => { ticking = false; }, 10);
-        }
-      }
-      
-      window.addEventListener('scroll', onScroll, { passive: true });
-    });
-  </script>
 </body>
 </html>

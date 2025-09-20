@@ -130,3 +130,4 @@ export function getOriginBadgeColor(origin: string): string {
       return 'bg-gray-100 text-gray-800';
   }
 }
+

@@ -56,3 +56,4 @@ export function createSeller(sellerData: Omit<Seller, 'id' | 'createdAt'>): Sell
 export function findSellerByUserId(userId: string): Seller | undefined {
   return sellers.find(s => s.userId === userId);
 }
+

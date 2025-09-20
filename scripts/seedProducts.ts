@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 // Utilidad simple para slug
@@ -133,17 +134,39 @@ async function main() {
     console.log(`📂 Categoría: ${name}`);
   }
 
+  // Crea usuario demo primero
+  let demoUser = await prisma.user.findFirst({
+    where: { phone: '123456789' },
+  });
+  
+  if (!demoUser) {
+    demoUser = await prisma.user.create({
+      data: { 
+        name: 'Vendedor Demo', 
+        phone: '123456789', 
+        passwordHash: await bcrypt.hash('123456', 10),
+        role: 'SELLER'
+      },
+    });
+  }
+
   // Crea seller demo
   let seller = await prisma.seller.findFirst({
-    where: { name: 'Vendedor Demo' },
+    where: { userId: demoUser.id },
   });
   
   if (!seller) {
     seller = await prisma.seller.create({
-      data: { name: 'Vendedor Demo', online: true, deliveryEnabled: true, deliveryETA: '30-40m' },
+      data: { 
+        userId: demoUser.id,
+        storeName: 'Vendedor Demo', 
+        online: true, 
+        deliveryEnabled: true, 
+        deliveryETA: '30-40m' 
+      },
     });
   }
-  console.log(`👤 Vendedor demo: ${seller.name}`);
+  console.log(`👤 Vendedor demo: ${seller.storeName}`);
 
   // Inserta productos y stock por vendedor
   let createdCount = 0;
@@ -191,7 +214,7 @@ async function main() {
   }
   
   console.log(`🎉 Seed completado! ${createdCount} productos creados.`);
-  console.log(`👤 Vendedor: ${seller.name} (${seller.online ? 'Online' : 'Offline'})`);
+  console.log(`👤 Vendedor: ${seller.storeName} (${seller.online ? 'Online' : 'Offline'})`);
   console.log(`📂 Categorías: ${catNames.join(', ')}`);
 }
 

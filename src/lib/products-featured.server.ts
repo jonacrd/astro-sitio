@@ -1,175 +1,114 @@
-import { prisma } from "./db";
-import type { Product, Category, Seller, SellerProduct } from "@prisma/client";
+import { productRepo, categoryRepo } from "./repos";
+import type { Product, Category } from "./repos";
 
 export interface ProductWithCategory extends Product {
-  category: Category;
-  sellers: (SellerProduct & { seller: Seller })[];
+  category?: Category;
 }
 
 export async function getFeaturedProducts(
   limit: number = 8,
 ): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      active: true,
-    },
-    take: limit,
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const products = await productRepo.findMany({
+    active: true
   });
+  
+  return products.slice(0, limit).map(p => ({
+    ...p,
+    category: p.category
+  }));
 }
 
 export async function getProductsByCategory(
   categoryName: string,
   limit: number = 8,
 ): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      category: {
-        name: categoryName, // En el nuevo schema no hay slug en Category
-      },
-      active: true,
-    },
-    take: limit,
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const category = await categoryRepo.findByName(categoryName);
+  if (!category) return [];
+  
+  const products = await productRepo.findMany({
+    categoryId: category.id,
+    active: true
   });
+  
+  return products.slice(0, limit).map(p => ({
+    ...p,
+    category: p.category
+  }));
 }
 
 export async function getRandomProducts(
   limit: number = 8,
 ): Promise<ProductWithCategory[]> {
-  const totalProducts = await prisma.product.count();
-  const skip = Math.floor(Math.random() * Math.max(0, totalProducts - limit));
-
-  return await prisma.product.findMany({
-    where: {
-      active: true,
-    },
-    skip,
-    take: limit,
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
+  const products = await productRepo.findMany({
+    active: true
   });
+  
+  // Mezclar array y tomar los primeros 'limit' elementos
+  const shuffled = products.sort(() => 0.5 - Math.random());
+  
+  return shuffled.slice(0, limit).map(p => ({
+    ...p,
+    category: p.category
+  }));
 }
 
 export async function getTopProductsByCategory(
   categoryName: string,
   limit: number = 3,
 ): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      category: {
-        name: categoryName,
-      },
-      active: true,
-    },
-    take: limit,
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-    orderBy: {
-      priceCents: "desc", // Productos más caros como "destacados"
-    },
+  const category = await categoryRepo.findByName(categoryName);
+  if (!category) return [];
+  
+  const products = await productRepo.findMany({
+    categoryId: category.id,
+    active: true
   });
+  
+  // Ordenar por precio descendente y tomar los primeros
+  const sorted = products.sort((a, b) => b.priceCents - a.priceCents);
+  
+  return sorted.slice(0, limit).map(p => ({
+    ...p,
+    category: p.category
+  }));
 }
 
 export async function getBestSellingProducts(
   limit: number = 6,
 ): Promise<ProductWithCategory[]> {
-  // Simulamos productos más vendidos basado en stock bajo en SellerProduct
-  return await prisma.product.findMany({
-    where: {
-      active: true,
-      sellers: {
-        some: {
-          stock: {
-            lt: 15, // Productos con stock bajo = más vendidos
-          },
-        },
-      },
-    },
-    take: limit,
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-    orderBy: {
-      rating: "desc", // Productos con mejor rating como "más vendidos"
-    },
+  // Simulamos productos más vendidos basado en rating alto
+  const products = await productRepo.findMany({
+    active: true
   });
+  
+  // Ordenar por rating descendente y tomar los primeros
+  const sorted = products.sort((a, b) => b.rating - a.rating);
+  
+  return sorted.slice(0, limit).map(p => ({
+    ...p,
+    category: p.category
+  }));
 }
 
 export async function getCategoryBannersData() {
   // Optimización: obtener solo las primeras 3 categorías para mejorar velocidad
-  const categories = await prisma.category.findMany({
-    take: 3,
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+  const categories = await categoryRepo.findMany();
+  const topCategories = categories.slice(0, 3);
 
   const bannersData = await Promise.all(
-    categories.map(async (category) => {
-      const products = await prisma.product.findMany({
-        where: {
-          category: {
-            name: category.name,
-          },
-          active: true,
-        },
-        take: 2, // Reducir a 2 productos por categoría
-        select: {
-          id: true,
-          name: true,
-          priceCents: true,
-          discountCents: true,
-          imageUrl: true,
-          origin: true,
-          rating: true,
-        },
-        orderBy: {
-          priceCents: "desc",
-        },
+    topCategories.map(async (category) => {
+      const products = await productRepo.findMany({
+        categoryId: category.id,
+        active: true
       });
+      
+      // Ordenar por precio descendente y tomar los primeros 2
+      const sorted = products.sort((a, b) => b.priceCents - a.priceCents);
+      const topProducts = sorted.slice(0, 2);
       
       return {
         category,
-        products,
+        products: topProducts,
       };
     }),
   );

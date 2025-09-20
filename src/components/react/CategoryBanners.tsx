@@ -1,102 +1,91 @@
-import { useState } from "react";
+import React, { useEffect, useState } from 'react';
+import CategoryBanner from './CategoryBanner';
 
-interface Category {
-  title: string;
-  href: string;
-  imageUrl?: string;
-  description?: string;
-  icon?: string;
-}
+export default function CategoryBanners() {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-interface CategoryBannersProps {
-  categories?: Category[];
-  className?: string;
-}
+  useEffect(() => {
+    // Simular carga de categorías con productos
+    const mockCategories = [
+      {
+        id: 'food',
+        title: 'Comida & Postres',
+        subtitle: 'Los mejores sabores de tu barrio',
+        icon: '🍽️',
+        href: '/categoria/comida',
+        products: [
+          { type: 'product', sellerId: 's1', sellerProductId: 'sp1', title: 'Arepa Reina Pepiada', priceCents: 2200, imageUrl: null, category: 'comida', sellerActive: true },
+          { type: 'product', sellerId: 's2', sellerProductId: 'sp2', title: 'Empanada de Queso', priceCents: 1500, imageUrl: null, category: 'comida', sellerActive: true },
+          { type: 'product', sellerId: 's3', sellerProductId: 'sp3', title: 'Cachapa con Queso', priceCents: 2500, imageUrl: null, category: 'comida', sellerActive: true },
+          { type: 'product', sellerId: 's4', sellerProductId: 'sp4', title: 'Torta Tres Leches', priceCents: 3500, imageUrl: null, category: 'postres', sellerActive: false }
+        ]
+      },
+      {
+        id: 'minimarket',
+        title: 'Minimarket & Bebidas',
+        subtitle: 'Todo para tu hogar',
+        icon: '🛒',
+        href: '/categoria/minimarket',
+        products: [
+          { type: 'product', sellerId: 's5', sellerProductId: 'sp5', title: 'Cerveza Nacional', priceCents: 1800, imageUrl: null, category: 'cervezas', sellerActive: true },
+          { type: 'product', sellerId: 's6', sellerProductId: 'sp6', title: 'Ron Premium', priceCents: 12000, imageUrl: null, category: 'ron', sellerActive: true },
+          { type: 'product', sellerId: 's7', sellerProductId: 'sp7', title: 'Whisky Importado', priceCents: 25000, imageUrl: null, category: 'whisky', sellerActive: true },
+          { type: 'product', sellerId: 's8', sellerProductId: 'sp8', title: 'Vodka Premium', priceCents: 15000, imageUrl: null, category: 'vodka', sellerActive: false }
+        ]
+      },
+      {
+        id: 'services',
+        title: 'Servicios',
+        subtitle: 'Profesionales cerca de ti',
+        icon: '🔧',
+        href: '/categoria/servicios',
+        products: [
+          { type: 'product', sellerId: 's9', sellerProductId: 'sp9', title: 'Corte de Cabello', priceCents: 8000, imageUrl: null, category: 'peluqueria', sellerActive: true },
+          { type: 'product', sellerId: 's10', sellerProductId: 'sp10', title: 'Manicure Completa', priceCents: 5000, imageUrl: null, category: 'manicurista', sellerActive: true },
+          { type: 'product', sellerId: 's11', sellerProductId: 'sp11', title: 'Reparación Moto', priceCents: 15000, imageUrl: null, category: 'mecanica', sellerActive: true },
+          { type: 'product', sellerId: 's12', sellerProductId: 'sp12', title: 'Alarma Vehicular', priceCents: 80000, imageUrl: null, category: 'alarmas', sellerActive: false }
+        ]
+      }
+    ];
 
-export default function CategoryBanners({
-  categories = [],
-  className = "",
-}: CategoryBannersProps) {
-  // Categorías por defecto si no se proporcionan
-  const defaultCategories: Category[] = [
-    {
-      title: "Hombre",
-      href: "/catalogo?cat=hombre",
-      description: "Explora poleras, jeans y más.",
-      icon: "👔",
-    },
-    {
-      title: "Mujer",
-      href: "/catalogo?cat=mujer",
-      description: "Novedades y básicos.",
-      icon: "👗",
-    },
-    {
-      title: "Niños",
-      href: "/catalogo?cat=ninos",
-      description: "Comodidad y estilo.",
-      icon: "👶",
-    },
-    {
-      title: "Accesorios",
-      href: "/catalogo?cat=accesorios",
-      description: "Completa tu outfit.",
-      icon: "⌚",
-    },
-  ];
+    setTimeout(() => {
+      setCategories(mockCategories);
+      setLoading(false);
+    }, 300);
+  }, []);
 
-  const displayCategories =
-    categories.length > 0 ? categories : defaultCategories;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="py-6 px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="h-8 bg-gray-200 rounded mb-4 animate-pulse" />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[...Array(4)].map((_, j) => (
+                  <div key={j} className="h-32 bg-gray-200 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <section
-      className={`py-6 bg-gradient-to-br from-gray-50 to-gray-200 max-h-80 overflow-hidden ${className}`}
-    >
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 max-h-64">
-          {displayCategories.map((category, index) => (
-            <a
-              key={index}
-              href={category.href}
-              className="group bg-white rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl text-inherit no-underline block h-48 max-h-48"
-            >
-              {/* Category Image */}
-              <div className="h-28 bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center relative overflow-hidden flex-shrink-0">
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-
-                {category.imageUrl ? (
-                  <img
-                    src={category.imageUrl}
-                    alt={category.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-4xl text-white z-10 relative drop-shadow-lg">
-                    {category.icon || "📦"}
-                  </span>
-                )}
-              </div>
-
-              {/* Category Content */}
-              <div className="p-4 h-20 flex flex-col justify-center flex-shrink-0">
-                <h3 className="text-lg font-bold text-gray-800 mb-1 leading-tight">
-                  {category.title}
-                </h3>
-                {category.description && (
-                  <p className="text-sm text-gray-600 leading-tight">
-                    {category.description}
-                  </p>
-                )}
-              </div>
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="space-y-6">
+      {categories.map((category) => (
+        <CategoryBanner
+          key={category.id}
+          title={category.title}
+          subtitle={category.subtitle}
+          icon={category.icon}
+          products={category.products}
+          href={category.href}
+        />
+      ))}
+    </div>
   );
 }
-
-
-
-

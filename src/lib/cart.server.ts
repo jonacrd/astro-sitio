@@ -1,11 +1,11 @@
-import { prisma } from "./db";
 import { randomUUID } from "crypto";
 import type { APIContext } from "astro";
-import type { Product } from "@prisma/client";
+import { productRepo } from "./repos";
+import type { Product } from "./repos";
 
 // Simplificado: usar localStorage en el cliente para el carrito
 export type CartItem = {
-  productId: string;
+  productId: number;
   quantity: number;
   product: Product;
 };
@@ -52,13 +52,11 @@ export async function getCart(sessionId: string): Promise<CartData | null> {
  */
 export async function addToCart(
   sessionId: string,
-  productId: string,
+  productId: number,
   quantity: number = 1,
 ): Promise<CartData> {
   // Verificar que el producto existe
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-  });
+  const product = await productRepo.findById(productId.toString());
 
   if (!product) {
     throw new Error("Producto no encontrado");
@@ -77,7 +75,7 @@ export async function addToCart(
  */
 export async function updateCartItem(
   sessionId: string,
-  productId: string,
+  productId: number,
   quantity: number,
 ): Promise<CartData> {
   // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
@@ -93,7 +91,7 @@ export async function updateCartItem(
  */
 export async function removeFromCart(
   sessionId: string,
-  productId: string,
+  productId: number,
 ): Promise<CartData> {
   // Por ahora devolver carrito vacío - el carrito se maneja en el cliente
   return {

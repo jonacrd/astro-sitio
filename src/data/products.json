@@ -1,0 +1,111 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Completo italiano",
+      "slug": "completo-italiano",
+      "description": "Hot dog con palta, tomate y mayonesa",
+      "categoryId": 1,
+      "origin": "chi",
+      "priceCents": 2500,
+      "discountCents": 0,
+      "imageUrl": "/images/placeholder-product.jpg",
+      "active": true,
+      "rating": 4.5,
+      "stock": 15,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Churrasco chileno",
+      "slug": "churrasco-chileno",
+      "description": "Sándwich de carne con tomate y palta",
+      "categoryId": 1,
+      "origin": "chi",
+      "priceCents": 3500,
+      "discountCents": 0,
+      "imageUrl": "/images/placeholder-product.jpg",
+      "active": true,
+      "rating": 4.3,
+      "stock": 8,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Polera básica",
+      "slug": "polera-basica",
+      "description": "Polera de algodón 100%",
+      "categoryId": 2,
+      "origin": "chi",
+      "priceCents": 8000,
+      "discountCents": 1000,
+      "imageUrl": "/images/placeholder-product.jpg",
+      "active": true,
+      "rating": 4.0,
+      "stock": 3,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Mouse inalámbrico",
+      "slug": "mouse-inalambrico",
+      "description": "Mouse óptico inalámbrico",
+      "categoryId": 3,
+      "origin": "chi",
+      "priceCents": 15000,
+      "discountCents": 2000,
+      "imageUrl": "/images/mouse.jpg",
+      "active": true,
+      "rating": 4.2,
+      "stock": 12,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Teclado mecánico",
+      "slug": "teclado-mecanico",
+      "description": "Teclado mecánico RGB",
+      "categoryId": 3,
+      "origin": "chi",
+      "priceCents": 45000,
+      "discountCents": 5000,
+      "imageUrl": "/images/teclado.jpg",
+      "active": true,
+      "rating": 4.7,
+      "stock": 5,
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "comida",
+      "slug": "comida"
+    },
+    {
+      "id": 2, 
+      "name": "ropa",
+      "slug": "ropa"
+    },
+    {
+      "id": 3,
+      "name": "tecnologia",
+      "slug": "tecnologia"
+    },
+    {
+      "id": 4,
+      "name": "hogar",
+      "slug": "hogar"
+    },
+    {
+      "id": 5,
+      "name": "deportes",
+      "slug": "deportes"
+    },
+    {
+      "id": 6,
+      "name": "servicios",
+      "slug": "servicios"
+    }
+  ]
+}

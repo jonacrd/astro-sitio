@@ -213,7 +213,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         {/* Icono del carrito con badge */}
         <div className="relative">
           <svg
-            className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors"
+            className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:text-blue-700 transition-colors"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

@@ -1,25 +1,16 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import { prisma } from '@lib/db'
 
 // Obtener código de orden de la URL
 const orderCode = Astro.url.searchParams.get('order')
 
+// En modo mock, no tenemos órdenes reales, solo mostramos el código
 let order = null
 if (orderCode) {
-  try {
-    order = await prisma.order.findUnique({
-      where: { orderCode },
-      include: {
-        items: {
-          include: {
-            product: true
-          }
-        }
-      }
-    })
-  } catch (error) {
-    console.error('Error fetching order:', error)
+  order = {
+    orderCode,
+    totalCents: 0,
+    items: []
   }
 }
 ---

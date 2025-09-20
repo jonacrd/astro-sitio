@@ -1,227 +1,73 @@
-import { prisma } from "./db";
-import type { Product, Category, Seller, SellerProduct } from "@prisma/client";
+import { productRepo, categoryRepo } from './repos'
+import type { Product, Category } from './repos'
 
 export type ProductWithCategory = Product & {
-  category: Category;
-  sellers: (SellerProduct & { seller: Seller })[];
-};
+  category?: Category
+}
 
 /**
  * Obtener todos los productos con sus categorías
  */
 export async function listProducts(): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      discountCents: true,
-      imageUrl: true,
-      origin: true,
-      active: true,
-      rating: true,
-      categoryId: true,
-      createdAt: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      sellers: {
-        select: {
-          stock: true,
-          seller: {
-            select: {
-              id: true,
-              name: true,
-              online: true,
-              deliveryEnabled: true,
-              deliveryETA: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const products = await productRepo.findMany()
+  return products.map(p => ({
+    ...p,
+    category: p.category
+  }))
 }
 
 /**
  * Obtener productos por categoría
  */
-export async function getProductsByCategory(
-  categorySlug: string,
-): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      category: {
-        name: categorySlug, // En el nuevo schema no hay slug en Category
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      discountCents: true,
-      imageUrl: true,
-      origin: true,
-      active: true,
-      rating: true,
-      categoryId: true,
-      createdAt: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      sellers: {
-        select: {
-          stock: true,
-          seller: {
-            select: {
-              id: true,
-              name: true,
-              online: true,
-              deliveryEnabled: true,
-              deliveryETA: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export async function getProductsByCategory(categorySlug: string): Promise<ProductWithCategory[]> {
+  const category = await categoryRepo.findByName(categorySlug)
+  if (!category) return []
+  
+  const products = await productRepo.findMany({
+    categoryId: category.id
+  })
+  
+  return products.map(p => ({
+    ...p,
+    category: p.category
+  }))
 }
 
 /**
  * Obtener producto por slug
  */
-export async function getProductBySlug(
-  slug: string,
-): Promise<ProductWithCategory | null> {
-  return await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-  });
+export async function getProductBySlug(slug: string): Promise<ProductWithCategory | null> {
+  const product = await productRepo.findBySlug(slug)
+  if (!product) return null
+  
+  return {
+    ...product,
+    category: product.category
+  }
 }
 
 /**
  * Obtener producto por ID
  */
-export async function getProductById(id: string): Promise<Product | null> {
-  return await prisma.product.findUnique({
-    where: { id },
-  });
+export async function getProductById(id: number): Promise<Product | null> {
+  return await productRepo.findById(id.toString())
 }
 
 /**
  * Obtener todas las categorías
  */
 export async function getCategories(): Promise<Category[]> {
-  return await prisma.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-}
-
-/**
- * Obtener productos destacados
- */
-export async function getFeaturedProducts(limit: number = 4): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      active: true,
-    },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      discountCents: true,
-      imageUrl: true,
-      origin: true,
-      active: true,
-      rating: true,
-      categoryId: true,
-      createdAt: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-      sellers: {
-        select: {
-          stock: true,
-          seller: {
-            select: {
-              id: true,
-              name: true,
-              online: true,
-              deliveryEnabled: true,
-              deliveryETA: true,
-            },
-          },
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: limit,
-  });
+  return await categoryRepo.findMany()
 }
 
 /**
  * Buscar productos por término
  */
-export async function searchProducts(
-  query: string,
-): Promise<ProductWithCategory[]> {
-  return await prisma.product.findMany({
-    where: {
-      OR: [
-        {
-          name: {
-            contains: query,
-          },
-        },
-        {
-          description: {
-            contains: query,
-          },
-        },
-      ],
-    },
-    include: {
-      category: true,
-      sellers: {
-        include: {
-          seller: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export async function searchProducts(query: string): Promise<ProductWithCategory[]> {
+  const products = await productRepo.search(query)
+  return products.map(p => ({
+    ...p,
+    category: p.category
+  }))
 }
+

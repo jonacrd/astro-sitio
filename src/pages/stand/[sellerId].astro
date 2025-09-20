@@ -1,0 +1,23 @@
+---
+import { repos } from '../../lib/repos';
+
+const { sellerId } = Astro.params;
+const inv = await repos.inventory.list(sellerId!);
+const status = (await repos.status.list()).find(s=>s.id===sellerId);
+---
+
+<main class="p-4">
+  <h1 class="text-xl font-bold mb-2">Tienda {sellerId} {status?.available ? '· Disponible' : ''}</h1>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+    {inv.map((sp)=>(
+      <a href={`/producto/${sp.productId}?seller=${sellerId}`} class="border rounded-lg overflow-hidden bg-white">
+        {sp.product.imageUrl ? <img src={sp.product.imageUrl} alt={sp.product.title} class="w-full h-28 object-cover" loading="lazy" /> : <div class="w-full h-28 bg-slate-100" />}
+        <div class="p-2">
+          <div class="text-sm font-medium line-clamp-2">{sp.product.title}</div>
+          <div class="text-sm">{`$${((sp.product.priceCents - (sp.product.discountCents||0))/100).toFixed(0)}`}</div>
+          <div class="text-xs text-slate-500">Stock: {sp.stock}</div>
+        </div>
+      </a>
+    ))}
+  </div>
+</main>

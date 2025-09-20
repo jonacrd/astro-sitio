@@ -1,452 +1,501 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { repos } from '@lib/repos'
+
+// Para el sistema mock, usamos un vendedor por defecto
+const MOCK_SELLER_ID = 's1' // Carnes del Zulia
+const MOCK_USER = { id: 'mock-user', role: 'SELLER', name: 'Vendedor Demo' }
+
+// Obtener inventario del vendedor mock
+let inventory = []
+try {
+  const rows = await repos.inventory.list(MOCK_SELLER_ID)
+  inventory = rows.map(sp => ({
+    id: sp.id,
+    productId: sp.productId,
+    stock: sp.stock,
+    active: sp.active,
+    title: sp.product.title,
+    imageUrl: sp.product.imageUrl,
+    category: sp.product.category,
+    priceCents: sp.product.priceCents,
+    discountCents: sp.product.discountCents || 0,
+  }))
+} catch (error) {
+  console.error('Error loading inventory:', error)
+  // Inventario de respaldo si hay error
+  inventory = [
+    { id: 'sp_s1_jamon', productId: 'p_jamon_serrano', stock: 15, active: true, title: 'Jamón Serrano 200g', category: 'fiambres', priceCents: 4500, discountCents: 0 },
+    { id: 'sp_s1_salchichon', productId: 'p_salchichon', stock: 12, active: true, title: 'Salchichón Español', category: 'fiambres', priceCents: 3200, discountCents: 0 },
+    { id: 'sp_s1_chorizo', productId: 'p_chorizo_parrilla', stock: 20, active: true, title: 'Chorizo para Parrilla', category: 'carnes', priceCents: 2800, discountCents: 0 },
+    { id: 'sp_s1_pollo', productId: 'p_pollo_entero', stock: 8, active: true, title: 'Pollo Entero 1.5kg', category: 'pollos', priceCents: 4200, discountCents: 0 },
+    { id: 'sp_s1_pechuga', productId: 'p_pechuga_pollo', stock: 10, active: true, title: 'Pechuga de Pollo 1kg', category: 'pollos', priceCents: 3800, discountCents: 0 },
+  ]
+}
 ---
 
-<BaseLayout 
-  title="Dashboard - Tienda Online"
-  description="Panel de control con métricas en tiempo real"
->
-  <!-- Header del Dashboard -->
-  <section class="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-8 sm:py-12">
+<BaseLayout title="Dashboard - Gestión de Inventario">
+  <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 class="text-3xl sm:text-4xl font-bold mb-2">
-            📊 Dashboard en Vivo
-          </h1>
-          <p class="text-blue-100 text-lg">
-            Métricas y estadísticas en tiempo real
-          </p>
-        </div>
-        <div class="mt-4 sm:mt-0">
-          <span class="bg-white/20 px-4 py-2 rounded-full text-sm">
-            <span id="lastUpdated">Actualizando...</span>
-          </span>
-        </div>
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard Multi-Vendedor</h1>
+        <p class="mt-2 text-gray-600">
+          {MOCK_USER.role === 'ADMIN' ? 'Panel de administración' : 'Gestión de tu inventario y ventas'}
+        </p>
       </div>
-    </div>
-  </section>
 
-  <!-- Tarjetas de Métricas -->
-  <section class="py-8 sm:py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <!-- Leads Hoy -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Leads Hoy</p>
-              <p class="text-3xl font-bold text-blue-600" id="leadsToday">-</p>
-            </div>
-            <div class="bg-blue-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
+      {MOCK_USER.role === 'SELLER' ? (
+        <div class="space-y-6">
+          <!-- Estado del Vendedor -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Estado de Disponibilidad</h2>
+            <div class="flex items-center gap-3">
+              <span id="status-label" class="text-sm text-slate-600">Estado: —</span>
+              <button id="btn-toggle" class="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+                Poner en Activo
+              </button>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Nuevos contactos hoy</p>
-        </div>
 
-        <!-- Órdenes Hoy -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Órdenes Hoy</p>
-              <p class="text-3xl font-bold text-green-600" id="ordersToday">-</p>
+          <!-- KPIs Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-sm font-medium text-gray-500">Ventas Hoy</h3>
+              <p class="text-2xl font-bold text-gray-900" id="today-count">0</p>
+              <p class="text-sm text-gray-600" id="today-total">$0</p>
             </div>
-            <div class="bg-green-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-              </svg>
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-sm font-medium text-gray-500">Últimos 7 días</h3>
+              <p class="text-2xl font-bold text-gray-900" id="week-count">0</p>
+              <p class="text-sm text-gray-600" id="week-total">$0</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-sm font-medium text-gray-500">Stock Bajo</h3>
+              <p class="text-2xl font-bold text-orange-600" id="low-stock-count">0</p>
+              <p class="text-sm text-gray-600">productos &lt; 5</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-sm font-medium text-gray-500">Clientes</h3>
+              <p class="text-2xl font-bold text-blue-600" id="customers-count">0</p>
+              <p class="text-sm text-gray-600">últimos 7 días</p>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Compras completadas hoy</p>
-        </div>
 
-        <!-- Revenue Hoy -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Revenue Hoy</p>
-              <p class="text-3xl font-bold text-purple-600" id="revenueToday">-</p>
+          <!-- Agregar Productos -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Agregar Productos al Inventario</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Buscar producto:</label>
+                <input 
+                  type="text" 
+                  id="search-global" 
+                  placeholder="Escribe para buscar..." 
+                  class="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
+                <select id="filter-category" class="w-full border rounded px-3 py-2">
+                  <option value="">Todas</option>
+                  <option value="comida">Comida</option>
+                  <option value="ropa">Ropa</option>
+                  <option value="tecnologia">Tecnología</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Stock inicial:</label>
+                <input 
+                  type="number" 
+                  id="initial-stock" 
+                  min="0" 
+                  value="1" 
+                  class="w-full border rounded px-3 py-2"
+                />
+              </div>
             </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-              </svg>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">Ingresos de hoy</p>
-        </div>
 
-        <!-- Stock Bajo -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Stock Bajo</p>
-              <p class="text-3xl font-bold text-red-600" id="lowStock">-</p>
-            </div>
-            <div class="bg-red-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-              </svg>
+            <div id="search-results" class="max-h-60 overflow-y-auto border rounded mb-4">
+              <p class="p-4 text-gray-500 text-center">Busca productos para agregar a tu inventario</p>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Productos con stock < 10</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Estadísticas Adicionales -->
-  <section class="py-8 sm:py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-        <!-- Revenue Total -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Revenue Total</p>
-              <p class="text-3xl font-bold text-purple-600" id="totalRevenue">-</p>
+          <!-- Inventario Actual -->
+          <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">Mi Inventario</h2>
             </div>
-            <div class="bg-purple-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-              </svg>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table" class="bg-white divide-y divide-gray-200">
+                  {inventory.length === 0 ? (
+                    <tr>
+                      <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                        No tienes productos en tu inventario. Busca productos arriba para agregar.
+                      </td>
+                    </tr>
+                  ) : (
+                    inventory.map(item => (
+                      <tr data-id={item.id} class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            {item.imageUrl && (
+                              <img class="h-10 w-10 rounded-lg object-cover mr-3" src={item.imageUrl} alt={item.title} />
+                            )}
+                            <div>
+                              <div class="text-sm font-medium text-gray-900">{item.title}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <input 
+                            type="number" 
+                            value={item.stock} 
+                            min="0"
+                            class="w-20 px-2 py-1 border rounded text-sm"
+                            data-field="stock"
+                            data-id={item.id}
+                          />
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <label class="flex items-center">
+                            <input 
+                              type="checkbox" 
+                              checked={item.active}
+                              class="rounded"
+                              data-field="active"
+                              data-id={item.id}
+                            />
+                            <span class="ml-2 text-sm text-gray-600">
+                              {item.active ? 'Activo' : 'Inactivo'}
+                            </span>
+                          </label>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${(item.priceCents / 100).toFixed(0)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button 
+                            class="text-red-600 hover:text-red-900"
+                            data-action="delete"
+                            data-id={item.id}
+                          >
+                            🗑️ Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Ingresos totales</p>
-        </div>
 
-        <!-- Total Órdenes -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Total Órdenes</p>
-              <p class="text-3xl font-bold text-indigo-600" id="totalOrders">-</p>
+          <!-- Top Products y Low Stock -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Productos Top (7 días)</h3>
+              <div id="top-products" class="space-y-2">
+                <p class="text-gray-500 text-sm">Cargando...</p>
+              </div>
             </div>
-            <div class="bg-indigo-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">Órdenes completadas</p>
-        </div>
-
-        <!-- Productos Totales -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Productos</p>
-              <p class="text-3xl font-bold text-teal-600" id="totalProducts">-</p>
-            </div>
-            <div class="bg-teal-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">En catálogo</p>
-        </div>
-
-        <!-- Leads Totales -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Leads Totales</p>
-              <p class="text-3xl font-bold text-orange-600" id="totalLeads">-</p>
-            </div>
-            <div class="bg-orange-100 p-3 rounded-full">
-              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
-            </div>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">Contactos capturados</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tablas de Datos -->
-  <section class="py-8 sm:py-12 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <!-- Últimas Órdenes -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-900">Últimas Órdenes</h2>
-            <p class="text-sm text-gray-600">Las 10 órdenes más recientes</p>
-          </div>
-          <div class="overflow-x-auto max-h-96">
-            <table class="w-full">
-              <thead class="bg-gray-50 sticky top-0">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orden</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                </tr>
-              </thead>
-              <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                    Cargando órdenes...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Últimos Leads -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-900">Últimos Leads</h2>
-            <p class="text-sm text-gray-600">Los 10 leads más recientes</p>
-          </div>
-          <div class="overflow-x-auto max-h-96">
-            <table class="w-full">
-              <thead class="bg-gray-50 sticky top-0">
-                <tr>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                </tr>
-              </thead>
-              <tbody id="leadsTableBody" class="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                    Cargando leads...
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Movimientos de Stock -->
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-bold text-gray-900">Stock Bajo</h2>
-            <p class="text-sm text-gray-600">Productos con menos de 20 unidades</p>
-          </div>
-          <div class="overflow-x-auto max-h-96">
-            <div id="stockMovementsBody" class="p-4">
-              <div class="text-center text-gray-500 py-8">
-                Cargando movimientos de stock...
+            
+            <div class="bg-white rounded-lg shadow p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Stock Bajo</h3>
+              <div id="low-stock-list" class="space-y-2">
+                <p class="text-gray-500 text-sm">Cargando...</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Información Demo -->
-  <section class="py-8 sm:py-12 bg-yellow-50 border-t border-yellow-200">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="bg-yellow-100 border border-yellow-300 rounded-lg p-6">
-        <h2 class="text-xl font-bold text-yellow-800 mb-2">
-          🎯 Vista Demo - Datos Ficticios
-        </h2>
-        <p class="text-yellow-700 mb-4">
-          Este dashboard muestra métricas en tiempo real de un sistema de e-commerce funcional.
-          Los datos se actualizan automáticamente cada 10 segundos.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4 text-sm">
-          <span class="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800">
-            ✅ Base de datos real
-          </span>
-          <span class="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800">
-            ✅ APIs funcionales
-          </span>
-          <span class="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800">
-            ✅ Actualización automática
-          </span>
-          <span class="bg-yellow-200 px-3 py-1 rounded-full text-yellow-800">
-            ✅ Responsive design
-          </span>
+          <!-- Clientes Recientes -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Clientes Recientes</h3>
+            <div id="customers-list" class="space-y-2">
+              <p class="text-gray-500 text-sm">Cargando...</p>
+            </div>
+          </div>
+
         </div>
-      </div>
+      ) : (
+        <div class="bg-white rounded-lg shadow p-6 text-center">
+          <p class="text-gray-600">No tienes permisos para ver este dashboard.</p>
+        </div>
+      )}
+
     </div>
-  </section>
+  </div>
 
   <script>
-    // Variables globales
-    let statsInterval;
-    let isUpdating = false;
+    // ===== SISTEMA DE ESTADO DE VENDEDOR =====
+    (async () => {
+      const SELLER_ID = 's1'; // Carnes del Zulia
 
-    // Función para formatear fecha
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
+      async function fetchStatus() {
+        const list = await fetch('/api/sellers/status').then(r => r.json());
+        return list.find(x => x.id === SELLER_ID);
+      }
 
-    // Función para formatear precio
-    function formatPrice(cents) {
-      return new Intl.NumberFormat('es-ES', {
-        style: 'currency',
-        currency: 'USD'
-      }).format(cents / 100);
-    }
+      async function refreshBadge() {
+        const me = await fetchStatus();
+        if (!me) return;
+        
+        const statusLabel = document.getElementById('status-label');
+        const btn = document.getElementById('btn-toggle');
+        
+        if (!statusLabel || !btn) return;
 
-    // Función para actualizar las métricas
-    async function updateStats() {
-      if (isUpdating) return;
-      isUpdating = true;
+        statusLabel.textContent =
+          me.available ? 'Estado: Disponible (Abierto + Activo)' :
+          (me.online ? 'Estado: Activo (fuera de horario)' :
+          (me.open ? 'Estado: Abierto (en Descanso)' : 'Estado: Cerrado'));
+
+        btn.textContent = me.online ? 'Poner en Descanso' : 'Poner en Activo';
+        btn.className = me.online 
+          ? 'px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition-colors'
+          : 'px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-colors';
+      }
+
+      const btnToggle = document.getElementById('btn-toggle');
+      if (btnToggle) {
+        btnToggle.addEventListener('click', async () => {
+          const me = await fetchStatus();
+          const next = !(me?.online);
+          await fetch('/api/seller/status', {
+            method: 'POST', 
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ online: next })
+          });
+          await refreshBadge();
+        });
+      }
+
+      await refreshBadge();
+      setInterval(refreshBadge, 45000); // refresco cada 45s
+    })();
+
+    // ===== SISTEMA DE INVENTARIO =====
+    const searchGlobal = document.getElementById('search-global');
+    const filterCategory = document.getElementById('filter-category');
+    const initialStock = document.getElementById('initial-stock');
+    const searchResults = document.getElementById('search-results');
+    const inventoryTable = document.getElementById('inventory-table');
+
+    async function searchGlobalProducts() {
+      const query = (searchGlobal as HTMLInputElement)?.value || '';
+      const category = (filterCategory as HTMLSelectElement)?.value || '';
+      
+      if (query.length < 2 && !category) {
+        searchResults.innerHTML = '<p class="p-4 text-gray-500 text-center">Busca productos para agregar a tu inventario</p>';
+        return;
+      }
+
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (category) params.set('category', category);
 
       try {
-        const response = await fetch('/api/stats');
-        const result = await response.json();
+        const response = await fetch(`/api/products/global?${params}`);
+        const products = await response.json();
 
-        if (result.success) {
-          const data = result.data;
-
-          // Actualizar tarjetas de métricas principales
-          document.getElementById('leadsToday').textContent = data.leads_today;
-          document.getElementById('ordersToday').textContent = data.orders_today;
-          document.getElementById('revenueToday').textContent = formatPrice(data.revenue_today);
-          document.getElementById('lowStock').textContent = data.low_stock;
-
-          // Actualizar tarjetas de estadísticas adicionales
-          document.getElementById('totalRevenue').textContent = formatPrice(data.total_revenue);
-          document.getElementById('totalOrders').textContent = data.total_orders;
-          document.getElementById('totalProducts').textContent = data.total_products;
-          document.getElementById('totalLeads').textContent = data.total_leads;
-
-          // Actualizar tabla de órdenes
-          const ordersTableBody = document.getElementById('ordersTableBody');
-          if (data.recent_orders.length > 0) {
-            ordersTableBody.innerHTML = data.recent_orders.map(order => `
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                  ${order.orderCode}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
-                  ${order.customerName || 'N/A'}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
-                  ${formatPrice(order.totalCents)}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-500">
-                  ${formatDate(order.createdAt)}
-                </td>
-              </tr>
-            `).join('');
-          } else {
-            ordersTableBody.innerHTML = `
-              <tr>
-                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                  No hay órdenes disponibles
-                </td>
-              </tr>
-            `;
-          }
-
-          // Actualizar tabla de leads
-          const leadsTableBody = document.getElementById('leadsTableBody');
-          if (data.recent_leads.length > 0) {
-            leadsTableBody.innerHTML = data.recent_leads.map(lead => `
-              <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                  ${lead.name}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
-                  ${lead.email}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-900">
-                  ${lead.whatsapp}
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-500">
-                  ${formatDate(lead.createdAt)}
-                </td>
-              </tr>
-            `).join('');
-          } else {
-            leadsTableBody.innerHTML = `
-              <tr>
-                <td colspan="4" class="px-4 py-8 text-center text-gray-500">
-                  No hay leads disponibles
-                </td>
-              </tr>
-            `;
-          }
-
-          // Actualizar movimientos de stock
-          const stockMovementsBody = document.getElementById('stockMovementsBody');
-          if (data.stock_movements && data.stock_movements.length > 0) {
-            stockMovementsBody.innerHTML = data.stock_movements.map(product => `
-              <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-3">
-                <div class="w-10 h-10 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                  <img 
-                    src="${product.imageUrl || '/images/placeholder-product.jpg'}" 
-                    alt="${product.name}"
-                    class="w-full h-full object-cover"
-                  />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">
-                    ${product.name}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Stock: <span class="font-semibold ${product.stock < 5 ? 'text-red-600' : 'text-orange-600'}">${product.stock}</span>
-                  </p>
-                </div>
-                <div class="text-xs text-gray-400">
-                  ${formatDate(product.lastUpdated)}
-                </div>
-              </div>
-            `).join('');
-          } else {
-            stockMovementsBody.innerHTML = `
-              <div class="text-center text-gray-500 py-8">
-                No hay productos con stock bajo
-              </div>
-            `;
-          }
-
-          // Actualizar timestamp
-          document.getElementById('lastUpdated').textContent = 
-            `Actualizado: ${formatDate(data.last_updated)}`;
+        searchResults.innerHTML = '';
+        if (products.length === 0) {
+          searchResults.innerHTML = '<p class="p-4 text-gray-500 text-center">No se encontraron productos.</p>';
+          return;
         }
+
+        products.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 flex justify-between items-center';
+          div.innerHTML = `
+            <div>
+              <div class="font-medium">${p.title}</div>
+              <div class="text-sm text-gray-500">${p.category} • $${(p.priceCents / 100).toFixed(0)}</div>
+            </div>
+            <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" data-product-id="${p.id}">
+              Agregar
+            </button>
+          `;
+          searchResults.appendChild(div);
+        });
       } catch (error) {
-        console.error('Error updating stats:', error);
-        document.getElementById('lastUpdated').textContent = 'Error al actualizar';
-      } finally {
-        isUpdating = false;
+        console.error('Error searching products:', error);
+        searchResults.innerHTML = '<p class="p-4 text-red-500 text-center">Error al buscar productos</p>';
       }
     }
 
-    // Inicializar dashboard
-    document.addEventListener('DOMContentLoaded', () => {
-      // Cargar datos iniciales
-      updateStats();
+    searchGlobal?.addEventListener('input', debounce(searchGlobalProducts, 300));
+    filterCategory?.addEventListener('change', searchGlobalProducts);
 
-      // Configurar actualización automática cada 10 segundos
-      statsInterval = setInterval(updateStats, 10000);
+    searchResults?.addEventListener('click', async (e) => {
+      const target = e.target as HTMLElement;
+      if (target.dataset.productId) {
+        const productId = target.dataset.productId;
+        const stock = Number((initialStock as HTMLInputElement)?.value || 1);
+        
+        try {
+          const response = await fetch('/api/seller/inventory/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, stock })
+          });
 
-      // Actualizar cuando la página vuelve a ser visible
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-          updateStats();
+          if (response.ok) {
+            alert('Producto agregado al inventario');
+            location.reload(); // Recargar para mostrar el nuevo producto
+          } else {
+            alert('Error al agregar el producto');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al agregar el producto');
         }
-      });
-    });
-
-    // Limpiar interval al salir de la página
-    window.addEventListener('beforeunload', () => {
-      if (statsInterval) {
-        clearInterval(statsInterval);
       }
     });
+
+    // ===== ACTUALIZACIÓN DE INVENTARIO =====
+    inventoryTable?.addEventListener('change', async (e) => {
+      const target = e.target as HTMLInputElement;
+      const id = target.dataset.id;
+      const field = target.dataset.field;
+
+      if (id && field) {
+        let value: string | boolean | number = target.value;
+        if (field === 'active') {
+          value = target.checked;
+        } else if (field === 'stock') {
+          value = Number(target.value);
+        }
+        
+        try {
+          const response = await fetch('/api/seller/inventory/update', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sellerProductId: id, [field]: value })
+          });
+
+          if (!response.ok) {
+            alert('Error al actualizar el inventario');
+            location.reload(); // Recargar para restaurar valores
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al actualizar el inventario');
+          location.reload();
+        }
+      }
+    });
+
+    inventoryTable?.addEventListener('click', async (e) => {
+      const target = e.target as HTMLElement;
+      if (target.dataset.action === 'delete' && target.dataset.id) {
+        if (confirm('¿Estás seguro de que quieres eliminar este producto de tu inventario?')) {
+          try {
+            const response = await fetch('/api/seller/inventory/remove', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sellerProductId: target.dataset.id })
+            });
+
+            if (response.ok) {
+              location.reload(); // Recargar para actualizar la tabla
+            } else {
+              alert('Error al eliminar el producto');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Error al eliminar el producto');
+          }
+        }
+      }
+    });
+
+    // ===== CARGAR STATS =====
+    async function loadStats() {
+      try {
+        const response = await fetch('/api/seller/stats');
+        const stats = await response.json();
+
+        // Actualizar KPIs
+        document.getElementById('today-count')!.textContent = stats.todayCount.toString();
+        document.getElementById('today-total')!.textContent = `$${(stats.todayTotalCents / 100).toFixed(0)}`;
+        document.getElementById('week-count')!.textContent = stats.weekCount.toString();
+        document.getElementById('week-total')!.textContent = `$${(stats.weekTotalCents / 100).toFixed(0)}`;
+        document.getElementById('low-stock-count')!.textContent = stats.lowStock.length.toString();
+        document.getElementById('customers-count')!.textContent = stats.customers.length.toString();
+
+        // Top Products
+        const topProductsDiv = document.getElementById('top-products');
+        if (stats.topProducts.length === 0) {
+          topProductsDiv!.innerHTML = '<p class="text-gray-500 text-sm">No hay ventas en los últimos 7 días</p>';
+        } else {
+          topProductsDiv!.innerHTML = stats.topProducts.map((p: any) => `
+            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+              <span class="text-sm font-medium">${p.title}</span>
+              <span class="text-sm text-gray-600">${p.count} vendidos</span>
+            </div>
+          `).join('');
+        }
+
+        // Low Stock
+        const lowStockDiv = document.getElementById('low-stock-list');
+        if (stats.lowStock.length === 0) {
+          lowStockDiv!.innerHTML = '<p class="text-green-600 text-sm">✅ Todo el stock está bien</p>';
+        } else {
+          lowStockDiv!.innerHTML = stats.lowStock.map((item: any) => `
+            <div class="flex justify-between items-center p-2 bg-orange-50 rounded">
+              <span class="text-sm font-medium">${item.title}</span>
+              <span class="text-sm text-orange-600 font-bold">${item.stock} unidades</span>
+            </div>
+          `).join('');
+        }
+
+        // Customers
+        const customersDiv = document.getElementById('customers-list');
+        if (stats.customers.length === 0) {
+          customersDiv!.innerHTML = '<p class="text-gray-500 text-sm">No hay clientes recientes</p>';
+        } else {
+          customersDiv!.innerHTML = stats.customers.map((c: any) => `
+            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+              <div>
+                <span class="text-sm font-medium">${c.buyerName}</span>
+                ${c.buyerPhone ? `<span class="text-xs text-gray-500 ml-2">${c.buyerPhone}</span>` : ''}
+              </div>
+              <span class="text-sm text-gray-600">${c.orders} pedidos</span>
+            </div>
+          `).join('');
+        }
+
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+
+    // Cargar stats al inicio
+    loadStats();
+
+    // ===== UTILIDADES =====
+    function debounce(func: Function, delay: number) {
+      let timeout: NodeJS.Timeout;
+      return function(...args: any[]) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+      };
+    }
   </script>
 </BaseLayout>
