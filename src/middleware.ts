@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'astro';
-import { prisma } from '@/src/lib/db';
-import { getUserId } from '@/src/lib/session';
+import { prisma } from '@lib/db';
+import { getUserId } from '@lib/session';
 
 export const onRequest: MiddlewareHandler = async (ctx, next) => {
   const path = ctx.url.pathname;

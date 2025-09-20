@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { prisma } from '@/src/lib/db';
-import { setSession } from '@/src/lib/session';
+import { prisma } from '@lib/db';
+import { setSession } from '@lib/session';
 import bcrypt from 'bcryptjs';
 
 export const POST: APIRoute = async (ctx) => {

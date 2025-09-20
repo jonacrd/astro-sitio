@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { prisma } from '@/src/lib/db';
-import { getUserId } from '@/src/lib/session';
+import { prisma } from '@lib/db';
+import { getUserId } from '@lib/session';
 
 export const GET: APIRoute = async (ctx) => {
   const uid = getUserId(ctx);

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { prisma } from '@/src/lib/db';
-import { getUserId } from '@/src/lib/session';
+import { prisma } from '@lib/db';
+import { getUserId } from '@lib/session';
 
 async function requireAdmin(ctx: any) {
   const uid = getUserId(ctx);
