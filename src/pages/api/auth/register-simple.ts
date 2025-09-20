@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro';
 import { setSession } from '@lib/session';
-
-// Datos mock temporales para desarrollo
-const users: Array<{id: string, name: string, phone: string, passwordHash: string, role: string}> = [];
+import { findUserByPhone, createUser } from '@lib/memory-storage';
 
 export const POST: APIRoute = async (ctx) => {
   try {
@@ -10,21 +8,18 @@ export const POST: APIRoute = async (ctx) => {
     if (!name || !phone || !password) return new Response('Bad Request', { status: 400 });
     
     // Verificar si el teléfono ya existe
-    const exist = users.find(u => u.phone === phone);
+    const exist = findUserByPhone(phone);
     if (exist) return new Response('Phone in use', { status: 409 });
     
-    // Crear usuario (simplificado, sin hash por ahora)
-    const userId = 'user_' + Date.now();
-    const user = { 
-      id: userId, 
-      name, 
-      phone, 
+    // Crear usuario
+    const user = createUser({
+      name,
+      phone,
       passwordHash: password, // Temporal: sin hash
-      role: 'CUSTOMER' 
-    };
+      role: 'CUSTOMER'
+    });
     
-    users.push(user);
-    setSession(ctx, userId);
+    setSession(ctx, user.id);
     
     return new Response(JSON.stringify({ id: user.id, role: user.role }), { 
       headers: { 'content-type': 'application/json' } 
