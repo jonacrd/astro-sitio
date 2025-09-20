@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { prisma } from "@lib/db";
-import { mapProductsToUI, type ProductWithDetails } from "@lib/data-adapters";
 
 export const GET: APIRoute = async ({ url }) => {
   try {

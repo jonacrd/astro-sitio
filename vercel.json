@@ -1,8 +1,5 @@
 {
   "buildCommand": "npm run build:vercel",
   "installCommand": "npm install",
-  "framework": null,
-  "env": {
-    "DATABASE_URL": "file:./prisma/dev.db"
-  }
+  "framework": null
 }
