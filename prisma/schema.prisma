@@ -3,26 +3,30 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // PostgreSQL para desarrollo y producción
+  provider = "sqlite" // Temporal para desarrollo local
   url      = env("DATABASE_URL")
 }
 
+// SQLite no soporta enums, usar String con valores específicos
+// Valores válidos: 'CUSTOMER', 'SELLER', 'ADMIN'
+
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String   @unique
-  role      String   @default("CUSTOMER") // 'CUSTOMER' | 'SELLER'
-  points    Int      @default(0)
-  orders    Order[]
-  sellers   Seller[]
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  phone        String   @unique
+  passwordHash String
+  role         String   @default("CUSTOMER")
+  points       Int      @default(0)
+  seller       Seller?
+  orders       Order[]
+  createdAt    DateTime @default(now())
 }
 
 model Seller {
   id              String   @id @default(cuid())
-  name            String
-  userId          String?
-  user            User?    @relation(fields: [userId], references: [id])
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  storeName       String
   online          Boolean  @default(false)
   deliveryEnabled Boolean  @default(true)
   deliveryETA     String?
@@ -72,6 +76,3 @@ model Order {
   totalCents Int
   createdAt  DateTime @default(now())
 }
-
-// Enum Role convertido a String para compatibilidad con SQLite
-// Valores: 'CUSTOMER' | 'SELLER'

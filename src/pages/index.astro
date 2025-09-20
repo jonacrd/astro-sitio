@@ -41,6 +41,25 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
   <!-- Hero Section with Landbot -->
   <section class="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-700 px-4">
     <div class="max-w-5xl w-full">
+      <!-- Auth Navigation -->
+      <nav class="flex justify-end gap-3 mb-6">
+        <button id="btn-login" class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors">
+          Entrar
+        </button>
+        <button id="btn-register" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
+          Registrarse
+        </button>
+        <button id="btn-seller" class="px-4 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors hidden">
+          Quiero vender
+        </button>
+        <a href="/dashboard" id="link-dashboard" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors hidden">
+          Dashboard
+        </a>
+        <button id="btn-logout" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors hidden">
+          Salir
+        </button>
+      </nav>
+
       <h1 class="text-3xl font-bold mb-2 text-center text-slate-200">Town</h1>
       <p class="text-slate-200 mb-4 text-center">Compra rápido, con IA y descuentos locales.</p>
       
@@ -267,4 +286,207 @@ const bestSellingProducts = await getBestSellingProducts(3) // Reducir de 4 a 3
       </a>
     </div>
   </section>
+
+  <!-- Modal Login -->
+  <dialog id="dlg-login" class="rounded-xl p-0 backdrop:bg-black/50">
+    <form id="form-login" method="dialog" class="p-6 w-80 bg-white">
+      <h3 class="text-lg font-semibold mb-4">Iniciar sesión</h3>
+      <input 
+        name="phone" 
+        placeholder="Teléfono" 
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        required
+      />
+      <input 
+        name="password" 
+        type="password" 
+        placeholder="Contraseña" 
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        required
+      />
+      <div class="flex gap-2 justify-end">
+        <button 
+          type="button" 
+          id="close-login" 
+          class="px-4 py-2 text-gray-600 hover:text-gray-800"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Entrar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Registro -->
+  <dialog id="dlg-register" class="rounded-xl p-0 backdrop:bg-black/50">
+    <form id="form-register" method="dialog" class="p-6 w-80 bg-white">
+      <h3 class="text-lg font-semibold mb-4">Registrarse</h3>
+      <input 
+        name="name" 
+        placeholder="Nombre completo" 
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        required
+      />
+      <input 
+        name="phone" 
+        placeholder="Teléfono" 
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        required
+      />
+      <input 
+        name="password" 
+        type="password" 
+        placeholder="Contraseña" 
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        required
+      />
+      <div class="flex gap-2 justify-end">
+        <button 
+          type="button" 
+          id="close-register" 
+          class="px-4 py-2 text-gray-600 hover:text-gray-800"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="submit"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >
+          Crear cuenta
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const dlgLogin = $('#dlg-login'), dlgReg = $('#dlg-register');
+    const btnLogin = $('#btn-login'), btnReg = $('#btn-register'), btnSeller = $('#btn-seller');
+    const btnLogout = $('#btn-logout'), linkDash = $('#link-dashboard');
+
+    async function refreshMe() {
+      const r = await fetch('/api/auth/me'); 
+      const { user } = await r.json();
+      
+      if (user) {
+        btnLogin.classList.add('hidden'); 
+        btnReg.classList.add('hidden'); 
+        btnLogout.classList.remove('hidden');
+        btnSeller.classList.remove('hidden');
+        
+        if (user.role === 'ADMIN' || user.role === 'SELLER') { 
+          linkDash.classList.remove('hidden'); 
+        } else { 
+          linkDash.classList.add('hidden'); 
+        }
+      } else {
+        btnLogin.classList.remove('hidden'); 
+        btnReg.classList.remove('hidden'); 
+        btnLogout.classList.add('hidden');
+        btnSeller.classList.add('hidden'); 
+        linkDash.classList.add('hidden');
+      }
+    }
+
+    // Event listeners para abrir modales
+    btnLogin.addEventListener('click', () => dlgLogin.showModal());
+    $('#close-login').addEventListener('click', () => dlgLogin.close());
+    btnReg.addEventListener('click', () => dlgReg.showModal());
+    $('#close-register').addEventListener('click', () => dlgReg.close());
+
+    // Cerrar modal al hacer clic fuera
+    dlgLogin.addEventListener('click', (e) => {
+      if (e.target === dlgLogin) dlgLogin.close();
+    });
+    dlgReg.addEventListener('click', (e) => {
+      if (e.target === dlgReg) dlgReg.close();
+    });
+
+    // Formulario de login
+    $('#form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      
+      try {
+        const r = await fetch('/api/auth/login', { 
+          method: 'POST', 
+          headers: { 'content-type': 'application/json' }, 
+          body: JSON.stringify(body) 
+        });
+        
+        if (r.ok) { 
+          dlgLogin.close(); 
+          refreshMe(); 
+        } else { 
+          alert('Credenciales inválidas'); 
+        }
+      } catch (error) {
+        alert('Error al iniciar sesión');
+      }
+    });
+
+    // Formulario de registro
+    $('#form-register').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = Object.fromEntries(new FormData(e.target).entries());
+      
+      try {
+        const r = await fetch('/api/auth/register', { 
+          method: 'POST', 
+          headers: { 'content-type': 'application/json' }, 
+          body: JSON.stringify(body) 
+        });
+        
+        if (r.ok) { 
+          dlgReg.close(); 
+          refreshMe(); 
+        } else { 
+          alert('No se pudo registrar. El teléfono ya está en uso.'); 
+        }
+      } catch (error) {
+        alert('Error al registrarse');
+      }
+    });
+
+    // Convertirse en vendedor
+    btnSeller.addEventListener('click', async () => {
+      const storeName = prompt('Nombre de tu tienda:');
+      if (!storeName) return;
+      
+      try {
+        const r = await fetch('/api/seller/apply', { 
+          method: 'POST', 
+          headers: { 'content-type': 'application/json' }, 
+          body: JSON.stringify({ storeName }) 
+        });
+        
+        if (r.ok) { 
+          alert('¡Felicidades! Ahora eres vendedor.'); 
+          refreshMe(); 
+        } else { 
+          alert('No se pudo habilitar como vendedor'); 
+        }
+      } catch (error) {
+        alert('Error al convertirse en vendedor');
+      }
+    });
+
+    // Logout
+    btnLogout.addEventListener('click', async () => {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' }); 
+        refreshMe(); 
+      } catch (error) {
+        alert('Error al cerrar sesión');
+      }
+    });
+
+    // Inicializar estado de autenticación
+    refreshMe();
+  </script>
 </BaseLayout>
