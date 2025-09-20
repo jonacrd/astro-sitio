@@ -17,19 +17,27 @@ model Category {
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  name        String
-  slug        String      @unique
-  description String
-  priceCents  Int
-  stock       Int         @default(0)
-  imageUrl    String?
-  categoryId  Int
-  category    Category    @relation(fields: [categoryId], references: [id])
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id            Int         @id @default(autoincrement())
+  name          String
+  slug          String      @unique
+  description   String
+  priceCents    Int
+  discountCents Int?        @default(0)
+  stock         Int         @default(0)
+  origin        String      @default("chi") // 'chi' | 'ven' | otros
+  rating        Float       @default(4.5)
+  active        Boolean     @default(true)
+  imageUrl      String?
+  categoryId    Int
+  category      Category    @relation(fields: [categoryId], references: [id])
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  sellers       SellerProduct[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([categoryId, active])
+  @@index([origin, active])
 }
 
 model Cart {
@@ -55,6 +63,8 @@ model Order {
   id            Int         @id @default(autoincrement())
   orderCode     String      @unique
   cartId        String
+  userId        String?     // Opcional para mantener compatibilidad
+  user          User?       @relation(fields: [userId], references: [id])
   totalCents    Int
   customerName  String?
   customerEmail String?
@@ -84,4 +94,48 @@ model Lead {
   updatedAt DateTime @updatedAt
 
   @@unique([email])
+}
+
+// ===== NUEVOS MODELOS PARA SISTEMA MULTI-VENDEDOR =====
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  role      Role     @default(CUSTOMER)
+  points    Int      @default(0)
+  orders    Order[]
+  seller    Seller?
+  createdAt DateTime @default(now())
+}
+
+model Seller {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  storeName       String
+  online          Boolean  @default(false)
+  deliveryEnabled Boolean  @default(true)
+  deliveryETA     String?  // "30-40m"
+  products        SellerProduct[]
+  createdAt       DateTime @default(now())
+}
+
+// Extender Product existente con nuevos campos
+// (No tocamos el modelo Product existente para no romper nada)
+
+model SellerProduct {
+  id        String  @id @default(cuid())
+  sellerId  String
+  productId Int     // Usar el ID existente de Product
+  seller    Seller  @relation(fields: [sellerId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(0)
+  
+  @@unique([sellerId, productId])
+}
+
+enum Role { 
+  CUSTOMER 
+  SELLER 
 }

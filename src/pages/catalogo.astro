@@ -1,14 +1,19 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getCategories } from '@lib/products.server'
-import { getProductsByCategory, getFeaturedProducts, getCategoryBannersData } from '@lib/products-featured.server'
+import { getFeaturedProducts, getCategoryBannersData } from '@lib/products-featured.server'
 import ProductCarousel from '@components/react/ProductCarousel.tsx'
 import CategoryBanner from '@components/react/CategoryBanner.tsx'
 import EnhancedCategoryBanner from '@components/react/EnhancedCategoryBanner.tsx'
+import CatalogWithFilters from '@components/react/CatalogWithFilters.tsx'
 
 const categories = await getCategories()
 const featuredProducts = await getFeaturedProducts(4) // Reducir de 6 a 4
 const categoryBannersData = await getCategoryBannersData()
+
+// Obtener categoría de la URL si existe
+const url = Astro.url
+const categoryParam = url.searchParams.get('category') || ''
 
 // Configuración de banners por categoría
 const bannerConfigs = {
@@ -68,13 +73,7 @@ const bannerConfigs = {
   }
 }
 
-// Obtener productos por categoría
-const categoryProducts = await Promise.all(
-  categories.map(async (category) => ({
-    category,
-    products: await getProductsByCategory(category.slug)
-  }))
-)
+// Los productos ahora se cargan dinámicamente con el componente CatalogWithFilters
 ---
 
 <BaseLayout 
@@ -116,42 +115,11 @@ const categoryProducts = await Promise.all(
     client:load 
   />
 
-  <!-- Category Banners with their respective products -->
-  {categoryBannersData.map((bannerData, index) => {
-    const config = bannerConfigs[bannerData.category.slug as keyof typeof bannerConfigs]
-    if (!config) return null
-    
-    // Encontrar los productos completos de esta categoría
-    const categoryProductsData = categoryProducts.find(cp => cp.category.slug === bannerData.category.slug)
-    
-    return (
-      <>
-        {/* Banner de la categoría */}
-        <EnhancedCategoryBanner
-          title={bannerData.category.name}
-          subtitle={`Los mejores productos de ${bannerData.category.name.toLowerCase()}`}
-          products={bannerData.products}
-          gradient={config.gradient}
-          icon={config.icon}
-          backgroundImages={config.backgroundImages}
-          height={index % 2 === 0 ? 'medium' : 'small'}
-          categorySlug={bannerData.category.slug}
-          client:load
-        />
-        
-        {/* Productos de la categoría */}
-        {categoryProductsData && categoryProductsData.products.length > 0 && (
-          <ProductCarousel 
-            title={`Todos los productos de ${categoryProductsData.category.name}`}
-            subtitle={`Explora nuestra selección completa de ${categoryProductsData.category.name.toLowerCase()}`}
-            products={categoryProductsData.products}
-            className="bg-gray-50"
-            client:load 
-          />
-        )}
-      </>
-    )
-  })}
+  <!-- Catálogo con Filtros -->
+  <CatalogWithFilters 
+    initialCategory={categoryParam}
+    client:load 
+  />
 
   <!-- Call to Action -->
   <section class="py-12 sm:py-16 bg-blue-600 text-white">

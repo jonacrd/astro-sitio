@@ -16,6 +16,7 @@
     "prisma:deploy": "prisma db push",
     "prisma:generate": "prisma generate",
     "seed": "node prisma/seed-fixed-images.js",
+    "seed:products": "tsx scripts/seedProducts.ts",
     "deploy": "npm run prisma:generate && npm run prisma:deploy && npm run seed && npm run build"
   },
   "dependencies": {
@@ -31,9 +32,12 @@
   },
   "devDependencies": {
     "@types/node": "^24.3.1",
+    "@types/node-fetch": "^2.6.13",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "node-fetch": "^3.3.2",
     "prisma": "^5.19.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }
