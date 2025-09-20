@@ -1,5 +1,8 @@
 {
   "buildCommand": "npm run build:vercel",
   "installCommand": "npm install",
-  "framework": null
+  "framework": null,
+  "env": {
+    "SESSION_SECRET": "your-super-secret-session-key-change-in-production"
+  }
 }

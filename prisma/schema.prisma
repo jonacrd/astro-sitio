@@ -3,19 +3,22 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // Temporal para desarrollo local
+  provider = "postgresql" // PostgreSQL para desarrollo y producción
   url      = env("DATABASE_URL")
 }
 
-// SQLite no soporta enums, usar String con valores específicos
-// Valores válidos: 'CUSTOMER', 'SELLER', 'ADMIN'
+enum Role {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
 
 model User {
   id           String   @id @default(cuid())
   name         String
   phone        String   @unique
   passwordHash String
-  role         String   @default("CUSTOMER")
+  role         Role     @default(CUSTOMER)
   points       Int      @default(0)
   seller       Seller?
   orders       Order[]
