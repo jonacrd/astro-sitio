@@ -134,11 +134,15 @@ async function main() {
   }
 
   // Crea seller demo
-  const seller = await prisma.seller.upsert({
+  let seller = await prisma.seller.findFirst({
     where: { name: 'Vendedor Demo' },
-    update: {},
-    create: { name: 'Vendedor Demo', online: true, deliveryEnabled: true, deliveryETA: '30-40m' },
   });
+  
+  if (!seller) {
+    seller = await prisma.seller.create({
+      data: { name: 'Vendedor Demo', online: true, deliveryEnabled: true, deliveryETA: '30-40m' },
+    });
+  }
   console.log(`👤 Vendedor demo: ${seller.name}`);
 
   // Inserta productos y stock por vendedor
@@ -148,31 +152,26 @@ async function main() {
       const slug = slugify(p.name);
       const imageUrl = await resolveImage(p);
 
-      const product = await prisma.product.upsert({
+      let product = await prisma.product.findFirst({
         where: { slug },
-        update: {
-          name: p.name,
-          description: p.description,
-          origin: p.origin,
-          priceCents: p.priceCents,
-          discountCents: p.discountCents ?? 0,
-          imageUrl,
-          active: true,
-          categoryId: cats.get(p.category),
-        },
-        create: {
-          name: p.name,
-          slug,
-          description: p.description,
-          origin: p.origin,
-          priceCents: p.priceCents,
-          discountCents: p.discountCents ?? 0,
-          imageUrl,
-          active: true,
-          rating: 4.5,
-          categoryId: cats.get(p.category),
-        },
       });
+
+      if (!product) {
+        product = await prisma.product.create({
+          data: {
+            name: p.name,
+            slug,
+            description: p.description,
+            origin: p.origin,
+            priceCents: p.priceCents,
+            discountCents: p.discountCents ?? 0,
+            imageUrl,
+            active: true,
+            rating: 4.5,
+            categoryId: cats.get(p.category),
+          },
+        });
+      }
 
       await prisma.sellerProduct.upsert({
         where: { sellerId_productId: { sellerId: seller.id, productId: product.id } },
