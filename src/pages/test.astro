@@ -115,6 +115,11 @@
       }
     }
 
+    // Hacer las funciones globales para que funcionen con onclick
+    window.testBasic = testBasic;
+    window.testAuth = testAuth;
+    window.testDatabase = testDatabase;
+
     // Cargar información del entorno al cargar la página
     window.addEventListener('load', testBasic);
   </script>
