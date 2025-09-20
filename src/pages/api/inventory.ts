@@ -10,7 +10,7 @@ export const GET: APIRoute = async () => {
         slug: true,
         description: true,
         priceCents: true,
-        stock: true,
+        // stock: true, // Campo movido a SellerProduct
         imageUrl: true,
         category: {
           select: {

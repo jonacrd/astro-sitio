@@ -78,7 +78,7 @@ export const GET: APIRoute = async () => {
                   select: {
                     name: true,
                     imageUrl: true,
-                    stock: true
+                    // stock: true // Campo movido a SellerProduct
                   }
                 }
               }
@@ -137,7 +137,7 @@ export const GET: APIRoute = async () => {
           select: {
             id: true,
             name: true,
-            stock: true,
+            // stock: true, // Campo movido a SellerProduct
             imageUrl: true,
             updatedAt: true
           },

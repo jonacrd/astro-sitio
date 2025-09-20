@@ -1,38 +1,24 @@
 import { prisma } from "./db";
+import type { Product, Category, Seller, SellerProduct } from "@prisma/client";
 
-export interface ProductWithCategory {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  priceCents: number;
-  stock: number;
-  imageUrl?: string;
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-  };
+export interface ProductWithCategory extends Product {
+  category: Category;
+  sellers: (SellerProduct & { seller: Seller })[];
 }
 
 export async function getFeaturedProducts(
   limit: number = 8,
 ): Promise<ProductWithCategory[]> {
   return await prisma.product.findMany({
+    where: {
+      active: true,
+    },
     take: limit,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      stock: true,
-      imageUrl: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
+    include: {
+      category: true,
+      sellers: {
+        include: {
+          seller: true,
         },
       },
     },
@@ -43,29 +29,22 @@ export async function getFeaturedProducts(
 }
 
 export async function getProductsByCategory(
-  categorySlug: string,
+  categoryName: string,
   limit: number = 8,
 ): Promise<ProductWithCategory[]> {
   return await prisma.product.findMany({
     where: {
       category: {
-        slug: categorySlug,
+        name: categoryName, // En el nuevo schema no hay slug en Category
       },
+      active: true,
     },
     take: limit,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      stock: true,
-      imageUrl: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
+    include: {
+      category: true,
+      sellers: {
+        include: {
+          seller: true,
         },
       },
     },
@@ -82,27 +61,41 @@ export async function getRandomProducts(
   const skip = Math.floor(Math.random() * Math.max(0, totalProducts - limit));
 
   return await prisma.product.findMany({
+    where: {
+      active: true,
+    },
     skip,
     take: limit,
     include: {
       category: true,
+      sellers: {
+        include: {
+          seller: true,
+        },
+      },
     },
   });
 }
 
 export async function getTopProductsByCategory(
-  categorySlug: string,
+  categoryName: string,
   limit: number = 3,
 ): Promise<ProductWithCategory[]> {
   return await prisma.product.findMany({
     where: {
       category: {
-        slug: categorySlug,
+        name: categoryName,
       },
+      active: true,
     },
     take: limit,
     include: {
       category: true,
+      sellers: {
+        include: {
+          seller: true,
+        },
+      },
     },
     orderBy: {
       priceCents: "desc", // Productos más caros como "destacados"
@@ -113,32 +106,29 @@ export async function getTopProductsByCategory(
 export async function getBestSellingProducts(
   limit: number = 6,
 ): Promise<ProductWithCategory[]> {
-  // Simulamos productos más vendidos basado en stock bajo (productos que se venden más)
+  // Simulamos productos más vendidos basado en stock bajo en SellerProduct
   return await prisma.product.findMany({
     where: {
-      stock: {
-        lt: 15, // Productos con stock bajo = más vendidos
+      active: true,
+      sellers: {
+        some: {
+          stock: {
+            lt: 15, // Productos con stock bajo = más vendidos
+          },
+        },
       },
     },
     take: limit,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      priceCents: true,
-      stock: true,
-      imageUrl: true,
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
+    include: {
+      category: true,
+      sellers: {
+        include: {
+          seller: true,
         },
       },
     },
     orderBy: {
-      stock: "asc", // Menor stock = más vendido
+      rating: "desc", // Productos con mejor rating como "más vendidos"
     },
   });
 }
@@ -150,7 +140,6 @@ export async function getCategoryBannersData() {
     select: {
       id: true,
       name: true,
-      slug: true,
     },
   });
 
@@ -159,16 +148,19 @@ export async function getCategoryBannersData() {
       const products = await prisma.product.findMany({
         where: {
           category: {
-            slug: category.slug,
+            name: category.name,
           },
+          active: true,
         },
         take: 2, // Reducir a 2 productos por categoría
         select: {
           id: true,
           name: true,
           priceCents: true,
-          stock: true,
+          discountCents: true,
           imageUrl: true,
+          origin: true,
+          rating: true,
         },
         orderBy: {
           priceCents: "desc",
