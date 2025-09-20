@@ -1,12 +1,42 @@
 // src/components/react/CatalogWithFilters.tsx
 import { useState, useEffect } from 'react';
-import { getOriginBadge, getOriginBadgeColor, formatPrice, formatPriceWithDiscount } from '@lib/data-adapters';
+// Funciones de utilidad para formateo
+const getOriginBadge = (origin: string): string => {
+  switch (origin.toLowerCase()) {
+    case 'chi': return '🇨🇱';
+    case 'ven': return '🇻🇪';
+    default: return '';
+  }
+};
+
+const getOriginBadgeColor = (origin: string): string => {
+  switch (origin.toLowerCase()) {
+    case 'chi': return 'bg-blue-100 text-blue-800';
+    case 'ven': return 'bg-yellow-100 text-yellow-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const formatPrice = (cents: number): string => {
+  return `$${(cents / 100).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+};
+
+const formatPriceWithDiscount = (priceCents: number, discountCents?: number): { original: string; discounted: string; hasDiscount: boolean } => {
+  const hasDiscount = discountCents && discountCents > 0;
+  const discountedPrice = hasDiscount ? priceCents - discountCents : priceCents;
+  
+  return {
+    original: formatPrice(priceCents),
+    discounted: formatPrice(discountedPrice),
+    hasDiscount: !!hasDiscount
+  };
+};
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   price: number;
   priceCents: number;
   discount?: number;
@@ -14,7 +44,7 @@ interface Product {
   stock: number;
   imageUrl: string | null;
   category: {
-    id: number;
+    id: string;
     name: string;
     slug: string;
   };
@@ -249,23 +279,26 @@ export default function CatalogWithFilters({ initialCategory }: CatalogWithFilte
 
                 {/* Precio */}
                 <div className="mb-3">
-                  {product.discount && product.discount > 0 ? (
-                    <div>
-                      <span className="text-lg font-bold text-green-600">
-                        {formatPriceWithDiscount(product.priceCents, product.discountCents || 0)}
+                  {(() => {
+                    const priceInfo = formatPriceWithDiscount(product.priceCents, product.discountCents);
+                    return priceInfo.hasDiscount ? (
+                      <div>
+                        <span className="text-lg font-bold text-green-600">
+                          {priceInfo.discounted}
+                        </span>
+                        <span className="text-sm text-gray-500 line-through ml-2">
+                          {priceInfo.original}
+                        </span>
+                        <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
+                          -{Math.round((product.discountCents! / product.priceCents) * 100)}%
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-lg font-bold text-gray-900">
+                        {priceInfo.discounted}
                       </span>
-                      <span className="text-sm text-gray-500 line-through ml-2">
-                        {formatPrice(product.priceCents)}
-                      </span>
-                      <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                        -{Math.round((product.discountCents! / product.priceCents) * 100)}%
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-lg font-bold text-gray-900">
-                      {formatPrice(product.priceCents)}
-                    </span>
-                  )}
+                    );
+                  })()}
                 </div>
 
                 {/* Info adicional */}
