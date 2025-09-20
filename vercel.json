@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:vercel",
+  "buildCommand": "chmod +x scripts/build-vercel.sh && ./scripts/build-vercel.sh",
   "installCommand": "npm install",
   "framework": null
 }
