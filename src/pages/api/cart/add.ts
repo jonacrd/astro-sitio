@@ -1,57 +1,18 @@
-import type { APIRoute } from "astro";
-import { addToCart, getSessionId } from "@lib/cart.server";
+import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = async (context) => {
-  try {
-    const { productId, quantity = 1 } = await context.request.json();
-    const sessionId = getSessionId(context);
+export const GET: APIRoute = async ({ url }) => {
+  const sellerProductId = url.searchParams.get('sellerProductId');
+  const qty = parseInt(url.searchParams.get('qty') || '1', 10);
 
-    // Usar la función existente de cart.server
-    const cartData = await addToCart(
-      sessionId,
-      Number(productId),
-      Number(quantity),
-    );
-
-    const totalCents = cartData.items.reduce(
-      (total: number, item) => total + item.quantity * item.product.priceCents,
-      0,
-    );
-    const itemCount = cartData.items.reduce(
-      (total: number, item) => total + item.quantity,
-      0,
-    );
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        items: cartData.items,
-        totalCents,
-        itemCount,
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Error al agregar al carrito",
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+  // Aquí harías: validar SPID, push a sesión/cookie/DB. De momento solo simulamos.
+  if (!sellerProductId) {
+    return new Response(JSON.stringify({ ok:false, error:'sellerProductId requerido' }), { status:400 });
   }
+
+  return new Response(JSON.stringify({
+    ok: true,
+    added: { sellerProductId, qty },
+    // redirige al carrito de tu app si lo deseas:
+    redirectTo: '/carrito'
+  }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'access-control-allow-origin': '*' }});
 };

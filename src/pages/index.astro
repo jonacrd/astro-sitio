@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import SmartSearch from '@/components/react/SmartSearch.tsx'
+import FeedResults from '@/components/react/FeedResults.tsx'
 import HowItWorks from '@/components/react/HowItWorks.tsx'
 import PopularProducts from '@/components/react/PopularProducts.tsx'
 import CategoryBanners from '@/components/react/CategoryBanners.tsx'
@@ -41,68 +43,58 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   description="Compra rápido, con IA y descuentos locales - Town"
 >
   <div class="main-container">
-    <!-- Hero Section with Chat IA -->
+    <!-- Hero Section Unificado -->
     <section class="min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-blue-900 to-green-700 px-4">
       <div class="max-w-6xl w-full">
-                <!-- Auth Navigation -->
-                <nav class="flex justify-end gap-3 mb-6">
-                  <button id="btn-login" class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors">
-                    Entrar
-                  </button>
-                  <button id="btn-register" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
-                    Registrarse
-                  </button>
-                  <a id="link-vender" class="text-sm underline text-white/80 hover:text-white cursor-pointer hidden">
-                    VENDER
-                  </a>
-                  <a href="/dashboard" id="link-dashboard" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors hidden">
-                    Dashboard
-                  </a>
-                  <button id="btn-logout" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors hidden">
-                    Salir
-                  </button>
-                  <button id="btn-refresh" class="px-2 py-1 rounded bg-yellow-600 text-white text-xs hover:bg-yellow-700 transition-colors">
-                    🔄
-                  </button>
-                </nav>
+        <!-- Auth Navigation -->
+        <nav class="flex justify-end gap-3 mb-6">
+          <button id="btn-login" class="px-4 py-2 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors">
+            Entrar
+          </button>
+          <button id="btn-register" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors">
+            Registrarse
+          </button>
+          <a id="link-vender" class="text-sm underline text-white/80 hover:text-white cursor-pointer hidden">
+            VENDER
+          </a>
+          <a href="/dashboard" id="link-dashboard" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors hidden">
+            Dashboard
+          </a>
+          <button id="btn-logout" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors hidden">
+            Salir
+          </button>
+          <button id="btn-refresh" class="px-2 py-1 rounded bg-yellow-600 text-white text-xs hover:bg-yellow-700 transition-colors">
+            🔄
+          </button>
+        </nav>
 
-        <!-- Hero Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <!-- Texto principal -->
-          <div class="text-white">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Columna izquierda: TITULAR grande -->
+          <div class="lg:col-span-5">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow">
               Compra en tu torre
             </h1>
-            <p class="text-xl md:text-2xl mb-8 opacity-90">
+            <p class="mt-3 text-lg text-white/90">
               Encuentra productos locales, compara precios y recibe en casa
             </p>
-            
-            <!-- Search Bar -->
-            <div class="mb-8">
-              <form id="search-form" class="flex gap-2">
-                <input 
-                  type="text" 
-                  id="search-input"
-                  placeholder="¿Qué necesitas? Ej: hamburguesa, cerveza, corte de cabello..."
-                  class="flex-1 px-4 py-3 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button 
-                  type="submit"
-                  class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
-                >
-                  Buscar
-                </button>
-              </form>
-            </div>
           </div>
 
-          <!-- Chat IA Widget -->
-          <div class="flex justify-center">
-            <div">
-              <div id="myLandbot" style="width: 100%; height: 400px; border: none; border-radius: 8px; overflow: hidden;"></div>
+          <!-- Columna derecha: Título+subtítulo original + BARRA IA con estilo de la izquierda -->
+          <div class="lg:col-span-7">
+            <h2 class="text-2xl font-bold text-white">Busca productos cerca — con tus vendedores de siempre</h2>
+            <p class="mt-2 text-white/80">
+              Escribe en lenguaje natural: "¿Quién tiene hamburguesas con delivery?", "malta barata", "arepa para hoy"… 
+            </p>
+
+            <!-- Barra IA sin tarjeta, estilo limpio como la izquierda -->
+            <div class="mt-4">
+              <SmartSearch client:load />
             </div>
           </div>
         </div>
+
+        <!-- Resultados vivos bajo el hero -->
+        <FeedResults client:load />
       </div>
     </section>
 
@@ -333,14 +325,6 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   refreshMe();
 </script>
 
-    <!-- Landbot Script -->
-    <script type="module" src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.mjs"></script>
-    <script type="module">
-      var myLandbot = new Landbot.Container({
-        container: '#myLandbot',
-        configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-3131692-XMRW5AQKBIILVQQU/index.json',
-      });
-    </script>
 
   </div>
 </BaseLayout>
