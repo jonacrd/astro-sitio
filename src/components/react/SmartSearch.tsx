@@ -4,8 +4,6 @@ const SUGGESTIONS = [
   'hamburguesa barata',
   'empanadas con delivery',
   'malta 355ml',
-  'arepa reina pepiada',
-  'servicios de peluquería',
 ];
 
 type SearchResult = {
@@ -59,23 +57,28 @@ export default function SmartSearch(){
           onChange={e=>setQ(e.target.value)}
           onKeyDown={e=>{ if(e.key==='Enter') runSearch(q); }}
           placeholder="¿Qué necesitas? Ej: hamburguesa, cerveza, corte de cabello…"
-          className="flex-1 rounded-xl px-4 py-3 text-slate-900 outline-none shadow ring-2 ring-white/30 focus:ring-white"
+          className="flex-1 rounded-xl px-4 py-3 bg-white text-slate-900 placeholder:text-slate-500 ring-2 ring-white/25 focus:ring-white/40 outline-none"
         />
         <button
           onClick={()=>runSearch(q)}
-          className="rounded-xl px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow"
+          className="rounded-xl px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
         >
           {loading ? 'Buscando…' : 'Buscar'}
         </button>
       </div>
 
-      {/* Sugerencias estilo chips inline */}
-      <div className="flex flex-wrap gap-2 mt-3">
+      {/* Texto de ayuda */}
+      <p className="text-white/70 text-sm mt-2">
+        Tip: pide en lenguaje natural. Ej: hamburguesa barata con delivery
+      </p>
+
+      {/* Sugerencias con scroll horizontal */}
+      <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
         {SUGGESTIONS.map(s => (
           <button
             key={s}
             onClick={()=>{ setQ(s); runSearch(s); }}
-            className="bg-white/15 hover:bg-white/25 text-white/90 text-sm px-3 py-1 rounded-full border border-white/20"
+            className="shrink-0 bg-white/10 hover:bg-white/20 text-white/90 text-sm px-3 py-1.5 rounded-full border border-white/15"
           >
             {s}
           </button>

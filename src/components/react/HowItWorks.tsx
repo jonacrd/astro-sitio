@@ -4,33 +4,33 @@ export default function HowItWorks() {
   const steps = [
     {
       icon: '🤖',
-      title: '1. Pregunta a la IA',
-      description: 'Describe lo que necesitas y nuestra IA te ayuda a encontrar los mejores productos'
+      title: 'Pregunta a la IA',
+      description: 'Describe lo que necesitas en lenguaje natural'
     },
     {
       icon: '🛒',
-      title: '2. Compra rápido',
-      description: 'Selecciona productos de vendedores locales y completa tu pedido en segundos'
+      title: 'Compra rápido',
+      description: 'Selecciona y completa tu pedido en segundos'
     },
     {
       icon: '🚚',
-      title: '3. Recibe en casa',
-      description: 'Disfruta de entrega rápida y productos frescos de tu barrio'
+      title: 'Recibe en casa',
+      description: 'Entrega rápida de vendedores locales'
     }
   ];
 
   return (
-    <section className="py-8 px-4 bg-white">
-      <div className="max-w-4xl mx-auto">
+    <section className="bg-white">
+      <div className="container mx-auto px-4 py-12">
         <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
           ¿Cómo funciona Town?
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {steps.map((step, index) => (
-            <div key={index} className="text-center">
-              <div className="text-4xl mb-4">{step.icon}</div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-800">{step.title}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{step.description}</p>
+            <div key={index} className="rounded-xl border border-gray-200 bg-gray-50 p-5 text-center">
+              <div className="text-3xl mb-3">{step.icon}</div>
+              <h3 className="font-semibold text-gray-800 mb-2">{step.title}</h3>
+              <p className="text-gray-600 text-sm leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>

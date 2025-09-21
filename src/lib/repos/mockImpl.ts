@@ -115,7 +115,7 @@ const SELLER_USERS: SellerUser[] = [
   { id:'u4', username:'user4', password:'4', name:'Ana Rodríguez', phone:'+56912345681', email:'user4@bellezayestilo.com', sellerId:'s4', role:'seller', active:true, createdAt:new Date('2024-01-04') },
   { id:'u5', username:'user5', password:'5', name:'Pedro Martínez', phone:'+56912345682', email:'user5@automecanicapro.com', sellerId:'s5', role:'seller', active:false, createdAt:new Date('2024-01-05') },
   { id:'u6', username:'user6', password:'6', name:'Laura Sánchez', phone:'+56912345683', email:'user6@saborestradicionales.com', sellerId:'s6', role:'seller', active:true, createdAt:new Date('2024-01-06') },
-  { id:'u7', username:'user7', password:'7', name:'Roberto Torres', phone:'+56912345684', email:'user7@comidasrapidasexpress.com', sellerId:'s7', role:'seller', active:true, createdAt:new Date('2024-01-07') },
+  { id:'u7', username:'user7', password:'7', name:'Roberto Torres', phone:'+56912345684', email:'user7@comidasrapidasexpress.com', sellerId:'s7', role:'seller', active:false, createdAt:new Date('2024-01-07') },
   { id:'u8', username:'user8', password:'8', name:'Carmen Flores', phone:'+56912345685', email:'user8@almuerzosejecutivos.com', sellerId:'s8', role:'seller', active:true, createdAt:new Date('2024-01-08') },
   { id:'u9', username:'user9', password:'9', name:'Diego Herrera', phone:'+56912345686', email:'user9@parrillaymariscos.com', sellerId:'s9', role:'seller', active:true, createdAt:new Date('2024-01-09') }
 ];

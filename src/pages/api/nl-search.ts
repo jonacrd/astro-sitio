@@ -1,70 +1,180 @@
 import type { APIRoute } from 'astro';
 
-// Función temporal para debug (sin OpenAI)
+// Función mejorada para procesamiento de lenguaje natural
 async function parseQueryWithAI(userText: string) {
-  // Simular procesamiento de lenguaje natural
   const text = userText.toLowerCase();
   
-  // Detectar categorías
+  // Mapeo de sinónimos y variaciones
+  const synonymMap = {
+    // Comida
+    'perro': ['perro caliente', 'hot dog', 'perro'],
+    'perros': ['perro caliente', 'hot dog', 'perro'],
+    'empanada': ['empanada', 'empanadas'],
+    'empanadas': ['empanada', 'empanadas'],
+    'hamburguesa': ['hamburguesa', 'hamburguesas', 'burger'],
+    'hamburguesas': ['hamburguesa', 'hamburguesas', 'burger'],
+    'pizza': ['pizza', 'pizzas'],
+    'pizzas': ['pizza', 'pizzas'],
+    'arepa': ['arepa', 'arepas'],
+    'arepas': ['arepa', 'arepas'],
+    'cachapa': ['cachapa', 'cachapas'],
+    'cachapas': ['cachapa', 'cachapas'],
+    'lasaña': ['lasaña', 'lasagna', 'pasta'],
+    'lasagna': ['lasaña', 'lasagna', 'pasta'],
+    
+    // Bebidas
+    'malta': ['malta', 'maltas'],
+    'maltas': ['malta', 'maltas'],
+    'coca': ['coca cola', 'coca', 'refresco'],
+    'cerveza': ['cerveza', 'cervezas', 'beer'],
+    'cervezas': ['cerveza', 'cervezas', 'beer'],
+    'agua': ['agua', 'aguas'],
+    'aguas': ['agua', 'aguas'],
+    
+    // Alcohol
+    'ron': ['ron', 'cacique'],
+    'whisky': ['whisky', 'whiskey'],
+    'vodka': ['vodka'],
+    
+    // Postres
+    'torta': ['torta', 'tortas', 'cake'],
+    'tortas': ['torta', 'tortas', 'cake'],
+    'quesillo': ['quesillo', 'flan'],
+    'flan': ['flan', 'quesillo'],
+    
+    // Servicios
+    'corte': ['corte de cabello', 'corte', 'peluquería'],
+    'manicure': ['manicure', 'manicura'],
+    'mecánica': ['mecánica', 'taller', 'revisión'],
+    
+    // Minimarket
+    'pan': ['pan', 'panes'],
+    'panes': ['pan', 'panes'],
+    'leche': ['leche'],
+    'huevo': ['huevo', 'huevos'],
+    'huevos': ['huevo', 'huevos']
+  };
+  
+  // Detectar múltiples productos en la consulta
+  const multipleProductKeywords = [
+    'y', 'con', 'mas', 'más', 'ademas', 'además', 'tambien', 'también', 
+    'mas', 'más', 'unos', 'unas', 'varios', 'varias', 'algunos', 'algunas'
+  ];
+  
+  // Detectar si es una búsqueda múltiple
+  const hasMultipleProducts = multipleProductKeywords.some(keyword => text.includes(keyword));
+  
+  // Detectar categorías con más flexibilidad
   let category = null;
-  if (text.includes('comida') || text.includes('empanada') || text.includes('hamburguesa') || text.includes('pizza')) {
-    category = 'comida';
-  } else if (text.includes('bebida') || text.includes('malta') || text.includes('coca') || text.includes('cerveza')) {
-    category = 'bebidas';
-  } else if (text.includes('alcohol') || text.includes('ron') || text.includes('whisky') || text.includes('vodka')) {
-    category = 'alcohol';
-  } else if (text.includes('postre') || text.includes('torta') || text.includes('quesillo') || text.includes('flan')) {
-    category = 'postres';
-  } else if (text.includes('servicio') || text.includes('corte') || text.includes('manicure') || text.includes('mecánica')) {
-    category = 'servicios';
-  } else if (text.includes('minimarket') || text.includes('pan') || text.includes('leche') || text.includes('huevo')) {
-    category = 'minimarket';
+  const categoryKeywords = {
+    'comida': ['comida', 'empanada', 'hamburguesa', 'pizza', 'arepa', 'cachapa', 'perro', 'lasaña', 'alimento', 'alimentar', 'comer', 'almuerzo', 'cena', 'desayuno'],
+    'bebidas': ['bebida', 'malta', 'coca', 'cerveza', 'agua', 'refresco', 'soda', 'tomar', 'hidratar'],
+    'alcohol': ['alcohol', 'ron', 'whisky', 'vodka', 'licor', 'trago', 'beber'],
+    'postres': ['postre', 'torta', 'quesillo', 'flan', 'dulce', 'azúcar', 'chocolate'],
+    'servicios': ['servicio', 'corte', 'manicure', 'mecánica', 'taller', 'peluquería', 'reparar', 'arreglar'],
+    'minimarket': ['minimarket', 'pan', 'leche', 'huevo', 'abarrotes', 'supermercado', 'tienda']
+  };
+  
+  for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+    if (keywords.some(keyword => text.includes(keyword))) {
+      category = cat;
+      break;
+    }
   }
   
-  // Detectar delivery
+  // Detectar delivery con más variaciones
   let delivery = null;
-  if (text.includes('delivery') || text.includes('envío') || text.includes('domicilio')) {
+  const deliveryKeywords = ['delivery', 'envío', 'domicilio', 'llevar', 'traer', 'entrega', 'a domicilio'];
+  if (deliveryKeywords.some(keyword => text.includes(keyword))) {
     delivery = true;
   }
   
-  // Detectar online
+  // Detectar online con más variaciones
   let onlineOnly = null;
-  if (text.includes('online') || text.includes('disponible ahora') || text.includes('abierto')) {
+  const onlineKeywords = ['online', 'disponible ahora', 'abierto', 'activo', 'funcionando', 'trabajando'];
+  if (onlineKeywords.some(keyword => text.includes(keyword))) {
     onlineOnly = true;
   }
   
-  // Detectar presupuesto
+  // Detectar presupuesto mejorado
   let budgetMax = null;
   const budgetMatch = text.match(/(\d+)\s*(pesos?|dolares?|\$)/);
   if (budgetMatch) {
     budgetMax = parseInt(budgetMatch[1]);
-  } else if (text.includes('barato') || text.includes('económico') || text.includes('bajo precio')) {
+  } else if (text.includes('barato') || text.includes('económico') || text.includes('bajo precio') || text.includes('cheap')) {
     budgetMax = 20; // $20 para "barato"
+  } else if (text.includes('caro') || text.includes('costoso') || text.includes('expensive')) {
+    budgetMax = 100; // $100 para "caro"
   }
   
-  // Extraer términos de búsqueda
-  const terms = text.split(/\s+/).filter(term => 
+  // Extraer términos de búsqueda mejorados
+  let terms = text.split(/\s+/).filter(term => 
     term.length > 2 && 
-    !['con', 'para', 'que', 'del', 'los', 'las', 'una', 'uno', 'algo', 'quiero', 'necesito', 'busco'].includes(term)
+    !['con', 'para', 'que', 'del', 'los', 'las', 'una', 'uno', 'algo', 'quiero', 'necesito', 'busco', 'quien', 'donde', 'como', 'tiene', 'vende', 'hay', 'comer', 'beber', 'y', 'mas', 'más', 'ademas', 'además', 'tambien', 'también', 'unos', 'unas', 'varios', 'varias', 'algunos', 'algunas'].includes(term)
   );
   
-  // Si no hay términos específicos, usar palabras clave generales
-  if (terms.length === 0) {
-    if (text.includes('comida') || text.includes('algo') || text.includes('que comer')) {
-      terms.push('comida');
+  // Expandir términos usando sinónimos
+  const expandedTerms = [];
+  for (const term of terms) {
+    if (synonymMap[term]) {
+      expandedTerms.push(...synonymMap[term]);
+    } else {
+      expandedTerms.push(term);
     }
   }
   
+  // Si es una búsqueda múltiple, expandir términos automáticamente
+  if (hasMultipleProducts && expandedTerms.length > 0) {
+    // Agregar términos relacionados para búsqueda múltiple
+    const relatedTerms = [];
+    for (const term of expandedTerms) {
+      if (term.includes('empanada')) {
+        relatedTerms.push('hamburguesa', 'arepa', 'pizza');
+      } else if (term.includes('hamburguesa')) {
+        relatedTerms.push('empanada', 'perro', 'pizza');
+      } else if (term.includes('bebida') || term.includes('malta')) {
+        relatedTerms.push('cerveza', 'coca', 'agua');
+      } else if (term.includes('comida')) {
+        relatedTerms.push('empanada', 'hamburguesa', 'arepa', 'pizza', 'perro');
+      }
+    }
+    expandedTerms.push(...relatedTerms);
+  }
+  
+  // Si no hay términos específicos, usar palabras clave generales
+  if (expandedTerms.length === 0) {
+    if (text.includes('comida') || text.includes('algo') || text.includes('que comer') || text.includes('que hay') || text.includes('para comer') || (text.includes('necesito') && text.includes('algo'))) {
+      expandedTerms.push('comida');
+    } else if (text.includes('bebida') || text.includes('tomar') || text.includes('para beber') || (text.includes('necesito') && text.includes('beber'))) {
+      expandedTerms.push('bebida', 'malta', 'coca', 'cerveza', 'agua'); // Incluir bebidas específicas
+    } else if (text.includes('que') && (text.includes('hay') || text.includes('tiene') || text.includes('vende'))) {
+      // Consultas generales como "que hay", "que tiene", "que vende"
+      expandedTerms.push('comida'); // Por defecto buscar comida
+    } else if (text.includes('para comer') || text.includes('que comer')) {
+      expandedTerms.push('comida');
+    }
+  }
+  
+  // Si la consulta es muy general, expandir términos
+  if (expandedTerms.length === 1 && expandedTerms[0] === 'comida') {
+    expandedTerms.push('empanada', 'hamburguesa', 'pizza', 'arepa', 'perro'); // Términos de comida comunes
+  }
+  
   const result = {
-    terms,
+    terms: expandedTerms,
     category,
     delivery,
     onlineOnly,
     budgetMax,
-    topK: null
+    topK: null,
+    hasMultipleProducts,
+    isMultipleSearch: hasMultipleProducts
   };
   
   console.log('parseQueryWithAI result:', result);
+  console.log('Text analyzed:', text);
+  console.log('Category detected:', category);
+  console.log('Terms extracted:', expandedTerms);
   return result;
 }
 
@@ -114,16 +224,16 @@ export const GET: APIRoute = async ({ url }) => {
   ];
 
   const SELLERS = [
-    { id: 's1', name: 'Sabor Zuliano', online: true, delivery: true },
-    { id: 's2', name: 'Don Pancho', online: true, delivery: true },
-    { id: 's3', name: 'La Esquina', online: false, delivery: false },
-    { id: 's4', name: 'Express Food', online: true, delivery: true },
-    { id: 's5', name: 'Bodega Central', online: true, delivery: false },
-    { id: 's6', name: 'Salón Bella', online: false, delivery: false }
+    { id: 's1', name: 'Carnes del Zulia', online: true, delivery: true },
+    { id: 's2', name: 'Postres y Dulces', online: true, delivery: true },
+    { id: 's3', name: 'Licores Premium', online: false, delivery: false },
+    { id: 's4', name: 'Belleza y Estilo', online: true, delivery: true },
+    { id: 's5', name: 'AutoMecánica Pro', online: true, delivery: false },
+    { id: 's6', name: 'Sabores Tradicionales', online: true, delivery: true }
   ];
 
   const STOCKS = [
-    // Sabor Zuliano (s1) - comida venezolana
+    // Carnes del Zulia (s1) - carnes y fiambres
     { sellerId: 's1', productId: 'p_emp_queso', stock: 12, active: true },
     { sellerId: 's1', productId: 'p_emp_carne', stock: 8, active: true },
     { sellerId: 's1', productId: 'p_arepa', stock: 15, active: true },
@@ -132,7 +242,7 @@ export const GET: APIRoute = async ({ url }) => {
     { sellerId: 's1', productId: 'p_tres_leches', stock: 6, active: true },
     { sellerId: 's1', productId: 'p_quesillo', stock: 8, active: true },
     
-    // Don Pancho (s2) - comida rápida
+    // Postres y Dulces (s2) - postres y bebidas
     { sellerId: 's2', productId: 'p_hamburguesa', stock: 8, active: true },
     { sellerId: 's2', productId: 'p_hamburguesa_queso', stock: 6, active: true },
     { sellerId: 's2', productId: 'p_perro_caliente', stock: 12, active: true },
@@ -219,9 +329,17 @@ export const GET: APIRoute = async ({ url }) => {
         if (aiParsed.terms?.length) {
           const hasMatchingTerm = aiParsed.terms.some(term => 
             item.productTitle.toLowerCase().includes(term.toLowerCase()) ||
-            item.category.toLowerCase().includes(term.toLowerCase())
+            item.category.toLowerCase().includes(term.toLowerCase()) ||
+            item.sellerName.toLowerCase().includes(term.toLowerCase())
           );
-          matches = matches && hasMatchingTerm;
+          
+          // Si no hay coincidencia de términos pero hay una categoría detectada, 
+          // y los términos son generales como "comida", "bebida", permitir
+          if (!hasMatchingTerm && aiParsed.category && ['comida', 'bebida', 'alcohol', 'postres', 'servicios', 'minimarket'].includes(aiParsed.terms[0])) {
+            matches = matches && true; // Permitir si la categoría coincide
+          } else {
+            matches = matches && hasMatchingTerm;
+          }
         }
         
         // Filtrar por categoría específica (solo si se detectó)
@@ -259,10 +377,21 @@ export const GET: APIRoute = async ({ url }) => {
     }
   }
 
-  // Ordenar: online primero, mayor stock, menor precio
+  // Ordenar: online primero, vendedores con múltiples productos, mayor stock, menor precio
   filteredResults.sort((a, b) => {
+    // 1. Online primero
     if (a.online !== b.online) return a.online ? -1 : 1;
+    
+    // 2. Contar productos por vendedor para priorizar vendedores con múltiples productos
+    const sellerACount = filteredResults.filter(item => item.sellerId === a.sellerId).length;
+    const sellerBCount = filteredResults.filter(item => item.sellerId === b.sellerId).length;
+    
+    if (sellerACount !== sellerBCount) return sellerBCount - sellerACount;
+    
+    // 3. Mayor stock
     if (b.stock !== a.stock) return b.stock - a.stock;
+    
+    // 4. Menor precio
     return a.priceCents - b.priceCents;
   });
 
@@ -271,14 +400,35 @@ export const GET: APIRoute = async ({ url }) => {
     filteredResults = filteredResults.slice(0, aiParsed.topK);
   }
 
+  // Crear mensaje descriptivo mejorado
+  let message;
+  if (filteredResults.length > 0) {
+    if (aiParsed?.hasMultipleProducts) {
+      // Agrupar por vendedor para mostrar información útil
+      const sellerGroups = filteredResults.reduce((acc, item) => {
+        if (!acc[item.sellerId]) {
+          acc[item.sellerId] = { seller: item.sellerName, products: [], online: item.online };
+        }
+        acc[item.sellerId].products.push(item.productTitle);
+        return acc;
+      }, {});
+      
+      const sellerCount = Object.keys(sellerGroups).length;
+      message = `Encontré ${filteredResults.length} productos para "${qRaw}" de ${sellerCount} vendedor${sellerCount > 1 ? 'es' : ''}. ${Object.values(sellerGroups).map(group => `${group.seller} (${group.products.length} productos)${group.online ? ' 🟢' : ' ⚪'}`).join(', ')}`;
+    } else {
+      message = `Encontré ${filteredResults.length} producto${filteredResults.length !== 1 ? 's' : ''} para "${qRaw}"`;
+    }
+  } else {
+    message = `No hay productos disponibles para "${qRaw}". Prueba con otras palabras o categorías.`;
+  }
+
   return new Response(JSON.stringify({
     query: qRaw,
     count: filteredResults.length,
     results: filteredResults,
     aiUsed: !!aiParsed,
-    message: filteredResults.length > 0 
-      ? `Encontré ${filteredResults.length} producto${filteredResults.length !== 1 ? 's' : ''} para "${qRaw}"`
-      : `No hay productos disponibles para "${qRaw}". Prueba con otras palabras o categorías.`
+    hasMultipleProducts: aiParsed?.hasMultipleProducts || false,
+    message
   }), { 
     headers: { 
       'content-type':'application/json', 
