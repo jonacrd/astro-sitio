@@ -1,0 +1,37 @@
+seller_id,product_title,price_cents,stock,active
+SELLER_ID_1,Arepa Reina Pepiada,2514,8,True
+SELLER_ID_1,Arepa Domino,2681,15,True
+SELLER_ID_1,Empanada de Queso,1928,12,True
+SELLER_ID_1,Empanada de Pollo,1804,25,True
+SELLER_ID_1,Cachapa con Queso,4089,26,True
+SELLER_ID_1,Hamburguesa Clásica,3732,9,True
+SELLER_ID_1,Perro Caliente,2030,10,True
+SELLER_ID_1,Tequeños (6u),3023,15,True
+SELLER_ID_1,Asado con Puré,5517,27,True
+SELLER_ID_1,Completo Italiano,2327,25,True
+SELLER_ID_1,Sopaipillas (6u),1803,28,True
+SELLER_ID_1,Torta Tres Leches,3858,21,True
+SELLER_ID_2,Quesillo Venezolano,2825,22,True
+SELLER_ID_2,Malta 355ml,1284,8,True
+SELLER_ID_2,Papelón con Limón 500ml,1063,21,True
+SELLER_ID_2,Chicha Andina 500ml,1648,16,True
+SELLER_ID_2,Refresco 2L,2459,14,True
+SELLER_ID_2,Cerveza 355ml,1644,11,True
+SELLER_ID_2,Jugo Natural 500ml,1294,20,True
+SELLER_ID_2,Harina PAN 1kg,2099,19,True
+SELLER_ID_2,Arroz 1kg,1652,27,True
+SELLER_ID_2,Azúcar 1kg,1370,9,True
+SELLER_ID_2,Aceite 1L,3470,999,True
+SELLER_ID_2,Leche 1L,2049,11,True
+SELLER_ID_3,Detergente 1kg,2987,10,True
+SELLER_ID_3,Pasta 500g,1765,17,True
+SELLER_ID_3,Salsa de Tomate 300g,1370,26,True
+SELLER_ID_3,Mayonesa 300g,1396,10,True
+SELLER_ID_3,Atún 170g,1446,15,True
+SELLER_ID_3,Jamón Serrano 200g,4596,10,True
+SELLER_ID_3,Salchichón 200g,3238,11,True
+SELLER_ID_3,Carne Molida 1kg,6389,16,True
+SELLER_ID_3,Lomo de Cerdo 1kg,7764,28,True
+SELLER_ID_3,Pollo Entero 1.5kg,7173,13,True
+SELLER_ID_3,Polera Básica Unisex,6679,19,True
+SELLER_ID_3,Polerón con Capucha,15914,16,True

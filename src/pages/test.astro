@@ -57,16 +57,24 @@
 
     async function testAuth() {
       const results = document.getElementById('results');
-      results.innerHTML = '<p class="info">Probando endpoint de auth...</p>';
+      results.innerHTML = '<p class="info">Probando autenticación con Supabase...</p>';
       
       try {
-        const response = await fetch('/api/auth/me-universal');
-        const data = await response.json();
+        const { supabase } = await import('../lib/supabaseClient');
         
-        results.innerHTML = `
-          <h3>✅ Test Auth - EXITOSO</h3>
-          <pre>${JSON.stringify(data, null, 2)}</pre>
-        `;
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          results.innerHTML = `
+            <h3>❌ Test Auth - ERROR</h3>
+            <p class="error">${error.message}</p>
+          `;
+        } else {
+          results.innerHTML = `
+            <h3>✅ Test Auth - EXITOSO</h3>
+            <pre>${JSON.stringify({ user: user ? { id: user.id, email: user.email } : null }, null, 2)}</pre>
+          `;
+        }
       } catch (error) {
         results.innerHTML = `
           <h3>❌ Test Auth - ERROR</h3>
@@ -77,34 +85,35 @@
 
     async function testDatabase() {
       const results = document.getElementById('results');
-      results.innerHTML = '<p class="info">Probando conexión a base de datos...</p>';
+      results.innerHTML = '<p class="info">Probando registro con Supabase...</p>';
       
       try {
-        // Test con registro simple
-        const testUser = {
-          name: 'Test User',
-          phone: '+1234567890',
-          password: 'test123'
-        };
+        const { supabase } = await import('../lib/supabaseClient');
         
-        const response = await fetch('/api/auth/register-universal', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(testUser)
+        // Test con registro simple
+        const testEmail = 'test@example.com';
+        const testPassword = 'test123456';
+        
+        const { data, error } = await supabase.auth.signUp({
+          email: testEmail,
+          password: testPassword,
+          options: {
+            emailRedirectTo: window.location.origin
+          }
         });
         
-        const data = await response.json();
-        
-        if (response.ok) {
+        if (error) {
           results.innerHTML = `
-            <h3>✅ Test Base de Datos - EXITOSO</h3>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
+            <h3>❌ Test Base de Datos - ERROR</h3>
+            <p class="error">${error.message}</p>
           `;
         } else {
           results.innerHTML = `
-            <h3>⚠️ Test Base de Datos - RESPUESTA INESPERADA</h3>
-            <pre>Status: ${response.status}</pre>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
+            <h3>✅ Test Base de Datos - EXITOSO</h3>
+            <pre>${JSON.stringify({ 
+              user: data.user ? { id: data.user.id, email: data.user.email } : null,
+              session: data.session ? 'Session created' : 'No session'
+            }, null, 2)}</pre>
           `;
         }
       } catch (error) {

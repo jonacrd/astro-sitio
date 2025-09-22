@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import UpgradeToSeller from '../components/react/UpgradeToSeller.tsx';
+---
+
+<BaseLayout title="Convertirse en Vendedor">
+  <main class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4">
+      <UpgradeToSeller client:load onUpgrade={() => {}} />
+    </div>
+  </main>
+</BaseLayout>

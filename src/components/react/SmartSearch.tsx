@@ -138,12 +138,27 @@ export default function SmartSearch(){
                   >
                     Ver
                   </a>
-                  <a 
-                    href={result.addToCartUrl} 
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const { supabase } = await import('../../lib/supabaseClient');
+                        const { data: { user } } = await supabase.auth.getUser();
+                        
+                        if (!user) {
+                          alert('Debes iniciar sesión para agregar productos al carrito');
+                          return;
+                        }
+                        
+                        window.location.href = result.addToCartUrl;
+                      } catch (error) {
+                        console.error('Error checking auth:', error);
+                        alert('Error al verificar autenticación');
+                      }
+                    }}
                     className="flex-1 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm text-center transition-colors"
                   >
                     Añadir
-                  </a>
+                  </button>
                 </div>
               </article>
             ))}

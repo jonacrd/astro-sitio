@@ -154,8 +154,15 @@
 
     async function refreshAuth() {
       try {
-        const response = await fetch('/api/auth/me-universal');
-        const { user } = await response.json();
+        const { supabase } = await import('../lib/supabaseClient');
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+          console.error('Supabase auth error:', error);
+          showLoggedOutState();
+          return;
+        }
         
         if (user) {
           btnLogin.style.display = 'none';
@@ -164,14 +171,19 @@
           btnSeller.textContent = 'Mi Cuenta';
           btnSeller.onclick = () => window.location.href = '/dashboard';
         } else {
-          btnLogin.style.display = 'inline-block';
-          btnRegister.style.display = 'inline-block';
-          btnSeller.style.display = 'inline-block';
-          btnSeller.textContent = 'Quiero Vender';
+          showLoggedOutState();
         }
       } catch (error) {
         console.log('Usuario no autenticado');
+        showLoggedOutState();
       }
+    }
+
+    function showLoggedOutState() {
+      btnLogin.style.display = 'inline-block';
+      btnRegister.style.display = 'inline-block';
+      btnSeller.style.display = 'inline-block';
+      btnSeller.textContent = 'Quiero Vender';
     }
 
     btnLogin.addEventListener('click', () => {

@@ -19,6 +19,21 @@ export default function AddToCartButton({
   const handleAddToCart = async () => {
     if (loading || disabled || stock === 0) return;
 
+    // Verificar autenticación primero
+    try {
+      const { supabase } = await import('../../lib/supabaseClient');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('Debes iniciar sesión para agregar productos al carrito');
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking auth:', error);
+      alert('Error al verificar autenticación');
+      return;
+    }
+
     setLoading(true);
 
     try {

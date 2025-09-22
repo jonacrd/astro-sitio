@@ -1,0 +1,45 @@
+title,description,category,image_url,base_price_cents,active
+Arepa Reina Pepiada,"Arepa de pollo, palta y mayo",comida,,2800,True
+Arepa Domino,Arepa de caraotas con queso,comida,,2600,True
+Empanada de Queso,Empanada frita tradicional,comida,,1800,True
+Empanada de Pollo,Empanada frita de pollo mechado,comida,,2000,True
+Cachapa con Queso,Torta de maíz tierno con queso,comida,,4200,True
+Hamburguesa Clásica,"Pan, carne, lechuga, tomate, queso",comida,,3500,True
+Perro Caliente,"Pan, salchicha, salsas",comida,,2200,True
+Tequeños (6u),Palitos de queso fritos,comida,,3000,True
+Asado con Puré,Carne asada con puré de papas,comida,,5200,True
+Completo Italiano,"Hot dog con palta, tomate y mayo",comida,,2500,True
+Sopaipillas (6u),Frituras de zapallo con pebre,comida,,1800,True
+Torta Tres Leches,Bizcocho humedecido en tres leches,comida,,3500,True
+Quesillo Venezolano,Flan tradicional venezolano,comida,,2800,True
+Malta 355ml,Bebida malteada,bebidas,,1200,True
+Papelón con Limón 500ml,Bebida de panela con limón,bebidas,,1100,True
+Chicha Andina 500ml,Bebida cremosa de arroz,bebidas,,1500,True
+Refresco 2L,Bebida gaseosa sabor cola,bebidas,,2500,True
+Cerveza 355ml,Bebida alcohólica rubia,bebidas,,1500,True
+Jugo Natural 500ml,Pulpa natural (naranja/mango),bebidas,,1400,True
+Harina PAN 1kg,Harina de maíz precocida,minimarket,,2200,True
+Arroz 1kg,Grano largo,minimarket,,1500,True
+Azúcar 1kg,Endulzante granulado,minimarket,,1300,True
+Aceite 1L,Aceite vegetal,minimarket,,3200,True
+Leche 1L,Larga vida,minimarket,,1700,True
+Detergente 1kg,Polvo para lavar ropa,minimarket,,2800,True
+Pasta 500g,Tallarín/tricolor,minimarket,,1400,True
+Salsa de Tomate 300g,Salsa lista para pastas,minimarket,,1200,True
+Mayonesa 300g,Aderezo clásico,minimarket,,1400,True
+Atún 170g,En aceite,minimarket,,1600,True
+Jamón Serrano 200g,Feteado,minimarket,,4500,True
+Salchichón 200g,Feteado,minimarket,,3200,True
+Carne Molida 1kg,Vacuno,minimarket,,6200,True
+Lomo de Cerdo 1kg,Corte de cerdo,minimarket,,7500,True
+Pollo Entero 1.5kg,Entero fresco,minimarket,,7000,True
+Polera Básica Unisex,"Algodón, varias tallas",ropa,,6500,True
+Polerón con Capucha,"Algodón, varios colores",ropa,,15900,True
+Audífonos In‑Ear,Cable 3.5mm con mic,tecnologia,,9900,True
+Cargador USB 20W,Rápida carga,tecnologia,,8900,True
+Corte de Cabello,Servicio de peluquería,servicios,,8000,True
+Manicure Completa,Servicio de estética,servicios,,5000,True
+Revisión de Motor,Servicio mecánico básico,servicios,,25000,True
+Cambio de Aceite,Incluye mano de obra,servicios,,15000,True
+Instalación de Alarma,Servicio automotriz,servicios,,80000,True
+Impresiones B/N (10u),Hojas carta A4,servicios,,1200,True

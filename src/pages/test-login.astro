@@ -24,7 +24,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
         <form id="test-login" class="space-y-4">
           <div>
             <label class="block text-sm font-medium mb-1">Username:</label>
-            <input type="text" id="username" placeholder="user1" required class="w-full p-2 border rounded" />
+            <input type="email" id="username" placeholder="test@example.com" required class="w-full p-2 border rounded" />
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Password:</label>
@@ -64,21 +64,21 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const username = (document.getElementById('username') as HTMLInputElement).value;
+    const email = (document.getElementById('username') as HTMLInputElement).value;
     const password = (document.getElementById('password') as HTMLInputElement).value;
 
     try {
-      const response = await fetch('/api/auth/login-universal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: username, password })
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        showResult(`Login exitoso: ${data.name} (${data.role})`);
-      } else {
-        showResult('Login fallido: Credenciales incorrectas', true);
+      if (error) {
+        showResult('Login fallido: ' + error.message, true);
+      } else if (data.user) {
+        showResult(`Login exitoso: ${data.user.email}`);
       }
     } catch (error) {
       showResult('Error en login', true);
@@ -87,11 +87,14 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
   checkMeBtn?.addEventListener('click', async () => {
     try {
-      const response = await fetch('/api/auth/me-universal');
-      const data = await response.json();
+      const { supabase } = await import('../lib/supabaseClient');
       
-      if (data.user) {
-        showResult(`Usuario actual: ${data.user.name} (${data.user.role}) - Seller: ${data.user.sellerId || 'N/A'}`);
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        showResult('Error al verificar usuario: ' + error.message, true);
+      } else if (user) {
+        showResult(`Usuario actual: ${user.email} - ID: ${user.id}`);
       } else {
         showResult('No hay usuario logueado', true);
       }
@@ -102,11 +105,14 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
   logoutBtn?.addEventListener('click', async () => {
     try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' });
-      if (response.ok) {
-        showResult('Logout exitoso');
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        showResult('Error en logout: ' + error.message, true);
       } else {
-        showResult('Error en logout', true);
+        showResult('Logout exitoso');
       }
     } catch (error) {
       showResult('Error en logout', true);

@@ -111,7 +111,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   <dialog id="dlg-login" class="backdrop:bg-black/50 bg-white rounded-lg p-6 max-w-md w-full">
     <form id="form-login" class="space-y-4">
       <h3 class="text-lg font-bold">Iniciar Sesión</h3>
-      <input name="phone" type="text" placeholder="Teléfono o Username (ej: user1)" required class="w-full p-2 border rounded" />
+      <input name="email" type="email" placeholder="Email" required class="w-full p-2 border rounded" />
       <input name="password" type="password" placeholder="Contraseña" required class="w-full p-2 border rounded" />
       <div class="flex gap-2">
         <button type="submit" class="flex-1 bg-blue-600 text-white p-2 rounded">Entrar</button>
@@ -122,9 +122,8 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
 
   <dialog id="dlg-register" class="backdrop:bg-black/50 bg-white rounded-lg p-6 max-w-md w-full">
     <form id="form-register" class="space-y-4">
-      <h3 class="text-lg font-bold">Registrarse</h3>
-      <input name="name" type="text" placeholder="Nombre completo" required class="w-full p-2 border rounded" />
-      <input name="phone" type="tel" placeholder="Teléfono" required class="w-full p-2 border rounded" />
+      <h3 class="text-lg font-bold">Crear Cuenta</h3>
+      <input name="email" type="email" placeholder="Email" required class="w-full p-2 border rounded" />
       <input name="password" type="password" placeholder="Contraseña" required class="w-full p-2 border rounded" />
       <div class="flex gap-2">
         <button type="submit" class="flex-1 bg-green-600 text-white p-2 rounded">Registrarse</button>
@@ -137,7 +136,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     <form id="form-vender" class="space-y-4">
       <h3 class="text-lg font-bold">Registrarse como Vendedor</h3>
       <input name="name" type="text" placeholder="Nombre completo" required class="w-full p-2 border rounded" />
-      <input name="phone" type="tel" placeholder="Teléfono" required class="w-full p-2 border rounded" />
+      <input name="email" type="email" placeholder="Email" required class="w-full p-2 border rounded" />
       <input name="password" type="password" placeholder="Contraseña" required class="w-full p-2 border rounded" />
       <input name="storeName" type="text" placeholder="Nombre de la tienda" required class="w-full p-2 border rounded" />
       <input name="addressLine1" type="text" placeholder="Dirección" required class="w-full p-2 border rounded" />
@@ -169,39 +168,85 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   const formRegister = document.getElementById('form-register') as HTMLFormElement;
   const formVender = document.getElementById('form-vender') as HTMLFormElement;
 
-  // Función para refrescar el estado de autenticación
+  // Función para refrescar el estado de autenticación con Supabase
   async function refreshMe() {
     try {
-      const r = await fetch('/api/auth/me-universal');
-      const data = r.ok ? await r.json() : { user: null };
-      const user = data?.user;
+      // Importar dinámicamente Supabase para evitar problemas de SSR
+      const { supabase } = await import('../lib/supabaseClient');
       
-      console.log('Auth state:', user ? `Logged in as ${user.name} (${user.role})` : 'Not logged in');
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        console.error('Supabase auth error:', error);
+        showLoggedOutState();
+        return;
+      }
       
       if (user) {
-        // Usuario logueado - mostrar logout y dashboard
+        // Verificar si el usuario tiene perfil completo
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, phone, is_seller')
+          .eq('id', user.id)
+          .single();
+
+        console.log('Auth state:', `Logged in as ${user.email}`, profile);
+
+        // Usuario logueado - mostrar logout y opciones apropiadas
         btnLogin?.classList.add('hidden');
         btnRegister?.classList.add('hidden');
-        linkVender?.classList.add('hidden');
         btnLogout?.classList.remove('hidden');
-        linkDash?.classList.remove('hidden');
+
+        if (!profile?.name || !profile?.phone) {
+          // Perfil incompleto - mostrar botón para completar
+          linkDash?.classList.add('hidden');
+          linkVender?.classList.add('hidden');
+          showCompleteProfileButton();
+        } else if (profile.is_seller) {
+          // Es vendedor - mostrar dashboard vendedor
+          linkDash?.classList.remove('hidden');
+          linkVender?.classList.add('hidden');
+          linkDash.textContent = 'Dashboard Vendedor';
+          linkDash.href = '/dashboard';
+        } else {
+          // Usuario normal - mostrar opciones
+          linkDash?.classList.remove('hidden');
+          linkVender?.classList.remove('hidden');
+          linkDash.textContent = 'Mi Cuenta';
+          linkDash.href = '/dashboard';
+          linkVender.textContent = 'VENDER';
+          linkVender.href = '/upgrade-seller';
+        }
       } else {
-        // Usuario no logueado - mostrar login y registro
-        btnLogin?.classList.remove('hidden');
-        btnRegister?.classList.remove('hidden');
-        linkVender?.classList.remove('hidden');
-        btnLogout?.classList.add('hidden');
-        linkDash?.classList.add('hidden');
+        showLoggedOutState();
       }
     } catch (error) {
       console.error('Error checking auth:', error);
-      // En caso de error, asumir que no hay usuario logueado
-      btnLogin?.classList.remove('hidden');
-      btnRegister?.classList.remove('hidden');
-      linkVender?.classList.remove('hidden');
-      btnLogout?.classList.add('hidden');
-      linkDash?.classList.add('hidden');
+      showLoggedOutState();
     }
+  }
+
+  function showCompleteProfileButton() {
+    // Crear botón temporal para completar perfil
+    const existingBtn = document.getElementById('btn-complete-profile');
+    if (existingBtn) return;
+
+    const completeBtn = document.createElement('button');
+    completeBtn.id = 'btn-complete-profile';
+    completeBtn.textContent = 'Completar Perfil';
+    completeBtn.className = 'px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors';
+    completeBtn.onclick = () => window.location.href = '/complete-profile';
+
+    // Insertar después del botón de logout
+    btnLogout?.parentNode?.insertBefore(completeBtn, btnLogout.nextSibling);
+  }
+
+  function showLoggedOutState() {
+    btnLogin?.classList.remove('hidden');
+    btnRegister?.classList.remove('hidden');
+    linkVender?.classList.remove('hidden');
+    btnLogout?.classList.add('hidden');
+    linkDash?.classList.add('hidden');
   }
 
   // Event listeners para botones
@@ -229,48 +274,66 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     if (e.target === dlgVender) dlgVender.close();
   });
 
-  // Formulario de login
+  // Formulario de login con Supabase
   formLogin?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const body = Object.fromEntries(new FormData(e.target as HTMLFormElement).entries());
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     
     try {
-      const r = await fetch('/api/auth/login-universal', { 
-        method: 'POST', 
-        headers: { 'content-type': 'application/json' }, 
-        body: JSON.stringify(body) 
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
       });
       
-      if (r.ok) { 
-        dlgLogin?.close(); 
-        refreshMe(); 
-      } else { 
-        alert('Credenciales incorrectas'); 
+      if (error) {
+        alert('Credenciales incorrectas: ' + error.message);
+        return;
+      }
+      
+      if (data.user) {
+        dlgLogin?.close();
+        refreshMe();
       }
     } catch (error) {
+      console.error('Login error:', error);
       alert('Error al iniciar sesión');
     }
   });
 
-  // Formulario de registro
+  // Formulario de registro con Supabase
   formRegister?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const body = Object.fromEntries(new FormData(e.target as HTMLFormElement).entries());
+    const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     
     try {
-      const r = await fetch('/api/auth/register-universal', { 
-        method: 'POST', 
-        headers: { 'content-type': 'application/json' }, 
-        body: JSON.stringify(body) 
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: { 
+          emailRedirectTo: window.location.origin
+        }
       });
       
-      if (r.ok) { 
-        dlgRegister?.close(); 
-        refreshMe(); 
-      } else { 
-        alert('No se pudo registrar. El teléfono ya está en uso.'); 
+      if (error) {
+        alert('Error al registrarse: ' + error.message);
+        return;
+      }
+      
+      if (data.user) {
+        dlgRegister?.close();
+        alert('¡Registro exitoso! Ahora completa tu perfil.');
+        window.location.href = '/complete-profile';
       }
     } catch (error) {
+      console.error('Register error:', error);
       alert('Error al registrarse');
     }
   });
@@ -298,22 +361,25 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     }
   });
 
-  // Logout
+  // Logout con Supabase
   btnLogout?.addEventListener('click', async () => {
     console.log('Logout clicked');
     try {
-      const response = await fetch('/api/auth/logout', { method: 'POST' }); 
-      console.log('Logout response:', response.ok);
+      const { supabase } = await import('../lib/supabaseClient');
       
-      // Forzar refreshMe inmediatamente y también después de un delay
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+      } else {
+        console.log('Logout successful');
+      }
+      
+      // Refrescar el estado de autenticación
       refreshMe();
-      setTimeout(() => {
-        console.log('Refreshing after timeout');
-        refreshMe(); 
-      }, 200);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
-      // Forzar refreshMe incluso si hay error
+      // Aún así intentar refreshMe
       refreshMe();
     }
   });

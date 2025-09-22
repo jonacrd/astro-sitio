@@ -1,0 +1,125 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SellerGuard from '../components/react/SellerGuard.tsx'
+import SellerStatusToggle from '../components/react/SellerStatusToggle.tsx'
+---
+
+<BaseLayout title="Dashboard Vendedor">
+  <SellerGuard client:load>
+    <main class="min-h-screen bg-gray-50">
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Vendedor</h1>
+          <p class="text-gray-600">Gestiona tu inventario y ventas</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Estado Online -->
+          <div class="lg:col-span-1">
+            <SellerStatusToggle client:load />
+          </div>
+
+          <!-- Inventario -->
+          <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-md p-6">
+              <h2 class="text-xl font-semibold text-gray-800 mb-4">Mi Inventario</h2>
+              <div id="inventory-container">
+                <p class="text-gray-500">Cargando inventario...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Ventas Hoy</h3>
+            <p class="text-3xl font-bold text-green-600">$0</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Productos Activos</h3>
+            <p class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Stock Bajo</h3>
+            <p class="text-3xl font-bold text-red-600">0</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </SellerGuard>
+</BaseLayout>
+
+<script>
+  // Cargar inventario del vendedor
+  async function loadInventory() {
+    try {
+      const { supabase } = await import('../lib/supabaseClient');
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: inventory, error } = await supabase
+        .from('seller_products')
+        .select(`
+          id,
+          stock,
+          active,
+          price_cents,
+          product:products(
+            id,
+            title,
+            category,
+            image_url
+          )
+        `)
+        .eq('seller_id', user.id);
+
+      if (error) {
+        console.error('Error loading inventory:', error);
+        return;
+      }
+
+      const container = document.getElementById('inventory-container');
+      if (!container) return;
+
+      if (!inventory || inventory.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-gray-500 mb-4">No tienes productos en tu inventario</p>
+            <button onclick="addProducts()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              Agregar Productos
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = inventory.map((item: any) => `
+        <div class="border border-gray-200 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-800">${item.product?.title || 'Producto'}</h4>
+              <p class="text-sm text-gray-600">Categoría: ${item.product?.category || 'N/A'}</p>
+              <p class="text-sm text-gray-600">Precio: $${(item.price_cents / 100).toFixed(2)}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-600">Stock: <span class="font-semibold ${item.stock < 5 ? 'text-red-600' : 'text-green-600'}">${item.stock}</span></p>
+              <p class="text-sm text-gray-600">Estado: <span class="font-semibold ${item.active ? 'text-green-600' : 'text-red-600'}">${item.active ? 'Activo' : 'Inactivo'}</span></p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error loading inventory:', error);
+    }
+  }
+
+  // Función para agregar productos (placeholder)
+  (window as any).addProducts = function() {
+    alert('Función de agregar productos en desarrollo');
+  };
+
+  // Cargar inventario al cargar la página
+  document.addEventListener('DOMContentLoaded', loadInventory);
+</script>
