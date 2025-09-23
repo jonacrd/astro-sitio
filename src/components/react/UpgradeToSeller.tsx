@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { getUser } from '../../lib/session';
+import { supabase } from '../../lib/supabase-browser';
 
 interface UpgradeToSellerProps {
   onUpgrade: () => void;
@@ -8,36 +9,74 @@ interface UpgradeToSellerProps {
 export default function UpgradeToSeller({ onUpgrade }: UpgradeToSellerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Verificar autenticación al montar
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const user = await getUser();
+        if (!user) {
+          setError('No hay usuario autenticado');
+        }
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
+        setError('Error verificando autenticación');
+      } finally {
+        setIsInitialized(true);
+      }
+    }
+    checkAuth();
+  }, []);
 
   const handleUpgrade = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔍 Verificando autenticación...');
+      const user = await getUser();
       
       if (!user) {
-        setError('No hay usuario autenticado');
+        console.error('❌ No hay usuario autenticado');
+        setError('No hay usuario autenticado. Por favor inicia sesión primero.');
         return;
       }
 
+      console.log('✅ Usuario autenticado:', user.email);
+
+      console.log('🔄 Actualizando perfil a vendedor...');
       const { error } = await supabase.from('profiles').update({ 
         is_seller: true 
       }).eq('id', user.id);
 
       if (error) {
+        console.error('❌ Error al actualizar perfil:', error);
         setError('Error al actualizar perfil: ' + error.message);
         return;
       }
 
+      console.log('✅ Perfil actualizado a vendedor exitosamente');
       alert('¡Ahora eres vendedor! Accede a tu dashboard.');
-      window.location.href = '/dashboard';
+      onUpgrade();
     } catch (err: any) {
+      console.error('❌ Error inesperado:', err);
       setError('Error inesperado: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Verificando autenticación...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">

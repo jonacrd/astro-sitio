@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { createClient } from '@supabase/supabase-js';
 
 // Función mejorada para procesamiento de lenguaje natural
 async function parseQueryWithAI(userText: string) {

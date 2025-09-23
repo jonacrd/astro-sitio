@@ -54,7 +54,7 @@ import SellerStatusToggle from '../components/react/SellerStatusToggle.tsx'
   // Cargar inventario del vendedor
   async function loadInventory() {
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;

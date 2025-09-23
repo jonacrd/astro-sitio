@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SellerGuard from '../../components/react/SellerGuard.tsx';
+import SelectSellerProducts from '../../components/react/SelectSellerProducts.tsx';
+---
+
+<BaseLayout title="Mis Productos - Dashboard Vendedor">
+  <SellerGuard client:load>
+    <main class="min-h-screen bg-gray-50">
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Mis Productos</h1>
+          <p class="text-gray-600">Gestiona tu catálogo de productos y precios</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+              <div class="p-3 bg-blue-100 rounded-lg">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Productos Activos</p>
+                <p class="text-2xl font-bold text-gray-900" id="active-products">-</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+              <div class="p-3 bg-green-100 rounded-lg">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Stock Total</p>
+                <p class="text-2xl font-bold text-gray-900" id="total-stock">-</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+              <div class="p-3 bg-yellow-100 rounded-lg">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Stock Bajo</p>
+                <p class="text-2xl font-bold text-gray-900" id="low-stock">-</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center">
+              <div class="p-3 bg-purple-100 rounded-lg">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Valor Total</p>
+                <p class="text-2xl font-bold text-gray-900" id="total-value">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <SelectSellerProducts client:load />
+        </div>
+      </div>
+    </main>
+  </SellerGuard>
+</BaseLayout>
+
+<script>
+  // Función para cargar estadísticas del vendedor
+  async function loadSellerStats() {
+    try {
+      const { supabase } = await import('../../lib/supabase-browser');
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+
+      const response = await fetch('/api/seller/products/list?limit=1000', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      const result = await response.json();
+      if (!result.success) return;
+
+      const products = result.data || [];
+      
+      // Calcular estadísticas
+      const activeProducts = products.filter(p => p.active).length;
+      const totalStock = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+      const lowStock = products.filter(p => p.stock < 5 && p.active).length;
+      const totalValue = products.reduce((sum, p) => sum + (p.price_cents * p.stock / 100), 0);
+
+      // Actualizar UI
+      const activeEl = document.getElementById('active-products');
+      const stockEl = document.getElementById('total-stock');
+      const lowStockEl = document.getElementById('low-stock');
+      const valueEl = document.getElementById('total-value');
+
+      if (activeEl) activeEl.textContent = activeProducts.toString();
+      if (stockEl) stockEl.textContent = totalStock.toString();
+      if (lowStockEl) lowStockEl.textContent = lowStock.toString();
+      if (valueEl) valueEl.textContent = `$${totalValue.toFixed(2)}`;
+
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  }
+
+  // Cargar estadísticas al cargar la página
+  document.addEventListener('DOMContentLoaded', loadSellerStats);
+</script>

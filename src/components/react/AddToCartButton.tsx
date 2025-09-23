@@ -1,7 +1,10 @@
 import { useState } from "react";
 
 interface AddToCartButtonProps {
-  productId: number;
+  productId: string;
+  sellerId: string;
+  title: string;
+  price_cents: number;
   stock: number;
   disabled?: boolean;
   className?: string;
@@ -9,6 +12,9 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({
   productId,
+  sellerId,
+  title,
+  price_cents,
   stock,
   disabled = false,
   className = "",
@@ -19,42 +25,43 @@ export default function AddToCartButton({
   const handleAddToCart = async () => {
     if (loading || disabled || stock === 0) return;
 
-    // Verificar autenticación primero
-    try {
-      const { supabase } = await import('../../lib/supabaseClient');
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        alert('Debes iniciar sesión para agregar productos al carrito');
-        return;
-      }
-    } catch (error) {
-      console.error('Error checking auth:', error);
-      alert('Error al verificar autenticación');
-      return;
-    }
-
     setLoading(true);
 
     try {
+      // Verificar autenticación y obtener token
+      const { supabase } = await import('../../lib/supabase-browser');
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        alert('Debes iniciar sesión para agregar productos al carrito');
+        return;
+      }
+
       const response = await fetch("/api/cart/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ productId, quantity: 1 }),
+        body: JSON.stringify({ 
+          sellerId, 
+          productId, 
+          title, 
+          price_cents, 
+          qty: 1 
+        }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.success) {
+      if (result.success) {
         setAdded(true);
 
         // Disparar evento personalizado para actualizar el widget del carrito
         const cartUpdateEvent = new CustomEvent("cart-updated", {
           detail: {
-            itemCount: data.itemCount,
-            totalCents: data.totalCents,
+            itemCount: result.itemCount,
+            totalCents: result.totalCents,
             productId: productId,
           },
         });
@@ -63,14 +70,12 @@ export default function AddToCartButton({
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
-        // Actualización simple - el polling del CartWidget se encargará del resto
-        
         console.log('Cart update event dispatched:', cartUpdateEvent.detail);
 
         // Resetear estado después de 2 segundos
         setTimeout(() => setAdded(false), 2000);
       } else {
-        throw new Error(data.error || "Error al agregar al carrito");
+        throw new Error(result.error || "Error al agregar al carrito");
       }
     } catch (error) {
       console.error("Error adding to cart:", error);

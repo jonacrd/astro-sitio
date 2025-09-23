@@ -134,6 +134,7 @@ let SELLERS: SellerState[] = [
   { id:'s9', storeName:'Parrilla y Mariscos', onlineManual:true, timezone:'America/Santiago', hoursJson:{ mon:[18,23], tue:[18,23], wed:[18,23], thu:[18,23], fri:[18,24], sat:[18,24], sun:[18,22] } }
 ];
 
+
 function isOpen(hours:any, now=new Date()){
   const key = ['sun','mon','tue','wed','thu','fri','sat'][now.getDay()];
   const span = hours?.[key];

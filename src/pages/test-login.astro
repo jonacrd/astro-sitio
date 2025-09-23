@@ -68,7 +68,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
     const password = (document.getElementById('password') as HTMLInputElement).value;
 
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
@@ -87,7 +87,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
   checkMeBtn?.addEventListener('click', async () => {
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data: { user }, error } = await supabase.auth.getUser();
       
@@ -105,7 +105,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 
   logoutBtn?.addEventListener('click', async () => {
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { error } = await supabase.auth.signOut();
       

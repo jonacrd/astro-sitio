@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { getUser, getUserProfile } from '../../lib/session';
+import { supabase } from '../../lib/supabase-browser';
 
 interface CompleteProfileProps {
   onComplete: () => void;
@@ -10,6 +11,31 @@ export default function CompleteProfile({ onComplete }: CompleteProfileProps) {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Cargar datos del perfil existente al montar
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const user = await getUser();
+        if (!user) {
+          setError('No hay usuario autenticado');
+          return;
+        }
+
+        const profile = await getUserProfile();
+        if (profile) {
+          setName(profile.name || '');
+          setPhone(profile.phone || '');
+        }
+      } catch (error) {
+        console.error('Error cargando perfil:', error);
+      } finally {
+        setIsInitialized(true);
+      }
+    }
+    loadProfile();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,13 +48,18 @@ export default function CompleteProfile({ onComplete }: CompleteProfileProps) {
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔍 Verificando autenticación...');
+      const user = await getUser();
       
       if (!user) {
-        setError('No hay usuario autenticado');
+        console.error('❌ No hay usuario autenticado');
+        setError('No hay usuario autenticado. Por favor inicia sesión primero.');
         return;
       }
 
+      console.log('✅ Usuario autenticado:', user.email);
+
+      console.log('💾 Guardando perfil...');
       const { error } = await supabase.from('profiles').upsert({
         id: user.id,
         name: name.trim(),
@@ -36,18 +67,32 @@ export default function CompleteProfile({ onComplete }: CompleteProfileProps) {
       }, { onConflict: 'id' });
 
       if (error) {
+        console.error('❌ Error al guardar perfil:', error);
         setError('Error al guardar perfil: ' + error.message);
         return;
       }
 
+      console.log('✅ Perfil guardado exitosamente');
       alert('¡Perfil completado exitosamente!');
-      window.location.href = '/';
+      onComplete();
     } catch (err: any) {
+      console.error('❌ Error inesperado:', err);
       setError('Error inesperado: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">

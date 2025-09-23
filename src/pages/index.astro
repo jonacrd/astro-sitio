@@ -172,7 +172,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   async function refreshMe() {
     try {
       // Importar dinámicamente Supabase para evitar problemas de SSR
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data: { user }, error } = await supabase.auth.getUser();
       
@@ -282,7 +282,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     const password = formData.get('password') as string;
     
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
@@ -312,7 +312,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
     const password = formData.get('password') as string;
     
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { data, error } = await supabase.auth.signUp({ 
         email, 
@@ -365,7 +365,7 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
   btnLogout?.addEventListener('click', async () => {
     console.log('Logout clicked');
     try {
-      const { supabase } = await import('../lib/supabaseClient');
+      const { supabase } = await import('../lib/supabase-browser');
       
       const { error } = await supabase.auth.signOut();
       

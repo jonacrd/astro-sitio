@@ -1,0 +1,369 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Prueba de Autenticación">
+  <main class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4 max-w-2xl">
+      <h1 class="text-3xl font-bold text-center mb-8">Prueba de Autenticación Supabase</h1>
+      
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Estado Actual</h2>
+        <div id="auth-status" class="text-gray-600">Cargando...</div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Registro</h2>
+        <form id="register-form" class="space-y-4">
+          <input 
+            type="email" 
+            id="register-email" 
+            placeholder="Email" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <input 
+            type="password" 
+            id="register-password" 
+            placeholder="Contraseña" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <button 
+            type="submit" 
+            class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+          >
+            Registrarse
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Iniciar Sesión</h2>
+        <form id="login-form" class="space-y-4">
+          <input 
+            type="email" 
+            id="login-email" 
+            placeholder="Email" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <input 
+            type="password" 
+            id="login-password" 
+            placeholder="Contraseña" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <button 
+            type="submit" 
+            class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+          >
+            Iniciar Sesión
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Completar Perfil</h2>
+        <form id="profile-form" class="space-y-4">
+          <input 
+            type="text" 
+            id="profile-name" 
+            placeholder="Nombre completo" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <input 
+            type="tel" 
+            id="profile-phone" 
+            placeholder="Teléfono" 
+            required 
+            class="w-full p-3 border rounded-lg"
+          />
+          <button 
+            type="submit" 
+            class="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700"
+          >
+            Guardar Perfil
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Convertirse en Vendedor</h2>
+        <button 
+          id="upgrade-seller" 
+          class="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700"
+        >
+          Convertirse en Vendedor
+        </button>
+      </div>
+
+       <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+         <h2 class="text-xl font-semibold mb-4">Restablecer Contraseña</h2>
+         <form id="reset-form" class="space-y-4">
+           <input 
+             type="email" 
+             id="reset-email" 
+             placeholder="Email para restablecer" 
+             required 
+             class="w-full p-3 border rounded-lg"
+           />
+           <button 
+             type="submit" 
+             class="w-full bg-yellow-600 text-white py-3 rounded-lg hover:bg-yellow-700"
+           >
+             Enviar Email de Restablecimiento
+           </button>
+         </form>
+       </div>
+
+       <div class="bg-white rounded-lg shadow-md p-6">
+         <h2 class="text-xl font-semibold mb-4">Acciones</h2>
+         <div class="space-y-2">
+           <button 
+             id="check-auth" 
+             class="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700"
+           >
+             Verificar Autenticación
+           </button>
+           <button 
+             id="logout" 
+             class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700"
+           >
+             Cerrar Sesión
+           </button>
+         </div>
+       </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  let supabase: any;
+
+  async function initSupabase() {
+    try {
+      const module = await import('../lib/supabase-browser');
+      supabase = module.supabase;
+      console.log('✅ Supabase inicializado');
+    } catch (error) {
+      console.error('❌ Error inicializando Supabase:', error);
+    }
+  }
+
+  async function updateAuthStatus() {
+    const statusEl = document.getElementById('auth-status');
+    if (!statusEl) return;
+
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        statusEl.innerHTML = `<span class="text-red-600">❌ Error: ${error.message}</span>`;
+        return;
+      }
+
+      if (!user) {
+        statusEl.innerHTML = '<span class="text-gray-600">👤 No autenticado</span>';
+        return;
+      }
+
+      // Obtener perfil
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, phone, is_seller')
+        .eq('id', user.id)
+        .single();
+
+      let status = `<span class="text-green-600">✅ Autenticado como: ${user.email}</span><br>`;
+      
+      if (profile) {
+        status += `<span class="text-blue-600">👤 Perfil: ${profile.name || 'Sin nombre'}</span><br>`;
+        status += `<span class="text-blue-600">📞 Teléfono: ${profile.phone || 'Sin teléfono'}</span><br>`;
+        status += `<span class="text-blue-600">🏪 Vendedor: ${profile.is_seller ? 'Sí' : 'No'}</span>`;
+      } else {
+        status += '<span class="text-orange-600">⚠️ Perfil incompleto</span>';
+      }
+
+      statusEl.innerHTML = status;
+    } catch (error) {
+      statusEl.innerHTML = `<span class="text-red-600">❌ Error: ${error.message}</span>`;
+    }
+  }
+
+  // Registro
+  document.getElementById('register-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('register-email') as HTMLInputElement).value;
+    const password = (document.getElementById('register-password') as HTMLInputElement).value;
+
+    try {
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: { emailRedirectTo: window.location.origin }
+      });
+
+      if (error) {
+        alert('Error al registrarse: ' + error.message);
+        return;
+      }
+
+      if (data.user) {
+        alert('¡Registro exitoso! Ahora completa tu perfil.');
+        updateAuthStatus();
+      }
+    } catch (error) {
+      alert('Error inesperado: ' + error.message);
+    }
+  });
+
+  // Login
+  document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('login-email') as HTMLInputElement).value;
+    const password = (document.getElementById('login-password') as HTMLInputElement).value;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        alert('Error al iniciar sesión: ' + error.message);
+        return;
+      }
+
+      if (data.user) {
+        alert('¡Sesión iniciada!');
+        updateAuthStatus();
+      }
+    } catch (error) {
+      alert('Error inesperado: ' + error.message);
+    }
+  });
+
+  // Completar perfil
+  document.getElementById('profile-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('profile-name') as HTMLInputElement).value;
+    const phone = (document.getElementById('profile-phone') as HTMLInputElement).value;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
+      const { error } = await supabase.from('profiles').upsert({
+        id: user.id,
+        name: name.trim(),
+        phone: phone.trim()
+      }, { onConflict: 'id' });
+
+      if (error) {
+        alert('Error al guardar perfil: ' + error.message);
+        return;
+      }
+
+      alert('¡Perfil completado!');
+      updateAuthStatus();
+    } catch (error) {
+      alert('Error inesperado: ' + error.message);
+    }
+  });
+
+   // Convertirse en vendedor
+   document.getElementById('upgrade-seller')?.addEventListener('click', async () => {
+     try {
+       const { data: { user } } = await supabase.auth.getUser();
+       
+       if (!user) {
+         alert('No hay usuario autenticado');
+         return;
+       }
+
+       console.log('🔄 Actualizando perfil a vendedor para usuario:', user.id);
+
+       // Primero verificar si el perfil existe
+       const { data: existingProfile } = await supabase
+         .from('profiles')
+         .select('id, name, phone, is_seller')
+         .eq('id', user.id)
+         .single();
+
+       console.log('📋 Perfil existente:', existingProfile);
+
+       if (!existingProfile) {
+         // Si no existe perfil, crear uno básico
+         console.log('📝 Creando perfil básico...');
+         const { error: createError } = await supabase.from('profiles').insert({
+           id: user.id,
+           name: 'Usuario',
+           phone: '',
+           is_seller: true
+         });
+
+         if (createError) {
+           console.error('❌ Error creando perfil:', createError);
+           alert('Error creando perfil: ' + createError.message);
+           return;
+         }
+       } else {
+         // Si existe, actualizar
+         console.log('🔄 Actualizando perfil existente...');
+         const { error } = await supabase.from('profiles').update({ 
+           is_seller: true 
+         }).eq('id', user.id);
+
+         if (error) {
+           console.error('❌ Error actualizando perfil:', error);
+           alert('Error al actualizar perfil: ' + error.message);
+           return;
+         }
+       }
+
+       console.log('✅ Perfil actualizado a vendedor exitosamente');
+       alert('¡Ahora eres vendedor!');
+       updateAuthStatus();
+     } catch (error) {
+       console.error('❌ Error inesperado:', error);
+       alert('Error inesperado: ' + error.message);
+     }
+   });
+
+   // Restablecer contraseña
+   document.getElementById('reset-form')?.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     const email = (document.getElementById('reset-email') as HTMLInputElement).value;
+
+     try {
+       const { resetPassword } = await import('../lib/session');
+       await resetPassword(email);
+       alert('¡Email de restablecimiento enviado! Revisa tu bandeja de entrada.');
+     } catch (error: any) {
+       alert('Error enviando email: ' + error.message);
+     }
+   });
+
+   // Verificar autenticación
+   document.getElementById('check-auth')?.addEventListener('click', updateAuthStatus);
+
+   // Logout
+   document.getElementById('logout')?.addEventListener('click', async () => {
+     try {
+       await supabase.auth.signOut();
+       alert('Sesión cerrada');
+       updateAuthStatus();
+     } catch (error) {
+       alert('Error al cerrar sesión: ' + error.message);
+     }
+   });
+
+  // Inicializar
+  initSupabase().then(() => {
+    updateAuthStatus();
+  });
+</script>

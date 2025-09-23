@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { getUser, getUserProfile } from '../../lib/session';
 
 interface SellerGuardProps {
   children: React.ReactNode;
@@ -16,32 +16,34 @@ export default function SellerGuard({ children }: SellerGuardProps) {
 
   const checkSellerStatus = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getUser();
       
       if (!user) {
+        console.log('❌ No hay usuario autenticado, redirigiendo...');
         window.location.href = '/';
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('is_seller')
-        .eq('id', user.id)
-        .single();
+      const profile = await getUserProfile();
 
-      if (error) {
-        setError('Error al verificar perfil: ' + error.message);
-        return;
-      }
-
-      if (!profile?.is_seller) {
+      if (!profile) {
+        console.log('❌ No hay perfil, redirigiendo...');
         window.location.href = '/';
         return;
       }
 
+      if (!profile.is_seller) {
+        console.log('❌ Usuario no es vendedor, redirigiendo...');
+        window.location.href = '/';
+        return;
+      }
+
+      console.log('✅ Usuario es vendedor');
       setIsSeller(true);
     } catch (err: any) {
+      console.error('❌ Error verificando vendedor:', err);
       setError('Error inesperado: ' + err.message);
+      window.location.href = '/';
     } finally {
       setLoading(false);
     }

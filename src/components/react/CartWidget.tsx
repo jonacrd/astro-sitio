@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatPrice } from "@lib/money";
+import { supabase } from "../../lib/supabase-browser";
 
 interface CartData {
   success: boolean;
@@ -21,34 +22,113 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
   });
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  const fetchCart = async () => {
+  const fetchCartSummary = async () => {
     try {
-      console.log('Fetching cart data...');
-      const response = await fetch("/api/cart/get");
-      const data = await response.json();
-      console.log('Cart data received:', data);
-      setCartData(data);
+      if (!user) {
+        setCartData({
+          success: true,
+          items: [],
+          totalCents: 0,
+          itemCount: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      console.log('Fetching cart summary...');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setCartData({
+          success: true,
+          items: [],
+          totalCents: 0,
+          itemCount: 0,
+        });
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch("/api/cart/summary", {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        setCartData({
+          success: true,
+          items: [],
+          totalCents: result.data.totalCents,
+          itemCount: result.data.itemCount,
+        });
+      } else {
+        console.error('Error fetching cart summary:', result.error);
+        setCartData({
+          success: false,
+          items: [],
+          totalCents: 0,
+          itemCount: 0,
+        });
+      }
     } catch (error) {
-      console.error("Error fetching cart:", error);
+      console.error("Error fetching cart summary:", error);
+      setCartData({
+        success: false,
+        items: [],
+        totalCents: 0,
+        itemCount: 0,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCart();
+    // Verificar autenticación
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        setUser(null);
+      }
+    };
 
+    checkAuth();
+
+    // Escuchar cambios de autenticación
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (user !== null) {
+      fetchCartSummary();
+    }
+  }, [user]);
+
+  useEffect(() => {
     // Escuchar eventos de actualización del carrito
     const handleCartUpdate = (event) => {
       console.log('Cart update event received:', event.detail);
-      fetchCart();
+      fetchCartSummary();
     };
 
     // Polling automático para mantener el carrito sincronizado
     const pollInterval = setInterval(() => {
-      fetchCart();
-    }, 3000); // Actualizar cada 3 segundos
+      if (user) {
+        fetchCartSummary();
+      }
+    }, 5000); // Actualizar cada 5 segundos
 
     window.addEventListener("cart-updated", handleCartUpdate);
 
@@ -56,7 +136,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
       clearInterval(pollInterval);
       window.removeEventListener("cart-updated", handleCartUpdate);
     };
-  }, []);
+  }, [user]);
 
   // Manejar scroll del body cuando el drawer está abierto
   useEffect(() => {
@@ -96,33 +176,45 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     setIsOpen(false);
   };
 
-  const removeFromCart = async (productId: number) => {
+  const removeFromCart = async (cartItemId: string) => {
     try {
-      const response = await fetch("/api/cart/remove", {
+      if (!user) {
+        console.error('Usuario no autenticado');
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.error('No hay sesión activa');
+        return;
+      }
+
+      const response = await fetch("/api/cart/updateQty", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ cartItemId, qty: 0 }),
       });
 
-      const data = await response.json();
+      const result = await response.json();
       
-      if (data.success) {
+      if (result.success) {
         // Actualizar el estado local del carrito
         setCartData({
           success: true,
-          items: data.cart.items,
-          totalCents: data.totalCents,
-          itemCount: data.itemCount,
+          items: result.items,
+          totalCents: result.totalCents,
+          itemCount: result.itemCount,
         });
 
         // Disparar evento personalizado para actualizar otros componentes
         const cartUpdateEvent = new CustomEvent("cart-updated", {
           detail: {
-            itemCount: data.itemCount,
-            totalCents: data.totalCents,
-            productId: productId,
+            itemCount: result.itemCount,
+            totalCents: result.totalCents,
+            cartItemId: cartItemId,
             action: 'remove'
           },
         });
@@ -130,11 +222,9 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
-        // Actualización simple - el polling se encargará del resto
-        
-        console.log('Product removed from cart:', productId);
+        console.log('Product removed from cart:', cartItemId);
       } else {
-        throw new Error(data.error || "Error al remover del carrito");
+        throw new Error(result.error || "Error al remover del carrito");
       }
     } catch (error) {
       console.error("Error removing from cart:", error);
@@ -148,45 +238,21 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     }
 
     try {
-      const response = await fetch("/api/cart/clear", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        // Actualizar el estado local del carrito
-        setCartData({
-          success: true,
-          items: [],
-          totalCents: 0,
-          itemCount: 0,
-        });
-
-        // Disparar evento personalizado para actualizar otros componentes
-        const cartUpdateEvent = new CustomEvent("cart-updated", {
-          detail: {
-            itemCount: 0,
-            totalCents: 0,
-            action: 'clear'
-          },
-        });
-        
-        window.dispatchEvent(cartUpdateEvent);
-        document.dispatchEvent(cartUpdateEvent);
-        
-        // Actualización simple - el polling se encargará del resto
-        
-        console.log('Cart cleared successfully');
-      } else {
-        throw new Error(data.error || "Error al vaciar el carrito");
+      if (!user) {
+        console.error('Usuario no autenticado');
+        return;
       }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.error('No hay sesión activa');
+        return;
+      }
+
+      // Por ahora, redirigir a la página del carrito para limpiar
+      window.location.href = '/carrito';
     } catch (error) {
       console.error("Error clearing cart:", error);
-      // Podrías agregar un toast o notificación de error aquí
     }
   };
 
@@ -321,7 +387,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
           {/* Contenido del carrito */}
           <div className="flex-1 overflow-y-auto p-4 min-h-0">
-            {cartData.items.length === 0 ? (
+            {cartData.itemCount === 0 ? (
               <div className="text-center py-12">
                 <svg
                   className="w-16 h-16 mx-auto text-gray-400 mb-4"
@@ -340,75 +406,23 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
                 <p className="text-gray-400 text-xs mt-2">Agrega productos desde el catálogo</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {cartData.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                      <img
-                        src={
-                          item.product?.imageUrl ||
-                          "/images/placeholder-product.jpg"
-                        }
-                        alt={item.product?.name || "Producto"}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm text-gray-900 line-clamp-2">
-                        {item.product?.name || "Producto"}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Cantidad: {item.quantity}
-                      </p>
-                      <p className="text-sm font-semibold text-blue-600">
-                        {formatPrice(
-                          item.product?.priceCents * item.quantity || 0,
-                        )}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {/* Botón para remover producto */}
-                      <button
-                        onClick={() => removeFromCart(item.productId)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
-                        title="Remover del carrito"
-                        aria-label={`Remover ${item.product?.name || 'producto'} del carrito`}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8">
+                <div className="text-4xl font-bold text-blue-600 mb-2">
+                  {cartData.itemCount}
+                </div>
+                <p className="text-gray-600 mb-4">
+                  {cartData.itemCount === 1 ? 'producto' : 'productos'} en tu carrito
+                </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  Total: {formatPrice(cartData.totalCents)}
+                </p>
               </div>
             )}
           </div>
 
-          {/* Footer con total y botones */}
-          {cartData.items.length > 0 && (
+          {/* Footer con botones */}
+          {cartData.itemCount > 0 && (
             <div className="border-t p-4 space-y-3 flex-shrink-0 bg-white">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900">
-                  Total:
-                </span>
-                <span className="text-xl font-bold text-blue-600">
-                  {formatPrice(cartData.totalCents)}
-                </span>
-              </div>
               <div className="space-y-2">
                 <a
                   href="/carrito"
@@ -418,7 +432,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
                   Ver carrito completo
                 </a>
                 <a
-                  href="/carrito"
+                  href="/catalogo"
                   className="w-full min-h-11 border border-gray-300 text-gray-700 rounded-lg font-medium 
                            hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >

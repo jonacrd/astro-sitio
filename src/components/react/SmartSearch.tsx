@@ -141,18 +141,60 @@ export default function SmartSearch(){
                   <button 
                     onClick={async () => {
                       try {
-                        const { supabase } = await import('../../lib/supabaseClient');
-                        const { data: { user } } = await supabase.auth.getUser();
+                        const { getUser } = await import('../../lib/session');
+                        const user = await getUser();
                         
                         if (!user) {
                           alert('Debes iniciar sesión para agregar productos al carrito');
                           return;
                         }
                         
-                        window.location.href = result.addToCartUrl;
+                        // Parsear sellerProductId para obtener sellerId y productId
+                        const [sellerId, productId] = result.addToCartUrl.split('?')[1].split('&')[0].split('=')[1].split('::');
+                        
+                        // Hacer POST request al endpoint
+                        const { supabase } = await import('../../lib/supabase-browser');
+                        const { data: { session } } = await supabase.auth.getSession();
+                        
+                        if (!session?.access_token) {
+                          alert('No hay sesión activa');
+                          return;
+                        }
+                        
+                        const response = await fetch("/api/cart/add", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            'Authorization': `Bearer ${session.access_token}`
+                          },
+                          body: JSON.stringify({
+                            sellerId: sellerId,
+                            productId: productId,
+                            title: result.productTitle,
+                            price_cents: result.priceCents,
+                            qty: 1
+                          })
+                        });
+                        
+                        const result_data = await response.json();
+                        
+                        if (result_data.success) {
+                          alert('¡Producto agregado al carrito!');
+                          // Disparar evento para actualizar el carrito
+                          const cartUpdateEvent = new CustomEvent("cart-updated", {
+                            detail: {
+                              itemCount: result_data.itemCount,
+                              totalCents: result_data.totalCents,
+                              productId: productId,
+                            },
+                          });
+                          window.dispatchEvent(cartUpdateEvent);
+                        } else {
+                          alert('Error: ' + result_data.error);
+                        }
                       } catch (error) {
-                        console.error('Error checking auth:', error);
-                        alert('Error al verificar autenticación');
+                        console.error('Error adding to cart:', error);
+                        alert('Error al agregar producto al carrito');
                       }
                     }}
                     className="flex-1 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm text-center transition-colors"

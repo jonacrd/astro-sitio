@@ -60,7 +60,7 @@
       results.innerHTML = '<p class="info">Probando autenticación con Supabase...</p>';
       
       try {
-        const { supabase } = await import('../lib/supabaseClient');
+        const { supabase } = await import('../lib/supabase-browser');
         
         const { data: { user }, error } = await supabase.auth.getUser();
         
@@ -88,7 +88,7 @@
       results.innerHTML = '<p class="info">Probando registro con Supabase...</p>';
       
       try {
-        const { supabase } = await import('../lib/supabaseClient');
+        const { supabase } = await import('../lib/supabase-browser');
         
         // Test con registro simple
         const testEmail = 'test@example.com';

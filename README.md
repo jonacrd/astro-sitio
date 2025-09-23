@@ -1,25 +1,28 @@
 # 🛍️ Tienda Online - Ecommerce Moderno
 
-Ecommerce completo construido con **Astro**, **React**, **Tailwind CSS**, **Prisma** y **PostgreSQL**.
+Ecommerce completo construido con **Astro**, **React**, **Tailwind CSS** y **Supabase**.
 
 ## 🚀 Características
 
+- ✅ **Autenticación completa** con Supabase Auth
 - ✅ **Catálogo de productos** con categorías y filtros
 - ✅ **Carrito de compras** interactivo con persistencia
 - ✅ **Control de stock** en tiempo real
-- ✅ **Checkout completo** con generación de órdenes
-- ✅ **Páginas de confirmación** con detalles del pedido
+- ✅ **Dashboard de vendedores** para gestión de productos
+- ✅ **Búsqueda inteligente** con IA
+- ✅ **Feed social** con productos en tiempo real
 - ✅ **Diseño responsive** con Tailwind CSS
 - ✅ **Componentes React** como islas de Astro
 - ✅ **API REST** para todas las operaciones
-- ✅ **Base de datos PostgreSQL** con Prisma ORM
+- ✅ **Base de datos PostgreSQL** con Supabase
 
 ## 🛠️ Stack Tecnológico
 
 - **Framework**: Astro 5.x con SSR
 - **Frontend**: React 19 + Tailwind CSS 4
 - **Backend**: API Routes de Astro
-- **Base de datos**: PostgreSQL con Prisma ORM
+- **Base de datos**: Supabase (PostgreSQL)
+- **Autenticación**: Supabase Auth
 - **Deploy**: Vercel con adaptador oficial
 - **Tipado**: TypeScript
 
@@ -33,32 +36,45 @@ cd astro-sitio
 npm install
 ```
 
-### 2. Configurar base de datos
+### 2. Configurar Supabase
 
+#### Crear proyecto en Supabase
+1. Ve a [supabase.com](https://supabase.com)
+2. Crea una nueva cuenta o inicia sesión
+3. Crea un nuevo proyecto
+4. Anota la URL y las claves de tu proyecto
+
+#### Configurar variables de entorno
 ```bash
-# Copiar archivo de ejemplo
-cp .env.example .env
+# Ejecutar script de configuración
+node scripts/setup-env.js
 
-# Editar .env con tu URL de PostgreSQL
-# DATABASE_URL="postgresql://USER:PASS@HOST:PORT/DB?sslmode=require"
+# Editar .env con tus credenciales de Supabase
+# PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+# PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_aqui
+# SUPABASE_SERVICE_ROLE_KEY=tu_clave_service_role_aqui
 ```
 
-### 3. Inicializar base de datos
+### 3. Configurar la base de datos
 
+#### Ejecutar el script SQL
+1. Ve a tu proyecto de Supabase
+2. Ve a "SQL Editor"
+3. Copia y pega el contenido de `scripts/seed-database.sql`
+4. Ejecuta el script
+
+#### Poblar con datos de prueba
 ```bash
-# Generar cliente Prisma
-npx prisma generate
-
-# Aplicar migraciones (o push para desarrollo)
-npx prisma migrate deploy
-# O alternativamente:
-npx prisma db push
-
-# Poblar con datos de ejemplo
-npm run seed
+node scripts/populate-database-direct.js
 ```
 
-### 4. Ejecutar en desarrollo
+### 4. Verificar la configuración
+
+```bash
+node scripts/verify-setup.js
+```
+
+### 5. Ejecutar en desarrollo
 
 ```bash
 npm run dev
@@ -66,13 +82,26 @@ npm run dev
 
 La aplicación estará disponible en `http://localhost:4321`
 
+## 🔧 Scripts de Configuración
+
+```bash
+# Configurar variables de entorno
+node scripts/setup-env.js
+
+# Verificar configuración
+node scripts/verify-setup.js
+
+# Poblar base de datos
+node scripts/populate-database-direct.js
+```
+
 ## 🌐 Deploy en Vercel
 
 ### Configuración en Vercel
 
 1. **Root Directory**: `astro-sitio`
 2. **Framework Preset**: Astro
-3. **Build Command**: `npx prisma migrate deploy || npx prisma db push && npm run build`
+3. **Build Command**: `npm run build`
 4. **Install Command**: `npm install`
 5. **Output Directory**: `dist` (automático)
 
@@ -81,7 +110,9 @@ La aplicación estará disponible en `http://localhost:4321`
 Agregar en el panel de Vercel:
 
 ```
-DATABASE_URL=postgresql://USER:PASS@HOST:PORT/DB?sslmode=require
+PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima_aqui
+SUPABASE_SERVICE_ROLE_KEY=tu_clave_service_role_aqui
 ```
 
 ### Pasos del deploy
@@ -95,9 +126,11 @@ DATABASE_URL=postgresql://USER:PASS@HOST:PORT/DB?sslmode=require
 
 ```
 astro-sitio/
-├── prisma/
-│   ├── schema.prisma          # Esquema de base de datos
-│   └── seed.js               # Datos de ejemplo
+├── scripts/
+│   ├── setup-env.js         # Configurar variables de entorno
+│   ├── verify-setup.js      # Verificar configuración
+│   ├── populate-database-direct.js # Poblar base de datos
+│   └── seed-database.sql    # Script SQL para crear tablas
 ├── src/
 │   ├── components/
 │   │   └── react/            # Componentes React
@@ -106,22 +139,30 @@ astro-sitio/
 │   │       ├── AddToCartButton.tsx
 │   │       ├── CartTable.tsx
 │   │       ├── CartWidget.tsx
-│   │       └── CheckoutButton.tsx
+│   │       ├── CheckoutButton.tsx
+│   │       ├── CompleteProfile.tsx
+│   │       ├── UpgradeToSeller.tsx
+│   │       ├── SellerStatusToggle.tsx
+│   │       └── SellerGuard.tsx
 │   ├── lib/                  # Librerías del servidor
-│   │   ├── db.ts            # Cliente Prisma
-│   │   ├── cart.server.ts   # Lógica del carrito
-│   │   ├── products.server.ts # Queries de productos
+│   │   ├── supabaseClient.ts # Cliente Supabase
+│   │   ├── supabase-browser.ts # Cliente Supabase para browser
+│   │   ├── session.ts       # Utilidades de sesión
 │   │   └── money.ts         # Utilidades de precio
 │   ├── layouts/
 │   │   └── BaseLayout.astro  # Layout principal
 │   ├── pages/
 │   │   ├── api/             # Endpoints API
 │   │   │   ├── cart/        # APIs del carrito
-│   │   │   └── products/    # APIs de productos
+│   │   │   ├── products/    # APIs de productos
+│   │   │   ├── search/      # APIs de búsqueda
+│   │   │   └── debug/       # APIs de debug
 │   │   ├── index.astro      # Página de inicio
 │   │   ├── catalogo.astro   # Catálogo de productos
 │   │   ├── carrito.astro    # Página del carrito
-│   │   └── gracias.astro    # Confirmación de pedido
+│   │   ├── complete-profile.astro # Completar perfil
+│   │   ├── upgrade-seller.astro # Convertirse en vendedor
+│   │   └── dashboard-supabase.astro # Dashboard vendedor
 │   └── styles/
 │       └── global.css       # Estilos globales
 ├── public/
@@ -129,6 +170,7 @@ astro-sitio/
 ├── astro.config.mjs         # Configuración de Astro
 ├── package.json
 ├── tailwind.config.mjs      # Configuración de Tailwind
+├── SETUP.md                 # Instrucciones de configuración
 └── vercel.json             # Configuración de Vercel
 ```
 
@@ -140,22 +182,24 @@ npm run dev              # Servidor de desarrollo
 npm run build           # Build para producción
 npm run preview         # Preview del build
 
-# Base de datos
-npm run seed            # Poblar con datos de ejemplo
-npx prisma studio       # Interfaz web para la BD
-npx prisma generate     # Generar cliente
-npx prisma db push      # Sincronizar esquema (desarrollo)
-npx prisma migrate deploy # Aplicar migraciones (producción)
+# Configuración
+node scripts/setup-env.js      # Configurar variables de entorno
+node scripts/verify-setup.js  # Verificar configuración
+node scripts/populate-database-direct.js # Poblar base de datos
+
+# Supabase
+# Ejecutar en SQL Editor de Supabase:
+# scripts/seed-database.sql   # Crear tablas y RLS
 ```
 
 ## 🛒 Uso de Componentes
 
 ### Agregar productos al catálogo
 
-Los productos se gestionan a través de Prisma. Puedes:
+Los productos se gestionan a través de Supabase. Puedes:
 
-1. Usar `npx prisma studio` para interfaz gráfica
-2. Modificar `prisma/seed.js` y ejecutar `npm run seed`
+1. Usar el dashboard de Supabase para interfaz gráfica
+2. Usar `node scripts/populate-database-direct.js` para datos de prueba
 3. Usar las APIs para crear productos programáticamente
 
 ### Usar componentes React
@@ -164,9 +208,9 @@ Los productos se gestionan a través de Prisma. Puedes:
 ---
 // En páginas .astro
 import ProductGrid from '@components/react/ProductGrid.tsx'
-import { listProducts } from '@lib/products.server'
+import { supabase } from '@lib/supabaseClient'
 
-const products = await listProducts()
+const { data: products } = await supabase.from('products').select('*')
 ---
 
 <ProductGrid products={products} client:load />
@@ -180,6 +224,9 @@ const products = await listProducts()
 - `POST /api/cart/update` - Actualizar cantidad
 - `POST /api/cart/remove` - Remover producto
 - `POST /api/cart/checkout` - Procesar pedido
+- `GET /api/search/working` - Búsqueda de productos
+- `GET /api/feed/real` - Feed de productos
+- `GET /api/debug/env` - Debug de variables de entorno
 
 ## 🎨 Personalización
 
@@ -193,12 +240,14 @@ Los componentes React en `src/components/react/` son completamente personalizabl
 
 ### Base de datos
 
-Modifica `prisma/schema.prisma` para agregar campos o modelos, luego ejecuta:
+Modifica el esquema en Supabase para agregar campos o tablas, luego ejecuta:
 
 ```bash
-npx prisma db push  # Para desarrollo
-# o
-npx prisma migrate dev --name tu-cambio  # Para crear migración
+# Actualizar script SQL
+scripts/seed-database.sql
+
+# Poblar con nuevos datos
+node scripts/populate-database-direct.js
 ```
 
 ## 📧 Contacto y Soporte

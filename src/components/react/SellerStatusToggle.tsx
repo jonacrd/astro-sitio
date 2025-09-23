@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { getUser } from '../../lib/session';
+import { supabase } from '../../lib/supabase-browser';
 
 export default function SellerStatusToggle() {
   const [isOnline, setIsOnline] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     loadStatus();
@@ -12,8 +14,11 @@ export default function SellerStatusToggle() {
 
   const loadStatus = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const user = await getUser();
+      if (!user) {
+        setError('No hay usuario autenticado');
+        return;
+      }
 
       const { data, error } = await supabase
         .from('seller_status')
@@ -23,12 +28,16 @@ export default function SellerStatusToggle() {
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
         console.error('Error loading status:', error);
+        setError('Error al cargar estado: ' + error.message);
         return;
       }
 
       setIsOnline(data?.online || false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading seller status:', err);
+      setError('Error inesperado: ' + err.message);
+    } finally {
+      setIsInitialized(true);
     }
   };
 
@@ -37,7 +46,7 @@ export default function SellerStatusToggle() {
     setError(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getUser();
       if (!user) {
         setError('No hay usuario autenticado');
         return;
@@ -62,6 +71,17 @@ export default function SellerStatusToggle() {
       setLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600 text-sm">Cargando estado...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
