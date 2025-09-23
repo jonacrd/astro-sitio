@@ -1,9 +1,11 @@
 import type { APIRoute } from 'astro';
-import { clearSession } from '@lib/session';
 
-export const POST: APIRoute = async (ctx) => { 
-  clearSession(ctx); 
-  return new Response(JSON.stringify({ ok: true }), { 
-    headers: { 'content-type': 'application/json' } 
-  }); 
+export const POST: APIRoute = async () => {
+  return new Response(JSON.stringify({
+    success: false,
+    error: 'This endpoint has been replaced with Supabase Auth. Use /api/auth/supabase endpoints instead.'
+  }), {
+    status: 410, // Gone
+    headers: { 'content-type': 'application/json' }
+  });
 };

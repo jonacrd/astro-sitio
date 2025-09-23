@@ -8,17 +8,13 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "prisma generate && prisma db push && astro build",
-    "build:vercel": "prisma generate && astro build",
+    "build": "astro build",
+    "build:vercel": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "postinstall": "prisma generate",
-    "prisma:gen": "prisma generate",
-    "prisma:migrate": "prisma migrate dev -n init",
-    "prisma:deploy": "prisma db push",
-    "seed": "node scripts/seed-supabase.mjs",
+    "seed": "node scripts/populate-database-direct.js",
     "seed:products": "tsx scripts/seedProducts.ts",
-    "deploy": "npm run prisma:gen && npm run prisma:deploy && npm run seed && npm run build"
+    "deploy": "npm run seed && npm run build"
   },
   "dependencies": {
     "@astrojs/react": "^3.6.0",
