@@ -6,10 +6,27 @@ export const GET: APIRoute = async ({ url }) => {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
+    // Log para debug en producción
+    console.log('🔍 /api/feed/real - Verificando variables de entorno:', {
+      supabaseUrl: supabaseUrl ? 'SET' : 'NOT_SET',
+      supabaseServiceKey: supabaseServiceKey ? 'SET' : 'NOT_SET',
+      timestamp: new Date().toISOString()
+    });
+    
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Variables de entorno faltantes:', {
+        supabaseUrl: !!supabaseUrl,
+        supabaseServiceKey: !!supabaseServiceKey
+      });
+      
       return new Response(JSON.stringify({
         success: false,
-        error: 'Variables de entorno no configuradas'
+        error: 'Variables de entorno no configuradas',
+        debug: {
+          supabaseUrl: !!supabaseUrl,
+          supabaseServiceKey: !!supabaseServiceKey,
+          timestamp: new Date().toISOString()
+        }
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -19,15 +36,23 @@ export const GET: APIRoute = async ({ url }) => {
     // Usar service role key para bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-            // Obtener parámetros de consulta
-            const limit = parseInt(url.searchParams.get('limit') || '20', 10);
-            const category = url.searchParams.get('category') || null;
-            const sellerId = url.searchParams.get('sellerId') || null;
-            const featured = url.searchParams.get('featured') === 'true';
-            const offers = url.searchParams.get('offers') === 'true';
-            const newProducts = url.searchParams.get('new') === 'true';
+    // Obtener parámetros de consulta
+    const limit = parseInt(url.searchParams.get('limit') || '20', 10);
+    const category = url.searchParams.get('category') || null;
+    const sellerId = url.searchParams.get('sellerId') || null;
+    const featured = url.searchParams.get('featured') === 'true';
+    const offers = url.searchParams.get('offers') === 'true';
+    const newProducts = url.searchParams.get('new') === 'true';
 
-    // console.log('🔍 API /feed/real - Parámetros de consulta:', { limit, category, sellerId, featured, offers, newProducts });
+    console.log('🔍 API /feed/real - Parámetros de consulta:', { 
+      limit, 
+      category, 
+      sellerId, 
+      featured, 
+      offers, 
+      newProducts,
+      timestamp: new Date().toISOString()
+    });
 
     // Construir query base
     let query = supabase
@@ -89,18 +114,32 @@ export const GET: APIRoute = async ({ url }) => {
 
     const { data: products, error } = await query;
 
-    // console.log('📊 API /feed/real - Resultado de la consulta:', { 
-    //   products: products?.length || 0, 
-    //   error: error?.message,
-    //   sellerId: sellerId,
-    //   firstProductSeller: products?.[0]?.seller?.name || 'N/A'
-    // });
+    console.log('📊 API /feed/real - Resultado de la consulta:', { 
+      products: products?.length || 0, 
+      error: error?.message,
+      sellerId: sellerId,
+      firstProductSeller: products?.[0]?.seller?.name || 'N/A',
+      timestamp: new Date().toISOString()
+    });
 
     if (error) {
-      console.error('Error obteniendo productos del feed:', error);
+      console.error('❌ Error obteniendo productos del feed:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        timestamp: new Date().toISOString()
+      });
+      
       return new Response(JSON.stringify({
         success: false,
-        error: 'Error obteniendo productos: ' + error.message
+        error: 'Error obteniendo productos: ' + error.message,
+        debug: {
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          timestamp: new Date().toISOString()
+        }
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -160,10 +199,21 @@ export const GET: APIRoute = async ({ url }) => {
     });
 
   } catch (error: any) {
-    console.error('Error inesperado:', error);
+    console.error('❌ Error inesperado en /api/feed/real:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      timestamp: new Date().toISOString()
+    });
+    
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error inesperado: ' + error.message
+      error: 'Error inesperado: ' + error.message,
+      debug: {
+        name: error.name,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      }
     }), { 
       status: 500,
       headers: { 'content-type': 'application/json' }
