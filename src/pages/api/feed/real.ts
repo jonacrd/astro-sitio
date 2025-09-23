@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 export const GET: APIRoute = async ({ url }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,14 +16,18 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar service role key para bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Obtener parámetros de consulta
-    const limit = parseInt(url.searchParams.get('limit') || '20', 10);
-    const category = url.searchParams.get('category') || null;
-    const featured = url.searchParams.get('featured') === 'true';
-    const offers = url.searchParams.get('offers') === 'true';
-    const newProducts = url.searchParams.get('new') === 'true';
+            // Obtener parámetros de consulta
+            const limit = parseInt(url.searchParams.get('limit') || '20', 10);
+            const category = url.searchParams.get('category') || null;
+            const sellerId = url.searchParams.get('sellerId') || null;
+            const featured = url.searchParams.get('featured') === 'true';
+            const offers = url.searchParams.get('offers') === 'true';
+            const newProducts = url.searchParams.get('new') === 'true';
+
+    // console.log('🔍 API /feed/real - Parámetros de consulta:', { limit, category, sellerId, featured, offers, newProducts });
 
     // Construir query base
     let query = supabase
@@ -51,10 +55,14 @@ export const GET: APIRoute = async ({ url }) => {
       .eq('active', true)
       .gt('stock', 0);
 
-    // Aplicar filtros
-    if (category) {
-      query = query.eq('product.category', category);
-    }
+            // Aplicar filtros
+            if (category) {
+              query = query.eq('product.category', category);
+            }
+
+            if (sellerId) {
+              query = query.eq('seller_id', sellerId);
+            }
 
     if (featured) {
       // Productos destacados: mayor stock
@@ -80,6 +88,13 @@ export const GET: APIRoute = async ({ url }) => {
     query = query.limit(limit);
 
     const { data: products, error } = await query;
+
+    // console.log('📊 API /feed/real - Resultado de la consulta:', { 
+    //   products: products?.length || 0, 
+    //   error: error?.message,
+    //   sellerId: sellerId,
+    //   firstProductSeller: products?.[0]?.seller?.name || 'N/A'
+    // });
 
     if (error) {
       console.error('Error obteniendo productos del feed:', error);

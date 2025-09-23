@@ -1,10 +1,23 @@
 import { useState, useEffect } from "react";
 import { formatPrice } from "@lib/money";
 import { supabase } from "../../lib/supabase-browser";
+import { cartStore } from "../../lib/cart-store";
+
+interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  title: string;
+  priceCents: number;
+  qty: number;
+  sellerId: string;
+  sellerName: string;
+  totalCents: number;
+}
 
 interface CartData {
   success: boolean;
-  items: any[];
+  items: CartItem[];
   totalCents: number;
   itemCount: number;
 }
@@ -26,7 +39,10 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
   const fetchCartSummary = async () => {
     try {
+      console.log('🛒 fetchCartSummary called, user:', user?.email || 'No user');
+      
       if (!user) {
+        console.log('❌ No user, setting empty cart');
         setCartData({
           success: true,
           items: [],
@@ -37,9 +53,10 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         return;
       }
 
-      console.log('Fetching cart summary...');
+      console.log('🔍 Fetching cart items for user:', user.email);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
+        console.log('❌ No session token');
         setCartData({
           success: true,
           items: [],
@@ -50,31 +67,46 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         return;
       }
 
-      const response = await fetch("/api/cart/summary", {
+      console.log('📡 Making request to /api/cart/items...');
+      const response = await fetch("/api/cart/items", {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
+      
+      console.log('📊 Response status:', response.status);
       const result = await response.json();
+      console.log('📋 Response data:', result);
       
       if (result.success) {
         setCartData({
           success: true,
-          items: [],
+          items: result.data.items,
           totalCents: result.data.totalCents,
           itemCount: result.data.itemCount,
         });
+        
+        // Actualizar el store del carrito
+        cartStore.updateCartStats(result.data.itemCount, result.data.totalCents);
+        
+        // Si no hay items, limpiar la tienda activa
+        if (result.data.itemCount === 0) {
+          cartStore.clearActiveSeller();
+        }
+        
+        console.log('✅ Cart items loaded:', result.data.items.length, 'items, total:', result.data.totalCents);
       } else {
-        console.error('Error fetching cart summary:', result.error);
+        console.error('❌ Error fetching cart items:', result.error);
         setCartData({
           success: false,
           items: [],
           totalCents: 0,
           itemCount: 0,
         });
+        cartStore.clearActiveSeller();
       }
     } catch (error) {
-      console.error("Error fetching cart summary:", error);
+      console.error("❌ Error fetching cart items:", error);
       setCartData({
         success: false,
         items: [],
@@ -119,22 +151,26 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
   useEffect(() => {
     // Escuchar eventos de actualización del carrito
     const handleCartUpdate = (event) => {
-      console.log('Cart update event received:', event.detail);
+      console.log('🛒 Cart update event received:', event.detail);
+      // Actualizar inmediatamente cuando se recibe un evento
       fetchCartSummary();
     };
 
-    // Polling automático para mantener el carrito sincronizado
+    // Polling automático para mantener el carrito sincronizado (menos frecuente)
     const pollInterval = setInterval(() => {
       if (user) {
+        console.log('🔄 Polling cart update...');
         fetchCartSummary();
       }
-    }, 5000); // Actualizar cada 5 segundos
+    }, 10000); // Actualizar cada 10 segundos
 
     window.addEventListener("cart-updated", handleCartUpdate);
+    document.addEventListener("cart-updated", handleCartUpdate);
 
     return () => {
       clearInterval(pollInterval);
       window.removeEventListener("cart-updated", handleCartUpdate);
+      document.removeEventListener("cart-updated", handleCartUpdate);
     };
   }, [user]);
 
@@ -178,6 +214,8 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
   const removeFromCart = async (cartItemId: string) => {
     try {
+      console.log('🗑️ Removing item from cart:', cartItemId);
+      
       if (!user) {
         console.error('Usuario no autenticado');
         return;
@@ -198,22 +236,32 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         body: JSON.stringify({ cartItemId, qty: 0 }),
       });
 
+      console.log('📊 Remove response status:', response.status);
       const result = await response.json();
+      console.log('📋 Remove response data:', result);
       
       if (result.success) {
         // Actualizar el estado local del carrito
         setCartData({
           success: true,
-          items: result.items,
-          totalCents: result.totalCents,
-          itemCount: result.itemCount,
+          items: result.data.items || [],
+          totalCents: result.data.totalCents || 0,
+          itemCount: result.data.itemCount || 0,
         });
+
+        // Actualizar el store del carrito
+        cartStore.updateCartStats(result.data.itemCount || 0, result.data.totalCents || 0);
+        
+        // Si no hay items, limpiar la tienda activa
+        if (result.data.itemCount === 0) {
+          cartStore.clearActiveSeller();
+        }
 
         // Disparar evento personalizado para actualizar otros componentes
         const cartUpdateEvent = new CustomEvent("cart-updated", {
           detail: {
-            itemCount: result.itemCount,
-            totalCents: result.totalCents,
+            itemCount: result.data.itemCount || 0,
+            totalCents: result.data.totalCents || 0,
             cartItemId: cartItemId,
             action: 'remove'
           },
@@ -222,13 +270,14 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         window.dispatchEvent(cartUpdateEvent);
         document.dispatchEvent(cartUpdateEvent);
         
-        console.log('Product removed from cart:', cartItemId);
+        console.log('✅ Product removed from cart:', cartItemId);
       } else {
+        console.error('❌ Error removing product:', result.error);
         throw new Error(result.error || "Error al remover del carrito");
       }
     } catch (error) {
-      console.error("Error removing from cart:", error);
-      // Podrías agregar un toast o notificación de error aquí
+      console.error("❌ Error removing from cart:", error);
+      alert("Error al eliminar producto del carrito");
     }
   };
 
@@ -238,6 +287,8 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     }
 
     try {
+      console.log('🗑️ Clearing entire cart...');
+      
       if (!user) {
         console.error('Usuario no autenticado');
         return;
@@ -249,10 +300,52 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
         return;
       }
 
-      // Por ahora, redirigir a la página del carrito para limpiar
-      window.location.href = '/carrito';
+      // Eliminar todos los items del carrito uno por uno
+      const itemsToRemove = [...cartData.items];
+      
+      for (const item of itemsToRemove) {
+        const response = await fetch("/api/cart/updateQty", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ cartItemId: item.id, qty: 0 }),
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          console.error('Error removing item:', item.id, result.error);
+        }
+      }
+
+      // Actualizar el estado local
+      setCartData({
+        success: true,
+        items: [],
+        totalCents: 0,
+        itemCount: 0,
+      });
+
+      // Limpiar la tienda activa
+      cartStore.clearActiveSeller();
+
+      // Disparar evento de actualización
+      const cartUpdateEvent = new CustomEvent("cart-updated", {
+        detail: {
+          itemCount: 0,
+          totalCents: 0,
+          action: 'clear'
+        },
+      });
+      
+      window.dispatchEvent(cartUpdateEvent);
+      document.dispatchEvent(cartUpdateEvent);
+      
+      console.log('✅ Cart cleared successfully');
     } catch (error) {
-      console.error("Error clearing cart:", error);
+      console.error("❌ Error clearing cart:", error);
+      alert("Error al vaciar el carrito");
     }
   };
 
@@ -406,16 +499,46 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
                 <p className="text-gray-400 text-xs mt-2">Agrega productos desde el catálogo</p>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <div className="text-4xl font-bold text-blue-600 mb-2">
-                  {cartData.itemCount}
+              <div className="space-y-4">
+                {cartData.items.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-gray-900 truncate">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Vendedor: {item.sellerName}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Cantidad: {item.qty} × {formatPrice(item.priceCents)}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatPrice(item.totalCents)}
+                      </span>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                        title="Eliminar del carrito"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Resumen total */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-900">Total:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {formatPrice(cartData.totalCents)}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-gray-600 mb-4">
-                  {cartData.itemCount === 1 ? 'producto' : 'productos'} en tu carrito
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  Total: {formatPrice(cartData.totalCents)}
-                </p>
               </div>
             )}
           </div>
@@ -425,14 +548,21 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
             <div className="border-t p-4 space-y-3 flex-shrink-0 bg-white">
               <div className="space-y-2">
                 <a
-                  href="/carrito"
+                  href="/checkout"
                   className="w-full min-h-11 bg-blue-600 text-white rounded-lg font-medium 
                            hover:bg-blue-700 transition-colors flex items-center justify-center"
+                >
+                  Proceder al Pago
+                </a>
+                <a
+                  href="/carrito"
+                  className="w-full min-h-11 border border-gray-300 text-gray-700 rounded-lg font-medium 
+                           hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >
                   Ver carrito completo
                 </a>
                 <a
-                  href="/catalogo"
+                  href="/"
                   className="w-full min-h-11 border border-gray-300 text-gray-700 rounded-lg font-medium 
                            hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >

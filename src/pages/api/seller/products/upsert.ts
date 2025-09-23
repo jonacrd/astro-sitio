@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 export const POST: APIRoute = async ({ request }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,14 +16,15 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar service role key para bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Obtener token de autorización
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Token de autorización requerido'
+        error: 'No autorizado'
       }), { 
         status: 401,
         headers: { 'content-type': 'application/json' }
@@ -45,17 +46,17 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el usuario es vendedor
-    const { data: profile, error: profileError } = await supabase
+    // Verificar que es vendedor
+    const { data: profile } = await supabase
       .from('profiles')
       .select('is_seller')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile?.is_seller) {
+    if (!profile?.is_seller) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Usuario no es vendedor'
+        error: 'No tienes permisos de vendedor'
       }), { 
         status: 403,
         headers: { 'content-type': 'application/json' }
@@ -63,55 +64,60 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Obtener datos del request
-    const { product_id, price_cents, stock, active = true } = await request.json();
+    const body = await request.json();
+    const { title, description, category, image_url, price_cents, stock, active = true } = body;
 
-    if (!product_id || price_cents === undefined || stock === undefined) {
+    if (!title || !description || !category || price_cents === undefined || stock === undefined) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'product_id, price_cents y stock son requeridos'
+        error: 'title, description, category, price_cents y stock son requeridos'
       }), { 
         status: 400,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    // Validar que el producto existe
+    // Crear producto
     const { data: product, error: productError } = await supabase
       .from('products')
-      .select('id, title')
-      .eq('id', product_id)
+      .insert({
+        title,
+        description,
+        category,
+        image_url: image_url || null
+      })
+      .select('id')
       .single();
 
-    if (productError || !product) {
+    if (productError) {
+      console.error('Error creando producto:', productError);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Producto no encontrado'
+        error: 'Error creando producto: ' + productError.message
       }), { 
-        status: 404,
+        status: 500,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    // Upsert en seller_products
-    const { data, error } = await supabase
+    // Agregar a vendedor
+    const { data: sellerProduct, error: sellerProductError } = await supabase
       .from('seller_products')
-      .upsert({
+      .insert({
         seller_id: user.id,
-        product_id: product_id,
-        price_cents: Math.round(price_cents),
-        stock: Math.max(0, Math.round(stock)),
-        active: Boolean(active)
-      }, {
-        onConflict: 'seller_id,product_id'
+        product_id: product.id,
+        price_cents: price_cents,
+        stock: stock,
+        active: active
       })
-      .select()
+      .select('id')
       .single();
 
-    if (error) {
-      console.error('Error upserting seller product:', error);
+    if (sellerProductError) {
+      console.error('Error agregando producto a vendedor:', sellerProductError);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Error guardando producto: ' + error.message
+        error: 'Error agregando producto: ' + sellerProductError.message
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -120,21 +126,21 @@ export const POST: APIRoute = async ({ request }) => {
 
     return new Response(JSON.stringify({
       success: true,
-      message: 'Producto guardado exitosamente',
       data: {
-        ...data,
-        product_title: product.title
-      }
-    }), { 
+        productId: product.id,
+        sellerProductId: sellerProduct.id
+      },
+      message: 'Producto agregado exitosamente'
+    }), {
       headers: { 'content-type': 'application/json' }
     });
 
   } catch (error: any) {
-    console.error('Error inesperado:', error);
+    console.error('Error en /api/seller/products/upsert:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error inesperado: ' + error.message
-    }), { 
+      error: 'Error interno del servidor: ' + error.message
+    }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
     });

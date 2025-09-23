@@ -1,11 +1,10 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import SmartSearch from '@/components/react/SmartSearch.tsx'
-import FeedResults from '@/components/react/FeedResults.tsx'
+import DynamicFeed from '@/components/react/DynamicFeed.tsx'
 import HowItWorks from '@/components/react/HowItWorks.tsx'
-import PopularProducts from '@/components/react/PopularProducts.tsx'
-import CategoryBanners from '@/components/react/CategoryBanners.tsx'
-import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
+import CategoryCatalog from '@/components/react/CategoryCatalog.tsx'
+import ProfileButton from '@/components/react/ProfileButton.tsx'
 ---
 
 <style>
@@ -91,21 +90,29 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
         </div>
 
         <!-- Resultados bajo el hero -->
-        <FeedResults client:load />
+        <!-- SmartSearch ya está en el hero, no duplicar -->
       </div>
     </section>
 
     <!-- Cómo funciona Town -->
     <HowItWorks client:load />
 
-    <!-- Productos Populares -->
-    <PopularProducts client:load />
+    <!-- Feed Dinámico con Productos Reales -->
+    <section class="py-12 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <DynamicFeed client:load />
+      </div>
+    </section>
 
-    <!-- Banners por Categoría -->
-    <CategoryBanners client:load />
+    <!-- Catálogo por Categorías -->
+    <section class="py-12 bg-white">
+      <div class="container mx-auto px-4">
+        <CategoryCatalog client:load />
+      </div>
+    </section>
 
-    <!-- Feed Infinito -->
-    <InfiniteFeed client:load />
+    <!-- Botón de Perfil Flotante -->
+    <ProfileButton client:load />
 
   <!-- Modales de autenticación -->
   <dialog id="dlg-login" class="backdrop:bg-black/50 bg-white rounded-lg p-6 max-w-md w-full">
@@ -203,17 +210,17 @@ import InfiniteFeed from '@/components/react/InfiniteFeed.tsx'
           linkVender?.classList.add('hidden');
           showCompleteProfileButton();
         } else if (profile.is_seller) {
-          // Es vendedor - mostrar dashboard vendedor
+          // Es vendedor - mostrar perfil con acceso al dashboard
           linkDash?.classList.remove('hidden');
           linkVender?.classList.add('hidden');
-          linkDash.textContent = 'Dashboard Vendedor';
-          linkDash.href = '/dashboard';
+          linkDash.textContent = 'Mi Perfil';
+          linkDash.href = '/perfil';
         } else {
           // Usuario normal - mostrar opciones
           linkDash?.classList.remove('hidden');
           linkVender?.classList.remove('hidden');
-          linkDash.textContent = 'Mi Cuenta';
-          linkDash.href = '/dashboard';
+          linkDash.textContent = 'Mi Perfil';
+          linkDash.href = '/perfil';
           linkVender.textContent = 'VENDER';
           linkVender.href = '/upgrade-seller';
         }

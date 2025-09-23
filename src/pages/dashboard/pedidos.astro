@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SellerGuard from '../../components/react/SellerGuard.tsx'
+import SellerOrders from '../../components/react/SellerOrders.tsx'
+import OrderNotification from '../../components/react/OrderNotification.tsx'
+---
+
+<BaseLayout title="Mis Pedidos">
+  <SellerGuard client:load>
+    <main class="min-h-screen bg-gray-50">
+      <div class="container mx-auto px-4 py-8">
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-800 mb-2">Mis Pedidos</h1>
+          <p class="text-gray-600">Gestiona los pedidos de tus clientes</p>
+        </div>
+
+        <SellerOrders client:load />
+      </div>
+    </main>
+    
+    <!-- Notificación de nuevos pedidos -->
+    <OrderNotification client:load sellerId="" />
+  </SellerGuard>
+</BaseLayout>

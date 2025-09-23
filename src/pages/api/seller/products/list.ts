@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 export const GET: APIRoute = async ({ request }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,14 +16,15 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar service role key para bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Obtener token de autorización
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Token de autorización requerido'
+        error: 'No autorizado'
       }), { 
         status: 401,
         headers: { 'content-type': 'application/json' }
@@ -45,69 +46,46 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el usuario es vendedor
-    const { data: profile, error: profileError } = await supabase
+    // Verificar que es vendedor
+    const { data: profile } = await supabase
       .from('profiles')
       .select('is_seller')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile?.is_seller) {
+    if (!profile?.is_seller) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Usuario no es vendedor'
+        error: 'No tienes permisos de vendedor'
       }), { 
         status: 403,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    // Obtener parámetros de consulta
-    const url = new URL(request.url);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);
-    const offset = Math.max(parseInt(url.searchParams.get('offset') || '0'), 0);
-    const search = url.searchParams.get('q') || '';
-    const category = url.searchParams.get('category') || '';
-
-    // Construir consulta
-    let query = supabase
+    // Obtener productos del vendedor
+    const { data: products, error } = await supabase
       .from('seller_products')
       .select(`
-        id,
+        seller_id,
         product_id,
         price_cents,
         stock,
         active,
-        created_at,
         updated_at,
-        products!inner(
+        product:products!inner(
           id,
           title,
+          description,
           category,
-          image_url,
-          description
+          image_url
         )
       `)
-      .eq('seller_id', user.id);
-
-    // Aplicar filtros
-    if (search) {
-      query = query.ilike('products.title', `%${search}%`);
-    }
-
-    if (category) {
-      query = query.eq('products.category', category);
-    }
-
-    // Aplicar paginación y ordenamiento
-    query = query
-      .order('updated_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    const { data: sellerProducts, error } = await query;
+      .eq('seller_id', user.id)
+      .order('updated_at', { ascending: false });
 
     if (error) {
-      console.error('Error obteniendo productos del vendedor:', error);
+      console.error('Error obteniendo productos:', error);
       return new Response(JSON.stringify({
         success: false,
         error: 'Error obteniendo productos: ' + error.message
@@ -117,31 +95,36 @@ export const GET: APIRoute = async ({ request }) => {
       });
     }
 
-    // Obtener total para paginación
-    const { count } = await supabase
-      .from('seller_products')
-      .select('*', { count: 'exact', head: true })
-      .eq('seller_id', user.id);
+    // Formatear datos
+    const formattedProducts = products?.map(item => ({
+      id: `${item.seller_id}::${item.product_id}`, // ID compuesto
+      product_id: item.product_id,
+      title: item.product.title,
+      description: item.product.description,
+      category: item.product.category,
+      image_url: item.product.image_url,
+      price_cents: item.price_cents,
+      stock: item.stock,
+      active: item.active,
+      updated_at: item.updated_at
+    })) || [];
 
     return new Response(JSON.stringify({
       success: true,
-      data: sellerProducts || [],
-      pagination: {
-        limit,
-        offset,
-        total: count || 0,
-        hasMore: (offset + limit) < (count || 0)
+      data: {
+        products: formattedProducts,
+        total: formattedProducts.length
       }
-    }), { 
+    }), {
       headers: { 'content-type': 'application/json' }
     });
 
   } catch (error: any) {
-    console.error('Error inesperado:', error);
+    console.error('Error en /api/seller/products/list:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error inesperado: ' + error.message
-    }), { 
+      error: 'Error interno del servidor: ' + error.message
+    }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
     });

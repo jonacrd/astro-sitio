@@ -33,12 +33,12 @@ export default function SmartSearch(){
     setLoading(true); setError(null);
     
     try{
-      const url = `/api/nl-search?q=${encodeURIComponent(text)}&limit=8`;
+      const url = `/api/nl-search-real?q=${encodeURIComponent(text)}&limit=8`;
       const res = await fetch(url);
       if(!res.ok) throw new Error('No se pudo consultar el buscador.');
       const data = await res.json();
       console.log('Resultados:', data);
-      setResults(data.results || []);
+      setResults(data.items || []);
       setLastQuery(text);
     }catch(e:any){
       const errorMsg = e.message || 'Error desconocido.';

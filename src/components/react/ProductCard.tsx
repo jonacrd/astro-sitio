@@ -1,104 +1,166 @@
-import { formatPrice } from "@lib/money";
-import AddToCartButton from "./AddToCartButton";
-
-interface Product {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  priceCents: number;
-  stock: number;
-  imageUrl?: string;
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-  };
-}
+import React, { useState } from 'react';
+import AddToCartButton from './AddToCartButton';
 
 interface ProductCardProps {
-  product: Product;
-  className?: string;
+  product: {
+    id: string;
+    productId: string;
+    sellerId: string;
+    title: string;
+    description?: string;
+    category: string;
+    imageUrl?: string;
+    priceCents: number;
+    stock: number;
+    sellerName: string;
+    sellerPhone?: string;
+    isOnline: boolean;
+    delivery: boolean;
+    updatedAt: string;
+    productUrl: string;
+    addToCartUrl: string;
+  };
+  variant?: 'small' | 'medium' | 'large';
+  showSeller?: boolean;
 }
 
-export default function ProductCard({
-  product,
-  className = "",
+export default function ProductCard({ 
+  product, 
+  variant = 'medium', 
+  showSeller = true 
 }: ProductCardProps) {
-  // Normalizar URL de imagen
-  const imageUrl = product.imageUrl?.startsWith("http")
-    ? product.imageUrl
-    : product.imageUrl || "/images/placeholder-product.jpg";
+  const [imageError, setImageError] = useState(false);
+
+  const formatPrice = (cents: number) => {
+    return `$${(cents / 100).toFixed(2)}`;
+  };
+
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'small':
+        return 'w-full max-w-xs';
+      case 'large':
+        return 'w-full max-w-md';
+      default:
+        return 'w-full max-w-sm';
+    }
+  };
+
+  const getImageClasses = () => {
+    switch (variant) {
+      case 'small':
+        return 'h-32';
+      case 'large':
+        return 'h-64';
+      default:
+        return 'h-48';
+    }
+  };
 
   return (
-    <a
-      href={`/catalogo?pid=${product.id}`}
-      className={`
-        group rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-300
-        overflow-hidden hover:scale-[1.02] active:scale-[0.98]
-        ${className}
-      `}
-    >
+    <div className={`${getVariantClasses()} bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}>
       {/* Imagen del producto */}
-      <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
-        <img
-          src={imageUrl}
-          alt={product.name}
-          className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-          loading="lazy"
-          decoding="async"
-        />
-
-        {/* Badge de categoría */}
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-            {product.category.name}
+      <div className={`${getImageClasses()} w-full bg-gray-200 relative`}>
+        {product.imageUrl && !imageError ? (
+          <img
+            src={product.imageUrl}
+            alt={product.title}
+            className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        )}
+        
+        {/* Badge de estado del vendedor */}
+        <div className="absolute top-2 right-2">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            product.isOnline 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            {product.isOnline ? '🟢 Online' : '⚪ Offline'}
           </span>
         </div>
 
-        {/* Badge de stock bajo */}
-        {product.stock > 0 && product.stock <= 5 && (
-          <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
-            <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-              ¡Últimos {product.stock}!
-            </span>
-          </div>
-        )}
-
-        {/* Badge sin stock */}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="bg-red-500 text-white px-3 py-2 rounded-lg font-bold text-sm sm:text-base">
-              AGOTADO
+        {/* Badge de stock */}
+        {product.stock < 5 && (
+          <div className="absolute top-2 left-2">
+            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Stock bajo
             </span>
           </div>
         )}
       </div>
 
       {/* Contenido de la tarjeta */}
-      <div className="p-3 sm:p-4">
-        {/* Título */}
-        <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 mb-1">
-          {product.name}
-        </h3>
+      <div className="p-4">
+        {/* Título y categoría */}
+        <div className="mb-2">
+          <h3 className="font-semibold text-gray-900 text-lg line-clamp-2">
+            {product.title}
+          </h3>
+          <p className="text-sm text-gray-500 capitalize">
+            {product.category}
+          </p>
+        </div>
 
-        {/* Precio */}
-        <p className="text-blue-600 font-semibold text-sm sm:text-base mb-2">
-          {formatPrice(product.priceCents)}
-        </p>
+        {/* Descripción (solo en variante large) */}
+        {variant === 'large' && product.description && (
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+            {product.description}
+          </p>
+        )}
 
-        {/* Stock */}
-        <p className="text-xs text-gray-500 mb-3">
-          {product.stock > 0 ? `${product.stock} disponibles` : "Agotado"}
-        </p>
+        {/* Información del vendedor */}
+        {showSeller && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Vendedor:</span> {product.sellerName}
+            </p>
+            {product.delivery && (
+              <p className="text-xs text-green-600 mt-1">
+                🚚 Entrega disponible
+              </p>
+            )}
+          </div>
+        )}
 
-        {/* Botón de agregar al carrito */}
-        <AddToCartButton
-          productId={product.id}
-          stock={product.stock}
-          className="w-full min-h-11 text-sm sm:text-base"
-        />
+        {/* Precio y stock */}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <p className="text-2xl font-bold text-blue-600">
+              {formatPrice(product.priceCents)}
+            </p>
+            <p className="text-sm text-gray-500">
+              Stock: {product.stock} unidades
+            </p>
+          </div>
+        </div>
+
+        {/* Botones de acción */}
+        <div className="flex gap-2">
+          <a
+            href={product.productUrl}
+            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-center text-sm font-medium hover:bg-gray-200 transition-colors"
+          >
+            Ver detalles
+          </a>
+          <AddToCartButton
+            productId={product.productId}
+            sellerId={product.sellerId}
+            sellerName={product.sellerName}
+            title={product.title}
+            price_cents={product.priceCents}
+            stock={product.stock}
+            className="flex-1"
+          />
+        </div>
       </div>
-    </a>
+    </div>
   );
 }

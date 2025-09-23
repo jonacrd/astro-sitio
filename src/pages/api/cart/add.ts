@@ -53,9 +53,9 @@ export const GET: APIRoute = async ({ url }) => {
 export const POST: APIRoute = async ({ request }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -65,7 +65,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar service role key para bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Obtener token de autorización
     const authHeader = request.headers.get('authorization');

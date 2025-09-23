@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { cartStore } from "../../lib/cart-store";
 
 interface AddToCartButtonProps {
   productId: string;
   sellerId: string;
+  sellerName?: string;
   title: string;
   price_cents: number;
   stock: number;
@@ -13,6 +15,7 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({
   productId,
   sellerId,
+  sellerName = "Vendedor",
   title,
   price_cents,
   stock,
@@ -25,52 +28,83 @@ export default function AddToCartButton({
   const handleAddToCart = async () => {
     if (loading || disabled || stock === 0) return;
 
-    setLoading(true);
+            // Verificar si se puede agregar de esta tienda
+            const canAdd = cartStore.canAddFromSeller(sellerId);
+            if (!canAdd.canAdd) {
+              alert(canAdd.message);
+              return;
+            }
 
-    try {
-      // Verificar autenticación y obtener token
-      const { supabase } = await import('../../lib/supabase-browser');
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.access_token) {
-        alert('Debes iniciar sesión para agregar productos al carrito');
-        return;
-      }
+            console.log('🛒 Adding to cart:', { sellerId, productId, title, price_cents });
+            console.log('🛒 Current cart state:', cartStore.getState());
 
-      const response = await fetch("/api/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({ 
-          sellerId, 
-          productId, 
-          title, 
-          price_cents, 
-          qty: 1 
-        }),
-      });
+            setLoading(true);
 
-      const result = await response.json();
+            try {
+              // Verificar autenticación y obtener token
+              const { supabase } = await import('../../lib/supabase-browser');
+              const { data: { session } } = await supabase.auth.getSession();
+              
+              if (!session?.access_token) {
+                alert('Debes iniciar sesión para agregar productos al carrito');
+                return;
+              }
+
+              const response = await fetch("/api/cart/add", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ 
+                  sellerId, 
+                  productId, 
+                  title, 
+                  price_cents, 
+                  qty: 1 
+                }),
+              });
+
+              const result = await response.json();
 
       if (result.success) {
         setAdded(true);
 
-        // Disparar evento personalizado para actualizar el widget del carrito
-        const cartUpdateEvent = new CustomEvent("cart-updated", {
-          detail: {
-            itemCount: result.itemCount,
-            totalCents: result.totalCents,
-            productId: productId,
-          },
-        });
-        
-        // Disparar en window y document para asegurar que se capture
-        window.dispatchEvent(cartUpdateEvent);
-        document.dispatchEvent(cartUpdateEvent);
-        
-        console.log('Cart update event dispatched:', cartUpdateEvent.detail);
+                // Establecer tienda activa (siempre actualizar para mostrar productos de la tienda actual)
+                cartStore.setActiveSeller(sellerId, sellerName);
+
+        // Actualizar estadísticas del carrito
+        cartStore.updateCartStats(result.itemCount, result.totalCents);
+
+                // Disparar evento personalizado para actualizar el widget del carrito y el feed
+                const cartUpdateEvent = new CustomEvent("cart-updated", {
+                  detail: {
+                    itemCount: result.itemCount,
+                    totalCents: result.totalCents,
+                    productId: productId,
+                    sellerId: sellerId,
+                    sellerName: sellerName,
+                    action: 'add'
+                  },
+                });
+                
+                // Disparar en window y document para asegurar que se capture
+                window.dispatchEvent(cartUpdateEvent);
+                document.dispatchEvent(cartUpdateEvent);
+                
+                // Forzar actualización del feed después de un pequeño delay
+                setTimeout(() => {
+                  const refreshEvent = new CustomEvent("force-feed-refresh", {
+                    detail: { sellerId, sellerName }
+                  });
+                  window.dispatchEvent(refreshEvent);
+                  
+                  // También disparar un evento de cambio de tienda
+                  const sellerChangeEvent = new CustomEvent("seller-changed", {
+                    detail: { sellerId, sellerName }
+                  });
+                  window.dispatchEvent(sellerChangeEvent);
+                }, 200);
 
         // Resetear estado después de 2 segundos
         setTimeout(() => setAdded(false), 2000);
@@ -78,7 +112,6 @@ export default function AddToCartButton({
         throw new Error(result.error || "Error al agregar al carrito");
       }
     } catch (error) {
-      console.error("Error adding to cart:", error);
       alert("Error al agregar producto al carrito");
     } finally {
       setLoading(false);

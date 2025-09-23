@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 export const POST: APIRoute = async ({ request }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,14 +16,15 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar service role key para bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Obtener token de autorización
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Token de autorización requerido'
+        error: 'No autorizado'
       }), { 
         status: 401,
         headers: { 'content-type': 'application/json' }
@@ -46,7 +47,8 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Obtener datos del request
-    const { cartItemId, qty } = await request.json();
+    const body = await request.json();
+    const { cartItemId, qty } = body;
 
     if (!cartItemId || qty === undefined) {
       return new Response(JSON.stringify({
@@ -58,18 +60,15 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el item pertenece al usuario
+    // Obtener el cart_id del item
     const { data: cartItem, error: itemError } = await supabase
       .from('cart_items')
-      .select(`
-        id,
-        cart_id,
-        carts!inner(user_id)
-      `)
+      .select('cart_id')
       .eq('id', cartItemId)
       .single();
 
     if (itemError || !cartItem) {
+      console.error('Error obteniendo item del carrito:', itemError);
       return new Response(JSON.stringify({
         success: false,
         error: 'Item del carrito no encontrado'
@@ -79,28 +78,37 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    if (cartItem.carts.user_id !== user.id) {
+    // Verificar que el carrito pertenece al usuario
+    const { data: cart, error: cartError } = await supabase
+      .from('carts')
+      .select('id')
+      .eq('id', cartItem.cart_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (cartError || !cart) {
+      console.error('Error verificando carrito:', cartError);
       return new Response(JSON.stringify({
         success: false,
-        error: 'No tienes permisos para modificar este item'
+        error: 'Carrito no encontrado o no tienes permisos'
       }), { 
         status: 403,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    if (qty <= 0) {
-      // Eliminar item
+    if (qty === 0) {
+      // Eliminar item del carrito
       const { error: deleteError } = await supabase
         .from('cart_items')
         .delete()
         .eq('id', cartItemId);
 
       if (deleteError) {
-        console.error('Error eliminando item:', deleteError);
+        console.error('Error eliminando item del carrito:', deleteError);
         return new Response(JSON.stringify({
           success: false,
-          error: 'Error eliminando item: ' + deleteError.message
+          error: 'Error eliminando item del carrito: ' + deleteError.message
         }), { 
           status: 500,
           headers: { 'content-type': 'application/json' }
@@ -110,14 +118,14 @@ export const POST: APIRoute = async ({ request }) => {
       // Actualizar cantidad
       const { error: updateError } = await supabase
         .from('cart_items')
-        .update({ qty: Math.round(qty) })
+        .update({ qty })
         .eq('id', cartItemId);
 
       if (updateError) {
-        console.error('Error actualizando item:', updateError);
+        console.error('Error actualizando cantidad:', updateError);
         return new Response(JSON.stringify({
           success: false,
-          error: 'Error actualizando item: ' + updateError.message
+          error: 'Error actualizando cantidad: ' + updateError.message
         }), { 
           status: 500,
           headers: { 'content-type': 'application/json' }
@@ -125,17 +133,34 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    // Obtener resumen actualizado del carrito
-    const { data: cartItems, error: summaryError } = await supabase
-      .from('cart_items')
-      .select('id, product_id, title, price_cents, qty')
-      .eq('cart_id', cartItem.cart_id);
+    // Obtener carrito actualizado
+    const { data: updatedCart, error: updatedCartError } = await supabase
+      .from('carts')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
 
-    if (summaryError) {
-      console.error('Error obteniendo resumen:', summaryError);
+    if (updatedCartError || !updatedCart) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Error obteniendo resumen: ' + summaryError.message
+        error: 'Error obteniendo carrito'
+      }), { 
+        status: 500,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    // Obtener items actualizados del carrito
+    const { data: cartItems, error: itemsError } = await supabase
+      .from('cart_items')
+      .select('qty, price_cents')
+      .eq('cart_id', updatedCart.id);
+
+    if (itemsError) {
+      console.error('Error obteniendo items del carrito:', itemsError);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Error obteniendo items del carrito: ' + itemsError.message
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -144,24 +169,25 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Calcular totales
     const itemCount = cartItems?.reduce((sum, item) => sum + item.qty, 0) || 0;
-    const totalCents = cartItems?.reduce((sum, item) => sum + (item.price_cents * item.qty), 0) || 0;
+    const totalCents = cartItems?.reduce((sum, item) => sum + (item.qty * item.price_cents), 0) || 0;
 
     return new Response(JSON.stringify({
       success: true,
-      message: qty <= 0 ? 'Item eliminado del carrito' : 'Cantidad actualizada',
-      itemCount,
-      totalCents,
-      items: cartItems || []
-    }), { 
+      data: {
+        itemCount,
+        totalCents,
+        items: cartItems
+      }
+    }), {
       headers: { 'content-type': 'application/json' }
     });
 
   } catch (error: any) {
-    console.error('Error inesperado:', error);
+    console.error('Error en /api/cart/updateQty:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error inesperado: ' + error.message
-    }), { 
+      error: 'Error interno del servidor: ' + error.message
+    }), {
       status: 500,
       headers: { 'content-type': 'application/json' }
     });

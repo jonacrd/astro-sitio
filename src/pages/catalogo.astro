@@ -1,126 +1,34 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import ProductGrid from '@components/react/ProductGrid.tsx'
-import { listProducts, getCategories } from '@lib/products.server'
-
-const products = await listProducts()
-const categories = await getCategories()
+import CategoryCatalog from '@/components/react/CategoryCatalog.tsx'
+import SmartSearch from '@/components/react/SmartSearch.tsx'
 ---
 
 <BaseLayout 
-  title="Catálogo - Tienda Online"
-  description="Explora nuestro catálogo completo de productos tecnológicos"
+  title="Catálogo de Productos - Town"
+  description="Explora todos los productos disponibles por categorías - Town"
 >
-  <!-- Header del catálogo -->
-  <section class="bg-white py-8 border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            Catálogo de productos
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header con búsqueda -->
+    <section class="bg-white shadow-sm">
+      <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+          <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+            Catálogo de Productos
           </h1>
-          <p class="text-gray-600">
-            Descubre nuestra selección de {products.length} productos de calidad
+          <p class="text-gray-600 text-center mb-8">
+            Explora todos los productos disponibles organizados por categorías
           </p>
+          <SmartSearch client:load />
         </div>
-
-        <!-- Filtros por categoría -->
-        {categories.length > 0 && (
-          <div class="flex flex-wrap gap-2">
-            <a 
-              href="/catalogo"
-              class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-            >
-              Todas
-            </a>
-            {categories.map((category) => (
-              <a 
-                href={`/catalogo?category=${category.slug}`}
-                class="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-              >
-                {category.name}
-              </a>
-            ))}
-          </div>
-        )}
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Estado de Vendedores -->
-  <section class="bg-gray-50 py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-600">Estado de vendedores:</span>
-        <span id="badge-available" class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700" hidden>Disponible</span>
-        <span id="badge-open" class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700" hidden>Abierto</span>
-        <span id="badge-closed" class="text-xs px-2 py-0.5 rounded bg-slate-200 text-slate-600" hidden>Cerrado</span>
+    <!-- Catálogo principal -->
+    <section class="py-12">
+      <div class="container mx-auto px-4">
+        <CategoryCatalog client:load />
       </div>
-    </div>
-  </section>
-
-  <!-- Grid de productos -->
-  <section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <ProductGrid 
-        products={products.filter(p => p.category).map(p => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          description: p.description || '',
-          priceCents: p.priceCents,
-          stock: p.stock,
-          imageUrl: p.imageUrl,
-          category: p.category!
-        }))} 
-        client:load 
-      />
-    </div>
-  </section>
-
-  <!-- Script para filtros -->
-  <script>
-    // Obtener parámetro de categoría de la URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const categoryParam = urlParams.get('category')
-    
-    if (categoryParam) {
-      // Resaltar el filtro activo
-      const filterLinks = document.querySelectorAll('a[href*="category="]')
-      filterLinks.forEach(link => {
-        if ((link as HTMLAnchorElement).href.includes(`category=${categoryParam}`)) {
-          link.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
-          link.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
-        }
-      })
-    } else {
-      // Resaltar "Todas" si no hay filtro
-      const allLink = document.querySelector('a[href="/catalogo"]')
-      if (allLink) {
-        allLink.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50')
-        allLink.classList.add('bg-blue-600', 'text-white', 'border-blue-600')
-      }
-    }
-
-    // ===== SISTEMA DE BADGES DE ESTADO =====
-    (async () => {
-      try {
-        const s = await fetch('/api/sellers/status').then(r => r.json());
-        const me = s.find(x => x.id === 's1'); // MOCK
-        if (!me) return;
-
-        const badgeAvailable = document.getElementById('badge-available');
-        const badgeOpen = document.getElementById('badge-open');
-        const badgeClosed = document.getElementById('badge-closed');
-
-        if (badgeAvailable && badgeOpen && badgeClosed) {
-          badgeAvailable.hidden = !me.available;
-          badgeOpen.hidden = !(me.open && !me.online);
-          badgeClosed.hidden = (me.open || me.online);
-        }
-      } catch (error) {
-        console.error('Error fetching seller status:', error);
-      }
-    })();
-  </script>
+    </section>
+  </div>
 </BaseLayout>

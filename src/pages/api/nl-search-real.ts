@@ -22,6 +22,8 @@ async function parseQueryWithAI(userText: string) {
     'cachapas': ['cachapa', 'cachapas'],
     'lasaña': ['lasaña', 'lasagna', 'pasta'],
     'lasagna': ['lasaña', 'lasagna', 'pasta'],
+    'tequeños': ['tequeños', 'tequeño'],
+    'tequeño': ['tequeños', 'tequeño'],
     
     // Bebidas
     'malta': ['malta', 'maltas'],
@@ -48,125 +50,79 @@ async function parseQueryWithAI(userText: string) {
     'manicure': ['manicure', 'manicura'],
     'mecánica': ['mecánica', 'taller', 'revisión'],
     
-    // Minimarket
-    'pan': ['pan', 'panes'],
-    'leche': ['leche', 'lácteos'],
-    'huevos': ['huevos', 'huevo'],
-    'arroz': ['arroz'],
-    'aceite': ['aceite'],
-    'azúcar': ['azúcar', 'azucar'],
-    'sal': ['sal'],
-    'pasta': ['pasta', 'fideos', 'tallarín'],
-    'harina': ['harina', 'pan'],
-    
-    // Ropa
-    'polera': ['polera', 'camiseta', 'playera'],
-    'jeans': ['jeans', 'pantalón', 'pantalones'],
-    'zapatos': ['zapatos', 'zapato', 'calzado'],
-    
-    // Tecnología
-    'audífonos': ['audífonos', 'audifonos', 'auriculares'],
-    'cargador': ['cargador', 'cargador usb'],
-    'cable': ['cable', 'cable usb'],
-    
-    // Palabras de entrega
-    'delivery': ['delivery', 'domicilio', 'a domicilio'],
-    'domicilio': ['delivery', 'domicilio', 'a domicilio'],
-    'envío': ['delivery', 'domicilio', 'envío'],
-    'entrega': ['delivery', 'domicilio', 'entrega'],
-    
-    // Palabras de precio
-    'barato': ['barato', 'económico', 'económico', 'barata', 'baratos', 'baratas'],
-    'caro': ['caro', 'costoso', 'cara', 'caros', 'caras'],
-    'oferta': ['oferta', 'ofertas', 'descuento', 'descuentos'],
-    'promoción': ['promoción', 'promociones', 'promocion', 'promociones'],
-    
-    // Palabras de cantidad
-    'mucho': ['mucho', 'muchos', 'mucha', 'muchas'],
-    'poco': ['poco', 'pocos', 'poca', 'pocas'],
-    'varios': ['varios', 'varias', 'diferentes', 'diversos'],
-    
-    // Palabras de tiempo
-    'nuevo': ['nuevo', 'nueva', 'nuevos', 'nuevas', 'reciente', 'recientes'],
-    'viejo': ['viejo', 'vieja', 'viejos', 'viejas', 'antiguo', 'antigua'],
-    
-    // Palabras de calidad
-    'bueno': ['bueno', 'buena', 'buenos', 'buenas', 'buen', 'buena'],
-    'malo': ['malo', 'mala', 'malos', 'malas', 'mal'],
-    
-    // Palabras de disponibilidad
-    'disponible': ['disponible', 'disponibles', 'stock', 'inventario'],
-    'agotado': ['agotado', 'agotada', 'agotados', 'agotadas', 'sin stock'],
-    
-    // Palabras de ubicación
-    'cerca': ['cerca', 'cercano', 'cercana', 'cercanos', 'cercanas'],
-    'lejos': ['lejos', 'lejano', 'lejana', 'lejanos', 'lejanas'],
-    
-    // Palabras de categoría
-    'comida': ['comida', 'alimento', 'alimentos', 'comestible', 'comestibles'],
-    'bebida': ['bebida', 'bebidas', 'líquido', 'líquidos', 'liquido', 'liquidos'],
-    'ropa': ['ropa', 'vestimenta', 'vestido', 'vestidos', 'prenda', 'prendas'],
-    'servicio': ['servicio', 'servicios', 'atención', 'atencion'],
-    'producto': ['producto', 'productos', 'artículo', 'articulo', 'artículos', 'articulos']
+    // Adjetivos de precio
+    'barato': ['barato', 'económico', 'cheap'],
+    'barata': ['barata', 'económica', 'cheap'],
+    'baratos': ['baratos', 'económicos', 'cheap'],
+    'baratas': ['baratas', 'económicas', 'cheap'],
+    'caro': ['caro', 'costoso', 'expensive'],
+    'cara': ['cara', 'costosa', 'expensive'],
+    'caros': ['caros', 'costosos', 'expensive'],
+    'caras': ['caras', 'costosas', 'expensive']
   };
 
-  // Extraer términos de búsqueda
-  const words = text.split(/\s+/);
-  const terms = [];
-  
-  for (const word of words) {
-    if (synonymMap[word]) {
-      terms.push(...synonymMap[word]);
-    } else {
-      terms.push(word);
-    }
-  }
-
-  // Detectar categoría
-  let category = null;
+  // Detectar categorías
   const categoryKeywords = {
-    'comida': ['comida', 'alimento', 'comestible', 'cocina', 'cocinar'],
-    'bebidas': ['bebida', 'líquido', 'beber', 'tomar'],
-    'ropa': ['ropa', 'vestir', 'prenda', 'moda'],
-    'servicios': ['servicio', 'atención', 'ayuda', 'trabajo'],
-    'minimarket': ['supermercado', 'tienda', 'mercado', 'compras'],
-    'tecnologia': ['tecnología', 'tecnologia', 'electrónico', 'electronico', 'digital'],
-    'alcohol': ['alcohol', 'licor', 'bebida alcohólica', 'bebida alcoholica'],
-    'postres': ['postre', 'dulce', 'torta', 'pastel']
+    'comida': ['comida', 'alimento', 'alimentos', 'comer', 'cenar', 'almorzar', 'desayunar'],
+    'bebidas': ['bebida', 'bebidas', 'tomar', 'beber', 'refresco', 'refrescos'],
+    'minimarket': ['minimarket', 'supermercado', 'tienda', 'comestibles', 'abastos'],
+    'servicios': ['servicio', 'servicios', 'trabajo', 'trabajos', 'oficio', 'oficios']
   };
 
-  for (const [cat, keywords] of Object.entries(categoryKeywords)) {
-    if (keywords.some(keyword => text.includes(keyword))) {
-      category = cat;
-      break;
-    }
-  }
-
-  // Detectar delivery
-  const delivery = text.includes('delivery') || text.includes('domicilio') || text.includes('envío') || text.includes('entrega');
-
-  // Detectar solo online
-  const onlineOnly = text.includes('online') || text.includes('en línea') || text.includes('en linea');
+  // Detectar términos de entrega
+  const deliveryKeywords = ['delivery', 'domicilio', 'a domicilio', 'entrega', 'llevar'];
+  const onlineKeywords = ['online', 'disponible', 'activo', 'abierto'];
 
   // Detectar presupuesto
+  const budgetPattern = /(\d+)\s*(pesos?|bs|bolívares?|dólares?|usd|\$)/i;
+  const budgetMatch = text.match(budgetPattern);
+
+  // Procesar texto
+  const words = text.split(/\s+/);
+  const terms = [];
+  let category = null;
+  let delivery = null;
+  let onlineOnly = null;
   let budgetMax = null;
-  const budgetMatch = text.match(/(\d+)\s*(pesos?|bs|bolívares?|bolivares?)/i);
+
+  for (const word of words) {
+    // Buscar en sinónimos
+    let found = false;
+    for (const [key, synonyms] of Object.entries(synonymMap)) {
+      if (synonyms.some(syn => syn.includes(word) || word.includes(syn))) {
+        terms.push(key);
+        found = true;
+        break;
+      }
+    }
+    
+    if (!found && word.length > 2) {
+      terms.push(word);
+    }
+
+    // Detectar categoría
+    for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+      if (keywords.some(keyword => word.includes(keyword) || keyword.includes(word))) {
+        category = cat;
+        break;
+      }
+    }
+
+    // Detectar entrega
+    if (deliveryKeywords.some(keyword => word.includes(keyword) || keyword.includes(word))) {
+      delivery = true;
+    }
+
+    // Detectar online
+    if (onlineKeywords.some(keyword => word.includes(keyword) || keyword.includes(word))) {
+      onlineOnly = true;
+    }
+  }
+
+  // Procesar presupuesto
   if (budgetMatch) {
     budgetMax = parseInt(budgetMatch[1]) * 100; // Convertir a centavos
   }
-
-  // Detectar cantidad de resultados
-  let topK = null;
-  const limitMatch = text.match(/(\d+)\s*(resultados?|items?|productos?)/i);
-  if (limitMatch) {
-    topK = parseInt(limitMatch[1]);
-  }
-
-  // Detectar múltiples productos
-  const hasMultipleProducts = text.includes('varios') || text.includes('diferentes') || text.includes('diversos') || text.includes('muchos');
-
-  // Detectar búsqueda múltiple
-  const isMultipleSearch = text.includes('y') || text.includes('o') || text.includes('también') || text.includes('además');
 
   return {
     terms,
@@ -174,37 +130,18 @@ async function parseQueryWithAI(userText: string) {
     delivery,
     onlineOnly,
     budgetMax,
-    topK,
-    hasMultipleProducts,
-    isMultipleSearch
+    topK: 10,
+    hasMultipleProducts: terms.length > 1,
+    isMultipleSearch: terms.some(term => term.includes('y') || term.includes('con'))
   };
 }
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   try {
-    const qRaw = (url.searchParams.get('q') || '').trim();
-    
-    if (!qRaw) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Query parameter "q" is required'
-      }), { 
-        status: 400,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    console.log('Text analyzed:', qRaw);
-    
-    // Procesar query con IA
-    const aiResult = await parseQueryWithAI(qRaw);
-    console.log('IA parsed query:', aiResult);
-    
-    // Conectar a Supabase
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -214,10 +151,25 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const qRaw = (url.searchParams.get('q') || '').trim();
+    
+    if (!qRaw) {
+      return new Response(JSON.stringify({
+        success: true,
+        items: [],
+        message: 'Ingresa un término de búsqueda'
+      }), {
+        headers: { 'content-type': 'application/json' }
+      });
+    }
 
-    // Construir query para buscar productos
-    let query = supabase
+    // Procesar consulta con IA
+    const aiResult = await parseQueryWithAI(qRaw);
+
+    // Obtener todos los productos activos
+    const { data: allProducts, error } = await supabase
       .from('seller_products')
       .select(`
         seller_id,
@@ -225,6 +177,7 @@ export const GET: APIRoute = async ({ url }) => {
         price_cents,
         stock,
         active,
+        updated_at,
         product:products!inner(
           id,
           title,
@@ -241,31 +194,6 @@ export const GET: APIRoute = async ({ url }) => {
       .eq('active', true)
       .gt('stock', 0);
 
-    // Aplicar filtros basados en análisis de IA
-    if (aiResult.category) {
-      query = query.eq('product.category', aiResult.category);
-    }
-
-    // Buscar por términos en título y descripción
-    if (aiResult.terms.length > 0) {
-      const searchTerms = aiResult.terms.join(' | ');
-      query = query.or(`product.title.ilike.%${searchTerms}%,product.description.ilike.%${searchTerms}%`);
-    }
-
-    // Filtrar por presupuesto si se especifica
-    if (aiResult.budgetMax) {
-      query = query.lte('price_cents', aiResult.budgetMax);
-    }
-
-    // Ordenar por stock
-    query = query.order('stock', { ascending: false });
-
-    // Aplicar límite
-    const limit = aiResult.topK || 10;
-    query = query.limit(limit);
-
-    const { data: products, error } = await query;
-
     if (error) {
       console.error('Error obteniendo productos:', error);
       return new Response(JSON.stringify({
@@ -277,11 +205,35 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    console.log('Inventory count:', products?.length || 0);
-    console.log('Filtered results count:', products?.length || 0);
+    // Filtrar productos por categoría y presupuesto
+    let products = allProducts || [];
+    
+    if (aiResult.category) {
+      products = products.filter(item => item.product.category === aiResult.category);
+    }
+
+    if (aiResult.budgetMax) {
+      products = products.filter(item => item.price_cents <= aiResult.budgetMax);
+    }
+
+    // Filtrar por términos de búsqueda
+    let filteredProducts = products || [];
+    
+    if (aiResult.terms.length > 0) {
+      filteredProducts = products?.filter(item => {
+        const title = item.product.title.toLowerCase();
+        const description = item.product.description?.toLowerCase() || '';
+        
+        // Búsqueda simple: si el término está en el título o descripción
+        return aiResult.terms.some(term => {
+          const normalizedTerm = term.toLowerCase().trim();
+          return title.includes(normalizedTerm) || description.includes(normalizedTerm);
+        });
+      }) || [];
+    }
 
     // Obtener estados online de los vendedores
-    const sellerIds = products?.map(item => item.seller_id) || [];
+    const sellerIds = filteredProducts.map(item => item.seller_id);
     let sellerStatuses = {};
     
     if (sellerIds.length > 0) {
@@ -297,7 +249,7 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     // Formatear resultados
-    const results = products?.map(item => ({
+    const items = filteredProducts.map(item => ({
       productId: item.product_id,
       productTitle: item.product.title,
       category: item.product.category,
@@ -307,30 +259,56 @@ export const GET: APIRoute = async ({ url }) => {
       sellerId: item.seller_id,
       sellerName: item.seller.name,
       online: sellerStatuses[item.seller_id] || false,
-      delivery: sellerStatuses[item.seller_id] || false, // Asumimos que vendedores online hacen delivery
+      delivery: true, // Por ahora asumimos que todos tienen delivery
       stock: item.stock,
       sellerProductId: `${item.seller_id}::${item.product_id}`,
       productUrl: `/producto/${item.product_id}?seller=${item.seller_id}`,
       addToCartUrl: `/api/cart/add?sellerProductId=${item.seller_id}::${item.product_id}&qty=1`
-    })) || [];
+    }));
+
+    // Generar mensaje para Landbot
+    const lines = [];
+    if (items.length > 0) {
+      lines.push(`Encontré ${items.length} producto(s) para "${qRaw}":\n`);
+      for (const item of items.slice(0, 5)) { // Mostrar máximo 5
+        const onlineDot = item.online ? '🟢' : '⚪';
+        const del = item.delivery ? ' · delivery' : '';
+        lines.push(`${onlineDot} *${item.productTitle}* — ${item.price}`);
+        lines.push(`    Vendedor: ${item.sellerName}${del} · stock: ${item.stock}`);
+        lines.push(`    👉 Ver: ${item.productUrl}`);
+        lines.push(`    🛒 Añadir: ${item.addToCartUrl}`);
+        lines.push('');
+      }
+      if (items.length > 5) {
+        lines.push(`... y ${items.length - 5} productos más.`);
+      }
+      lines.push('¿Te paso el link al vendedor o agrego al carrito?');
+    } else {
+      lines.push(`No encontré productos para "${qRaw}". ¿Intentas con otra palabra o categoría?`);
+    }
+
+    const message = lines.join('\n');
 
     return new Response(JSON.stringify({
       success: true,
-      data: {
-        query: qRaw,
-        aiAnalysis: aiResult,
-        results: results,
-        total: results.length
+      items,
+      message,
+      query: {
+        original: qRaw,
+        parsed: aiResult
       }
-    }), { 
-      headers: { 'content-type': 'application/json' }
+    }), {
+      headers: { 
+        'content-type': 'application/json',
+        'access-control-allow-origin': '*'
+      }
     });
 
   } catch (error: any) {
-    console.error('Error inesperado:', error);
+    console.error('Error en /api/nl-search-real:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: 'Error inesperado: ' + error.message
+      error: 'Error interno del servidor: ' + error.message
     }), { 
       status: 500,
       headers: { 'content-type': 'application/json' }

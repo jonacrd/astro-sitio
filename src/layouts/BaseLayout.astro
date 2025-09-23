@@ -1,5 +1,7 @@
 ---
 import CartWidget from '@components/react/CartWidget.tsx'
+import CartNotification from '@components/react/CartNotification.tsx'
+import CartDebugButton from '@components/react/CartDebugButton.tsx'
 
 export interface Props {
   title?: string
@@ -55,6 +57,12 @@ const {
   <main class="min-h-screen">
     <slot />
   </main>
+
+  <!-- Notificaciones del carrito -->
+  <CartNotification client:load />
+  
+  <!-- Botón de debug del carrito -->
+  <CartDebugButton client:load />
 
   <!-- Footer -->
   <footer class="bg-gray-900 text-white py-12">
