@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import UserProfile from '../components/react/UserProfile.tsx'
+import NotificationsWidget from '../components/react/NotificationsWidget.tsx'
+import UserPoints from '../components/react/UserPoints.tsx'
+import { getUser, getUserProfile } from '../lib/session'
 ---
 
 <BaseLayout title="Mi Perfil">
@@ -8,10 +10,208 @@ import UserProfile from '../components/react/UserProfile.tsx'
     <div class="container mx-auto px-4 py-8">
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Mi Perfil</h1>
-        <p class="text-gray-600">Gestiona tu información personal y negocio</p>
+        <p class="text-gray-600">Gestiona tu cuenta, notificaciones y puntos</p>
       </div>
 
-      <UserProfile client:load />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Notificaciones -->
+        <div>
+          <NotificationsWidget client:load />
+        </div>
+
+        <!-- Puntos -->
+        <div>
+          <UserPoints client:load />
+        </div>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Acciones Rápidas</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a 
+              href="/mis-pedidos" 
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-center"
+            >
+              📦 Mis Pedidos
+            </a>
+            <a 
+              href="/dashboard/vendedor" 
+              class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-center"
+            >
+              🏪 Mi Tienda
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del perfil -->
+      <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Información del Perfil</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+              <p class="text-gray-900" id="profile-name">Cargando...</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+              <p class="text-gray-900" id="profile-phone">Cargando...</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <p class="text-gray-900" id="profile-email">Cargando...</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de cuenta</label>
+              <p class="text-gray-900" id="profile-type">Cargando...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel de vendedor (solo para vendedores) -->
+      <div id="seller-panel" class="mt-8 hidden">
+        <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-bold">Panel de Vendedor</h2>
+              <p class="text-green-100">Gestiona tu negocio y ventas</p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Dashboard -->
+            <a href="/dashboard/vendedor" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Dashboard</h3>
+              </div>
+              <p class="text-sm text-green-100">Gestiona tu inventario y productos</p>
+            </a>
+
+            <!-- Pedidos -->
+            <a href="/dashboard/pedidos" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Pedidos</h3>
+              </div>
+              <p class="text-sm text-green-100">Revisa y gestiona tus pedidos</p>
+            </a>
+
+            <!-- Productos -->
+            <a href="/dashboard/mis-productos" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Mis Productos</h3>
+              </div>
+              <p class="text-sm text-green-100">Administra tu catálogo de productos</p>
+            </a>
+
+            <!-- Estadísticas -->
+            <a href="/dashboard/estadisticas" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Estadísticas</h3>
+              </div>
+              <p class="text-sm text-green-100">Analiza tus ventas y rendimiento</p>
+            </a>
+
+            <!-- Configuración -->
+            <a href="/dashboard/configuracion" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Configuración</h3>
+              </div>
+              <p class="text-sm text-green-100">Ajusta tu tienda y preferencias</p>
+            </a>
+
+            <!-- Ayuda -->
+            <a href="/dashboard/ayuda" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
+              <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="font-semibold">Ayuda</h3>
+              </div>
+              <p class="text-sm text-green-100">Guías y soporte para vendedores</p>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
+
+  <script>
+    // Cargar información del perfil
+    async function loadProfile() {
+      try {
+        const { supabase } = await import('../lib/supabase-browser');
+        
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          console.error('Error obteniendo usuario:', userError);
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('name, phone, is_seller')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error obteniendo perfil:', profileError);
+          return;
+        }
+
+        // Actualizar información en la página
+        document.getElementById('profile-name').textContent = profile.name || 'No especificado';
+        document.getElementById('profile-phone').textContent = profile.phone || 'No especificado';
+        document.getElementById('profile-email').textContent = user.email || 'No especificado';
+        document.getElementById('profile-type').textContent = profile.is_seller ? 'Vendedor' : 'Comprador';
+        
+        // Mostrar panel de vendedor si es vendedor
+        const sellerPanel = document.getElementById('seller-panel');
+        if (profile.is_seller && sellerPanel) {
+          sellerPanel.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error cargando perfil:', error);
+      }
+    }
+
+    // Cargar perfil al montar la página
+    loadProfile();
+  </script>
 </BaseLayout>

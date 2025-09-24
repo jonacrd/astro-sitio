@@ -3,81 +3,71 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite" // SQLite para desarrollo, PostgreSQL para producción
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String   @id @default(cuid())
-  name         String
-  phone        String   @unique
-  passwordHash String
-  role         String   @default("CUSTOMER") // CUSTOMER, SELLER, ADMIN
-  points       Int      @default(0)
-  seller       Seller?
-  orders       Order[]
-  createdAt    DateTime @default(now())
-}
-
-model Seller {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id])
-  storeName       String
-  firstName       String
-  lastName        String
-  addressLine1    String   // calle y número
-  addressLine2    String?  // torre, depto
-  comuna          String
-  ciudad          String
-  phoneContact    String
-  online          Boolean  @default(false)
-  deliveryEnabled Boolean  @default(true)
-  deliveryETA     String?
-  createdAt       DateTime @default(now())
-  products        SellerProduct[]
-}
-
 model Category {
-  id       String   @id @default(cuid())
-  name     String   @unique
-  products Product[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
-  id            String     @id @default(cuid())
-  name          String
-  slug          String     @unique
-  description   String?
-  categoryId    String?
-  category      Category?  @relation(fields: [categoryId], references: [id])
-  origin        String?    // 'chi' | 'ven' | otros
-  priceCents    Int
-  discountCents Int        @default(0)
-  imageUrl      String?
-  active        Boolean    @default(true)
-  rating        Float      @default(4.5)
-  createdAt     DateTime   @default(now())
-  sellers       SellerProduct[]
-  @@index([active, categoryId])
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String
+  priceCents  Int
+  stock       Int        @default(0)
+  imageUrl    String?
+  categoryId  Int
+  category    Category   @relation(fields: [categoryId], references: [id])
+  cartItems   CartItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
-model SellerProduct {
-  id        String  @id @default(cuid())
-  sellerId  String
-  productId String
-  seller    Seller  @relation(fields: [sellerId], references: [id])
+model Cart {
+  id         Int        @id @default(autoincrement())
+  sessionId  String     @unique      // 👈 necesario para poder usar where: { sessionId }
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int                      // 👈 debe matchear Cart.id (que es Int)
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId Int
   product   Product @relation(fields: [productId], references: [id])
-  stock     Int     @default(0)
-  active    Boolean @default(true)
+  quantity  Int
 
-  @@unique([sellerId, productId])
+  @@unique([cartId, productId], name: "cartId_productId")   // 👈 nombre para usar en where
 }
+
+
 
 model Order {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  id         Int         @id @default(autoincrement())
+  orderCode  String      @unique
+  cartId     String
   totalCents Int
-  createdAt  DateTime @default(now())
+  customerName String?
+  customerEmail String?
+  items      OrderItem[]
+  createdAt  DateTime    @default(now())
+}
+
+model OrderItem {
+  id         Int    @id @default(autoincrement())
+  orderId    Int
+  order      Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  Int
+  name       String
+  priceCents Int
+  quantity   Int
 }

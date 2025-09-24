@@ -127,7 +127,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     console.log('💰 Total calculado:', { totalCents, itemCount });
 
-    // Crear orden (solo campos que existen en la tabla)
+    // Crear orden con dirección de entrega
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -135,7 +135,8 @@ export const POST: APIRoute = async ({ request }) => {
         seller_id: sellerId,
         total_cents: totalCents,
         payment_method: payment_method,
-        status: 'pending'
+        status: 'pending',
+        // delivery_notes: `${delivery_address.fullName}, ${delivery_address.phone}, ${delivery_address.address}, ${delivery_address.city}, ${delivery_address.state} ${delivery_address.zipCode}${delivery_address.notes ? ', Notas: ' + delivery_address.notes : ''}`
       })
       .select('id')
       .single();

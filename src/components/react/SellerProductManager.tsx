@@ -49,7 +49,7 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
       const { data, error } = await supabase
         .from('seller_products')
         .select(`
-          id,
+          seller_id,
           product_id,
           price_cents,
           stock,
@@ -71,7 +71,7 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
       }
 
       const formattedProducts = data?.map((item: any) => ({
-        id: item.id,
+        id: `${item.seller_id}::${item.product_id}`, // Crear ID compuesto
         productId: item.product_id,
         title: item.product.title,
         description: item.product.description,
@@ -106,6 +106,9 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
       const user = await getUser();
       if (!user) return;
 
+      // Parsear el ID compuesto para obtener seller_id y product_id
+      const [sellerId, actualProductId] = productId.split('::');
+
       const { error } = await supabase
         .from('seller_products')
         .update({
@@ -114,8 +117,8 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
           active: editForm.active,
           updated_at: new Date().toISOString()
         })
-        .eq('id', productId)
-        .eq('seller_id', user.id);
+        .eq('seller_id', sellerId)
+        .eq('product_id', actualProductId);
 
       if (error) {
         throw new Error('Error actualizando producto: ' + error.message);
