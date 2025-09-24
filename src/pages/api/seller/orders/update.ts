@@ -99,14 +99,14 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Actualizar estado del pedido
     const updateData: any = {
-      status,
-      updated_at: new Date().toISOString()
+      status
+      // updated_at: new Date().toISOString() // Columna no existe
     };
 
     // Agregar timestamp de confirmación del vendedor
-    if (status === 'confirmed') {
-      updateData.seller_confirmed_at = new Date().toISOString();
-    }
+    // if (status === 'confirmed') {
+    //   updateData.seller_confirmed_at = new Date().toISOString(); // Columna no existe
+    // }
 
     const { error: updateError } = await supabase
       .from('orders')
@@ -122,6 +122,52 @@ export const POST: APIRoute = async ({ request }) => {
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
+    }
+
+    // Crear notificación para el comprador
+    try {
+      if (status === 'confirmed') {
+        // Obtener el user_id del comprador
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('user_id')
+          .eq('id', orderId)
+          .single();
+
+        if (orderData?.user_id) {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: orderData.user_id,
+              type: 'order_confirmed',
+              title: '¡Pedido Confirmado!',
+              message: 'Tu pedido ha sido confirmado por el vendedor y está en preparación.',
+              order_id: orderId
+            });
+        }
+      } else if (status === 'delivered') {
+        // Obtener el user_id del comprador
+        const { data: orderData } = await supabase
+          .from('orders')
+          .select('user_id')
+          .eq('id', orderId)
+          .single();
+
+        if (orderData?.user_id) {
+          await supabase
+            .from('notifications')
+            .insert({
+              user_id: orderData.user_id,
+              type: 'order_delivered',
+              title: '¡Pedido Entregado!',
+              message: 'Tu pedido ha sido entregado. Por favor, confirma la recepción.',
+              order_id: orderId
+            });
+        }
+      }
+    } catch (notifError) {
+      console.log('⚠️ No se pudo crear notificación:', notifError);
+      // No fallar la operación por esto
     }
 
     // Si se marca como entregado, reducir stock
@@ -145,18 +191,29 @@ export const POST: APIRoute = async ({ request }) => {
 
       // Reducir stock de cada producto
       for (const item of orderItems || []) {
-        const { error: stockError } = await supabase
+        // Obtener stock actual
+        const { data: currentStock } = await supabase
           .from('seller_products')
-          .update({ 
-            stock: supabase.raw(`stock - ${item.qty}`),
-            updated_at: new Date().toISOString()
-          })
+          .select('stock')
           .eq('seller_id', user.id)
-          .eq('product_id', item.product_id);
+          .eq('product_id', item.product_id)
+          .single();
 
-        if (stockError) {
-          console.error('Error actualizando stock:', stockError);
-          // No fallar la operación por esto, solo logear
+        if (currentStock) {
+          const newStock = Math.max(0, currentStock.stock - item.qty);
+          
+          const { error: stockError } = await supabase
+            .from('seller_products')
+            .update({ 
+              stock: newStock
+            })
+            .eq('seller_id', user.id)
+            .eq('product_id', item.product_id);
+
+          if (stockError) {
+            console.error('Error actualizando stock:', stockError);
+            // No fallar la operación por esto, solo logear
+          }
         }
       }
     }

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SellerGuard from '../components/react/SellerGuard.tsx'
 import SellerStatusToggle from '../components/react/SellerStatusToggle.tsx'
 import SellerProductManager from '../components/react/SellerProductManager.tsx'
+import OrderHistory from '../components/react/OrderHistory.tsx'
 ---
 
 <BaseLayout title="Dashboard Vendedor">
@@ -27,6 +28,11 @@ import SellerProductManager from '../components/react/SellerProductManager.tsx'
               <SellerProductManager client:load />
             </div>
           </div>
+        </div>
+
+        <!-- Historial de ventas -->
+        <div class="mt-8">
+          <OrderHistory client:load userType="seller" />
         </div>
 
         <!-- Estadísticas -->

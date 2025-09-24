@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import NotificationsWidget from '../components/react/NotificationsWidget.tsx'
 import UserPoints from '../components/react/UserPoints.tsx'
+import OrderHistory from '../components/react/OrderHistory.tsx'
 import { getUser, getUserProfile } from '../lib/session'
 ---
 
@@ -44,6 +45,11 @@ import { getUser, getUserProfile } from '../lib/session'
             </a>
           </div>
         </div>
+      </div>
+
+      <!-- Historial de pedidos -->
+      <div class="mt-8">
+        <OrderHistory client:load userType="buyer" />
       </div>
 
       <!-- Información del perfil -->

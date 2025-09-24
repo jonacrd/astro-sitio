@@ -30,6 +30,14 @@ export default function SellerOrdersDashboard({ className = '' }: SellerOrdersDa
 
   useEffect(() => {
     loadOrders();
+    
+    // Escuchar cambios en el estado de pedidos
+    const handleOrderUpdate = () => {
+      loadOrders();
+    };
+    
+    window.addEventListener('order-updated', handleOrderUpdate);
+    return () => window.removeEventListener('order-updated', handleOrderUpdate);
   }, [filter]);
 
   const loadOrders = async () => {
@@ -133,6 +141,13 @@ export default function SellerOrdersDashboard({ className = '' }: SellerOrdersDa
       }
 
       alert('¡Pedido confirmado exitosamente!');
+      
+      // Disparar evento para actualizar otros componentes
+      const orderUpdateEvent = new CustomEvent('order-updated', {
+        detail: { orderId, status: 'confirmed' }
+      });
+      window.dispatchEvent(orderUpdateEvent);
+      
       loadOrders();
     } catch (err: any) {
       console.error('Error confirmando pedido:', err);
@@ -180,6 +195,13 @@ export default function SellerOrdersDashboard({ className = '' }: SellerOrdersDa
       }
 
       alert('¡Entrega confirmada exitosamente!');
+      
+      // Disparar evento para actualizar otros componentes
+      const orderUpdateEvent = new CustomEvent('order-updated', {
+        detail: { orderId, status: 'delivered' }
+      });
+      window.dispatchEvent(orderUpdateEvent);
+      
       loadOrders();
     } catch (err: any) {
       console.error('Error confirmando entrega:', err);
