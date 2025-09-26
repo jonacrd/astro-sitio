@@ -116,8 +116,16 @@ export default function BuyerNotifications({
 
   const confirmReceipt = async (orderId: string) => {
     try {
+      // Obtener el usuario actual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('No hay usuario autenticado');
+        return;
+      }
+
       const { data, error } = await supabase.rpc('confirm_receipt_by_buyer', {
-        p_order_id: orderId
+        p_order_id: orderId,
+        p_buyer_id: user.id
       });
 
       if (error) {

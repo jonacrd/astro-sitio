@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { getUser } from '../../lib/session';
 
-interface PointEntry {
+interface PointsSummary {
+  total_points: number;
+  available_points: number;
+  spent_points: number;
+}
+
+interface PointsHistory {
   id: string;
-  points: number;
-  source: 'purchase' | 'referral' | 'bonus';
+  points_earned: number;
+  points_spent: number;
+  transaction_type: string;
   description: string;
   created_at: string;
-  order_status?: string;
+  seller_name?: string;
 }
 
 interface UserPointsProps {
@@ -19,121 +27,111 @@ export default function UserPoints({
   className = '', 
   showSummary = true 
 }: UserPointsProps) {
-  const [points, setPoints] = useState<PointEntry[]>([]);
-  const [totalPoints, setTotalPoints] = useState(0);
+  const [pointsSummary, setPointsSummary] = useState<PointsSummary>({
+    total_points: 0,
+    available_points: 0,
+    spent_points: 0
+  });
+  
+  const [history, setHistory] = useState<PointsHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPoints();
+    loadPointsData();
   }, []);
 
-  const loadPoints = async () => {
-    setLoading(true);
-    setError(null);
-
+  const loadPointsData = async () => {
     try {
-      // Intentar cargar desde user_points_summary primero
-      const { data: pointsData, error: pointsError } = await supabase
-        .from('user_points_summary')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (pointsError) {
-        // Si la vista no existe, intentar cargar desde user_points directamente
-        if (pointsError.code === 'PGRST205' || pointsError.message.includes('Could not find the table')) {
-          console.log('Vista user_points_summary no existe, cargando desde user_points...');
-          
-          const { data: userPointsData, error: userPointsError } = await supabase
-            .from('user_points')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-          if (userPointsError) {
-            // Si tampoco existe la tabla user_points, mostrar estado vacío
-            if (userPointsError.code === 'PGRST205' || userPointsError.message.includes('Could not find the table')) {
-              console.log('Tabla user_points no existe, mostrando estado vacío');
-              setPoints([]);
-              setTotalPoints(0);
-              return;
-            }
-            throw userPointsError;
-          }
-
-          setPoints(userPointsData || []);
-          const calculatedTotal = userPointsData?.reduce((sum, entry) => sum + entry.points, 0) || 0;
-          setTotalPoints(calculatedTotal);
-          return;
-        }
-        throw pointsError;
+      const user = await getUser();
+      if (!user) {
+        setError('No hay usuario autenticado');
+        return;
       }
 
-      setPoints(pointsData || []);
+      // Obtener resumen de puntos desde user_points
+      const { data: userPointsData } = await supabase
+        .from('user_points')
+        .select('points')
+        .eq('user_id', user.id);
 
-      // Intentar cargar total de puntos del perfil
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('total_points')
-        .single();
-
-      if (profileError) {
-        console.warn('Error cargando total de puntos del perfil:', profileError);
-        // Calcular total desde los puntos individuales
-        const calculatedTotal = pointsData?.reduce((sum, entry) => sum + entry.points, 0) || 0;
-        setTotalPoints(calculatedTotal);
-      } else {
-        setTotalPoints(profileData?.total_points || 0);
+      if (userPointsData && userPointsData.length > 0) {
+        const totalPoints = userPointsData.reduce((sum, item) => sum + (item.points || 0), 0);
+        
+        setPointsSummary({
+          total_points: totalPoints,
+          available_points: totalPoints,
+          spent_points: 0
+        });
       }
+
+      // Obtener historial
+      const { data: historyData } = await supabase
+        .from('points_history')
+        .select(`
+          id,
+          points_earned,
+          points_spent,
+          transaction_type,
+          description,
+          created_at
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (historyData) {
+        setHistory(historyData.map(item => ({
+          ...item,
+          seller_name: 'Vendedor'
+        })));
+      }
+
     } catch (err: any) {
       console.error('Error cargando puntos:', err);
-      // En lugar de mostrar error, mostrar estado vacío
-      setPoints([]);
-      setTotalPoints(0);
+      setError('Error cargando puntos: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES');
+    return new Date(dateString).toLocaleDateString('es-CL', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const getSourceIcon = (source: string) => {
-    switch (source) {
-      case 'purchase':
-        return '🛒';
-      case 'referral':
-        return '👥';
-      case 'bonus':
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'earned':
         return '🎁';
-      default:
+      case 'spent':
+        return '💸';
+      case 'bonus':
         return '⭐';
+      case 'expired':
+        return '⏰';
+      default:
+        return '📝';
     }
   };
 
-  const getSourceColor = (source: string) => {
-    switch (source) {
-      case 'purchase':
-        return 'bg-blue-50 border-blue-200';
-      case 'referral':
-        return 'bg-green-50 border-green-200';
+  const getTransactionColor = (type: string) => {
+    switch (type) {
+      case 'earned':
+        return 'text-green-600';
+      case 'spent':
+        return 'text-red-600';
       case 'bonus':
-        return 'bg-yellow-50 border-yellow-200';
+        return 'text-yellow-600';
+      case 'expired':
+        return 'text-gray-500';
       default:
-        return 'bg-gray-50 border-gray-200';
-    }
-  };
-
-  const getSourceText = (source: string) => {
-    switch (source) {
-      case 'purchase':
-        return 'Compra';
-      case 'referral':
-        return 'Referido';
-      case 'bonus':
-        return 'Bonificación';
-      default:
-        return 'Otro';
+        return 'text-gray-600';
     }
   };
 
@@ -156,7 +154,7 @@ export default function UserPoints({
             <h3 className="font-semibold mb-2">Error al cargar puntos</h3>
             <p className="text-sm">{error}</p>
             <button 
-              onClick={loadPoints}
+              onClick={loadPointsData}
               className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
             >
               Reintentar
@@ -178,8 +176,8 @@ export default function UserPoints({
                 <p className="text-blue-100">Acumula puntos con tus compras</p>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold">{totalPoints}</div>
-                <div className="text-blue-100 text-sm">puntos totales</div>
+                <div className="text-4xl font-bold">{pointsSummary.available_points}</div>
+                <div className="text-blue-100 text-sm">puntos disponibles</div>
               </div>
             </div>
           </div>
@@ -189,50 +187,45 @@ export default function UserPoints({
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Historial de Puntos</h3>
         <div className="text-sm text-gray-500">
-          {points.length} entrada{points.length !== 1 ? 's' : ''}
+          {history.length} transacción{history.length !== 1 ? 'es' : ''}
         </div>
       </div>
 
-      {points.length === 0 ? (
+      {history.length === 0 ? (
         <div className="text-center py-8">
           <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-md">
             <h3 className="font-semibold mb-2">No tienes puntos aún</h3>
             <p className="text-sm">
-              Comienza a comprar para ganar puntos y recompensas
+              Realiza compras de $5,000 o más en tiendas con sistema de puntos activado
             </p>
           </div>
         </div>
       ) : (
         <div className="space-y-3">
-          {points.map((entry) => (
-            <div 
-              key={entry.id} 
-              className={`border rounded-lg p-4 ${getSourceColor(entry.source)}`}
-            >
+          {history.map((item) => (
+            <div key={item.id} className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="text-2xl">
-                    {getSourceIcon(entry.source)}
-                  </div>
+                  <span className="text-2xl">{getTransactionIcon(item.transaction_type)}</span>
                   <div>
-                    <h4 className="font-medium text-gray-900">
-                      {entry.description}
-                    </h4>
+                    <h4 className="font-medium text-gray-800">{item.description}</h4>
                     <p className="text-sm text-gray-600">
-                      {getSourceText(entry.source)} • {formatDate(entry.created_at)}
+                      {item.seller_name} • {formatDate(item.created_at)}
                     </p>
-                    {entry.order_status && (
-                      <p className="text-xs text-gray-500">
-                        Estado del pedido: {entry.order_status}
-                      </p>
-                    )}
                   </div>
                 </div>
+                
                 <div className="text-right">
-                  <div className="text-lg font-bold text-green-600">
-                    +{entry.points}
-                  </div>
-                  <div className="text-xs text-gray-500">puntos</div>
+                  {item.points_earned > 0 && (
+                    <p className={`font-semibold ${getTransactionColor('earned')}`}>
+                      +{item.points_earned} puntos
+                    </p>
+                  )}
+                  {item.points_spent > 0 && (
+                    <p className={`font-semibold ${getTransactionColor('spent')}`}>
+                      -{item.points_spent} puntos
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -242,11 +235,14 @@ export default function UserPoints({
 
       {showSummary && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">¿Cómo ganar puntos?</h4>
+          <h4 className="font-semibold text-blue-800 mb-2">ℹ️ Información del Sistema de Puntos</h4>
           <ul className="text-sm text-blue-700 space-y-1">
-            <li>• 🛒 <strong>Compra:</strong> 1 punto por cada $10.00 gastados</li>
-            <li>• 👥 <strong>Referir amigos:</strong> 50 puntos por cada referido</li>
-            <li>• 🎁 <strong>Bonificaciones:</strong> Puntos extra en promociones especiales</li>
+            <li>• 1 punto = $1,000 pesos de descuento</li>
+            <li>• Los puntos se otorgan en compras de $5,000 o más</li>
+            <li>• $5,000 = 5 puntos • $10,000 = 10 puntos • $20,000 = 20 puntos</li>
+            <li>• Solo en tiendas que tengan activado el sistema de puntos</li>
+            <li>• Los puntos no expiran y son acumulables</li>
+            <li>• Puedes canjear puntos por descuentos en futuras compras</li>
           </ul>
         </div>
       )}

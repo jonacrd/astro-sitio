@@ -27,13 +27,11 @@ export default function BuyerOrderActions({ order, onStatusChange }: BuyerOrderA
         return;
       }
 
-      // Actualizar el status del pedido a 'completed'
-      const { error } = await supabase
-        .from('orders')
-        .update({ 
-          status: 'completed'
-        })
-        .eq('id', order.id);
+      // Usar la función RPC para confirmar recepción
+      const { data, error } = await supabase.rpc('confirm_receipt_by_buyer', {
+        p_order_id: order.id,
+        p_buyer_id: user.id
+      });
 
       if (error) {
         throw error;
