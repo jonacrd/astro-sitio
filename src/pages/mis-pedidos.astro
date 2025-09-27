@@ -26,12 +26,12 @@ import { getUser, getUserProfile } from '../lib/session'
             <div class="flex items-center gap-2">
               <label class="text-sm font-medium text-gray-700">Filtrar por estado:</label>
               <select id="status-filter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500">
-                <option value="">Todos</option>
-                <option value="placed">Realizados</option>
-                <option value="seller_confirmed">Confirmados</option>
-                <option value="delivered">Entregados</option>
-                <option value="completed">Completados</option>
-                <option value="cancelled">Cancelados</option>
+                <option value="">Todos los pedidos</option>
+                <option value="placed">🛒 Realizados (Pendientes)</option>
+                <option value="seller_confirmed">✅ Confirmados por vendedor</option>
+                <option value="delivered">📦 Entregados</option>
+                <option value="completed">🎉 Completados</option>
+                <option value="cancelled">❌ Cancelados</option>
               </select>
             </div>
             
@@ -173,17 +173,15 @@ import { getUser, getUserProfile } from '../lib/session'
       // Consultar pedidos del comprador con información completa
       console.log('🔍 Cargando pedidos para usuario:', user.id);
       
-      const { data, error } = await supabase
+      // Consulta básica primero (sin columnas que pueden no existir)
+      let { data, error } = await supabase
         .from('orders')
         .select(`
           id,
           total_cents,
           status,
-          payment_status,
           payment_method,
           created_at,
-          expires_at,
-          points_awarded,
           seller_id,
           sellers:profiles!orders_seller_id_fkey(name, phone)
         `)
@@ -191,8 +189,33 @@ import { getUser, getUserProfile } from '../lib/session'
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error cargando pedidos:', error);
+        console.error('❌ Error cargando pedidos básicos:', error);
         throw error;
+      }
+
+      // Intentar agregar columnas adicionales si existen
+      try {
+        const { data: extendedData, error: extendedError } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            payment_status,
+            expires_at,
+            points_awarded
+          `)
+          .eq('user_id', user.id);
+
+        if (!extendedError && extendedData) {
+          // Combinar datos básicos con extendidos
+          const extendedMap = new Map(extendedData.map(item => [item.id, item]));
+          data = data?.map(order => ({
+            ...order,
+            ...extendedMap.get(order.id)
+          })) || [];
+        }
+      } catch (extendedErr) {
+        console.warn('⚠️ No se pudieron cargar columnas extendidas, usando datos básicos:', extendedErr);
+        // Continuar con datos básicos
       }
 
       console.log('📦 Pedidos cargados:', data);
@@ -285,27 +308,51 @@ import { getUser, getUserProfile } from '../lib/session'
       const totalOrders = allOrders.length;
       const totalPointsEarned = allOrders.reduce((sum, order) => sum + (order.points_awarded || 0), 0);
       
-      // Obtener puntos disponibles del usuario
+      // Obtener puntos disponibles del usuario (con fallback)
       let totalPointsAvailable = 0;
       if (currentUser) {
-        const { data: userPoints } = await supabase
-          .from('user_points')
-          .select('points')
-          .eq('user_id', currentUser.id);
-        
-        totalPointsAvailable = userPoints?.reduce((sum, up) => sum + up.points, 0) || 0;
+        try {
+          const { data: userPoints, error: userPointsError } = await supabase
+            .from('user_points')
+            .select('points')
+            .eq('user_id', currentUser.id);
+          
+          if (!userPointsError && userPoints) {
+            totalPointsAvailable = userPoints.reduce((sum, up) => sum + (up.points || 0), 0);
+          }
+        } catch (error) {
+          console.warn('⚠️ Error obteniendo puntos de usuario:', error);
+          // Usar endpoint de API como fallback
+          try {
+            const response = await fetch(`/api/points/summary?userId=${currentUser.id}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success) {
+                totalPointsAvailable = data.summary.reduce((sum, seller) => sum + (seller.total_points || 0), 0);
+              }
+            }
+          } catch (apiError) {
+            console.warn('⚠️ Error en API de puntos:', apiError);
+          }
+        }
       }
 
-      // Obtener ahorro total de redenciones
+      // Obtener ahorro total de redenciones (con fallback)
       let totalSavings = 0;
       if (currentUser) {
-        const { data: redemptions } = await supabase
-          .from('point_redemptions')
-          .select('discount_cents')
-          .eq('user_id', currentUser.id)
-          .eq('status', 'applied');
-        
-        totalSavings = redemptions?.reduce((sum, r) => sum + r.discount_cents, 0) || 0;
+        try {
+          const { data: redemptions, error: redemptionsError } = await supabase
+            .from('point_redemptions')
+            .select('discount_cents')
+            .eq('user_id', currentUser.id)
+            .eq('status', 'applied');
+          
+          if (!redemptionsError && redemptions) {
+            totalSavings = redemptions.reduce((sum, r) => sum + (r.discount_cents || 0), 0);
+          }
+        } catch (error) {
+          console.warn('⚠️ Error obteniendo redenciones:', error);
+        }
       }
 
       // Actualizar elementos del DOM

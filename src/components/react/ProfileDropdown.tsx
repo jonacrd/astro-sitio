@@ -70,15 +70,62 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
   if (!isAuthenticated) {
     return (
-      <button
-        onClick={() => onNavigate('/login')}
-        className="flex items-center gap-2 px-3 py-2 text-white/80 hover:text-white transition-colors"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        <span className="hidden sm:inline">Iniciar Sesión</span>
-      </button>
+      <div className="relative" ref={dropdownRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 px-3 py-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span className="hidden sm:inline">Cuenta</span>
+          <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Dropdown para usuarios no autenticados */}
+        {isOpen && (
+          <div className="profile-dropdown-opaque absolute right-0 top-full mt-2 w-48 rounded-lg shadow-lg py-2 z-50">
+            <div className="px-4 py-3 border-b border-gray-600">
+              <p className="text-sm font-medium text-white">Acceder a tu cuenta</p>
+              <p className="text-xs text-gray-300">Inicia sesión o regístrate</p>
+            </div>
+
+            <div className="py-1">
+              <button
+                onClick={() => handleMenuItemClick('/login')}
+                className="profile-dropdown-item-opaque flex items-center gap-3 w-full px-4 py-3 text-left"
+              >
+                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Iniciar Sesión</p>
+                  <p className="text-xs text-gray-300">Accede a tu cuenta</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleMenuItemClick('/register')}
+                className="profile-dropdown-item-opaque flex items-center gap-3 w-full px-4 py-3 text-left"
+              >
+                <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Crear Cuenta</p>
+                  <p className="text-xs text-gray-300">Únete a nosotros</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 
