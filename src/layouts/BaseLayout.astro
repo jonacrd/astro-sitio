@@ -1,7 +1,5 @@
 ---
-import CartWidget from '@components/react/CartWidget.tsx'
 import CartNotification from '@components/react/CartNotification.tsx'
-import CartDebugButton from '@components/react/CartDebugButton.tsx'
 
 export interface Props {
   title?: string
@@ -22,47 +20,43 @@ const {
   <title>{title}</title>
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <!-- Importar CSS de prueba -->
+  <link rel="stylesheet" href="/src/styles/test.css">
+  
+  <!-- Importar CSS específico del checkout -->
+  <link rel="stylesheet" href="/src/styles/checkout.css">
+  
+  <!-- Importar CSS para restaurar estilos dañados -->
+  <link rel="stylesheet" href="/src/styles/restore-styles.css">
+  
+  <!-- Importar CSS para forzar botones -->
+  <link rel="stylesheet" href="/src/styles/force-buttons.css">
+  
+  <!-- Importar CSS para arreglar botones transparentes -->
+  <link rel="stylesheet" href="/src/styles/fix-transparent-buttons.css">
+  
+  <!-- Importar CSS para arreglar botones de búsqueda -->
+  <link rel="stylesheet" href="/src/styles/fix-search-buttons.css">
+  
+  <!-- Importar CSS para colores opacos del tema oscuro -->
+  <link rel="stylesheet" href="/src/styles/dark-theme-colors.css">
+  
+  <!-- Importar fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-blue-600">
-  <!-- Header -->
-  <header class="bg-blue-900 shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <a href="/" class="text-2xl font-bold text-black">
-            🛍️ Tienda
-          </a>
-        </div>
-
-        <!-- Navegación -->
-        <nav class="hidden md:flex items-center space-x-8">
-          <a href="/" class="text-white hover:text-black transition-colors">
-            Inicio
-          </a>
-          <a href="/catalogo" class="text-white hover:text-blue-600 transition-colors">
-            Catálogo
-          </a>
-        </nav>
-
-        <!-- Carrito Widget -->
-        <div class="flex items-center">
-          <CartWidget client:load />
-        </div>
-      </div>
-    </div>
-  </header>
+<body class="bg-[#0E1626] text-white min-h-screen">
+  <!-- Header eliminado - ahora se maneja en cada página -->
 
   <!-- Contenido principal -->
-  <main class="min-h-screen">
+  <main class="min-h-screen bg-[#0E1626]">
     <slot />
   </main>
 
   <!-- Notificaciones del carrito -->
   <CartNotification client:load />
-  
-  <!-- Botón de debug del carrito -->
-  <CartDebugButton client:load />
 
   <!-- Footer -->
   <footer class="bg-gray-900 text-white py-12">

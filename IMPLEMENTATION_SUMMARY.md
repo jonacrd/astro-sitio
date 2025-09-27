@@ -188,3 +188,7 @@ node scripts/verify-setup.js
 ---
 
 **¡La tienda web está lista para producción! 🎉**
+
+
+
+

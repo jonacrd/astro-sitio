@@ -106,3 +106,7 @@ SELECT 'Vendedores creados:' as info, COUNT(*) as count FROM profiles WHERE is_s
 SELECT 'Estados de vendedores:' as info, COUNT(*) as count FROM seller_status;
 SELECT 'Productos por vendedor:' as info, COUNT(*) as count FROM seller_products;
 SELECT 'Productos activos:' as info, COUNT(*) as count FROM seller_products WHERE active = true;
+
+
+
+

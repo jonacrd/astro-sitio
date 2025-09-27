@@ -1,0 +1,40 @@
+/* Test CSS para verificar que los estilos se cargan */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Test básico - FORZAR FONDO OSCURO */
+html {
+  background-color: #0E1626 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+}
+
+body {
+  background-color: #0E1626 !important;
+  color: white !important;
+  font-family: 'Inter', sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+}
+
+/* Eliminar fondos blancos SOLO en checkout */
+.checkout-container * {
+  box-sizing: border-box;
+}
+
+/* NO afectar otros elementos */
+* {
+  box-sizing: border-box;
+}
+
+/* NO afectar elementos globales - solo checkout */
+
+.test-red {
+  background-color: red !important;
+  color: white !important;
+  padding: 20px !important;
+  margin: 10px !important;
+}

@@ -252,3 +252,7 @@ async function setupUniversalRewards() {
 }
 
 setupUniversalRewards();
+
+
+
+

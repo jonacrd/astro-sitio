@@ -1,0 +1,154 @@
+/* CSS específico para arreglar botones de añadir en resultados de búsqueda */
+
+/* FORZAR botones de añadir en resultados de búsqueda */
+.search-result button,
+.search-item button,
+.result-item button,
+.related-product button,
+.product-related button {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* FORZAR botones "Agregar" específicamente */
+button:contains("Agregar"),
+button:contains("agregar"),
+button:contains("Añadir"),
+button:contains("añadir") {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* FORZAR botones "PEDIR AHORA" */
+button:contains("PEDIR AHORA"),
+button:contains("Pedir ahora"),
+button:contains("pedir ahora") {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+  border: none !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* FORZAR botones en productos relacionados */
+.flex-shrink-0 button,
+.w-32 button,
+.product-card button {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* FORZAR hover states */
+.search-result button:hover,
+.search-item button:hover,
+.result-item button:hover,
+.related-product button:hover,
+.product-related button:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+  background-color: #1d4ed8 !important;
+}
+
+/* FORZAR botones de añadir hover */
+button:contains("Agregar"):hover,
+button:contains("agregar"):hover,
+button:contains("Añadir"):hover,
+button:contains("añadir"):hover {
+  background-color: #15803d !important;
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* FORZAR botones PEDIR AHORA hover */
+button:contains("PEDIR AHORA"):hover,
+button:contains("Pedir ahora"):hover,
+button:contains("pedir ahora"):hover {
+  background-color: #eab308 !important;
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* FORZAR que los botones sean clickeables */
+.search-result button,
+.search-item button,
+.result-item button,
+.related-product button,
+.product-related button,
+.flex-shrink-0 button,
+.w-32 button,
+.product-card button {
+  pointer-events: auto !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* FORZAR que los botones no se oculten */
+.search-result button,
+.search-item button,
+.result-item button,
+.related-product button,
+.product-related button,
+.flex-shrink-0 button,
+.w-32 button,
+.product-card button {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 10 !important;
+  position: relative !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 80px !important;
+  min-height: 32px !important;
+}
+
+

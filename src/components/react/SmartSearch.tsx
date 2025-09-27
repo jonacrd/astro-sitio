@@ -61,7 +61,7 @@ export default function SmartSearch(){
         />
         <button
           onClick={()=>runSearch(q)}
-          className="rounded-xl px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+          className="btn-primary-opaque rounded-xl px-5 py-3 font-semibold"
         >
           {loading ? 'Buscando…' : 'Buscar'}
         </button>
@@ -78,7 +78,7 @@ export default function SmartSearch(){
           <button
             key={s}
             onClick={()=>{ setQ(s); runSearch(s); }}
-            className="shrink-0 bg-white/10 hover:bg-white/20 text-white/90 text-sm px-3 py-1.5 rounded-full border border-white/15"
+            className="tag-opaque shrink-0 text-sm px-3 py-1.5 rounded-full"
           >
             {s}
           </button>

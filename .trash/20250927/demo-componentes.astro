@@ -1,0 +1,73 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { getCategorySections } from '@lib/categories.server'
+import CategoryCarousel from '@components/react/CategoryCarousel.tsx'
+import CategoryBanners from '@components/react/CategoryBanners.tsx'
+import MainBanner from '@components/react/MainBanner.tsx'
+import SectionCarousel from '@components/react/SectionCarousel.tsx'
+
+// Obtener datos para el carrusel de categorías
+const categorySections = await getCategorySections()
+---
+
+<BaseLayout 
+  title="Demo de Componentes - Tienda Online"
+  description="Demostración de los nuevos componentes React con Tailwind CSS"
+>
+  <!-- Banner Principal -->
+  <MainBanner client:load />
+
+  <!-- Banners de Categorías -->
+  <CategoryBanners client:load />
+
+  <!-- Carrusel de Categorías -->
+  <CategoryCarousel 
+    sections={categorySections}
+    client:load 
+  />
+
+  <!-- Carrusel de Secciones -->
+  <SectionCarousel client:load />
+
+  <!-- Sección de prueba -->
+  <section class="py-16 bg-gray-100">
+    <div class="max-w-4xl mx-auto text-center px-4">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        🎉 Componentes Migrados Exitosamente
+      </h2>
+      <p class="text-lg text-gray-600 mb-8">
+        Todos los componentes han sido migrados de Astro vanilla a React + Tailwind CSS
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">✅ Carrusel de Categorías</h3>
+          <p class="text-gray-600">Carrusel interactivo con productos por categoría, auto-play y controles</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">✅ Banners de Categorías</h3>
+          <p class="text-gray-600">Grid responsive de categorías con hover effects</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">✅ Banner Principal</h3>
+          <p class="text-gray-600">Slider automático con navegación e indicadores</p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">✅ Carrusel de Secciones</h3>
+          <p class="text-gray-600">Grid de características con efectos visuales</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+
+
+
+
+
+
+

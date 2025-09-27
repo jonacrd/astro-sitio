@@ -25,3 +25,7 @@ CREATE POLICY "Users can update own points" ON user_points
 
 CREATE POLICY "System can create points" ON user_points
   FOR INSERT WITH CHECK (true);
+
+
+
+

@@ -61,7 +61,7 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ read_at: new Date().toISOString() })
+        .update({ is_read: true })
         .eq('id', notificationId);
 
       if (error) {
@@ -72,7 +72,7 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
       setNotifications(prev => 
         prev.map(notif => 
           notif.id === notificationId 
-            ? { ...notif, read_at: new Date().toISOString() }
+            ? { ...notif, is_read: true }
             : notif
         )
       );
@@ -111,7 +111,7 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.read_at).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   if (loading) {
     return (
@@ -188,7 +188,7 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
                 <div 
                   key={notification.id}
                   className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                    !notification.read_at ? 'bg-blue-50' : ''
+                    !notification.is_read ? 'bg-blue-50' : ''
                   }`}
                   onClick={() => markAsRead(notification.id)}
                 >
@@ -201,11 +201,11 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h4 className={`text-sm font-medium ${
-                          !notification.read_at ? 'text-gray-900' : 'text-gray-700'
+                          !notification.is_read ? 'text-gray-900' : 'text-gray-700'
                         }`}>
                           {notification.title}
                         </h4>
-                        {!notification.read_at && (
+                        {!notification.is_read && (
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         )}
                       </div>
@@ -226,3 +226,5 @@ export default function NotificationsWidget({ className = '' }: NotificationsWid
     </div>
   );
 }
+
+

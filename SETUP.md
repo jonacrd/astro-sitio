@@ -59,3 +59,7 @@ Visita `http://localhost:4321/api/search/working?q=arepa` para probar la búsque
 - `orders`: Órdenes de compra
 - `order_items`: Items de las órdenes
 - `user_points`: Puntos de usuarios
+
+
+
+

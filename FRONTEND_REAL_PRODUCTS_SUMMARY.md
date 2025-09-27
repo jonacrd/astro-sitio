@@ -213,3 +213,7 @@ Los usuarios pueden:
 ---
 
 **¡El frontend está completamente funcional con productos reales! 🎉**
+
+
+
+

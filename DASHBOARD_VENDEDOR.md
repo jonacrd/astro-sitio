@@ -107,3 +107,7 @@ El dashboard de vendedores está **100% operativo** con todas las funcionalidade
 - ✅ Interfaz moderna y responsive
 
 **¡Los vendedores pueden gestionar su negocio completamente desde el dashboard!** 🎯
+
+
+
+

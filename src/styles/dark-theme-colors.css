@@ -1,0 +1,247 @@
+/* =============================================
+   DARK THEME COLORS - COLORES MÁS OPACOS
+   ============================================= */
+
+/* Variables de colores opacos para tema oscuro */
+:root {
+  /* Azules más opacos y suaves */
+  --blue-opaque: #1e40af; /* Azul más oscuro y opaco */
+  --blue-opaque-hover: #1d4ed8;
+  --blue-opaque-light: #3b82f6;
+  
+  /* Rojos más opacos */
+  --red-opaque: #dc2626; /* Rojo más oscuro */
+  --red-opaque-hover: #ef4444;
+  --red-opaque-light: #f87171;
+  
+  /* Amarillos más opacos */
+  --yellow-opaque: #ca8a04; /* Amarillo más oscuro */
+  --yellow-opaque-hover: #eab308;
+  --yellow-opaque-light: #facc15;
+  
+  /* Verdes más opacos */
+  --green-opaque: #059669; /* Verde más oscuro */
+  --green-opaque-hover: #10b981;
+  --green-opaque-light: #34d399;
+  
+  /* Naranjas más opacos */
+  --orange-opaque: #ea580c; /* Naranja más oscuro */
+  --orange-opaque-hover: #f97316;
+  --orange-opaque-light: #fb923c;
+  
+  /* Fondos más suaves */
+  --bg-opaque: rgba(31, 41, 55, 0.8); /* Gris oscuro con transparencia */
+  --bg-opaque-hover: rgba(31, 41, 55, 0.9);
+}
+
+/* =============================================
+   BOTONES PRINCIPALES - COLORES OPACOS
+   ============================================= */
+
+/* Botones "Haz una pregunta" y "Venta Express" */
+.btn-primary-opaque {
+  background-color: var(--blue-opaque) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-primary-opaque:hover {
+  background-color: var(--blue-opaque-hover) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* =============================================
+   BOTONES DE CARTO - COLORES OPACOS
+   ============================================= */
+
+.btn-cart-opaque {
+  background-color: var(--green-opaque) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-cart-opaque:hover {
+  background-color: var(--green-opaque-hover) !important;
+}
+
+/* =============================================
+   ETIQUETAS DE PRODUCTOS - COLORES OPACOS
+   ============================================= */
+
+/* Etiquetas "Producto del Mes", "Oferta Especial", etc. */
+.badge-product-opaque {
+  background-color: var(--red-opaque) !important;
+  color: white !important;
+  border: none !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.badge-premium-opaque {
+  background-color: var(--orange-opaque) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.badge-service-opaque {
+  background-color: var(--yellow-opaque) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* =============================================
+   DROPDOWN DE PERFIL - COLORES OPACOS
+   ============================================= */
+
+/* Botón de perfil en header */
+.profile-btn-opaque {
+  background-color: rgba(55, 65, 81, 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(75, 85, 99, 0.5) !important;
+  transition: all 0.3s ease !important;
+}
+
+.profile-btn-opaque:hover {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+  border-color: rgba(75, 85, 99, 0.7) !important;
+}
+
+/* Dropdown del perfil */
+.profile-dropdown-opaque {
+  background-color: rgba(31, 41, 55, 0.95) !important;
+  border: 1px solid rgba(75, 85, 99, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.profile-dropdown-item-opaque {
+  background-color: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.profile-dropdown-item-opaque:hover {
+  background-color: rgba(55, 65, 81, 0.5) !important;
+  color: white !important;
+}
+
+/* Iconos del dropdown con colores opacos */
+.profile-icon-orders {
+  background-color: rgba(234, 88, 12, 0.2) !important;
+  color: var(--orange-opaque) !important;
+}
+
+.profile-icon-rewards {
+  background-color: rgba(202, 138, 4, 0.2) !important;
+  color: var(--yellow-opaque) !important;
+}
+
+.profile-icon-addresses {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: var(--red-opaque) !important;
+}
+
+.profile-icon-logout {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: var(--red-opaque) !important;
+}
+
+/* =============================================
+   TAGS Y PILLS - COLORES OPACOS
+   ============================================= */
+
+.tag-opaque {
+  background-color: rgba(30, 64, 175, 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.tag-opaque:hover {
+  background-color: rgba(30, 64, 175, 0.9) !important;
+  color: white !important;
+}
+
+/* =============================================
+   BOTONES DE NOTIFICACIONES Y CARRITO
+   ============================================= */
+
+.notification-btn-opaque {
+  background-color: rgba(55, 65, 81, 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(75, 85, 99, 0.5) !important;
+  transition: all 0.3s ease !important;
+}
+
+.notification-btn-opaque:hover {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+  color: white !important;
+}
+
+.cart-btn-opaque {
+  background-color: rgba(55, 65, 81, 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(75, 85, 99, 0.5) !important;
+  transition: all 0.3s ease !important;
+}
+
+.cart-btn-opaque:hover {
+  background-color: rgba(55, 65, 81, 0.9) !important;
+  color: white !important;
+}
+
+/* =============================================
+   BADGES DE NOTIFICACIONES
+   ============================================= */
+
+.notification-badge-opaque {
+  background-color: var(--yellow-opaque) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.cart-badge-opaque {
+  background-color: var(--green-opaque) !important;
+  color: white !important;
+  border: none !important;
+}
+
+/* =============================================
+   OVERRIDES ESPECÍFICOS
+   ============================================= */
+
+/* Forzar colores opacos en elementos específicos */
+button[class*="bg-blue"]:not(.keep-original) {
+  background-color: var(--blue-opaque) !important;
+}
+
+button[class*="bg-blue"]:not(.keep-original):hover {
+  background-color: var(--blue-opaque-hover) !important;
+}
+
+button[class*="bg-red"]:not(.keep-original) {
+  background-color: var(--red-opaque) !important;
+}
+
+button[class*="bg-red"]:not(.keep-original):hover {
+  background-color: var(--red-opaque-hover) !important;
+}
+
+button[class*="bg-yellow"]:not(.keep-original) {
+  background-color: var(--yellow-opaque) !important;
+}
+
+button[class*="bg-yellow"]:not(.keep-original):hover {
+  background-color: var(--yellow-opaque-hover) !important;
+}
+
+button[class*="bg-green"]:not(.keep-original) {
+  background-color: var(--green-opaque) !important;
+}
+
+button[class*="bg-green"]:not(.keep-original):hover {
+  background-color: var(--green-opaque-hover) !important;
+}
+

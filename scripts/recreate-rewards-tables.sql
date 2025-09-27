@@ -91,3 +91,7 @@ CREATE POLICY "Users can view own points history" ON points_history
 
 CREATE POLICY "Sellers can view points history for their store" ON points_history
   FOR SELECT USING (auth.uid() = seller_id);
+
+
+
+

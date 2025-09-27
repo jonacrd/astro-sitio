@@ -1,166 +1,216 @@
-import React, { useState } from 'react';
-import AddToCartButton from './AddToCartButton';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    productId: string;
-    sellerId: string;
-    title: string;
-    description?: string;
-    category: string;
-    imageUrl?: string;
-    priceCents: number;
-    stock: number;
-    sellerName: string;
-    sellerPhone?: string;
-    isOnline: boolean;
-    delivery: boolean;
-    updatedAt: string;
-    productUrl: string;
-    addToCartUrl: string;
-  };
-  variant?: 'small' | 'medium' | 'large';
-  showSeller?: boolean;
+  id: string;
+  title: string;
+  price: number;
+  seller: string;
+  images: string[];
+  isVideo?: boolean;
+  isOpen?: boolean;
+  onAddToCart: (productId: string) => void;
+  onContact: (productId: string) => void;
+  isExpress?: boolean;
+  className?: string;
 }
 
-export default function ProductCard({ 
-  product, 
-  variant = 'medium', 
-  showSeller = true 
+export default function ProductCard({
+  id,
+  title,
+  price,
+  seller,
+  images,
+  isVideo = false,
+  isOpen = false,
+  onAddToCart,
+  onContact,
+  isExpress = false,
+  className = ''
 }: ProductCardProps) {
-  const [imageError, setImageError] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
+  // Intersection Observer para autoplay de videos
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const isIntersecting = entry.isIntersecting;
+        setIsVisible(isIntersecting);
+        
+        if (isVideo && videoRef.current) {
+          if (isIntersecting) {
+            videoRef.current.play().catch(console.error);
+            setIsPlaying(true);
+          } else {
+            videoRef.current.pause();
+            setIsPlaying(false);
+          }
+        }
+      },
+      { threshold: 0.6 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isVideo]);
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0
+    }).format(price);
   };
 
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'small':
-        return 'w-full max-w-xs';
-      case 'large':
-        return 'w-full max-w-md';
-      default:
-        return 'w-full max-w-sm';
-    }
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
-  const getImageClasses = () => {
-    switch (variant) {
-      case 'small':
-        return 'h-32';
-      case 'large':
-        return 'h-64';
-      default:
-        return 'h-48';
-    }
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   return (
-    <div className={`${getVariantClasses()} bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300`}>
-      {/* Imagen del producto */}
-      <div className={`${getImageClasses()} w-full bg-gray-200 relative`}>
-        {product.imageUrl && !imageError ? (
-          <img
-            src={product.imageUrl}
-            alt={product.title}
+    <div
+      ref={cardRef}
+      className={`relative aspect-[4/5] rounded-2xl overflow-hidden card group ${className}`}
+    >
+      {/* Media Container */}
+      <div className="relative w-full h-full">
+        {isVideo ? (
+          <video
+            ref={videoRef}
+            src={images[0]}
             className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            style={{ filter: 'contrast(1.05) saturate(1.05)' }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-        )}
-        
-        {/* Badge de estado del vendedor */}
-        <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            product.isOnline 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-gray-100 text-gray-800'
-          }`}>
-            {product.isOnline ? '🟢 Online' : '⚪ Offline'}
-          </span>
-        </div>
-
-        {/* Badge de stock */}
-        {product.stock < 5 && (
-          <div className="absolute top-2 left-2">
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              Stock bajo
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Contenido de la tarjeta */}
-      <div className="p-4">
-        {/* Título y categoría */}
-        <div className="mb-2">
-          <h3 className="font-semibold text-gray-900 text-lg line-clamp-2">
-            {product.title}
-          </h3>
-          <p className="text-sm text-gray-500 capitalize">
-            {product.category}
-          </p>
-        </div>
-
-        {/* Descripción (solo en variante large) */}
-        {variant === 'large' && product.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {product.description}
-          </p>
-        )}
-
-        {/* Información del vendedor */}
-        {showSeller && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Vendedor:</span> {product.sellerName}
-            </p>
-            {product.delivery && (
-              <p className="text-xs text-green-600 mt-1">
-                🚚 Entrega disponible
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Precio y stock */}
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <p className="text-2xl font-bold text-blue-600">
-              {formatPrice(product.priceCents)}
-            </p>
-            <p className="text-sm text-gray-500">
-              Stock: {product.stock} unidades
-            </p>
-          </div>
-        </div>
-
-        {/* Botones de acción */}
-        <div className="flex gap-2">
-          <a
-            href={product.productUrl}
-            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-center text-sm font-medium hover:bg-gray-200 transition-colors"
-          >
-            Ver detalles
-          </a>
-          <AddToCartButton
-            productId={product.productId}
-            sellerId={product.sellerId}
-            sellerName={product.sellerName}
-            title={product.title}
-            price_cents={product.priceCents}
-            stock={product.stock}
-            className="flex-1"
+          <img
+            src={images[currentImageIndex]}
+            alt={title}
+            className="w-full h-full object-cover"
+            style={{ filter: 'contrast(1.05) saturate(1.05)' }}
+            loading="lazy"
           />
+        )}
+
+        {/* Slider Navigation */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+            >
+              ‹
+            </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/20 hover:bg-black/40 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+            >
+              ›
+            </button>
+          </>
+        )}
+
+        {/* Dots indicadores */}
+        {images.length > 1 && (
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Overlay Inferior */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {isOpen && (
+            <span className="bg-success text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              Abierto ahora
+            </span>
+          )}
+          {isExpress && (
+            <span className="bg-accent text-primary px-2 py-1 rounded-full text-xs font-medium">
+              Express 24h
+            </span>
+          )}
+        </div>
+
+        {/* Indicador de video */}
+        {isVideo && (
+          <div className="absolute top-3 right-3">
+            <div className="bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+              <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-accent' : 'bg-white/60'}`} />
+              {isPlaying ? 'Reproduciendo' : 'Pausado'}
+            </div>
+          </div>
+        )}
+
+        {/* Contenido Inferior */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          {/* Precio */}
+          <div className="text-2xl font-bold text-white mb-2">
+            {formatPrice(price)}
+          </div>
+
+          {/* Título */}
+          <h3 className="text-white font-semibold mb-1 line-clamp-2">
+            {title}
+          </h3>
+
+          {/* Vendedor */}
+          <p className="text-white/80 text-sm mb-3">
+            {seller}
+          </p>
+
+          {/* Botones */}
+          <div className="flex gap-2">
+            {isExpress ? (
+              <button
+                onClick={() => onContact(id)}
+                className="flex-1 bg-accent text-primary px-4 py-2 rounded-full font-medium hover:bg-accent/90 transition-all duration-200 hover:scale-105"
+              >
+                Contactar
+              </button>
+            ) : (
+              <button
+                onClick={() => onAddToCart(id)}
+                className="flex-1 bg-accent text-primary px-4 py-2 rounded-full font-medium hover:bg-accent/90 transition-all duration-200 hover:scale-105"
+              >
+                Añadir al carrito
+              </button>
+            )}
+            <button
+              onClick={() => onContact(id)}
+              className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full font-medium hover:bg-white/30 transition-all duration-200 hover:scale-105"
+            >
+              Ver más
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Micro-animación en hover */}
+      <div className="absolute inset-0 transition-transform duration-200 group-hover:scale-[1.015]" />
     </div>
   );
 }

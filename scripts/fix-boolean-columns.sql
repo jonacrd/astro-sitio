@@ -15,3 +15,7 @@ ALTER COLUMN is_active SET DEFAULT true;
 
 ALTER TABLE seller_rewards_config 
 ALTER COLUMN is_active SET DEFAULT false;
+
+
+
+

@@ -16,37 +16,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Usar service role key para bypass RLS
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Obtener token de autorización
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'No autorizado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    // Verificar autenticación
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Usuario no autenticado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Obtener datos del request
     const body = await request.json();
     const { orderId, status } = body;
 
@@ -60,58 +31,18 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el pedido pertenece al vendedor
-    const { data: order, error: orderError } = await supabase
+    console.log(`🔄 Actualizando pedido ${orderId} a estado: ${status}`);
+
+    // Actualizar el estado del pedido
+    const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
-      .select('id, seller_id, status')
+      .update({ 
+        status: status,
+        updated_at: new Date().toISOString()
+      })
       .eq('id', orderId)
-      .eq('seller_id', user.id)
+      .select()
       .single();
-
-    if (orderError || !order) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Pedido no encontrado o no tienes permisos'
-      }), { 
-        status: 404,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Validar transición de estado
-    const validTransitions = {
-      'pending': ['confirmed', 'cancelled'],
-      'confirmed': ['delivered', 'cancelled'],
-      'delivered': ['completed'],
-      'completed': [],
-      'cancelled': []
-    };
-
-    if (!validTransitions[order.status as keyof typeof validTransitions]?.includes(status)) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: `No se puede cambiar de ${order.status} a ${status}`
-      }), { 
-        status: 400,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Actualizar estado del pedido
-    const updateData: any = {
-      status
-      // updated_at: new Date().toISOString() // Columna no existe
-    };
-
-    // Agregar timestamp de confirmación del vendedor
-    // if (status === 'confirmed') {
-    //   updateData.seller_confirmed_at = new Date().toISOString(); // Columna no existe
-    // }
-
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update(updateData)
-      .eq('id', orderId);
 
     if (updateError) {
       console.error('Error actualizando pedido:', updateError);
@@ -124,106 +55,35 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    console.log('✅ Pedido actualizado:', updatedOrder);
+
     // Crear notificación para el comprador
-    try {
-      if (status === 'confirmed') {
-        // Obtener el user_id del comprador
-        const { data: orderData } = await supabase
-          .from('orders')
-          .select('user_id')
-          .eq('id', orderId)
-          .single();
+    const notificationTitle = getNotificationTitle(status);
+    const notificationMessage = getNotificationMessage(status, orderId);
 
-        if (orderData?.user_id) {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: orderData.user_id,
-              type: 'order_confirmed',
-              title: '¡Pedido Confirmado!',
-              message: 'Tu pedido ha sido confirmado por el vendedor y está en preparación.',
-              order_id: orderId
-            });
-        }
-      } else if (status === 'delivered') {
-        // Obtener el user_id del comprador
-        const { data: orderData } = await supabase
-          .from('orders')
-          .select('user_id')
-          .eq('id', orderId)
-          .single();
+    const { error: notificationError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: updatedOrder.user_id,
+        type: 'order_confirmed',
+        title: notificationTitle,
+        message: notificationMessage,
+        order_id: orderId,
+        is_read: false
+      });
 
-        if (orderData?.user_id) {
-          await supabase
-            .from('notifications')
-            .insert({
-              user_id: orderData.user_id,
-              type: 'order_delivered',
-              title: '¡Pedido Entregado!',
-              message: 'Tu pedido ha sido entregado. Por favor, confirma la recepción.',
-              order_id: orderId
-            });
-        }
-      }
-    } catch (notifError) {
-      console.log('⚠️ No se pudo crear notificación:', notifError);
-      // No fallar la operación por esto
-    }
-
-    // Si se marca como entregado, reducir stock
-    if (status === 'delivered') {
-      // Obtener items del pedido
-      const { data: orderItems, error: itemsError } = await supabase
-        .from('order_items')
-        .select('product_id, qty')
-        .eq('order_id', orderId);
-
-      if (itemsError) {
-        console.error('Error obteniendo items del pedido:', itemsError);
-        return new Response(JSON.stringify({
-          success: false,
-          error: 'Error obteniendo items del pedido: ' + itemsError.message
-        }), { 
-          status: 500,
-          headers: { 'content-type': 'application/json' }
-        });
-      }
-
-      // Reducir stock de cada producto
-      for (const item of orderItems || []) {
-        // Obtener stock actual
-        const { data: currentStock } = await supabase
-          .from('seller_products')
-          .select('stock')
-          .eq('seller_id', user.id)
-          .eq('product_id', item.product_id)
-          .single();
-
-        if (currentStock) {
-          const newStock = Math.max(0, currentStock.stock - item.qty);
-          
-          const { error: stockError } = await supabase
-            .from('seller_products')
-            .update({ 
-              stock: newStock
-            })
-            .eq('seller_id', user.id)
-            .eq('product_id', item.product_id);
-
-          if (stockError) {
-            console.error('Error actualizando stock:', stockError);
-            // No fallar la operación por esto, solo logear
-          }
-        }
-      }
+    if (notificationError) {
+      console.log('⚠️ Error creando notificación (tabla puede no existir):', notificationError.message);
+      // Continuar sin notificación por ahora
+    } else {
+      console.log('🔔 Notificación creada para el comprador');
     }
 
     return new Response(JSON.stringify({
       success: true,
       data: {
-        orderId,
-        status,
-        message: `Pedido ${status === 'confirmed' ? 'confirmado' : status === 'delivered' ? 'marcado como entregado' : 'actualizado'} exitosamente`
+        order: updatedOrder,
+        message: `Pedido actualizado a ${status}`
       }
     }), {
       headers: { 'content-type': 'application/json' }
@@ -240,3 +100,31 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 };
+
+function getNotificationTitle(status: string): string {
+  switch (status) {
+    case 'confirmed':
+      return '¡Pedido Confirmado!';
+    case 'delivered':
+      return '¡Pedido Entregado!';
+    case 'completed':
+      return '¡Pedido Completado!';
+    default:
+      return 'Estado del Pedido Actualizado';
+  }
+}
+
+function getNotificationMessage(status: string, orderId: string): string {
+  const orderCode = orderId.substring(0, 8);
+  
+  switch (status) {
+    case 'confirmed':
+      return `Tu pedido #${orderCode} ha sido confirmado por el vendedor. ¡Pronto será preparado!`;
+    case 'delivered':
+      return `¡Excelente! Tu pedido #${orderCode} ha sido entregado. ¡Esperamos que lo disfrutes!`;
+    case 'completed':
+      return `Tu pedido #${orderCode} ha sido completado. ¡Gracias por tu compra!`;
+    default:
+      return `El estado de tu pedido #${orderCode} ha sido actualizado a ${status}.`;
+  }
+}

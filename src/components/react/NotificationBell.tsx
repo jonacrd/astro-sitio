@@ -14,7 +14,7 @@ export default function NotificationBell() {
       const { data, error } = await supabase
         .from('notifications')
         .select('id')
-        .is('read_at', null);
+        .eq('is_read', false);
 
       if (error) {
         console.error('Error cargando notificaciones:', error);
@@ -59,3 +59,5 @@ export default function NotificationBell() {
     </div>
   );
 }
+
+

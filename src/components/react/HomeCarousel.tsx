@@ -25,3 +25,7 @@ export default function HomeCarousel() {
   
   return <Carousel title="Destacados — Comida & Postres" items={items} />;
 }
+
+
+
+

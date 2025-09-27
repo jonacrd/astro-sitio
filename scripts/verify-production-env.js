@@ -126,3 +126,7 @@ if (!isComplete) {
   console.log('\n🎉 ¡Variables de entorno configuradas correctamente!');
   console.log('🔗 Siguiente paso: Verificar en Vercel Dashboard');
 }
+
+
+
+
