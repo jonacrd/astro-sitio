@@ -44,3 +44,7 @@ Si no hay dato, usa null.
   const txt = res.choices?.[0]?.message?.content ?? "{}";
   try { return JSON.parse(txt); } catch { return null; }
 }
+
+
+
+

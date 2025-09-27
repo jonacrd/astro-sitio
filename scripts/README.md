@@ -180,3 +180,7 @@ node scripts/test-checkout.js
 3. **Historial**: Página de historial de órdenes
 4. **Estados**: Sistema de seguimiento de órdenes
 5. **Pagos**: Integración con pasarelas de pago
+
+
+
+

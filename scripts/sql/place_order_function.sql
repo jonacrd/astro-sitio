@@ -141,3 +141,7 @@ $$;
 
 -- Otorgar permisos de ejecución
 GRANT EXECUTE ON FUNCTION place_order(UUID, UUID, TEXT) TO authenticated;
+
+
+
+

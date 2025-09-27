@@ -114,3 +114,7 @@ Puedes verificar en Supabase Dashboard:
 ### Compradores:
 - **Cliente A**: `cliente.a@town.dev` / `Password123!`
 - **Cliente B**: `cliente.b@town.dev` / `Password123!`
+
+
+
+

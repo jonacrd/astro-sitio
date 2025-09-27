@@ -88,3 +88,7 @@ CREATE POLICY "Users can delete items from their carts" ON cart_items
 SELECT 'Tablas creadas:' as info;
 SELECT 'carts' as table_name, COUNT(*) as count FROM carts;
 SELECT 'cart_items' as table_name, COUNT(*) as count FROM cart_items;
+
+
+
+

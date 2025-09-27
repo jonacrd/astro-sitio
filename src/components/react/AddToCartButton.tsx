@@ -131,8 +131,8 @@ export default function AddToCartButton({
           isDisabled
             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
             : added
-              ? "bg-green-500 text-white"
-              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
+              ? "btn-cart-opaque"
+              : "btn-primary-opaque active:scale-[0.99]"
         }
         ${className}
       `}

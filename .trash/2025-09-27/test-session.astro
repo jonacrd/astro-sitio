@@ -1,0 +1,242 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Test de Sesión">
+  <main class="min-h-screen bg-gray-50 pb-20">
+    <div class="container mx-auto px-4 py-8">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Test de Sesión</h1>
+        <p class="text-gray-600">Verificar sesión y pedidos</p>
+      </div>
+
+      <div class="space-y-6">
+        <div id="session-info" class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">Información de Sesión</h2>
+          <div id="session-content">
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Verificando sesión...</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="orders-info" class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold mb-4">Pedidos del Usuario</h2>
+          <div id="orders-content">
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Cargando pedidos...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { supabase } from '../lib/supabase-browser';
+
+  async function checkSession() {
+    try {
+      console.log('🔍 Verificando sesión...');
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('❌ Error obteniendo sesión:', sessionError);
+        document.getElementById('session-content').innerHTML = `
+          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <h3 class="font-semibold mb-2">Error de sesión</h3>
+            <p class="text-sm">${sessionError.message}</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (session) {
+        console.log('✅ Sesión activa encontrada');
+        console.log('👤 Usuario:', session.user.email);
+        console.log('🆔 ID:', session.user.id);
+        
+        // Mostrar información de sesión
+        document.getElementById('session-content').innerHTML = `
+          <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+            <h3 class="font-semibold mb-2">✅ Sesión Activa</h3>
+            <p class="text-sm"><strong>Email:</strong> ${session.user.email}</p>
+            <p class="text-sm"><strong>ID:</strong> ${session.user.id}</p>
+            <p class="text-sm"><strong>Token:</strong> ${session.access_token.substring(0, 20)}...</p>
+          </div>
+        `;
+        
+        // Verificar perfil
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('name, is_seller')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('❌ Error obteniendo perfil:', profileError);
+        } else {
+          console.log('👤 Perfil:', profile);
+          
+          // Agregar información del perfil
+          const sessionDiv = document.getElementById('session-content');
+          sessionDiv.innerHTML += `
+            <div class="mt-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md">
+              <h4 class="font-semibold mb-2">👤 Perfil</h4>
+              <p class="text-sm"><strong>Nombre:</strong> ${profile.name}</p>
+              <p class="text-sm"><strong>Es vendedor:</strong> ${profile.is_seller ? 'Sí' : 'No'}</p>
+            </div>
+          `;
+        }
+        
+        // Cargar pedidos
+        await loadOrders(session.user.id);
+        
+      } else {
+        console.log('❌ No hay sesión activa');
+        document.getElementById('session-content').innerHTML = `
+          <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
+            <h3 class="font-semibold mb-2">⚠️ No hay sesión activa</h3>
+            <p class="text-sm">Necesitas iniciar sesión para ver tus pedidos</p>
+            <a href="/scripts/browser-login.html" class="text-blue-600 underline mt-2 inline-block">Iniciar sesión</a>
+          </div>
+        `;
+        
+        document.getElementById('orders-content').innerHTML = `
+          <div class="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-md">
+            <p class="text-sm">No se pueden cargar pedidos sin sesión activa</p>
+          </div>
+        `;
+      }
+
+    } catch (error) {
+      console.error('❌ Error inesperado:', error);
+      document.getElementById('session-content').innerHTML = `
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <h3 class="font-semibold mb-2">Error inesperado</h3>
+          <p class="text-sm">${error.message}</p>
+        </div>
+      `;
+    }
+  }
+
+  async function loadOrders(userId) {
+    try {
+      console.log('📋 Cargando pedidos para usuario:', userId);
+      
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('id, total_cents, status, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (ordersError) {
+        console.error('❌ Error cargando pedidos:', ordersError);
+        document.getElementById('orders-content').innerHTML = `
+          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            <h3 class="font-semibold mb-2">Error cargando pedidos</h3>
+            <p class="text-sm">${ordersError.message}</p>
+          </div>
+        `;
+        return;
+      }
+
+      console.log('📦 Pedidos cargados:', orders);
+
+      if (!orders || orders.length === 0) {
+        document.getElementById('orders-content').innerHTML = `
+          <div class="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-md">
+            <h3 class="font-semibold mb-2">No tienes pedidos</h3>
+            <p class="text-sm">Cuando hagas un pedido, aparecerá aquí</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Mostrar pedidos
+      const ordersHtml = orders.map(order => `
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="font-semibold text-gray-900">
+                Pedido #${order.id.substring(0, 8)}
+              </h3>
+              <p class="text-sm text-gray-600">
+                ${new Date(order.created_at).toLocaleString('es-ES')}
+              </p>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-bold text-blue-600">
+                $${(order.total_cents / 100).toFixed(2)}
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <p class="text-sm font-medium ${getStatusColor(order.status)}">
+              ${getStatusMessage(order.status)}
+            </p>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('orders-content').innerHTML = `
+        <div class="mb-4">
+          <p class="text-sm text-gray-600">Total de pedidos: ${orders.length}</p>
+        </div>
+        ${ordersHtml}
+      `;
+
+    } catch (error) {
+      console.error('❌ Error cargando pedidos:', error);
+      document.getElementById('orders-content').innerHTML = `
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          <h3 class="font-semibold mb-2">Error cargando pedidos</h3>
+          <p class="text-sm">${error.message}</p>
+        </div>
+      `;
+    }
+  }
+
+  function getStatusMessage(status) {
+    switch (status) {
+      case 'pending':
+        return 'Tu pedido está pendiente de confirmación por el vendedor';
+      case 'confirmed':
+        return 'Tu pedido ha sido confirmado y está en preparación';
+      case 'delivered':
+        return 'Tu pedido ha sido entregado. Por favor, confirma la recepción';
+      case 'completed':
+        return 'Pedido completado exitosamente';
+      case 'cancelled':
+        return 'Pedido cancelado';
+      default:
+        return 'Estado desconocido';
+    }
+  }
+
+  function getStatusColor(status) {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-600';
+      case 'confirmed':
+        return 'text-blue-600';
+      case 'delivered':
+        return 'text-green-600';
+      case 'completed':
+        return 'text-gray-600';
+      case 'cancelled':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
+  }
+
+  // Ejecutar al cargar la página
+  checkSession();
+</script>
+

@@ -5,63 +5,38 @@ export const GET: APIRoute = async ({ request, url }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
+    const userId = url.searchParams.get('userId');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const offset = parseInt(url.searchParams.get('offset') || '0');
+
+    if (!userId) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'Variables de entorno no configuradas'
+        error: 'userId es requerido'
       }), { 
-        status: 500,
+        status: 400,
         headers: { 'content-type': 'application/json' }
       });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Obtener token de autorización
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'No autorizado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
 
-    const token = authHeader.split(' ')[1];
-    
-    // Verificar autenticación
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
-    if (authError || !user) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Usuario no autenticado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
+    console.log('📊 Obteniendo historial de puntos para usuario:', userId);
 
-    // Obtener parámetros de consulta
-    const limit = parseInt(url.searchParams.get('limit') || '20', 10);
-    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-
-    // Obtener historial de puntos del usuario
-    const { data: historyData, error: historyError } = await supabase
+    // Obtener historial de puntos
+    const { data: history, error: historyError } = await supabase
       .from('points_history')
       .select(`
         id,
+        seller_id,
+        order_id,
         points_earned,
         points_spent,
         transaction_type,
         description,
-        created_at,
-        seller:profiles!points_history_seller_id_fkey(name)
+        created_at
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -69,7 +44,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       console.error('Error obteniendo historial:', historyError);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Error obteniendo historial: ' + historyError.message
+        error: 'Error obteniendo historial de puntos'
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
@@ -77,33 +52,35 @@ export const GET: APIRoute = async ({ request, url }) => {
     }
 
     // Formatear datos
-    const formattedHistory = historyData?.map(item => ({
-      id: item.id,
-      points_earned: item.points_earned || 0,
-      points_spent: item.points_spent || 0,
-      transaction_type: item.transaction_type,
-      description: item.description,
-      created_at: item.created_at,
-      seller_name: item.seller?.name || 'Vendedor'
+    const formattedHistory = history?.map(entry => ({
+      id: entry.id,
+      seller_id: entry.seller_id,
+      order_id: entry.order_id,
+      points_earned: entry.points_earned,
+      points_spent: entry.points_spent,
+      transaction_type: entry.transaction_type,
+      description: entry.description,
+      created_at: entry.created_at,
+      seller_name: 'Vendedor' // Simplificado por ahora
     })) || [];
+
+    console.log(`✅ Historial obtenido: ${formattedHistory.length} transacciones`);
 
     return new Response(JSON.stringify({
       success: true,
       history: formattedHistory,
-      pagination: {
-        limit,
-        offset,
-        total: formattedHistory.length
-      }
-    }), {
+      count: formattedHistory.length,
+      has_more: formattedHistory.length === limit
+    }), { 
+      status: 200,
       headers: { 'content-type': 'application/json' }
     });
 
-  } catch (error: any) {
-    console.error('Error en /api/points/history:', error);
-    return new Response(JSON.stringify({ 
-      success: false, 
-      error: error.message 
+  } catch (error) {
+    console.error('❌ Error en GET points/history:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Error interno del servidor'
     }), { 
       status: 500,
       headers: { 'content-type': 'application/json' }

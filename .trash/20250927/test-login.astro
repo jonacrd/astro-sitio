@@ -1,0 +1,121 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Test Login - Town">
+  <div class="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+      <h1 class="text-2xl font-bold mb-6 text-center">Test Login Vendedores</h1>
+      
+      <div class="space-y-4">
+        <div>
+          <h3 class="font-semibold mb-2">Usuarios de Vendedores:</h3>
+          <ul class="text-sm space-y-1">
+            <li><strong>user1</strong> / <strong>1</strong> - Juan Pérez (Carnes del Zulia)</li>
+            <li><strong>user2</strong> / <strong>2</strong> - María González (Postres y Dulces)</li>
+            <li><strong>user4</strong> / <strong>4</strong> - Ana Rodríguez (Belleza y Estilo)</li>
+            <li><strong>user6</strong> / <strong>6</strong> - Laura Sánchez (Sabores Tradicionales)</li>
+            <li><strong>user7</strong> / <strong>7</strong> - Roberto Torres (Comidas Rápidas Express)</li>
+            <li><strong>user8</strong> / <strong>8</strong> - Carmen Flores (Almuerzos Ejecutivos)</li>
+            <li><strong>user9</strong> / <strong>9</strong> - Diego Herrera (Parrilla y Mariscos)</li>
+          </ul>
+        </div>
+        
+        <form id="test-login" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Username:</label>
+            <input type="email" id="username" placeholder="test@example.com" required class="w-full p-2 border rounded" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Password:</label>
+            <input type="password" id="password" placeholder="1" required class="w-full p-2 border rounded" />
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+            Login
+          </button>
+        </form>
+        
+        <div id="result" class="mt-4 p-3 rounded hidden"></div>
+        
+        <div class="flex gap-2">
+          <button id="check-me" class="flex-1 bg-green-600 text-white p-2 rounded hover:bg-green-700">
+            Check Me
+          </button>
+          <button id="logout" class="flex-1 bg-red-600 text-white p-2 rounded hover:bg-red-700">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('test-login') as HTMLFormElement;
+  const result = document.getElementById('result');
+  const checkMeBtn = document.getElementById('check-me');
+  const logoutBtn = document.getElementById('logout');
+
+  function showResult(message: string, isError = false) {
+    result!.textContent = message;
+    result!.className = `mt-4 p-3 rounded ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+    result!.classList.remove('hidden');
+  }
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('username') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+
+    try {
+      const { supabase } = await import('../lib/supabase-browser');
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+
+      if (error) {
+        showResult('Login fallido: ' + error.message, true);
+      } else if (data.user) {
+        showResult(`Login exitoso: ${data.user.email}`);
+      }
+    } catch (error) {
+      showResult('Error en login', true);
+    }
+  });
+
+  checkMeBtn?.addEventListener('click', async () => {
+    try {
+      const { supabase } = await import('../lib/supabase-browser');
+      
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        showResult('Error al verificar usuario: ' + error.message, true);
+      } else if (user) {
+        showResult(`Usuario actual: ${user.email} - ID: ${user.id}`);
+      } else {
+        showResult('No hay usuario logueado', true);
+      }
+    } catch (error) {
+      showResult('Error al verificar usuario', true);
+    }
+  });
+
+  logoutBtn?.addEventListener('click', async () => {
+    try {
+      const { supabase } = await import('../lib/supabase-browser');
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        showResult('Error en logout: ' + error.message, true);
+      } else {
+        showResult('Logout exitoso');
+      }
+    } catch (error) {
+      showResult('Error en logout', true);
+    }
+  });
+</script>

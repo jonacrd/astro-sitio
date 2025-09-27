@@ -219,3 +219,7 @@ WHERE id IN (
   SELECT DISTINCT seller_id FROM orders
 )
 ON CONFLICT (seller_id, tier_name) DO NOTHING;
+
+
+
+

@@ -51,3 +51,7 @@ $$ LANGUAGE plpgsql;
 
 -- 3. Verificar que se creó correctamente
 SELECT proname, prosrc FROM pg_proc WHERE proname = 'confirm_receipt_by_buyer';
+
+
+
+

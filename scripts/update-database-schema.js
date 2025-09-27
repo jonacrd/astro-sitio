@@ -98,3 +98,7 @@ async function updateDatabaseSchema() {
 }
 
 updateDatabaseSchema();
+
+
+
+

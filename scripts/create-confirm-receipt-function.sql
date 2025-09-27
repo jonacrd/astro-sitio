@@ -44,3 +44,7 @@ BEGIN
   RETURN json_build_object('success', true, 'message', 'Recepción confirmada exitosamente');
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+

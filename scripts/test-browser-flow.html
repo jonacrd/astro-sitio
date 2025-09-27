@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Flujo Completo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0E1626;
+            color: white;
+        }
+        .test-section {
+            background: #1D2939;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Flujo Completo: Búsqueda → Carrito → Checkout</h1>
+    
+    <div class="test-section">
+        <h2>1. Simular Búsqueda con IA</h2>
+        <button onclick="simulateSearch()">Buscar "perro caliente"</button>
+        <div id="search-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Verificar Carrito</h2>
+        <button onclick="checkCart()">Ver Carrito</button>
+        <button onclick="clearCart()">Limpiar Carrito</button>
+        <div id="cart-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Simular Checkout</h2>
+        <button onclick="simulateCheckout()">Procesar Checkout</button>
+        <div id="checkout-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Verificar Orden en Base de Datos</h2>
+        <button onclick="checkOrders()">Ver Órdenes</button>
+        <div id="orders-log" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        function simulateSearch() {
+            log('search-log', '🔍 Simulando búsqueda "perro caliente"...');
+            
+            // Simular producto de búsqueda
+            const searchProduct = {
+                id: 'hotdog-fallback',
+                title: 'Perro Caliente',
+                description: 'Hot dog con todos los ingredientes',
+                price: 2500,
+                image_url: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=400&h=300&q=80',
+                category: 'Comida',
+                vendor: 'Max Snack'
+            };
+            
+            log('search-log', `📦 Producto encontrado: ${searchProduct.title} - $${searchProduct.price}`);
+            
+            // Simular agregar al carrito
+            const cartItem = {
+                id: searchProduct.id,
+                title: searchProduct.title,
+                price: searchProduct.price,
+                image: searchProduct.image_url,
+                vendor: searchProduct.vendor,
+                quantity: 1,
+                addedAt: new Date().toISOString()
+            };
+            
+            const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existingItemIndex = existingCart.findIndex(item => item.id === cartItem.id);
+            
+            if (existingItemIndex >= 0) {
+                existingCart[existingItemIndex].quantity += 1;
+                log('search-log', '📈 Cantidad incrementada');
+            } else {
+                existingCart.push(cartItem);
+                log('search-log', '➕ Producto agregado al carrito');
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(existingCart));
+            
+            // Disparar evento
+            window.dispatchEvent(new CustomEvent('cart-updated', { 
+                detail: { 
+                    item: cartItem, 
+                    action: existingItemIndex >= 0 ? 'update' : 'add',
+                    cart: existingCart
+                } 
+            }));
+            
+            log('search-log', `✅ Carrito actualizado: ${existingCart.length} items`);
+        }
+        
+        function checkCart() {
+            log('cart-log', '🛒 Verificando carrito...');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (cart.length === 0) {
+                log('cart-log', '❌ Carrito vacío');
+                return;
+            }
+            
+            log('cart-log', `📊 Carrito tiene ${cart.length} items:`);
+            cart.forEach((item, index) => {
+                log('cart-log', `  ${index + 1}. ${item.title} - $${item.price} x${item.quantity} (${item.vendor})`);
+            });
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            log('cart-log', `💰 Total: $${total}`);
+        }
+        
+        function clearCart() {
+            localStorage.removeItem('cart');
+            log('cart-log', '🧹 Carrito limpiado');
+        }
+        
+        async function simulateCheckout() {
+            log('checkout-log', '🛒 Simulando checkout...');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (cart.length === 0) {
+                log('checkout-log', '❌ Carrito vacío, no se puede hacer checkout');
+                return;
+            }
+            
+            // Simular conversión del checkout
+            const formattedItems = cart.map(item => ({
+                id: item.id,
+                cartId: 'local',
+                productId: item.id,
+                title: item.title,
+                priceCents: item.price,
+                quantity: item.quantity,
+                sellerId: 'df33248a-5462-452b-a4f1-5d17c8c05a51',
+                sellerName: item.vendor,
+                totalCents: item.price * item.quantity
+            }));
+            
+            const totalCents = formattedItems.reduce((sum, item) => sum + item.totalCents, 0);
+            
+            log('checkout-log', `📋 Items formateados: ${formattedItems.length}`);
+            log('checkout-log', `💰 Total: $${totalCents}`);
+            
+            // Simular envío al backend
+            try {
+                const response = await fetch('/api/cart/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        customerName: 'Cliente de Prueba',
+                        customerEmail: 'cliente@prueba.com',
+                        deliveryAddress: {
+                            fullName: 'Cliente de Prueba',
+                            phone: '+56 9 1234 5678',
+                            address: 'Dirección de Prueba 123',
+                            city: 'Santiago',
+                            state: 'Región Metropolitana',
+                            zipCode: '12345',
+                            instructions: 'Pedido desde test'
+                        },
+                        paymentMethod: 'cash',
+                        orderNotes: 'Test desde navegador',
+                        cartItems: formattedItems
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('checkout-log', `✅ Orden creada: ${result.orderCode}`);
+                    log('checkout-log', `💰 Total: $${result.totalCents}`);
+                    
+                    // Limpiar carrito
+                    localStorage.removeItem('cart');
+                    log('checkout-log', '🧹 Carrito limpiado después del checkout');
+                } else {
+                    log('checkout-log', `❌ Error: ${result.error}`);
+                }
+            } catch (error) {
+                log('checkout-log', `❌ Error en checkout: ${error.message}`);
+            }
+        }
+        
+        async function checkOrders() {
+            log('orders-log', '🔍 Verificando órdenes en base de datos...');
+            
+            try {
+                const response = await fetch('/api/vendor/orders');
+                const orders = await response.json();
+                
+                if (orders.length === 0) {
+                    log('orders-log', '❌ No hay órdenes');
+                    return;
+                }
+                
+                log('orders-log', `📋 Encontradas ${orders.length} órdenes:`);
+                orders.forEach((order, index) => {
+                    log('orders-log', `  ${index + 1}. Orden ${order.order_code} - $${order.total_cents} - ${order.status}`);
+                });
+            } catch (error) {
+                log('orders-log', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Inicializar
+        log('search-log', '🚀 Test iniciado. Haz clic en "Buscar perro caliente" para comenzar.');
+    </script>
+</body>
+</html>
+
+

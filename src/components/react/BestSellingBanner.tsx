@@ -182,7 +182,7 @@ export default function BestSellingBanner({
                           className={`px-8 py-3 rounded-lg font-bold text-lg transition-all ${
                             isOutOfStock
                               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              : "bg-red-600 text-white hover:bg-red-700 hover:scale-105 shadow-lg"
+                              : "btn-cart-opaque hover:scale-105 shadow-lg"
                           }`}
                         >
                           {isOutOfStock ? "Agotado" : "🔥 Agregar al Carrito"}

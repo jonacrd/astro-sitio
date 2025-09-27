@@ -1,228 +1,283 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase-browser';
-import { getUser } from '../../lib/session';
 
 interface PointsRedemptionProps {
+  orderId: string;
   sellerId: string;
-  orderTotal: number; // en centavos
-  onPointsApplied: (discountCents: number, pointsUsed: number) => void;
+  onRedemptionSuccess?: (discountCents: number, pointsUsed: number) => void;
+  onRedemptionError?: (error: string) => void;
+  className?: string;
 }
 
-export default function PointsRedemption({ sellerId, orderTotal, onPointsApplied }: PointsRedemptionProps) {
-  const [availablePoints, setAvailablePoints] = useState(0);
+interface RedemptionInfo {
+  can_redeem: boolean;
+  available_points: number;
+  pesos_per_point: number;
+  max_points_usable: number;
+  max_discount_cents: number;
+  order_total_cents: number;
+  existing_redemption?: any;
+}
+
+export default function PointsRedemption({ 
+  orderId, 
+  sellerId, 
+  onRedemptionSuccess, 
+  onRedemptionError,
+  className = '' 
+}: PointsRedemptionProps) {
+  const [redemptionInfo, setRedemptionInfo] = useState<RedemptionInfo | null>(null);
   const [pointsToUse, setPointsToUse] = useState(0);
-  const [maxPoints, setMaxPoints] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sellerHasRewards, setSellerHasRewards] = useState(false);
 
   useEffect(() => {
-    loadPointsData();
-  }, [sellerId]);
+    loadRedemptionInfo();
+  }, [orderId, sellerId]);
 
-  const loadPointsData = async () => {
+  const loadRedemptionInfo = async () => {
     try {
-      const user = await getUser();
-      if (!user) {
-        setError('No hay usuario autenticado');
-        return;
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/points/redeem?orderId=${orderId}&sellerId=${sellerId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setRedemptionInfo(data);
+        if (data.can_redeem && data.max_points_usable > 0) {
+          setPointsToUse(Math.min(100, data.max_points_usable)); // Default a 100 puntos o el máximo
+        }
+      } else {
+        setError(data.error || 'Error cargando información de canje');
       }
-
-      // Verificar si el vendedor tiene sistema de puntos activado
-      const { data: rewardsConfig } = await supabase
-        .from('seller_rewards_config')
-        .select('is_active, minimum_purchase_cents')
-        .eq('seller_id', sellerId)
-        .eq('is_active', true)
-        .single();
-
-      if (!rewardsConfig) {
-        setSellerHasRewards(false);
-        setLoading(false);
-        return;
-      }
-
-      setSellerHasRewards(true);
-
-      // Verificar compra mínima
-      if (orderTotal < rewardsConfig.minimum_purchase_cents) {
-        setError(`Compra mínima para puntos: $${(rewardsConfig.minimum_purchase_cents / 100).toLocaleString('es-CL')}`);
-        setLoading(false);
-        return;
-      }
-
-      // Obtener puntos disponibles del usuario
-      const { data: pointsData } = await supabase
-        .from('points_history')
-        .select('points_earned, points_spent')
-        .eq('user_id', user.id);
-
-      if (pointsData) {
-        const totalEarned = pointsData.reduce((sum, item) => sum + (item.points_earned || 0), 0);
-        const totalSpent = pointsData.reduce((sum, item) => sum + (item.points_spent || 0), 0);
-        const available = totalEarned - totalSpent;
-        
-        setAvailablePoints(available);
-        
-        // Máximo puntos que se pueden usar (hasta el 50% del total de la compra)
-        const maxDiscountCents = Math.floor(orderTotal * 0.5);
-        const maxPointsToUse = Math.floor(maxDiscountCents / 35); // 1 punto = 35 pesos
-        const actualMaxPoints = Math.min(available, maxPointsToUse);
-        
-        setMaxPoints(actualMaxPoints);
-        setPointsToUse(Math.min(actualMaxPoints, 10)); // Por defecto, usar hasta 10 puntos
-      }
-
-    } catch (err: any) {
-      console.error('Error cargando puntos:', err);
-      setError('Error cargando puntos: ' + err.message);
+    } catch (err) {
+      console.error('Error cargando información de canje:', err);
+      setError('Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePointsChange = (value: number) => {
-    const clampedValue = Math.max(0, Math.min(value, maxPoints));
-    setPointsToUse(clampedValue);
-    
-    const discountCents = clampedValue * 35; // 1 punto = 35 pesos
-    onPointsApplied(discountCents, clampedValue);
+  const handleRedeemPoints = async () => {
+    if (!redemptionInfo || !pointsToUse || pointsToUse <= 0) {
+      setError('Selecciona una cantidad válida de puntos');
+      return;
+    }
+
+    try {
+      setRedeeming(true);
+      setError(null);
+
+      const response = await fetch('/api/points/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          sellerId,
+          pointsToUse
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ Puntos canjeados exitosamente:', data);
+        
+        if (onRedemptionSuccess) {
+          onRedemptionSuccess(data.discount_cents, data.points_used);
+        }
+
+        // Recargar información
+        await loadRedemptionInfo();
+
+        // Mostrar mensaje de éxito
+        alert(data.message || 'Puntos canjeados exitosamente');
+      } else {
+        const errorMsg = data.error || 'Error canjeando puntos';
+        setError(errorMsg);
+        if (onRedemptionError) {
+          onRedemptionError(errorMsg);
+        }
+      }
+    } catch (err) {
+      console.error('Error canjeando puntos:', err);
+      const errorMsg = 'Error de conexión';
+      setError(errorMsg);
+      if (onRedemptionError) {
+        onRedemptionError(errorMsg);
+      }
+    } finally {
+      setRedeeming(false);
+    }
   };
 
-  const formatPesos = (cents: number) => {
-    return `$${(cents / 100).toLocaleString('es-CL')}`;
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(cents / 100);
+  };
+
+  const calculateDiscount = (points: number) => {
+    if (!redemptionInfo) return 0;
+    return points * redemptionInfo.pesos_per_point * 100; // Convertir a centavos
   };
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-600 text-sm">Cargando puntos...</p>
+      <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+          <span className="ml-2 text-white">Verificando puntos disponibles...</span>
         </div>
       </div>
     );
   }
 
-  if (!sellerHasRewards) {
+  if (error && !redemptionInfo) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-gray-400">ℹ️</span>
-          <p className="text-gray-600 text-sm">
-            Esta tienda no tiene sistema de puntos activado
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-red-400">⚠️</span>
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (availablePoints === 0) {
-    return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-blue-400">🎁</span>
-          <p className="text-blue-600 text-sm">
-            No tienes puntos disponibles. Realiza compras de $5,000 o más para ganar puntos.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const discountCents = pointsToUse * 35;
-  const finalTotal = orderTotal - discountCents;
-
-  return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Canjear Puntos</h3>
-      
-      <div className="space-y-4">
-        {/* Información de puntos disponibles */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-green-800 font-medium">Puntos disponibles:</span>
-            <span className="text-green-600 font-bold text-lg">{availablePoints}</span>
+      <div className={`bg-red-900/20 border border-red-500/30 rounded-lg p-4 ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-red-300">{error}</span>
           </div>
-          <p className="text-green-700 text-sm mt-1">
-            Máximo a usar: {maxPoints} puntos (50% del total de la compra)
-          </p>
+          <button
+            onClick={loadRedemptionInfo}
+            className="text-red-400 hover:text-red-300 text-sm"
+          >
+            Reintentar
+          </button>
         </div>
+      </div>
+    );
+  }
 
-        {/* Selector de puntos */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Puntos a usar:
-          </label>
-          <div className="flex items-center space-x-3">
-            <input
-              type="number"
-              min="0"
-              max={maxPoints}
-              value={pointsToUse}
-              onChange={(e) => handlePointsChange(parseInt(e.target.value) || 0)}
-              className="flex-1 p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button
-              onClick={() => handlePointsChange(maxPoints)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-            >
-              Máximo
-            </button>
-            <button
-              onClick={() => handlePointsChange(0)}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
-            >
-              Ninguno
-            </button>
-          </div>
-        </div>
-
-        {/* Resumen del descuento */}
-        {pointsToUse > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-blue-800 font-medium">Descuento por puntos:</span>
-              <span className="text-blue-600 font-bold">{formatPesos(discountCents)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-blue-800 font-medium">Total final:</span>
-              <span className="text-blue-600 font-bold text-lg">{formatPesos(finalTotal)}</span>
-            </div>
-            <p className="text-blue-700 text-sm mt-2">
-              Ahorras {formatPesos(discountCents)} usando {pointsToUse} puntos
+  if (!redemptionInfo || !redemptionInfo.can_redeem) {
+    return (
+      <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
+        <div className="flex items-center">
+          <svg className="w-6 h-6 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          </svg>
+          <div>
+            <h3 className="text-white font-medium">Puntos no disponibles</h3>
+            <p className="text-gray-400 text-sm">
+              {redemptionInfo?.available_points === 0 
+                ? 'No tienes puntos para este vendedor'
+                : 'No se pueden canjear puntos para este pedido'
+              }
             </p>
           </div>
-        )}
-
-        {/* Botones de acción rápida */}
-        <div className="flex space-x-2">
-          {[5, 10, 20, 50].map((amount) => (
-            <button
-              key={amount}
-              onClick={() => handlePointsChange(Math.min(amount, maxPoints))}
-              disabled={amount > maxPoints}
-              className={`px-3 py-1 rounded-md text-sm ${
-                amount > maxPoints
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              {amount} pts
-            </button>
-          ))}
         </div>
+      </div>
+    );
+  }
+
+  const discountCents = calculateDiscount(pointsToUse);
+  const newTotalCents = redemptionInfo.order_total_cents - discountCents;
+
+  return (
+    <div className={`bg-gray-800 rounded-lg p-4 ${className}`}>
+      <div className="flex items-center mb-4">
+        <svg className="w-6 h-6 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+        </svg>
+        <h3 className="text-lg font-semibold text-white">Canjear Puntos</h3>
+      </div>
+
+      {/* Información de puntos disponibles */}
+      <div className="bg-gray-700 rounded-lg p-3 mb-4">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div className="text-gray-400">Puntos disponibles:</div>
+            <div className="text-white font-medium">{redemptionInfo.available_points}</div>
+          </div>
+          <div>
+            <div className="text-gray-400">Valor:</div>
+            <div className="text-white font-medium">1 punto = {redemptionInfo.pesos_per_point} pesos</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Selector de puntos */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Puntos a canjear (máximo {redemptionInfo.max_points_usable})
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            min="0"
+            max={redemptionInfo.max_points_usable}
+            value={pointsToUse}
+            onChange={(e) => setPointsToUse(parseInt(e.target.value) || 0)}
+            className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            placeholder="Cantidad de puntos"
+          />
+          <button
+            onClick={() => setPointsToUse(redemptionInfo.max_points_usable)}
+            className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors text-sm"
+          >
+            Máximo
+          </button>
+        </div>
+      </div>
+
+      {/* Resumen del canje */}
+      {pointsToUse > 0 && (
+        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-blue-300">Descuento aplicado:</span>
+            <span className="text-green-400 font-medium">{formatPrice(discountCents)}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm mt-1">
+            <span className="text-blue-300">Nuevo total:</span>
+            <span className="text-white font-medium">{formatPrice(newTotalCents)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 mb-4">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-red-300 text-sm">{error}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Botón de canje */}
+      <button
+        onClick={handleRedeemPoints}
+        disabled={redeeming || pointsToUse <= 0 || pointsToUse > redemptionInfo.max_points_usable}
+        className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {redeeming ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Canjeando puntos...
+          </div>
+        ) : (
+          `Canjear ${pointsToUse} puntos por ${formatPrice(discountCents)} de descuento`
+        )}
+      </button>
+
+      {/* Información adicional */}
+      <div className="mt-4 text-xs text-gray-500">
+        <p>• Los puntos se canjean al momento de confirmar el pedido</p>
+        <p>• El descuento se aplica antes del pago final</p>
+        <p>• Máximo 50% de descuento del total del pedido</p>
       </div>
     </div>
   );

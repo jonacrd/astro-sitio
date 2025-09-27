@@ -3,11 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import NotificationsWidget from '../components/react/NotificationsWidget.tsx'
 import UserPoints from '../components/react/UserPoints.tsx'
 import OrderHistory from '../components/react/OrderHistory.tsx'
+import BottomNav from '../components/react/BottomNav.tsx'
 import { getUser, getUserProfile } from '../lib/session'
 ---
 
 <BaseLayout title="Mi Perfil">
-  <main class="min-h-screen bg-gray-50">
+  <main class="min-h-screen bg-gray-50 pb-20">
     <div class="container mx-auto px-4 py-8">
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Mi Perfil</h1>
@@ -43,6 +44,19 @@ import { getUser, getUserProfile } from '../lib/session'
             >
               🏪 Mi Tienda
             </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de puntos -->
+      <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Historial de Puntos</h2>
+          <div id="points-history-container">
+            <div class="text-center py-8">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p class="text-gray-600">Cargando historial de puntos...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -178,11 +192,14 @@ import { getUser, getUserProfile } from '../lib/session'
   </main>
 
   <script>
+    import { supabase } from '../lib/supabase-browser';
+    import { createElement } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import PointsHistory from '../components/react/PointsHistory.tsx';
+
     // Cargar información del perfil
     async function loadProfile() {
       try {
-        const { supabase } = await import('../lib/supabase-browser');
-        
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
@@ -212,12 +229,40 @@ import { getUser, getUserProfile } from '../lib/session'
         if (profile.is_seller && sellerPanel) {
           sellerPanel.classList.remove('hidden');
         }
+
+        // Cargar historial de puntos
+        loadPointsHistory(user.id);
       } catch (error) {
         console.error('Error cargando perfil:', error);
       }
     }
 
+    async function loadPointsHistory(userId) {
+      try {
+        // Renderizar componente de historial de puntos
+        const container = document.getElementById('points-history-container');
+        if (container) {
+          container.innerHTML = '';
+          const root = createRoot(container);
+          root.render(createElement(PointsHistory, { userId: userId }));
+        }
+      } catch (error) {
+        console.error('Error cargando historial de puntos:', error);
+        const container = document.getElementById('points-history-container');
+        if (container) {
+          container.innerHTML = `
+            <div class="text-center py-8">
+              <p class="text-red-600">Error cargando historial de puntos</p>
+            </div>
+          `;
+        }
+      }
+    }
+
     // Cargar perfil al montar la página
-    loadProfile();
+    document.addEventListener('DOMContentLoaded', loadProfile);
   </script>
+
+  <!-- Bottom Navigation -->
+  <BottomNav client:load role="buyer" notifications={0} orders={0} rewards={0} />
 </BaseLayout>

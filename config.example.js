@@ -8,3 +8,7 @@ export const config = {
     serviceRoleKey: 'your_supabase_service_role_key_here'
   }
 };
+
+
+
+

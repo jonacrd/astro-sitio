@@ -115,3 +115,7 @@ async function fixSellerProductsTable() {
 }
 
 fixSellerProductsTable().catch(console.error);
+
+
+
+

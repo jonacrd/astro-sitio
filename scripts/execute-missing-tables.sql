@@ -102,3 +102,7 @@ CREATE POLICY "Users can view own notifications" ON notifications
 
 CREATE POLICY "Users can view own points" ON user_points
   FOR SELECT USING (auth.uid() = user_id);
+
+
+
+

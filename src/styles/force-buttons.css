@@ -1,0 +1,183 @@
+/* CSS para FORZAR estilos de botones y elementos dañados */
+
+/* FORZAR TODOS LOS BOTONES */
+button, .btn, [role="button"], input[type="button"], input[type="submit"] {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  text-decoration: none !important;
+}
+
+/* FORZAR botones azules */
+.bg-blue-600, .bg-blue-500, .bg-blue-700 {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* FORZAR botones amarillos */
+.bg-yellow-400, .bg-yellow-500, .bg-yellow-600 {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+}
+
+/* FORZAR botones verdes */
+.bg-green-600, .bg-green-500, .bg-green-700 {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+/* FORZAR botones rojos */
+.bg-red-600, .bg-red-500, .bg-red-700 {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* FORZAR botones grises */
+.bg-gray-600, .bg-gray-500, .bg-gray-700 {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
+/* FORZAR botones específicos del carrito */
+.cart-button, .add-to-cart, .remove-from-cart, .cart-btn {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+/* FORZAR botones de búsqueda */
+.search-button, .search-submit, .search-btn {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+/* FORZAR botones de productos */
+.product-button, .order-button, .pedir-button {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+/* FORZAR específicamente "PEDIR AHORA" */
+button:contains("PEDIR AHORA"), 
+button:contains("Pedir ahora"), 
+button:contains("pedir ahora"),
+[data-testid*="pedir"],
+[data-testid*="order"],
+[data-testid*="add-to-cart"] {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* FORZAR botones de agregar */
+.add-button, .agregar-button, .add-btn {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+/* FORZAR botones de eliminar */
+.remove-button, .delete-button, .eliminar-button {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+}
+
+/* FORZAR botones de pagar */
+.pay-button, .pagar-button, .checkout-button {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+
+/* Hover states */
+button:hover, .btn:hover, [role="button"]:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* FORZAR cards y contenedores */
+.card, .product-card, .search-card {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+}
+
+/* FORZAR modales */
+.modal, .modal-backdrop, [data-modal] {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 50 !important;
+}
+
+/* FORZAR mosaico */
+.grid-item, .mosaic-item, .product-item {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+}
+
+/* FORZAR resultados de búsqueda */
+.search-result, .search-item, .result-item {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+}
+
+/* FORZAR productos relacionados */
+.related-product, .product-related {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+}
+
+/* FORZAR carrito */
+.cart-item, .cart-product, .cart-element {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+}

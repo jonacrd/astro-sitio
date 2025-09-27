@@ -24,3 +24,7 @@ CREATE POLICY "Users can view active reward tiers" ON seller_reward_tiers
 -- 4. Verificar que las tablas tengan RLS habilitado
 ALTER TABLE seller_rewards_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seller_reward_tiers ENABLE ROW LEVEL SECURITY;
+
+
+
+

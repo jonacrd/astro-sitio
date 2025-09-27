@@ -1,0 +1,135 @@
+---
+// Página completamente minimalista para diagnosticar problemas
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Test - Town</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 40px; 
+      background: #f5f5f5; 
+      text-align: center;
+    }
+    .container { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 40px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    }
+    .success { color: green; font-weight: bold; }
+    .error { color: red; font-weight: bold; }
+    .info { color: blue; }
+    button { 
+      background: #007bff; 
+      color: white; 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      margin: 10px;
+      font-size: 16px;
+    }
+    button:hover { background: #0056b3; }
+    pre { 
+      background: #f8f8f8; 
+      padding: 15px; 
+      border-radius: 4px; 
+      text-align: left;
+      overflow-x: auto; 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏠 Town - Test Simple</h1>
+    <p class="info">Página minimalista para diagnosticar problemas</p>
+    
+    <button onclick="testHealth()">Test API Health</button>
+    <button onclick="testDebug()">Test Debug</button>
+    
+    <div id="results"></div>
+    
+    <hr style="margin: 30px 0;">
+    
+    <h2>🔗 Enlaces de Prueba</h2>
+    <p><a href="/api/health" target="_blank">/api/health</a> - Test básico de API</p>
+    <p><a href="/api/debug" target="_blank">/api/debug</a> - Test de entorno y DB</p>
+    <p><a href="/" target="_blank">/</a> - Página principal</p>
+    
+  </div>
+
+  <script>
+    async function testHealth() {
+      const results = document.getElementById('results');
+      results.innerHTML = '<p class="info">Probando API Health...</p>';
+      
+      try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        
+        if (response.ok) {
+          results.innerHTML = `
+            <h3 class="success">✅ API Health - EXITOSO</h3>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          results.innerHTML = `
+            <h3 class="error">❌ API Health - ERROR ${response.status}</h3>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        results.innerHTML = `
+          <h3 class="error">❌ API Health - ERROR DE CONEXIÓN</h3>
+          <p class="error">${error.message}</p>
+        `;
+      }
+    }
+
+    async function testDebug() {
+      const results = document.getElementById('results');
+      results.innerHTML = '<p class="info">Probando Debug API...</p>';
+      
+      try {
+        const response = await fetch('/api/debug');
+        const data = await response.json();
+        
+        if (response.ok) {
+          results.innerHTML = `
+            <h3 class="success">✅ Debug API - EXITOSO</h3>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          results.innerHTML = `
+            <h3 class="error">❌ Debug API - ERROR ${response.status}</h3>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        results.innerHTML = `
+          <h3 class="error">❌ Debug API - ERROR DE CONEXIÓN</h3>
+          <p class="error">${error.message}</p>
+        `;
+      }
+    }
+
+    // Hacer funciones globales
+    window.testHealth = testHealth;
+    window.testDebug = testDebug;
+
+    // Auto-test al cargar
+    window.addEventListener('load', testHealth);
+  </script>
+</body>
+</html>
+
+
+
+

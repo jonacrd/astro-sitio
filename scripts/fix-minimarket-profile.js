@@ -182,3 +182,7 @@ async function fixMinimarketProfile() {
 }
 
 fixMinimarketProfile();
+
+
+
+

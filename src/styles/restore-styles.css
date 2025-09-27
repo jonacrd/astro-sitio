@@ -1,0 +1,61 @@
+/* CSS para restaurar estilos dañados */
+
+/* Restaurar botones */
+button, .btn {
+  background-color: inherit !important;
+  color: inherit !important;
+}
+
+/* Restaurar botones azules */
+.bg-blue-600 {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Restaurar botones amarillos */
+.bg-yellow-400 {
+  background-color: #facc15 !important;
+  color: #000000 !important;
+}
+
+/* Restaurar botones verdes */
+.bg-green-600 {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+/* Restaurar botones rojos */
+.bg-red-600 {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* Restaurar modales */
+.modal, .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Restaurar cards */
+.card {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Restaurar mosaico */
+.grid-item {
+  background-color: inherit !important;
+}
+
+/* Restaurar resultados de búsqueda */
+.search-result {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Restaurar productos relacionados */
+.related-product {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+

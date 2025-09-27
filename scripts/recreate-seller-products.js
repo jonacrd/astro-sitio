@@ -94,3 +94,7 @@ async function recreateSellerProductsTable() {
 }
 
 recreateSellerProductsTable().catch(console.error);
+
+
+
+

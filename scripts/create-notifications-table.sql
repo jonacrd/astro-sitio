@@ -25,3 +25,7 @@ CREATE POLICY "Users can update own notifications" ON notifications
 
 CREATE POLICY "System can create notifications" ON notifications
   FOR INSERT WITH CHECK (true);
+
+
+
+
