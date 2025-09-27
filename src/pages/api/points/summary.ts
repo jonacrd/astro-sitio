@@ -7,6 +7,17 @@ export const GET: APIRoute = async ({ request, url }) => {
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     const userId = url.searchParams.get('userId');
 
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Variables de entorno no configuradas');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Variables de entorno no configuradas'
+      }), { 
+        status: 500,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
     if (!userId) {
       return new Response(JSON.stringify({
         success: false,
@@ -21,47 +32,51 @@ export const GET: APIRoute = async ({ request, url }) => {
 
     console.log('📊 Obteniendo resumen de puntos para usuario:', userId);
 
-    // Obtener resumen de puntos por vendedor
-    const { data: summary, error: summaryError } = await supabase
-      .from('user_points')
-      .select(`
-        seller_id,
-        points
-      `)
-      .eq('user_id', userId)
-      .gt('points', 0); // Solo vendedores con puntos positivos
+    // Intentar obtener resumen de puntos por vendedor (con fallback)
+    let summary = [];
+    try {
+      const { data, error: summaryError } = await supabase
+        .from('user_points')
+        .select(`
+          seller_id,
+          points
+        `)
+        .eq('user_id', userId)
+        .gt('points', 0);
 
-    if (summaryError) {
-      console.error('Error obteniendo resumen:', summaryError);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Error obteniendo resumen de puntos'
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
+      if (summaryError) {
+        console.warn('⚠️ Error obteniendo user_points, usando datos vacíos:', summaryError);
+        summary = [];
+      } else {
+        summary = data || [];
+      }
+    } catch (error) {
+      console.warn('⚠️ Excepción obteniendo user_points, usando datos vacíos:', error);
+      summary = [];
     }
 
-    // Obtener estadísticas detalladas por vendedor
-    const { data: stats, error: statsError } = await supabase
-      .from('points_history')
-      .select(`
-        seller_id,
-        points_earned,
-        points_spent,
-        created_at
-      `)
-      .eq('user_id', userId);
+    // Intentar obtener estadísticas detalladas por vendedor (con fallback)
+    let stats = [];
+    try {
+      const { data, error: statsError } = await supabase
+        .from('points_history')
+        .select(`
+          seller_id,
+          points_earned,
+          points_spent,
+          created_at
+        `)
+        .eq('user_id', userId);
 
-    if (statsError) {
-      console.error('Error obteniendo estadísticas:', statsError);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Error obteniendo estadísticas de puntos'
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
+      if (statsError) {
+        console.warn('⚠️ Error obteniendo points_history, usando datos vacíos:', statsError);
+        stats = [];
+      } else {
+        stats = data || [];
+      }
+    } catch (error) {
+      console.warn('⚠️ Excepción obteniendo points_history, usando datos vacíos:', error);
+      stats = [];
     }
 
     // Procesar estadísticas por vendedor

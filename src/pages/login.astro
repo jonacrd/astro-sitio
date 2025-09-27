@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import LoginModal from '../components/react/LoginModal.tsx'
+---
+
+<BaseLayout title="Iniciar Sesión">
+  <main class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-900">¡Bienvenido de vuelta!</h2>
+        <p class="mt-2 text-gray-600">Inicia sesión en tu cuenta para continuar</p>
+      </div>
+
+      <!-- Modal de Login (se abre automáticamente) -->
+      <div id="login-modal-container">
+        <LoginModal client:load isOpen={true} onClose={() => window.history.back()} />
+      </div>
+
+      <!-- Información adicional -->
+      <div class="mt-8 text-center">
+        <p class="text-sm text-gray-600">
+          ¿No tienes cuenta? 
+          <a href="/register" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
+            Crear cuenta aquí
+          </a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Cerrar modal y volver atrás
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.querySelector('[data-component="LoginModal"]');
+      if (modal) {
+        // Configurar para cerrar modal y volver atrás
+        const closeModal = () => {
+          window.history.back();
+        };
+        
+        // Agregar listener para el botón de cerrar
+        window.addEventListener('message', (event) => {
+          if (event.data.type === 'CLOSE_LOGIN_MODAL') {
+            closeModal();
+          }
+        });
+      }
+    });
+  </script>
+</BaseLayout>
