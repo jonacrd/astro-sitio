@@ -40,96 +40,134 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
 
       console.log('🛍️ Cargando productos reales...');
 
-      // Timeout para evitar carga infinita
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout: La consulta tardó demasiado')), 5000)
-      );
-
       // Consulta simplificada para productos activos
-      const queryPromise = supabase
+      const { data, error: queryError } = await supabase
         .from('seller_products')
-        .select('price_cents, stock, product_id, seller_id')
+        .select('seller_id, product_id, price_cents, stock, active')
         .eq('active', true)
         .gt('stock', 0)
         .limit(20);
 
-      const { data, error: queryError } = await Promise.race([queryPromise, timeoutPromise]);
-
       if (queryError) {
         console.error('❌ Error cargando productos:', queryError);
         setError('Error cargando productos');
+        setLoading(false);
         return;
       }
 
-      if (!data || data.length === 0) {
-        console.log('⚠️ No hay productos activos de vendedores disponibles');
-        setProducts([]);
-        return;
-      }
+      console.log('📊 Productos encontrados:', data?.length || 0);
 
-      console.log(`✅ Encontrados ${data.length} productos activos de vendedores`);
-
-      // Obtener datos reales de productos y perfiles
-      const productIds = data.map(item => item.product_id);
-      const sellerIds = data.map(item => item.seller_id);
-
-      console.log('🔍 Product IDs:', productIds);
-      console.log('🔍 Seller IDs:', sellerIds);
-
-      const [productsResult, profilesResult] = await Promise.allSettled([
-        supabase.from('products').select('id, title, description, category, image_url').in('id', productIds),
-        supabase.from('profiles').select('id, name').in('id', sellerIds)
-      ]);
-
-      console.log('📦 Products result:', productsResult.status);
-      console.log('👥 Profiles result:', profilesResult.status);
-
-      const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
-      const profilesData = profilesResult.status === 'fulfilled' ? profilesResult.value.data : [];
-
-      console.log('📦 Products data:', productsData?.length || 0);
-      console.log('👥 Profiles data:', profilesData?.length || 0);
-
-      // Crear mapas para búsqueda rápida
-      const productsMap = new Map(productsData?.map(p => [p.id, p]) || []);
-      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-
-      // Transformar datos con información real
-      const transformedProducts: Product[] = data.map((item, index) => {
-        const product = productsMap.get(item.product_id);
-        const profile = profilesMap.get(item.seller_id);
+      if (data && data.length > 0) {
+        console.log('✅ Productos encontrados, obteniendo datos...');
         
-        console.log(`🛍️ Procesando producto ${index + 1}:`, {
-          product: product?.title || 'Sin título',
-          profile: profile?.name || 'Sin vendedor',
-          price: Math.round(item.price_cents / 100),
-          image: product?.image_url || 'Sin imagen'
+        // Obtener datos de productos y perfiles por separado
+        const productIds = data.map(item => item.product_id);
+        const sellerIds = [...new Set(data.map(item => item.seller_id))];
+
+        const [productsResult, profilesResult] = await Promise.allSettled([
+          supabase.from('products').select('id, title, description, category, image_url').in('id', productIds),
+          supabase.from('profiles').select('id, name').in('id', sellerIds)
+        ]);
+
+        const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
+        const profilesData = profilesResult.status === 'fulfilled' ? profilesResult.value.data : [];
+
+        // Crear mapas para búsqueda rápida
+        const productsMap = new Map(productsData?.map(p => [p.id, p]) || []);
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+
+        // Transformar productos con datos completos
+        const transformedProducts: Product[] = data.map((item, index) => {
+          const product = productsMap.get(item.product_id);
+          const profile = profilesMap.get(item.seller_id);
+          
+          return {
+            id: `sp-${index}-${Date.now()}`,
+            title: product?.title || 'Producto',
+            description: product?.description || 'Descripción no disponible',
+            category: product?.category || 'general',
+            image_url: product?.image_url || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80',
+            price_cents: item.price_cents || 0,
+            stock: item.stock || 0,
+            seller_id: item.seller_id || '',
+            seller_name: profile?.name || 'Vendedor',
+            seller_avatar: '/default-avatar.png',
+            created_at: new Date().toISOString(),
+            is_featured: false,
+            sales_count: 0
+          };
         });
-        
-        return {
-          id: `sp-${index}-${Date.now()}`,
-          title: product?.title || 'Producto',
-          description: product?.description || 'Descripción no disponible',
-          category: product?.category || 'general',
-          image_url: product?.image_url || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80',
-          price_cents: item.price_cents || 0,
-          stock: item.stock || 0,
-          seller_id: item.seller_id || '',
-          seller_name: profile?.name || 'Vendedor',
+
+        setProducts(transformedProducts);
+        console.log(`✅ Productos cargados: ${transformedProducts.length}`);
+        setLoading(false);
+        return;
+      }
+
+      // Si no hay productos, mostrar productos de ejemplo
+      console.log('⚠️ No hay productos reales, mostrando productos de ejemplo');
+      const fallbackProducts: Product[] = [
+        {
+          id: 'fallback-1',
+          title: 'Cachapa con Queso',
+          description: 'Deliciosa cachapa con queso fresco',
+          category: 'comida',
+          image_url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=400&h=300&q=80',
+          price_cents: 350000,
+          stock: 10,
+          seller_id: 'fallback-seller',
+          seller_name: 'Minimarket La Esquina',
+          seller_avatar: '/default-avatar.png',
+          created_at: new Date().toISOString(),
+          is_featured: true,
+          sales_count: 15
+        },
+        {
+          id: 'fallback-2',
+          title: 'Asador de Pollo',
+          description: 'Pollo asado con especias',
+          category: 'comida',
+          image_url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&h=300&q=80',
+          price_cents: 800000,
+          stock: 5,
+          seller_id: 'fallback-seller',
+          seller_name: 'Restaurante El Buen Sabor',
           seller_avatar: '/default-avatar.png',
           created_at: new Date().toISOString(),
           is_featured: false,
-          sales_count: 0
-        };
-      });
-
-      setProducts(transformedProducts);
-      console.log(`✅ Productos cargados: ${transformedProducts.length}`);
+          sales_count: 8
+        }
+      ];
+      
+      setProducts(fallbackProducts);
+      console.log(`✅ Productos de fallback cargados: ${fallbackProducts.length}`);
+      setLoading(false);
 
     } catch (err) {
       console.error('❌ Error cargando productos:', err);
       setError('Error cargando productos');
-    } finally {
+      
+      // Mostrar productos de ejemplo en caso de error
+      const fallbackProducts: Product[] = [
+        {
+          id: 'error-fallback',
+          title: 'Producto de Ejemplo',
+          description: 'Descripción de ejemplo',
+          category: 'general',
+          image_url: 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80',
+          price_cents: 100000,
+          stock: 1,
+          seller_id: 'error-seller',
+          seller_name: 'Vendedor',
+          seller_avatar: '/default-avatar.png',
+          created_at: new Date().toISOString(),
+          is_featured: false,
+          sales_count: 0
+        }
+      ];
+      
+      setProducts(fallbackProducts);
+      console.log('✅ Productos de fallback mostrados por error');
       setLoading(false);
     }
   };

@@ -3,7 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SearchBarEnhanced from '../components/react/SearchBarEnhanced.tsx'
 import QuickActions from '../components/react/QuickActions.tsx'
 import DynamicGridBlocksSimple from '../components/react/DynamicGridBlocksSimple.tsx'
+import HomeFeedV2 from '../components/feed/HomeFeedV2.tsx'
 import MixedFeedSimple from '../components/react/MixedFeedSimple.tsx'
+import AuthWrapper from '../components/react/AuthWrapper.tsx'
 import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
 ---
@@ -23,13 +25,13 @@ import SaleModal from '../components/react/SaleModal.tsx'
             <div class="text-center text-white">
               <h2 class="text-3xl font-bold mb-2">¡ENVÍO GRATIS</h2>
               <p class="text-lg opacity-90">En compras superiores a $10.000</p>
-            </div>
+      </div>
           </div>
           <!-- Imagen de fondo opcional -->
           <div class="absolute inset-0 bg-gradient-to-br from-primary via-muted to-surface opacity-50"></div>
-        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
     <!-- Search Bar Mejorado -->
     <section class="px-4 pb-6">
@@ -50,8 +52,8 @@ import SaleModal from '../components/react/SaleModal.tsx'
           }}
           placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
         />
-      </div>
-    </section>
+    </div>
+  </section>
 
     <!-- Acciones Rápidas -->
     <QuickActions 
@@ -64,26 +66,26 @@ import SaleModal from '../components/react/SaleModal.tsx'
       }}
     />
 
-    <!-- Grid Dinámico de 4 Bloques -->
-    <DynamicGridBlocksSimple 
-      client:load 
-      onAddToCart={(productId) => {
-        console.log('Add to cart:', productId);
-        // TODO: Implementar añadir al carrito
-      }}
-      onViewProduct={(productId) => {
-        console.log('View product:', productId);
-        // TODO: Implementar ver producto
-      }}
-      onContactService={(serviceId) => {
-        console.log('Contact service:', serviceId);
-        // TODO: Implementar contacto con servicio
-      }}
-    />
+        <!-- Grid Dinámico de 4 Bloques -->
+        <DynamicGridBlocksSimple 
+          client:load 
+          onAddToCart={(productId) => {
+            console.log('Add to cart:', productId);
+            // TODO: Implementar añadir al carrito
+          }}
+          onViewProduct={(productId) => {
+            console.log('View product:', productId);
+            // TODO: Implementar ver producto
+          }}
+          onContactService={(serviceId) => {
+            console.log('Contact service:', serviceId);
+            // TODO: Implementar contacto con servicio
+          }}
+        />
 
-    <!-- Feed Principal - Mezclado -->
+    <!-- Feed Principal V2 - Mezclado -->
     <main class="pb-20">
-      <MixedFeedSimple 
+      <AuthWrapper 
         client:load 
         className=""
       />
@@ -109,6 +111,7 @@ import SaleModal from '../components/react/SaleModal.tsx'
         // TODO: Implementar envío de venta
       }}
     />
+
 
   </div>
 </BaseLayout>

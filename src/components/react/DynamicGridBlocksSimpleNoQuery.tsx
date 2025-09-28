@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase-browser';
 import { useCart } from '../../hooks/useCart';
 
 interface RealProduct {
@@ -16,163 +15,96 @@ interface RealProduct {
   price_cents?: number;
 }
 
-interface DynamicGridBlocksSimpleProps {
+interface DynamicGridBlocksSimpleNoQueryProps {
   onAddToCart?: (productId: string) => void;
   onViewProduct?: (productId: string) => void;
   onContactService?: (serviceId: string) => void;
 }
 
-export default function DynamicGridBlocksSimple({ onAddToCart, onViewProduct, onContactService }: DynamicGridBlocksSimpleProps) {
+export default function DynamicGridBlocksSimpleNoQuery({ onAddToCart, onViewProduct, onContactService }: DynamicGridBlocksSimpleNoQueryProps) {
   const [products, setProducts] = useState<RealProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { addToCart, loading: cartLoading } = useCart();
 
   useEffect(() => {
-    loadRealProducts();
+    loadProducts();
   }, []);
 
-  const loadRealProducts = async () => {
+  const loadProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🛍️ Cargando productos reales desde DynamicGridBlocksSimple...');
+      console.log('🛍️ Cargando productos de ejemplo (SIN consultas a Supabase)...');
 
-      // Consulta simplificada para productos activos
-      const { data, error: queryError } = await supabase
-        .from('seller_products')
-        .select('seller_id, product_id, price_cents, stock, active')
-        .eq('active', true)
-        .gt('stock', 0)
-        .limit(4);
-
-      if (queryError) {
-        console.error('❌ Error cargando productos:', queryError);
-        setError('Error cargando productos');
-        setLoading(false);
-        return;
-      }
-
-      console.log('📊 Productos encontrados:', data?.length || 0);
-
-      if (data && data.length > 0) {
-        console.log('✅ Productos encontrados, obteniendo datos...');
-        
-        // Obtener datos de productos y perfiles por separado
-        const productIds = data.map(item => item.product_id);
-        const sellerIds = [...new Set(data.map(item => item.seller_id))];
-
-        const [productsResult, profilesResult] = await Promise.allSettled([
-          supabase.from('products').select('id, title, description, category, image_url').in('id', productIds),
-          supabase.from('profiles').select('id, name').in('id', sellerIds)
-        ]);
-
-        const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
-        const profilesData = profilesResult.status === 'fulfilled' ? profilesResult.value.data : [];
-
-        // Crear mapas para búsqueda rápida
-        const productsMap = new Map(productsData?.map(p => [p.id, p]) || []);
-        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-
-        // Transformar productos con datos completos
-        const realProducts: RealProduct[] = data.map((item, index) => {
-          const product = productsMap.get(item.product_id);
-          const profile = profilesMap.get(item.seller_id);
-          
-          return {
-            id: `real-${index}-${Date.now()}`,
-            media: [product?.image_url || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80'],
-            title: product?.title || 'Producto',
-            vendor: profile?.name || 'Vendedor',
-            price: Math.round(item.price_cents / 100),
-            badge: index === 0 ? 'Producto del Mes' : 
-                   index === 1 ? 'Oferta Especial' : 
-                   index === 2 ? 'Nuevo' : 'Servicio Premium',
-            hasSlider: index === 1,
-            ctaLabel: product?.category === 'servicios' ? 'Contactar' : 'Añadir al carrito',
-            productId: item.product_id,
-            sellerId: item.seller_id,
-            price_cents: item.price_cents
-          };
-        });
-
-        setProducts(realProducts);
-        console.log(`✅ Productos reales cargados: ${realProducts.length}`);
-        setLoading(false);
-        return;
-      }
-
-      // Si no hay productos, mostrar productos de ejemplo
-      console.log('⚠️ No hay productos reales, mostrando productos de ejemplo');
-      const fallbackProducts: RealProduct[] = [
+      // Productos de ejemplo estáticos - SIN consultas a Supabase
+      const exampleProducts: RealProduct[] = [
         {
-          id: 'cachapa-fallback',
-          media: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=400&h=300&q=80'],
-          title: 'Cachapa con Queso',
-          vendor: 'Minimarket La Esquina',
-          price: 3500,
+          id: 'example-1',
+          media: ['https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80'],
+          title: 'Cerveza Premium',
+          vendor: 'Bodega Central',
+          price: 15000,
           badge: 'Producto del Mes',
           hasSlider: false,
-          ctaLabel: 'Añadir al carrito'
+          ctaLabel: 'Añadir al carrito',
+          productId: 'example-1',
+          sellerId: 'example-seller',
+          price_cents: 1500000
         },
         {
-          id: 'asador-fallback',
-          media: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&h=300&q=80'],
-          title: 'Asador de Pollo',
+          id: 'example-2',
+          media: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?auto=format&fit=crop&w=400&h=300&q=80'],
+          title: 'Hamburguesa Especial',
           vendor: 'Restaurante El Buen Sabor',
-          price: 8000,
+          price: 25000,
           badge: 'Oferta Especial',
           hasSlider: true,
-          ctaLabel: 'Añadir al carrito'
+          ctaLabel: 'Añadir al carrito',
+          productId: 'example-2',
+          sellerId: 'example-seller',
+          price_cents: 2500000
         },
         {
-          id: 'powerbank-fallback',
-          media: ['https://images.unsplash.com/photo-1609592807900-4b0b4a0b4a0b?auto=format&fit=crop&w=400&h=300&q=80'],
-          title: 'Power Bank 10000mAh',
-          vendor: 'TechStore Local',
-          price: 15000,
+          id: 'example-3',
+          media: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=400&h=300&q=80'],
+          title: 'Pizza Margherita',
+          vendor: 'Pizzería Italiana',
+          price: 35000,
           badge: 'Nuevo',
           hasSlider: false,
-          ctaLabel: 'Ver más'
+          ctaLabel: 'Añadir al carrito',
+          productId: 'example-3',
+          sellerId: 'example-seller',
+          price_cents: 3500000
         },
         {
-          id: 'limpieza-fallback',
+          id: 'example-4',
           media: ['https://images.unsplash.com/photo-1581578731548-c6a0c3f2fcc0?auto=format&fit=crop&w=400&h=300&q=80'],
-          title: 'Limpieza Profesional',
+          title: 'Servicio de Limpieza',
           vendor: 'CleanPro Services',
-          price: 45000,
+          price: 50000,
           badge: 'Servicio Premium',
           hasSlider: false,
-          ctaLabel: 'Contactar'
+          ctaLabel: 'Contactar',
+          productId: 'example-4',
+          sellerId: 'example-seller',
+          price_cents: 5000000
         }
       ];
-      
-      setProducts(fallbackProducts);
-      console.log(`✅ Productos de fallback cargados: ${fallbackProducts.length}`);
+
+      // Simular carga rápida
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      setProducts(exampleProducts);
       setLoading(false);
+      console.log('✅ Productos de ejemplo cargados: 4');
 
     } catch (err) {
       console.error('❌ Error al cargar productos:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
-      
-      // Mostrar productos de ejemplo en caso de error
-      const fallbackProducts: RealProduct[] = [
-        {
-          id: 'error-fallback',
-          media: ['https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80'],
-          title: 'Producto de Ejemplo',
-          vendor: 'Vendedor',
-          price: 10000,
-          badge: 'Ejemplo',
-          hasSlider: false,
-          ctaLabel: 'Ver más'
-        }
-      ];
-      
-      setProducts(fallbackProducts);
-      console.log('✅ Productos de fallback mostrados por error');
-      setLoading(false);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
