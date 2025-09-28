@@ -74,44 +74,53 @@ export default function SellerStatusToggle() {
 
   if (!isInitialized) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600 text-sm">Cargando estado...</p>
-        </div>
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3">
-        Estado de Disponibilidad
-      </h3>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-          <span className="text-gray-700">
-            {isOnline ? 'Estoy disponible' : 'No disponible'}
-          </span>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+          <span className="text-white text-sm">🟢</span>
         </div>
+        <div>
+          <h3 className="text-white font-medium">Estado del Vendedor</h3>
+          <p className="text-gray-400 text-sm">
+            {isOnline ? 'Activo - Apareces primero en búsquedas' : 'Inactivo - Apareces después en búsquedas'}
+          </p>
+        </div>
+      </div>
+      
+      {/* Toggle Switch */}
+      <div className="flex items-center gap-2">
+        <span className={`text-sm font-medium ${!isOnline ? 'text-white' : 'text-gray-400'}`}>
+          {!isOnline ? 'OFF' : ''}
+        </span>
         
         <button
           onClick={handleToggle}
           disabled={loading}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            isOnline
-              ? 'bg-red-100 text-red-700 hover:bg-red-200'
-              : 'bg-green-100 text-green-700 hover:bg-green-200'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 ${
+            isOnline ? 'bg-green-500' : 'bg-gray-600'
+          } ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
-          {loading ? 'Actualizando...' : (isOnline ? 'Desactivar' : 'Activar')}
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+              isOnline ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
         </button>
+        
+        <span className={`text-sm font-medium ${isOnline ? 'text-white' : 'text-gray-400'}`}>
+          {isOnline ? 'ON' : ''}
+        </span>
       </div>
 
       {error && (
-        <div className="mt-3 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
+        <div className="mt-2 text-red-400 text-sm">
           {error}
         </div>
       )}

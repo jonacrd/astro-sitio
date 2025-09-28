@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { useCart } from '../../hooks/useCart';
 
 interface Product {
   id: string;
@@ -26,6 +27,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'featured' | 'cheapest' | 'popular'>('all');
+  const { addToCart, loading: cartLoading } = useCart();
 
   useEffect(() => {
     loadProducts();
@@ -38,20 +40,20 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
 
       console.log('🛍️ Cargando productos reales...');
 
-      // Consulta para productos activos de vendedores con stock
-      const { data, error: queryError } = await supabase
+      // Timeout para evitar carga infinita
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout: La consulta tardó demasiado')), 5000)
+      );
+
+      // Consulta simplificada para productos activos
+      const queryPromise = supabase
         .from('seller_products')
-        .select(`
-          price_cents,
-          stock,
-          active,
-          product_id,
-          seller_id
-        `)
+        .select('price_cents, stock, product_id, seller_id')
         .eq('active', true)
         .gt('stock', 0)
-        .order('price_cents', { ascending: false })
         .limit(20);
+
+      const { data, error: queryError } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (queryError) {
         console.error('❌ Error cargando productos:', queryError);
@@ -67,33 +69,49 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
 
       console.log(`✅ Encontrados ${data.length} productos activos de vendedores`);
 
-      // Obtener detalles de productos por separado
+      // Obtener datos reales de productos y perfiles
       const productIds = data.map(item => item.product_id);
       const sellerIds = data.map(item => item.seller_id);
+
+      console.log('🔍 Product IDs:', productIds);
+      console.log('🔍 Seller IDs:', sellerIds);
 
       const [productsResult, profilesResult] = await Promise.allSettled([
         supabase.from('products').select('id, title, description, category, image_url').in('id', productIds),
         supabase.from('profiles').select('id, name').in('id', sellerIds)
       ]);
 
+      console.log('📦 Products result:', productsResult.status);
+      console.log('👥 Profiles result:', profilesResult.status);
+
       const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
       const profilesData = profilesResult.status === 'fulfilled' ? profilesResult.value.data : [];
+
+      console.log('📦 Products data:', productsData?.length || 0);
+      console.log('👥 Profiles data:', profilesData?.length || 0);
 
       // Crear mapas para búsqueda rápida
       const productsMap = new Map(productsData?.map(p => [p.id, p]) || []);
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
 
-      // Transformar datos
+      // Transformar datos con información real
       const transformedProducts: Product[] = data.map((item, index) => {
         const product = productsMap.get(item.product_id);
         const profile = profilesMap.get(item.seller_id);
         
+        console.log(`🛍️ Procesando producto ${index + 1}:`, {
+          product: product?.title || 'Sin título',
+          profile: profile?.name || 'Sin vendedor',
+          price: Math.round(item.price_cents / 100),
+          image: product?.image_url || 'Sin imagen'
+        });
+        
         return {
           id: `sp-${index}-${Date.now()}`,
           title: product?.title || 'Producto',
-          description: product?.description || '',
-          category: product?.category || 'otros',
-          image_url: product?.image_url || '/default-product.png',
+          description: product?.description || 'Descripción no disponible',
+          category: product?.category || 'general',
+          image_url: product?.image_url || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80',
           price_cents: item.price_cents || 0,
           stock: item.stock || 0,
           seller_id: item.seller_id || '',
@@ -252,8 +270,32 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
                 </div>
                 <span className="text-sm text-gray-600">{product.seller_name}</span>
               </div>
-              <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                {product.category === 'servicios' ? 'Contactar' : 'Añadir al carrito'}
+              <button 
+                onClick={async () => {
+                  if (product.category === 'servicios') {
+                    console.log('Contactar servicio:', product.id);
+                  } else {
+                    // Agregar al carrito real
+                    const success = await addToCart(
+                      product.id,
+                      product.seller_id,
+                      product.title,
+                      product.price_cents,
+                      1,
+                      product.image_url
+                    );
+                    
+                    if (success) {
+                      console.log('✅ Producto agregado al carrito:', product.title);
+                    } else {
+                      console.error('❌ Error agregando al carrito:', product.title);
+                    }
+                  }
+                }}
+                disabled={cartLoading}
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {cartLoading ? 'Agregando...' : (product.category === 'servicios' ? 'Contactar' : 'Añadir al carrito')}
               </button>
             </div>
           </div>

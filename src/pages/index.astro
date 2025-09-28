@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import SearchBarAI from '../components/react/SearchBarAI.tsx'
+import SearchBarEnhanced from '../components/react/SearchBarEnhanced.tsx'
 import QuickActions from '../components/react/QuickActions.tsx'
 import DynamicGridBlocksSimple from '../components/react/DynamicGridBlocksSimple.tsx'
 import HomeFeedV2 from '../components/feed/HomeFeedV2.tsx'
@@ -33,15 +33,24 @@ import SaleModal from '../components/react/SaleModal.tsx'
     </div>
   </section>
 
-    <!-- Search Bar con IA -->
+    <!-- Search Bar Mejorado -->
     <section class="px-4 pb-6">
       <div class="max-w-7xl mx-auto">
-        <SearchBarAI 
+        <SearchBarEnhanced 
           client:load 
-          onSubmit={async (query) => {
-            console.log('🔍 Búsqueda IA:', query);
-            // La búsqueda se maneja internamente en SearchBarAI
+          onAddToCart={(productId, sellerId) => {
+            console.log('🛒 Añadir al carrito:', productId, sellerId);
+            // TODO: Implementar añadir al carrito
           }}
+          onViewProduct={(productId) => {
+            console.log('👁️ Ver producto:', productId);
+            // TODO: Implementar ver producto
+          }}
+          onViewSeller={(sellerId) => {
+            console.log('🏪 Ver vendedor:', sellerId);
+            // TODO: Implementar ver vendedor
+          }}
+          placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
         />
     </div>
   </section>

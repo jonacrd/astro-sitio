@@ -31,6 +31,11 @@ export default function ProductManagerEnhanced() {
   ]);
   const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [productPrice, setProductPrice] = useState('');
+  const [productStock, setProductStock] = useState('');
+  const [pendingProducts, setPendingProducts] = useState<Array<{product: Product, price: number, stock: number}>>([]);
 
   const categoryLabels = {
     supermercado: 'Abarrotes',
@@ -63,7 +68,7 @@ export default function ProductManagerEnhanced() {
       const { data, error } = await supabase
         .from('seller_products')
         .select(`
-          id,
+          seller_id,
           product_id,
           price_cents,
           stock,
@@ -77,7 +82,7 @@ export default function ProductManagerEnhanced() {
           )
         `)
         .eq('seller_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
@@ -124,44 +129,133 @@ export default function ProductManagerEnhanced() {
     }
   };
 
-  const handleAddProduct = async (product: Product) => {
+  const handleAddProduct = (product: Product) => {
+    // Verificar si el producto ya existe en productos pendientes
+    const existingPending = pendingProducts.find(p => p.product.id === product.id);
+    if (existingPending) {
+      alert('Este producto ya está en la lista de productos pendientes');
+      return;
+    }
+
+    // Verificar si el producto ya existe en la base de datos
+    const existingInDB = sellerProducts.find(sp => sp.product_id === product.id);
+    if (existingInDB) {
+      alert('Este producto ya está en tu tienda');
+      return;
+    }
+
+    // Agregar a productos pendientes
+    setPendingProducts(prev => [...prev, {
+      product,
+      price: 0,
+      stock: 0
+    }]);
+    
+    setSearchTerm('');
+    setSearchResults([]);
+    setShowSearchResults(false);
+  };
+
+  const handleConfigureProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setProductPrice('');
+    setProductStock('');
+    setShowConfigModal(true);
+  };
+
+  const handleSaveConfiguration = () => {
+    if (!selectedProduct) return;
+    
+    const price = Number(productPrice);
+    const stock = Number(productStock);
+    
+    if (isNaN(price) || price <= 0) {
+      alert('Precio inválido');
+      return;
+    }
+    
+    if (isNaN(stock) || stock <= 0) {
+      alert('Stock inválido');
+      return;
+    }
+
+    // Actualizar el producto en la lista pendiente
+    setPendingProducts(prev => 
+      prev.map(p => 
+        p.product.id === selectedProduct.id 
+          ? { ...p, price, stock }
+          : p
+      )
+    );
+
+    setShowConfigModal(false);
+    setSelectedProduct(null);
+    setProductPrice('');
+    setProductStock('');
+  };
+
+  const handleSaveAllProducts = async () => {
+    if (pendingProducts.length === 0) {
+      alert('No hay productos para guardar');
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Verificar si el producto ya existe
-      const { data: existing } = await supabase
-        .from('seller_products')
-        .select('id')
-        .eq('seller_id', user.id)
-        .eq('product_id', product.id)
-        .single();
+      setLoading(true);
 
-      if (existing) {
-        alert('Este producto ya está en tu tienda');
+      // Verificar productos existentes antes de insertar
+      const productIds = pendingProducts.map(p => p.product.id);
+      const { data: existingProducts, error: checkError } = await supabase
+        .from('seller_products')
+        .select('product_id')
+        .eq('seller_id', user.id)
+        .in('product_id', productIds);
+
+      if (checkError) throw checkError;
+
+      const existingProductIds = new Set(existingProducts?.map(p => p.product_id) || []);
+      const newProducts = pendingProducts.filter(p => !existingProductIds.has(p.product.id));
+
+      if (newProducts.length === 0) {
+        alert('Todos los productos ya están en tu tienda');
+        setPendingProducts([]);
         return;
       }
 
+      // Guardar solo los productos nuevos
+      const productsToInsert = newProducts.map(p => ({
+        seller_id: user.id,
+        product_id: p.product.id,
+        price_cents: p.price * 100,
+        stock: p.stock,
+        active: true
+      }));
+
       const { error } = await supabase
         .from('seller_products')
-        .insert({
-          seller_id: user.id,
-          product_id: product.id,
-          price_cents: 0,
-          stock: 0,
-          active: false
-        });
+        .insert(productsToInsert);
 
       if (error) throw error;
 
+      // Limpiar productos pendientes
+      setPendingProducts([]);
       await loadData();
-      setShowAddModal(false);
-      setSearchTerm('');
-      setSearchResults([]);
-      setShowSearchResults(false);
+      
+      const skippedCount = pendingProducts.length - newProducts.length;
+      let message = `${productsToInsert.length} productos agregados exitosamente a tu tienda`;
+      if (skippedCount > 0) {
+        message += ` (${skippedCount} productos ya existían)`;
+      }
+      alert(message);
 
     } catch (error) {
-      console.error('❌ Error agregando producto:', error);
+      console.error('❌ Error guardando productos:', error);
+      alert('Error guardando productos: ' + (error as any).message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -181,7 +275,8 @@ export default function ProductManagerEnhanced() {
           stock: stock,
           active: active
         })
-        .eq('id', editingProduct.id);
+        .eq('seller_id', editingProduct.seller_id)
+        .eq('product_id', editingProduct.product_id);
 
       if (error) throw error;
 
@@ -199,7 +294,8 @@ export default function ProductManagerEnhanced() {
       const { error } = await supabase
         .from('seller_products')
         .update({ active: !product.active })
-        .eq('id', product.id);
+        .eq('seller_id', product.seller_id)
+        .eq('product_id', product.product_id);
 
       if (error) throw error;
 
@@ -409,6 +505,148 @@ export default function ProductManagerEnhanced() {
                 className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sección de productos pendientes */}
+      {pendingProducts.length > 0 && (
+        <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4 mb-6">
+          <h3 className="text-lg font-semibold text-yellow-400 mb-4">
+            📋 Productos pendientes de configuración ({pendingProducts.length})
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pendingProducts.map((pendingProduct) => (
+              <div key={pendingProduct.product.id} className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={pendingProduct.product.image_url}
+                    alt={pendingProduct.product.title}
+                    className="w-12 h-12 object-cover rounded"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <h4 className="text-white font-medium">{pendingProduct.product.title}</h4>
+                    <p className="text-gray-400 text-sm">{pendingProduct.product.category}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mb-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Precio:</span>
+                    <span className="text-white font-medium">
+                      {pendingProduct.price > 0 
+                        ? `$${pendingProduct.price.toLocaleString('es-CL')}`
+                        : 'No configurado'
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Stock:</span>
+                    <span className="text-white font-medium">
+                      {pendingProduct.stock > 0 ? pendingProduct.stock : 'No configurado'}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleConfigureProduct(pendingProduct.product)}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {pendingProduct.price > 0 && pendingProduct.stock > 0 ? 'Editar' : 'Configurar'}
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={handleSaveAllProducts}
+              disabled={pendingProducts.some(p => p.price <= 0 || p.stock <= 0)}
+              className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+            >
+              💾 Guardar todos los productos ({pendingProducts.length})
+            </button>
+            <button
+              onClick={() => setPendingProducts([])}
+              className="bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              🗑️ Limpiar lista
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de configuración */}
+      {showConfigModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Configurar {selectedProduct.title}
+            </h3>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={selectedProduct.image_url}
+                alt={selectedProduct.title}
+                className="w-16 h-16 object-cover rounded"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+              <div>
+                <h4 className="text-white font-medium">{selectedProduct.title}</h4>
+                <p className="text-gray-400 text-sm">{selectedProduct.category}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">Precio (en pesos)</label>
+                <input
+                  type="number"
+                  value={productPrice}
+                  onChange={(e) => setProductPrice(e.target.value)}
+                  placeholder="Ej: 15000"
+                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">Cantidad en stock</label>
+                <input
+                  type="number"
+                  value={productStock}
+                  onChange={(e) => setProductStock(e.target.value)}
+                  placeholder="Ej: 50"
+                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => {
+                  setShowConfigModal(false);
+                  setSelectedProduct(null);
+                  setProductPrice('');
+                  setProductStock('');
+                }}
+                className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSaveConfiguration}
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Guardar
               </button>
             </div>
           </div>

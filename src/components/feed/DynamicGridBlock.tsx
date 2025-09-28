@@ -15,12 +15,7 @@ type Item = {
 type Props = {
   items: Item[];           // al menos 4
   pattern?: ("tall"|"short")[]; 
-  // default: ["tall","tall","short","tall"]  // <- patrón asimétrico
-};
-
-const STYLE = { 
-  tall: "aspect-[4/5]", 
-  short: "aspect-[4/3]" 
+  // default: ["tall","short","short","tall"]  // <- patrón asimétrico
 };
 
 export default function DynamicGridBlock({ items, pattern }: Props) {
@@ -28,8 +23,8 @@ export default function DynamicGridBlock({ items, pattern }: Props) {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const sliderRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Patrón asimétrico por defecto
-  const defaultPattern: ("tall"|"short")[] = ["tall", "tall", "short", "tall"];
+  // Patrón asimétrico por defecto - exacto como en las imágenes
+  const defaultPattern: ("tall"|"short")[] = ["tall", "short", "short", "tall"];
   const layout = (pattern ?? defaultPattern)
     .concat(Array(Math.max(0, items.length - 4)).fill("tall")); // el resto alto por defecto
 
@@ -171,139 +166,145 @@ export default function DynamicGridBlock({ items, pattern }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-[480px] px-4">
-      <section className="grid grid-cols-2 gap-3 [grid-auto-flow:dense]">
-        {items.slice(0, 4).map((item, i) => (
-          <article 
-            key={item.id} 
-            className={`relative ${STYLE[layout[i]]} rounded-2xl overflow-hidden ring-1 ring-white/5 shadow-lg bg-[#101828] transition-transform duration-200 will-change-transform hover:scale-[1.015]`}
-            onMouseEnter={() => setIsAutoPlaying(false)}
-            onMouseLeave={() => setIsAutoPlaying(true)}
-          >
-            {/* Media (imagen o slider) */}
-            <div className="absolute inset-0 w-full h-full">
-              {item.hasSlider && item.media.length > 1 ? (
-                <div className="relative w-full h-full">
-                  <div
-                    ref={el => sliderRefs.current[item.id] = el}
-                    className="flex transition-transform duration-500 ease-in-out h-full"
-                    style={{ 
-                      transform: `translateX(-${(currentSlides[item.id] || 0) * 100}%)` 
-                    }}
-                  >
-                    {item.media.map((media, mediaIndex) => (
-                      <div key={mediaIndex} className="w-full h-full flex-shrink-0">
-                        {media.includes('.mp4') || media.includes('.webm') ? (
-                          <video
-                            src={media}
-                            className="w-full h-full object-cover saturate-[1.05] contrast-[1.05]"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
-                        ) : (
-                          <img
-                            src={media}
-                            alt={`${item.title} - ${mediaIndex + 1}`}
-                            className="w-full h-full object-cover saturate-[1.05] contrast-[1.05]"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Navegación del slider */}
-                  <button
-                    onClick={() => prevSlide(item.id, item.media.length)}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors text-sm"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    onClick={() => nextSlide(item.id, item.media.length)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors text-sm"
-                  >
-                    ›
-                  </button>
-
-                  {/* Dots del slider */}
-                  <div className="absolute right-3 bottom-3 flex gap-1">
-                    {item.media.map((_, dotIndex) => (
-                      <button
-                        key={dotIndex}
-                        onClick={() => setCurrentSlides(prev => ({ ...prev, [item.id]: dotIndex }))}
-                        className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                          (currentSlides[item.id] || 0) === dotIndex ? 'bg-white' : 'bg-white/30'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {item.media[0]?.includes('.mp4') || item.media[0]?.includes('.webm') ? (
-                    <video
-                      src={item.media[0]}
-                      className="w-full h-full object-cover saturate-[1.05] contrast-[1.05]"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    />
-                  ) : (
-                    <img
-                      src={item.media[0] || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80'}
-                      alt={item.title}
-                      className="w-full h-full object-cover saturate-[1.05] contrast-[1.05]"
-                    />
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Badge */}
-            {item.badge && (
-              <div className="absolute top-3 left-3 rounded-full h-8 px-3 bg-red-600/90 text-white text-sm font-semibold flex items-center">
-                {item.badge}
-              </div>
-            )}
-
-            {/* Overlay inferior */}
-            <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-              <h3 className="text-white text-xl font-semibold leading-tight line-clamp-2 mb-1">
-                {item.title}
-              </h3>
-              {item.vendor && (
-                <p className="text-white/80 text-sm mb-1">{item.vendor}</p>
-              )}
-              {item.price && (
-                <p className="text-white text-2xl font-extrabold mt-1">
-                  {formatPrice(item.price)}
-                </p>
-              )}
-            </div>
-
-            {/* CTA Button */}
-            <button
-              onClick={() => {
-                if (item.ctaLabel?.includes('carrito')) {
-                  handleAddToCart(item.id);
-                } else if (item.ctaLabel?.includes('Contactar')) {
-                  handleContactService(item.id);
-                } else {
-                  handleViewProduct(item.id);
-                }
-              }}
-              className="absolute left-3 bottom-3 rounded-full px-4 h-10 bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-500 active:scale-95 transition"
+    <div className="w-full max-w-[400px] mx-auto px-2">
+      {/* MOSAICO 2x2 CON DIFERENTES ALTURAS - BLOQUES PEQUEÑOS */}
+      <div className="grid grid-cols-2 gap-2">
+        {items.slice(0, 4).map((item, i) => {
+          const isTall = layout[i] === 'tall';
+          const isShort = layout[i] === 'short';
+          
+          return (
+            <div
+              key={item.id}
+              className={`relative rounded-xl overflow-hidden shadow-lg transition-transform duration-200 hover:scale-[1.015] ${
+                isTall ? 'aspect-[3/4]' : 'aspect-[4/3]'
+              }`}
+              onMouseEnter={() => setIsAutoPlaying(false)}
+              onMouseLeave={() => setIsAutoPlaying(true)}
             >
-              {item.ctaLabel || 'Ver más'}
-            </button>
-          </article>
-        ))}
-      </section>
+              {/* IMAGEN CUBRE TODO EL BLOQUE */}
+              <div className="absolute inset-0 w-full h-full">
+                {item.hasSlider && item.media.length > 1 ? (
+                  <div className="relative w-full h-full">
+                    <div
+                      ref={el => sliderRefs.current[item.id] = el}
+                      className="flex transition-transform duration-500 ease-in-out h-full"
+                      style={{ 
+                        transform: `translateX(-${(currentSlides[item.id] || 0) * 100}%)` 
+                      }}
+                    >
+                      {item.media.map((media, mediaIndex) => (
+                        <div key={mediaIndex} className="w-full h-full flex-shrink-0">
+                          {media.includes('.mp4') || media.includes('.webm') ? (
+                            <video
+                              src={media}
+                              className="w-full h-full object-cover"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                            />
+                          ) : (
+                            <img
+                              src={media}
+                              alt={`${item.title} - ${mediaIndex + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Navegación del slider */}
+                    <button
+                      onClick={() => prevSlide(item.id, item.media.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors text-sm"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => nextSlide(item.id, item.media.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-colors text-sm"
+                    >
+                      ›
+                    </button>
+
+                    {/* Dots del slider */}
+                    <div className="absolute right-3 bottom-3 flex gap-1">
+                      {item.media.map((_, dotIndex) => (
+                        <button
+                          key={dotIndex}
+                          onClick={() => setCurrentSlides(prev => ({ ...prev, [item.id]: dotIndex }))}
+                          className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                            (currentSlides[item.id] || 0) === dotIndex ? 'bg-white' : 'bg-white/30'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {item.media[0]?.includes('.mp4') || item.media[0]?.includes('.webm') ? (
+                      <video
+                        src={item.media[0]}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={item.media[0] || 'https://images.unsplash.com/photo-1513104890138-e1f88ed010f5?auto=format&fit=crop&w=400&h=300&q=80'}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Badge */}
+              {item.badge && (
+                <div className="absolute top-2 left-2 rounded-full h-6 px-2 bg-red-600/90 text-white text-xs font-semibold flex items-center">
+                  {item.badge}
+                </div>
+              )}
+
+              {/* Overlay inferior */}
+              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                <h3 className="text-white text-sm font-semibold leading-tight line-clamp-1 mb-1">
+                  {item.title}
+                </h3>
+                {item.vendor && (
+                  <p className="text-white/80 text-xs mb-1">{item.vendor}</p>
+                )}
+                {item.price && (
+                  <p className="text-white text-lg font-extrabold mt-1">
+                    {formatPrice(item.price)}
+                  </p>
+                )}
+              </div>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => {
+                  if (item.ctaLabel?.includes('carrito')) {
+                    handleAddToCart(item.id);
+                  } else if (item.ctaLabel?.includes('Contactar')) {
+                    handleContactService(item.id);
+                  } else {
+                    handleViewProduct(item.id);
+                  }
+                }}
+                className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition"
+              >
+                {item.ctaLabel || 'Ver más'}
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
-
-
