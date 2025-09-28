@@ -54,7 +54,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
           console.log('✅ Login exitoso:', data.user.email);
           // Éxito
           onSuccess?.();
-          onClose();
+          if (onClose) {
+            onClose();
+          }
         }
       } else {
         // Registro
@@ -100,7 +102,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
 
           // Éxito
           onSuccess?.();
-          onClose();
+          if (onClose) {
+            onClose();
+          }
         }
       }
     } catch (error) {

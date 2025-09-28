@@ -2,12 +2,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SearchBarAI from '../components/react/SearchBarAI.tsx'
 import QuickActions from '../components/react/QuickActions.tsx'
-import DynamicGridBlocks from '../components/react/DynamicGridBlocks.tsx'
+import DynamicGridBlocksSimple from '../components/react/DynamicGridBlocksSimple.tsx'
 import HomeFeedV2 from '../components/feed/HomeFeedV2.tsx'
+import MixedFeedSimple from '../components/react/MixedFeedSimple.tsx'
+import AuthWrapper from '../components/react/AuthWrapper.tsx'
 import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
-import BottomNavAuth from '../components/react/BottomNavAuth.tsx'
-import Header from '../components/react/Header.tsx'
 ---
 
 <BaseLayout 
@@ -16,8 +16,6 @@ import Header from '../components/react/Header.tsx'
 >
   <link rel="stylesheet" href="/src/styles/feed-animations.css" />
   <div class="min-h-screen bg-primary">
-    <!-- Header con Funcionalidad -->
-    <Header client:load />
 
     <!-- Banner Promocional -->
     <section class="px-4 py-6">
@@ -60,7 +58,7 @@ import Header from '../components/react/Header.tsx'
     />
 
     <!-- Grid Dinámico de 4 Bloques -->
-    <DynamicGridBlocks 
+    <DynamicGridBlocksSimple 
       client:load 
       onAddToCart={(productId) => {
         console.log('Add to cart:', productId);
@@ -78,32 +76,9 @@ import Header from '../components/react/Header.tsx'
 
     <!-- Feed Principal V2 - Mezclado -->
     <main class="pb-20">
-      <HomeFeedV2 
+      <AuthWrapper 
         client:load 
-        onAddToCart={(productId) => {
-          console.log('Add to cart:', productId);
-          // TODO: Implementar añadir al carrito
-        }}
-        onViewProduct={(productId) => {
-          console.log('View product:', productId);
-          // TODO: Implementar ver producto
-        }}
-        onContactExpress={(postId, contactMethod, contactValue) => {
-          console.log('Contact express:', { postId, contactMethod, contactValue });
-          // TODO: Implementar contacto con express post
-        }}
-        onViewExpress={(postId) => {
-          console.log('View express:', postId);
-          // TODO: Implementar ver express post
-        }}
-        onViewQuestion={(questionId) => {
-          console.log('View question:', questionId);
-          // TODO: Implementar ver pregunta
-        }}
-        onAnswerQuestion={(questionId) => {
-          console.log('Answer question:', questionId);
-          // TODO: Implementar responder pregunta
-        }}
+        className=""
       />
     </main>
 
@@ -129,14 +104,6 @@ import Header from '../components/react/Header.tsx'
     />
 
 
-    <!-- Bottom Navigation -->
-    <BottomNavAuth 
-      client:load 
-      role="buyer" 
-      notifications={3} 
-      orders={0} 
-      rewards={50} 
-    />
   </div>
 </BaseLayout>
 

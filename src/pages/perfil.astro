@@ -3,189 +3,186 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import NotificationsWidget from '../components/react/NotificationsWidget.tsx'
 import UserPoints from '../components/react/UserPoints.tsx'
 import OrderHistory from '../components/react/OrderHistory.tsx'
-import BottomNav from '../components/react/BottomNav.tsx'
 import { getUser, getUserProfile } from '../lib/session'
 ---
 
 <BaseLayout title="Mi Perfil">
-  <main class="min-h-screen bg-gray-50 pb-20">
+  <main class="min-h-screen bg-gray-900 pb-20">
     <div class="container mx-auto px-4 py-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Mi Perfil</h1>
-        <p class="text-gray-600">Gestiona tu cuenta, notificaciones y puntos</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Notificaciones -->
-        <div>
-          <NotificationsWidget client:load />
-        </div>
-
-        <!-- Puntos -->
-        <div>
-          <UserPoints client:load />
-        </div>
-      </div>
-
-      <!-- Acciones rápidas -->
-      <div class="mt-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Acciones Rápidas</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a 
-              href="/mis-pedidos" 
-              class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-center"
-            >
-              📦 Mis Pedidos
-            </a>
-            <a 
-              href="/dashboard/vendedor" 
-              class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors text-center"
-            >
-              🏪 Mi Tienda
-            </a>
+      <!-- Header del perfil -->
+      <div class="text-center mb-8">
+        <!-- Foto de perfil -->
+        <div class="relative inline-block mb-4">
+          <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto overflow-hidden">
+            <img id="profile-avatar" src="/default-avatar.png" alt="Avatar" class="w-full h-full object-cover rounded-full" />
           </div>
+          <button class="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
         </div>
-      </div>
-
-      <!-- Historial de puntos -->
-      <div class="mt-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Historial de Puntos</h2>
-          <div id="points-history-container">
-            <div class="text-center py-8">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p class="text-gray-600">Cargando historial de puntos...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Historial de pedidos -->
-      <div class="mt-8">
-        <OrderHistory client:load userType="buyer" />
-      </div>
-
-      <!-- Información del perfil -->
-      <div class="mt-8">
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Información del Perfil</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-              <p class="text-gray-900" id="profile-name">Cargando...</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-              <p class="text-gray-900" id="profile-phone">Cargando...</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <p class="text-gray-900" id="profile-email">Cargando...</p>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de cuenta</label>
-              <p class="text-gray-900" id="profile-type">Cargando...</p>
-            </div>
-          </div>
-        </div>
+        
+        <!-- Nombre y rol -->
+        <h1 id="profile-name" class="text-2xl font-bold text-white mb-1">Cargando...</h1>
+        <p id="profile-role" class="text-gray-400">Cargando...</p>
+        
+        <!-- Configuración -->
+        <button class="absolute top-4 right-4 w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
       </div>
 
       <!-- Panel de vendedor (solo para vendedores) -->
-      <div id="seller-panel" class="mt-8 hidden">
-        <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-          <div class="flex items-center justify-between mb-6">
+      <div id="seller-panel" class="hidden">
+        <!-- Resumen de ventas -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-4">Resumen de Ventas</h2>
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-gray-400">Ventas del día</span>
+            <span id="daily-sales" class="text-2xl font-bold text-white">$0</span>
+          </div>
+          <div class="border-t border-gray-700 pt-4">
+            <div class="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div class="text-2xl font-bold text-white" id="total-orders">0</div>
+                <div class="text-sm text-gray-400">Órdenes</div>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-yellow-500" id="pending-orders">0</div>
+                <div class="text-sm text-gray-400">Pendientes</div>
+              </div>
+              <div>
+                <div class="text-2xl font-bold text-green-500" id="completed-orders">0</div>
+                <div class="text-sm text-gray-400">Completadas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones de vendedor -->
+        <div class="space-y-3">
+          <a href="/dashboard/mis-productos" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <span class="text-white font-medium">Administrar productos</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+
+          <a href="/dashboard/pedidos" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+              <span class="text-white font-medium">Mis órdenes</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+
+          <a href="/dashboard" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span class="text-white font-medium">Ventas Express</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+
+          <a href="/dashboard/recompensas" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <span class="text-white font-medium">Retirar fondos</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Panel de comprador (solo para compradores) -->
+      <div id="buyer-panel" class="hidden">
+        <!-- Resumen de compras -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-4">Mis Compras</h2>
+          <div class="grid grid-cols-2 gap-4 text-center">
             <div>
-              <h2 class="text-2xl font-bold">Panel de Vendedor</h2>
-              <p class="text-green-100">Gestiona tu negocio y ventas</p>
+              <div class="text-2xl font-bold text-white" id="total-purchases">0</div>
+              <div class="text-sm text-gray-400">Compras</div>
             </div>
-            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+            <div>
+              <div class="text-2xl font-bold text-yellow-500" id="total-points">0</div>
+              <div class="text-sm text-gray-400">Puntos</div>
             </div>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Dashboard -->
-            <a href="/dashboard/vendedor" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Dashboard</h3>
-              </div>
-              <p class="text-sm text-green-100">Gestiona tu inventario y productos</p>
-            </a>
+        </div>
 
-            <!-- Pedidos -->
-            <a href="/dashboard/pedidos" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Pedidos</h3>
+        <!-- Acciones de comprador -->
+        <div class="space-y-3">
+          <a href="/mis-pedidos" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
               </div>
-              <p class="text-sm text-green-100">Revisa y gestiona tus pedidos</p>
-            </a>
+              <span class="text-white font-medium">Mis pedidos</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
 
-            <!-- Productos -->
-            <a href="/dashboard/mis-productos" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Mis Productos</h3>
+          <a href="/perfil" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
               </div>
-              <p class="text-sm text-green-100">Administra tu catálogo de productos</p>
-            </a>
+              <span class="text-white font-medium">Mis puntos</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
 
-            <!-- Estadísticas -->
-            <a href="/dashboard/estadisticas" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Estadísticas</h3>
+          <a href="/perfil" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               </div>
-              <p class="text-sm text-green-100">Analiza tus ventas y rendimiento</p>
-            </a>
-
-            <!-- Configuración -->
-            <a href="/dashboard/configuracion" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Configuración</h3>
-              </div>
-              <p class="text-sm text-green-100">Ajusta tu tienda y preferencias</p>
-            </a>
-
-            <!-- Ayuda -->
-            <a href="/dashboard/ayuda" class="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-200 group">
-              <div class="flex items-center space-x-3 mb-2">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold">Ayuda</h3>
-              </div>
-              <p class="text-sm text-green-100">Guías y soporte para vendedores</p>
-            </a>
-          </div>
+              <span class="text-white font-medium">Mis datos</span>
+            </div>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
@@ -193,9 +190,6 @@ import { getUser, getUserProfile } from '../lib/session'
 
   <script>
     import { supabase } from '../lib/supabase-browser';
-    import { createElement } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import PointsHistory from '../components/react/PointsHistory.tsx';
 
     // Cargar información del perfil
     async function loadProfile() {
@@ -218,44 +212,88 @@ import { getUser, getUserProfile } from '../lib/session'
           return;
         }
 
-        // Actualizar información en la página
-        document.getElementById('profile-name').textContent = profile.name || 'No especificado';
-        document.getElementById('profile-phone').textContent = profile.phone || 'No especificado';
-        document.getElementById('profile-email').textContent = user.email || 'No especificado';
-        document.getElementById('profile-type').textContent = profile.is_seller ? 'Vendedor' : 'Comprador';
+        // Actualizar información básica
+        document.getElementById('profile-name').textContent = profile.name || 'Usuario';
+        document.getElementById('profile-role').textContent = profile.is_seller ? 'Vendedor' : 'Comprador';
         
-        // Mostrar panel de vendedor si es vendedor
-        const sellerPanel = document.getElementById('seller-panel');
-        if (profile.is_seller && sellerPanel) {
-          sellerPanel.classList.remove('hidden');
+        // Mostrar panel según el tipo de usuario
+        if (profile.is_seller) {
+          document.getElementById('seller-panel').classList.remove('hidden');
+          await loadSellerData(user.id);
+        } else {
+          document.getElementById('buyer-panel').classList.remove('hidden');
+          await loadBuyerData(user.id);
         }
 
-        // Cargar historial de puntos
-        loadPointsHistory(user.id);
       } catch (error) {
         console.error('Error cargando perfil:', error);
       }
     }
 
-    async function loadPointsHistory(userId) {
+    // Cargar datos específicos del vendedor
+    async function loadSellerData(sellerId) {
       try {
-        // Renderizar componente de historial de puntos
-        const container = document.getElementById('points-history-container');
-        if (container) {
-          container.innerHTML = '';
-          const root = createRoot(container);
-          root.render(createElement(PointsHistory, { userId: userId }));
+        // Ventas del día
+        const today = new Date().toISOString().split('T')[0];
+        const { data: todayOrders, error: todayError } = await supabase
+          .from('orders')
+          .select('total_cents, status')
+          .eq('seller_id', sellerId)
+          .gte('created_at', `${today}T00:00:00`)
+          .in('status', ['completed', 'seller_confirmed']);
+
+        if (!todayError && todayOrders) {
+          const todaySales = todayOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
+          document.getElementById('daily-sales').textContent = `$${(todaySales / 100).toFixed(0)}`;
         }
+
+        // Total de órdenes
+        const { data: totalOrders, error: totalError } = await supabase
+          .from('orders')
+          .select('id, status')
+          .eq('seller_id', sellerId);
+
+        if (!totalError && totalOrders) {
+          document.getElementById('total-orders').textContent = totalOrders.length.toString();
+          
+          const pending = totalOrders.filter(o => o.status === 'placed' || o.status === 'seller_confirmed').length;
+          const completed = totalOrders.filter(o => o.status === 'completed').length;
+          
+          document.getElementById('pending-orders').textContent = pending.toString();
+          document.getElementById('completed-orders').textContent = completed.toString();
+        }
+
       } catch (error) {
-        console.error('Error cargando historial de puntos:', error);
-        const container = document.getElementById('points-history-container');
-        if (container) {
-          container.innerHTML = `
-            <div class="text-center py-8">
-              <p class="text-red-600">Error cargando historial de puntos</p>
-            </div>
-          `;
+        console.error('Error cargando datos del vendedor:', error);
+      }
+    }
+
+    // Cargar datos específicos del comprador
+    async function loadBuyerData(buyerId) {
+      try {
+        // Total de compras
+        const { data: purchases, error: purchasesError } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('buyer_id', buyerId);
+
+        if (!purchasesError && purchases) {
+          document.getElementById('total-purchases').textContent = purchases.length.toString();
         }
+
+        // Total de puntos
+        const { data: points, error: pointsError } = await supabase
+          .from('user_points')
+          .select('points')
+          .eq('user_id', buyerId);
+
+        if (!pointsError && points) {
+          const totalPoints = points.reduce((sum, p) => sum + (p.points || 0), 0);
+          document.getElementById('total-points').textContent = totalPoints.toString();
+        }
+
+      } catch (error) {
+        console.error('Error cargando datos del comprador:', error);
       }
     }
 
@@ -264,5 +302,4 @@ import { getUser, getUserProfile } from '../lib/session'
   </script>
 
   <!-- Bottom Navigation -->
-  <BottomNav client:load role="buyer" notifications={0} orders={0} rewards={0} />
 </BaseLayout>

@@ -1,501 +1,446 @@
 ---
-import BaseLayout from '@/layouts/BaseLayout.astro'
-import { repos } from '@lib/repos'
-
-// Para el sistema mock, usamos un vendedor por defecto
-const MOCK_SELLER_ID = 's1' // Carnes del Zulia
-const MOCK_USER = { id: 'mock-user', role: 'SELLER', name: 'Vendedor Demo' }
-
-// Obtener inventario del vendedor mock
-let inventory = []
-try {
-  const rows = await repos.inventory.list(MOCK_SELLER_ID)
-  inventory = rows.map(sp => ({
-    id: sp.id,
-    productId: sp.productId,
-    stock: sp.stock,
-    active: sp.active,
-    title: sp.product.title,
-    imageUrl: sp.product.imageUrl,
-    category: sp.product.category,
-    priceCents: sp.product.priceCents,
-    discountCents: sp.product.discountCents || 0,
-  }))
-} catch (error) {
-  console.error('Error loading inventory:', error)
-  // Inventario de respaldo si hay error
-  inventory = [
-    { id: 'sp_s1_jamon', productId: 'p_jamon_serrano', stock: 15, active: true, title: 'Jamón Serrano 200g', category: 'fiambres', priceCents: 4500, discountCents: 0 },
-    { id: 'sp_s1_salchichon', productId: 'p_salchichon', stock: 12, active: true, title: 'Salchichón Español', category: 'fiambres', priceCents: 3200, discountCents: 0 },
-    { id: 'sp_s1_chorizo', productId: 'p_chorizo_parrilla', stock: 20, active: true, title: 'Chorizo para Parrilla', category: 'carnes', priceCents: 2800, discountCents: 0 },
-    { id: 'sp_s1_pollo', productId: 'p_pollo_entero', stock: 8, active: true, title: 'Pollo Entero 1.5kg', category: 'pollos', priceCents: 4200, discountCents: 0 },
-    { id: 'sp_s1_pechuga', productId: 'p_pechuga_pollo', stock: 10, active: true, title: 'Pechuga de Pollo 1kg', category: 'pollos', priceCents: 3800, discountCents: 0 },
-  ]
-}
+import BaseLayout from '../layouts/BaseLayout.astro'
 ---
 
-<BaseLayout title="Dashboard - Gestión de Inventario">
-  <div class="min-h-screen bg-gray-50 py-8">
+<BaseLayout title="Dashboard Vendedor">
+  <div class="min-h-screen bg-gray-900 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Dashboard Multi-Vendedor</h1>
-        <p class="mt-2 text-gray-600">
-          {MOCK_USER.role === 'ADMIN' ? 'Panel de administración' : 'Gestión de tu inventario y ventas'}
-        </p>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+            </svg>
+          </div>
+          <h1 class="text-3xl font-bold text-white">Dashboard Vendedor</h1>
+        </div>
+        <p class="text-gray-400">Resumen de tu negocio y gestión de productos</p>
       </div>
 
-      {MOCK_USER.role === 'SELLER' ? (
-        <div class="space-y-6">
-          <!-- Estado del Vendedor -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Estado de Disponibilidad</h2>
-            <div class="flex items-center gap-3">
-              <span id="status-label" class="text-sm text-slate-600">Estado: —</span>
-              <button id="btn-toggle" class="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
-                Poner en Activo
-              </button>
-            </div>
-        </div>
-
-          <!-- KPIs Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-sm font-medium text-gray-500">Ventas Hoy</h3>
-              <p class="text-2xl font-bold text-gray-900" id="today-count">0</p>
-              <p class="text-sm text-gray-600" id="today-total">$0</p>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-sm font-medium text-gray-500">Últimos 7 días</h3>
-              <p class="text-2xl font-bold text-gray-900" id="week-count">0</p>
-              <p class="text-sm text-gray-600" id="week-total">$0</p>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-sm font-medium text-gray-500">Stock Bajo</h3>
-              <p class="text-2xl font-bold text-orange-600" id="low-stock-count">0</p>
-              <p class="text-sm text-gray-600">productos &lt; 5</p>
-            </div>
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-sm font-medium text-gray-500">Clientes</h3>
-              <p class="text-2xl font-bold text-blue-600" id="customers-count">0</p>
-              <p class="text-sm text-gray-600">últimos 7 días</p>
-            </div>
-          </div>
-
-          <!-- Agregar Productos -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Agregar Productos al Inventario</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <!-- Estadísticas Principales -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Ventas Hoy -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Buscar producto:</label>
-                <input 
-                  type="text" 
-                  id="search-global" 
-                  placeholder="Escribe para buscar..." 
-                  class="w-full border rounded px-3 py-2"
-                />
-    </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Categoría:</label>
-                <select id="filter-category" class="w-full border rounded px-3 py-2">
-                  <option value="">Todas</option>
-                  <option value="comida">Comida</option>
-                  <option value="ropa">Ropa</option>
-                  <option value="tecnologia">Tecnología</option>
-                </select>
-        </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Stock inicial:</label>
-                <input 
-                  type="number" 
-                  id="initial-stock" 
-                  min="0" 
-                  value="1" 
-                  class="w-full border rounded px-3 py-2"
-                />
+              <p class="text-sm text-gray-400">Ventas Hoy</p>
+              <p class="text-2xl font-bold text-white" id="today-sales">$0</p>
             </div>
-        </div>
-
-            <div id="search-results" class="max-h-60 overflow-y-auto border rounded mb-4">
-              <p class="p-4 text-gray-500 text-center">Busca productos para agregar a tu inventario</p>
+            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"/>
+              </svg>
             </div>
-        </div>
-
-          <!-- Inventario Actual -->
-          <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-semibold text-gray-900">Mi Inventario</h2>
-            </div>
-            
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                </tr>
-              </thead>
-                <tbody id="inventory-table" class="bg-white divide-y divide-gray-200">
-                  {inventory.length === 0 ? (
-                <tr>
-                      <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                        No tienes productos en tu inventario. Busca productos arriba para agregar.
-                  </td>
-                </tr>
-                  ) : (
-                    inventory.map(item => (
-                      <tr data-id={item.id} class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="flex items-center">
-                            {item.imageUrl && (
-                              <img class="h-10 w-10 rounded-lg object-cover mr-3" src={item.imageUrl} alt={item.title} />
-                            )}
-                            <div>
-                              <div class="text-sm font-medium text-gray-900">{item.title}</div>
-          </div>
-        </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <input 
-                            type="number" 
-                            value={item.stock} 
-                            min="0"
-                            class="w-20 px-2 py-1 border rounded text-sm"
-                            data-field="stock"
-                            data-id={item.id}
-                          />
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <label class="flex items-center">
-                            <input 
-                              type="checkbox" 
-                              checked={item.active}
-                              class="rounded"
-                              data-field="active"
-                              data-id={item.id}
-                            />
-                            <span class="ml-2 text-sm text-gray-600">
-                              {item.active ? 'Activo' : 'Inactivo'}
-                            </span>
-                          </label>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${(item.priceCents / 100).toFixed(0)}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button 
-                            class="text-red-600 hover:text-red-900"
-                            data-action="delete"
-                            data-id={item.id}
-                          >
-                            🗑️ Eliminar
-                          </button>
-                  </td>
-                </tr>
-                    ))
-                  )}
-              </tbody>
-            </table>
           </div>
         </div>
 
-          <!-- Top Products y Low Stock -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Productos Top (7 días)</h3>
-              <div id="top-products" class="space-y-2">
-                <p class="text-gray-500 text-sm">Cargando...</p>
+        <!-- Pedidos Pendientes -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-400">Pedidos Pendientes</p>
+              <p class="text-2xl font-bold text-yellow-500" id="pending-orders">0</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock Bajo -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-400">Stock Bajo</p>
+              <p class="text-2xl font-bold text-red-500" id="low-stock">0</p>
+            </div>
+            <div class="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Productos -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-400">Total Productos</p>
+              <p class="text-2xl font-bold text-blue-500" id="total-products">0</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contenido Principal -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Mi Inventario por Categoría -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-white">Mi Inventario</h2>
+            <a href="/dashboard/mis-productos" class="text-yellow-500 hover:text-yellow-400 text-sm font-medium">
+              Ver todos →
+            </a>
+          </div>
+          <div id="inventory-categories" class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">📦</span>
+                </div>
+                <span class="text-white font-medium">Cargando...</span>
               </div>
-          </div>
-            
-            <div class="bg-white rounded-lg shadow p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Stock Bajo</h3>
-              <div id="low-stock-list" class="space-y-2">
-                <p class="text-gray-500 text-sm">Cargando...</p>
-              </div>
+              <span class="text-gray-400 text-sm">0 productos</span>
             </div>
           </div>
-
-          <!-- Clientes Recientes -->
-          <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Clientes Recientes</h3>
-            <div id="customers-list" class="space-y-2">
-              <p class="text-gray-500 text-sm">Cargando...</p>
-      </div>
-    </div>
-
         </div>
-      ) : (
-        <div class="bg-white rounded-lg shadow p-6 text-center">
-          <p class="text-gray-600">No tienes permisos para ver este dashboard.</p>
-      </div>
-      )}
 
+        <!-- Pedidos Recientes -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-white">Pedidos Recientes</h2>
+            <a href="/dashboard/pedidos" class="text-yellow-500 hover:text-yellow-400 text-sm font-medium">
+              Ver todos →
+            </a>
+          </div>
+          <div id="recent-orders" class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">📋</span>
+                </div>
+                <div>
+                  <span class="text-white font-medium">Cargando...</span>
+                  <p class="text-gray-400 text-sm">Estado: —</p>
+                </div>
+              </div>
+              <span class="text-gray-400 text-sm">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ventas de la Semana -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-white">Ventas de la Semana</h2>
+            <span class="text-yellow-500 text-2xl font-bold" id="week-sales">$0</span>
+          </div>
+          <div class="h-32 bg-gray-700 rounded-lg flex items-center justify-center">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-yellow-600 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
+                </svg>
+              </div>
+              <p class="text-gray-400 text-sm">Gráfico de ventas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-white mb-6">Acciones Rápidas</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <a href="/dashboard/mis-productos" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg text-center transition-colors">
+              <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium">Mis Productos</p>
+            </a>
+            <a href="/dashboard/pedidos" class="bg-yellow-600 hover:bg-yellow-700 text-white p-4 rounded-lg text-center transition-colors">
+              <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium">Pedidos</p>
+            </a>
+            <a href="/dashboard/recompensas" class="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg text-center transition-colors">
+              <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium">Recompensas</p>
+            </a>
+            <a href="/dashboard/mis-productos" class="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg text-center transition-colors">
+              <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd"/>
+                </svg>
+              </div>
+              <p class="text-sm font-medium">Agregar Producto</p>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // ===== SISTEMA DE ESTADO DE VENDEDOR =====
-    (async () => {
-      const SELLER_ID = 's1'; // Carnes del Zulia
-
-      async function fetchStatus() {
-        const list = await fetch('/api/sellers/status').then(r => r.json());
-        return list.find(x => x.id === SELLER_ID);
-      }
-
-      async function refreshBadge() {
-        const me = await fetchStatus();
-        if (!me) return;
-        
-        const statusLabel = document.getElementById('status-label');
-        const btn = document.getElementById('btn-toggle');
-        
-        if (!statusLabel || !btn) return;
-
-        statusLabel.textContent =
-          me.available ? 'Estado: Disponible (Abierto + Activo)' :
-          (me.online ? 'Estado: Activo (fuera de horario)' :
-          (me.open ? 'Estado: Abierto (en Descanso)' : 'Estado: Cerrado'));
-
-        btn.textContent = me.online ? 'Poner en Descanso' : 'Poner en Activo';
-        btn.className = me.online 
-          ? 'px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition-colors'
-          : 'px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 transition-colors';
-      }
-
-      const btnToggle = document.getElementById('btn-toggle');
-      if (btnToggle) {
-        btnToggle.addEventListener('click', async () => {
-          const me = await fetchStatus();
-          const next = !(me?.online);
-          await fetch('/api/seller/status', {
-            method: 'POST', 
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ online: next })
-          });
-          await refreshBadge();
-        });
-      }
-
-      await refreshBadge();
-      setInterval(refreshBadge, 45000); // refresco cada 45s
-    })();
-
-    // ===== SISTEMA DE INVENTARIO =====
-    const searchGlobal = document.getElementById('search-global');
-    const filterCategory = document.getElementById('filter-category');
-    const initialStock = document.getElementById('initial-stock');
-    const searchResults = document.getElementById('search-results');
-    const inventoryTable = document.getElementById('inventory-table');
-
-    async function searchGlobalProducts() {
-      const query = (searchGlobal as HTMLInputElement)?.value || '';
-      const category = (filterCategory as HTMLSelectElement)?.value || '';
-      
-      if (query.length < 2 && !category) {
-        searchResults.innerHTML = '<p class="p-4 text-gray-500 text-center">Busca productos para agregar a tu inventario</p>';
-        return;
-      }
-
-      const params = new URLSearchParams();
-      if (query) params.set('q', query);
-      if (category) params.set('category', category);
-
+    // ===== CARGAR DATOS DEL DASHBOARD =====
+    async function loadDashboardData() {
       try {
-        const response = await fetch(`/api/products/global?${params}`);
-        const products = await response.json();
-
-        searchResults.innerHTML = '';
-        if (products.length === 0) {
-          searchResults.innerHTML = '<p class="p-4 text-gray-500 text-center">No se encontraron productos.</p>';
+        // Obtener usuario autenticado
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('❌ No hay usuario autenticado');
           return;
         }
 
-        products.forEach(p => {
-          const div = document.createElement('div');
-          div.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0 flex justify-between items-center';
-          div.innerHTML = `
-            <div>
-              <div class="font-medium">${p.title}</div>
-              <div class="text-sm text-gray-500">${p.category} • $${(p.priceCents / 100).toFixed(0)}</div>
-            </div>
-            <button class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" data-product-id="${p.id}">
-              Agregar
-            </button>
-          `;
-          searchResults.appendChild(div);
-        });
+        // Cargar estadísticas principales
+        await loadMainStats(user.id);
+        
+        // Cargar inventario por categoría
+        await loadInventoryCategories(user.id);
+        
+        // Cargar pedidos recientes
+        await loadRecentOrders(user.id);
+        
+        // Cargar ventas de la semana
+        await loadWeekSales(user.id);
+
       } catch (error) {
-        console.error('Error searching products:', error);
-        searchResults.innerHTML = '<p class="p-4 text-red-500 text-center">Error al buscar productos</p>';
+        console.error('❌ Error cargando datos del dashboard:', error);
       }
     }
 
-    searchGlobal?.addEventListener('input', debounce(searchGlobalProducts, 300));
-    filterCategory?.addEventListener('change', searchGlobalProducts);
-
-    searchResults?.addEventListener('click', async (e) => {
-      const target = e.target as HTMLElement;
-      if (target.dataset.productId) {
-        const productId = target.dataset.productId;
-        const stock = Number((initialStock as HTMLInputElement)?.value || 1);
-        
-        try {
-          const response = await fetch('/api/seller/inventory/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, stock })
-          });
-
-          if (response.ok) {
-            alert('Producto agregado al inventario');
-            location.reload(); // Recargar para mostrar el nuevo producto
-          } else {
-            alert('Error al agregar el producto');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al agregar el producto');
-        }
-      }
-    });
-
-    // ===== ACTUALIZACIÓN DE INVENTARIO =====
-    inventoryTable?.addEventListener('change', async (e) => {
-      const target = e.target as HTMLInputElement;
-      const id = target.dataset.id;
-      const field = target.dataset.field;
-
-      if (id && field) {
-        let value: string | boolean | number = target.value;
-        if (field === 'active') {
-          value = target.checked;
-        } else if (field === 'stock') {
-          value = Number(target.value);
-        }
-        
-        try {
-          const response = await fetch('/api/seller/inventory/update', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sellerProductId: id, [field]: value })
-          });
-
-          if (!response.ok) {
-            alert('Error al actualizar el inventario');
-            location.reload(); // Recargar para restaurar valores
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al actualizar el inventario');
-          location.reload();
-        }
-      }
-    });
-
-    inventoryTable?.addEventListener('click', async (e) => {
-      const target = e.target as HTMLElement;
-      if (target.dataset.action === 'delete' && target.dataset.id) {
-        if (confirm('¿Estás seguro de que quieres eliminar este producto de tu inventario?')) {
-          try {
-            const response = await fetch('/api/seller/inventory/remove', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sellerProductId: target.dataset.id })
-            });
-
-            if (response.ok) {
-              location.reload(); // Recargar para actualizar la tabla
-          } else {
-              alert('Error al eliminar el producto');
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar el producto');
-          }
-        }
-      }
-    });
-
-    // ===== CARGAR STATS =====
-    async function loadStats() {
+    // ===== ESTADÍSTICAS PRINCIPALES =====
+    async function loadMainStats(sellerId) {
       try {
-        const response = await fetch('/api/seller/stats');
-        const stats = await response.json();
+        // Ventas de hoy
+        const today = new Date().toISOString().split('T')[0];
+        const { data: todayOrders, error: todayError } = await supabase
+          .from('orders')
+          .select('total_cents, status')
+          .eq('seller_id', sellerId)
+          .gte('created_at', `${today}T00:00:00`)
+          .in('status', ['completed', 'seller_confirmed']);
 
-        // Actualizar KPIs
-        document.getElementById('today-count')!.textContent = stats.todayCount.toString();
-        document.getElementById('today-total')!.textContent = `$${(stats.todayTotalCents / 100).toFixed(0)}`;
-        document.getElementById('week-count')!.textContent = stats.weekCount.toString();
-        document.getElementById('week-total')!.textContent = `$${(stats.weekTotalCents / 100).toFixed(0)}`;
-        document.getElementById('low-stock-count')!.textContent = stats.lowStock.length.toString();
-        document.getElementById('customers-count')!.textContent = stats.customers.length.toString();
+        if (!todayError && todayOrders) {
+          const todaySales = todayOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
+          document.getElementById('today-sales').textContent = `$${(todaySales / 100).toFixed(0)}`;
+        }
 
-        // Top Products
-        const topProductsDiv = document.getElementById('top-products');
-        if (stats.topProducts.length === 0) {
-          topProductsDiv!.innerHTML = '<p class="text-gray-500 text-sm">No hay ventas en los últimos 7 días</p>';
-        } else {
-          topProductsDiv!.innerHTML = stats.topProducts.map((p: any) => `
-            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span class="text-sm font-medium">${p.title}</span>
-              <span class="text-sm text-gray-600">${p.count} vendidos</span>
+        // Pedidos pendientes
+        const { data: pendingOrders, error: pendingError } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('seller_id', sellerId)
+          .in('status', ['placed', 'seller_confirmed']);
+
+        if (!pendingError && pendingOrders) {
+          document.getElementById('pending-orders').textContent = pendingOrders.length.toString();
+        }
+
+        // Stock bajo
+        const { data: lowStockProducts, error: lowStockError } = await supabase
+          .from('seller_products')
+          .select('id, stock')
+          .eq('seller_id', sellerId)
+          .lt('stock', 5);
+
+        if (!lowStockError && lowStockProducts) {
+          document.getElementById('low-stock').textContent = lowStockProducts.length.toString();
+        }
+
+        // Total productos
+        const { data: totalProducts, error: totalError } = await supabase
+          .from('seller_products')
+          .select('id')
+          .eq('seller_id', sellerId);
+
+        if (!totalError && totalProducts) {
+          document.getElementById('total-products').textContent = totalProducts.length.toString();
+        }
+
+      } catch (error) {
+        console.error('❌ Error cargando estadísticas principales:', error);
+      }
+    }
+
+    // ===== INVENTARIO POR CATEGORÍA =====
+    async function loadInventoryCategories(sellerId) {
+      try {
+        const { data: sellerProducts, error } = await supabase
+          .from('seller_products')
+          .select(`
+            stock,
+            products (title, category)
+          `)
+          .eq('seller_id', sellerId);
+
+        if (error) {
+          console.error('❌ Error cargando inventario:', error);
+          return;
+        }
+
+        // Agrupar por categoría
+        const categories = {};
+        (sellerProducts || []).forEach(sp => {
+          if (sp.products?.category) {
+            if (!categories[sp.products.category]) {
+              categories[sp.products.category] = 0;
+            }
+            categories[sp.products.category]++;
+          }
+        });
+
+        // Renderizar categorías
+        const container = document.getElementById('inventory-categories');
+        if (Object.keys(categories).length === 0) {
+          container.innerHTML = `
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">📦</span>
                 </div>
-          `).join('');
-        }
-
-        // Low Stock
-        const lowStockDiv = document.getElementById('low-stock-list');
-        if (stats.lowStock.length === 0) {
-          lowStockDiv!.innerHTML = '<p class="text-green-600 text-sm">✅ Todo el stock está bien</p>';
+                <span class="text-white font-medium">Sin productos</span>
+              </div>
+              <span class="text-gray-400 text-sm">0 productos</span>
+            </div>
+          `;
         } else {
-          lowStockDiv!.innerHTML = stats.lowStock.map((item: any) => `
-            <div class="flex justify-between items-center p-2 bg-orange-50 rounded">
-              <span class="text-sm font-medium">${item.title}</span>
-              <span class="text-sm text-orange-600 font-bold">${item.stock} unidades</span>
-              </div>
-            `).join('');
-        }
+          const categoryLabels = {
+            supermercado: 'Abarrotes',
+            postres: 'Panadería',
+            comida: 'Comida preparada',
+            bebidas: 'Bebidas',
+            belleza: 'Belleza',
+            servicios: 'Servicios'
+          };
 
-        // Customers
-        const customersDiv = document.getElementById('customers-list');
-        if (stats.customers.length === 0) {
-          customersDiv!.innerHTML = '<p class="text-gray-500 text-sm">No hay clientes recientes</p>';
-          } else {
-          customersDiv!.innerHTML = stats.customers.map((c: any) => `
-            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <div>
-                <span class="text-sm font-medium">${c.buyerName}</span>
-                ${c.buyerPhone ? `<span class="text-xs text-gray-500 ml-2">${c.buyerPhone}</span>` : ''}
+          const categoryIcons = {
+            supermercado: '🛒',
+            postres: '🍰',
+            comida: '🍕',
+            bebidas: '🥤',
+            belleza: '💄',
+            servicios: '🔧'
+          };
+
+          container.innerHTML = Object.entries(categories).map(([category, count]) => `
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">${categoryIcons[category] || '📦'}</span>
+                </div>
+                <span class="text-white font-medium">${categoryLabels[category] || category}</span>
               </div>
-              <span class="text-sm text-gray-600">${c.orders} pedidos</span>
+              <span class="text-gray-400 text-sm">${count} productos</span>
             </div>
           `).join('');
         }
 
       } catch (error) {
-        console.error('Error loading stats:', error);
+        console.error('❌ Error cargando inventario por categoría:', error);
       }
     }
 
-    // Cargar stats al inicio
-    loadStats();
+    // ===== PEDIDOS RECIENTES =====
+    async function loadRecentOrders(sellerId) {
+      try {
+        const { data: recentOrders, error } = await supabase
+          .from('orders')
+          .select('id, total_cents, status, created_at')
+          .eq('seller_id', sellerId)
+          .order('created_at', { ascending: false })
+          .limit(3);
 
-    // ===== UTILIDADES =====
-    function debounce(func: Function, delay: number) {
-      let timeout: NodeJS.Timeout;
-      return function(...args: any[]) {
-        const context = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), delay);
-      };
+        if (error) {
+          console.error('❌ Error cargando pedidos recientes:', error);
+          return;
+        }
+
+        const container = document.getElementById('recent-orders');
+        if (!recentOrders || recentOrders.length === 0) {
+          container.innerHTML = `
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">📋</span>
+                </div>
+                <div>
+                  <span class="text-white font-medium">Sin pedidos</span>
+                  <p class="text-gray-400 text-sm">Estado: —</p>
+                </div>
+              </div>
+              <span class="text-gray-400 text-sm">$0</span>
+            </div>
+          `;
+        } else {
+          const statusLabels = {
+            placed: 'Pendiente',
+            seller_confirmed: 'Confirmado',
+            completed: 'Completado',
+            cancelled: 'Cancelado'
+          };
+
+          const statusColors = {
+            placed: 'text-yellow-400',
+            seller_confirmed: 'text-blue-400',
+            completed: 'text-green-400',
+            cancelled: 'text-red-400'
+          };
+
+          container.innerHTML = recentOrders.map(order => `
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-yellow-600 rounded-lg flex items-center justify-center">
+                  <span class="text-white text-sm font-bold">📋</span>
+                </div>
+                <div>
+                  <span class="text-white font-medium">Pedido #${order.id.slice(-6)}</span>
+                  <p class="text-gray-400 text-sm">Estado: <span class="${statusColors[order.status] || 'text-gray-400'}">${statusLabels[order.status] || order.status}</span></p>
+                </div>
+              </div>
+              <span class="text-gray-400 text-sm">$${((order.total_cents || 0) / 100).toFixed(0)}</span>
+            </div>
+          `).join('');
+        }
+
+      } catch (error) {
+        console.error('❌ Error cargando pedidos recientes:', error);
+      }
     }
+
+    // ===== VENTAS DE LA SEMANA =====
+    async function loadWeekSales(sellerId) {
+      try {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
+        const { data: weekOrders, error } = await supabase
+          .from('orders')
+          .select('total_cents')
+          .eq('seller_id', sellerId)
+          .gte('created_at', weekAgo.toISOString())
+          .in('status', ['completed', 'seller_confirmed']);
+
+        if (!error && weekOrders) {
+          const weekSales = weekOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
+          document.getElementById('week-sales').textContent = `$${(weekSales / 100).toFixed(0)}`;
+        }
+
+      } catch (error) {
+        console.error('❌ Error cargando ventas de la semana:', error);
+      }
+    }
+
+    // ===== INICIALIZAR DASHBOARD =====
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDashboardData();
+    });
   </script>
 </BaseLayout>

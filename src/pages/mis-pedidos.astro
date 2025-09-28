@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import EnhancedOrderCard from '../components/react/EnhancedOrderCard.tsx'
 import PointsSummaryCard from '../components/react/PointsSummaryCard.tsx'
-import BottomNav from '../components/react/BottomNav.tsx'
 import { getUser, getUserProfile } from '../lib/session'
 ---
 
@@ -409,4 +408,3 @@ import { getUser, getUserProfile } from '../lib/session'
 </script>
 
 <!-- Bottom Navigation -->
-<BottomNav client:load role="buyer" notifications={0} orders={0} rewards={0} />

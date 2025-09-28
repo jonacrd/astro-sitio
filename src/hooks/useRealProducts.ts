@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase-browser';
 
 export interface RealProduct {
   id: string;
@@ -17,12 +18,76 @@ export function useRealProducts() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadRealProducts = () => {
+    const loadRealProducts = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Usar productos de ejemplo directamente para evitar errores de base de datos
+        console.log('🛍️ Cargando productos reales desde useRealProducts...');
+
+        // Consulta simplificada sin joins problemáticos
+        const { data, error: queryError } = await supabase
+          .from('seller_products')
+          .select(`
+            price_cents,
+            stock,
+            active,
+            product_id,
+            seller_id
+          `)
+          .eq('active', true)
+          .gt('stock', 0)
+          .order('price_cents', { ascending: false })
+          .limit(4);
+
+        if (queryError) {
+          console.error('❌ Error cargando productos reales:', queryError);
+          throw queryError;
+        }
+
+        if (data && data.length > 0) {
+          // Obtener detalles de productos por separado
+          const productIds = data.map(item => item.product_id);
+          const sellerIds = data.map(item => item.seller_id);
+
+          const [productsResult, profilesResult] = await Promise.allSettled([
+            supabase.from('products').select('id, title, description, category, image_url').in('id', productIds),
+            supabase.from('profiles').select('id, name').in('id', sellerIds)
+          ]);
+
+          const productsData = productsResult.status === 'fulfilled' ? productsResult.value.data : [];
+          const profilesData = profilesResult.status === 'fulfilled' ? profilesResult.value.data : [];
+
+          // Crear mapas para búsqueda rápida
+          const productsMap = new Map(productsData?.map(p => [p.id, p]) || []);
+          const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+
+          // Transformar productos reales
+          const realProducts: RealProduct[] = data.map((item, index) => {
+            const product = productsMap.get(item.product_id);
+            const profile = profilesMap.get(item.seller_id);
+            
+            return {
+              id: `real-${index}-${Date.now()}`,
+              media: [product?.image_url || '/default-product.png'],
+              title: product?.title || 'Producto',
+              vendor: profile?.name || 'Vendedor',
+              price: Math.round(item.price_cents / 100),
+              badge: index === 0 ? 'Producto del Mes' : 
+                     index === 1 ? 'Oferta Especial' : 
+                     index === 2 ? 'Nuevo' : 'Servicio Premium',
+              hasSlider: index === 1,
+              ctaLabel: product?.category === 'servicios' ? 'Contactar' : 'Añadir al carrito'
+            };
+          });
+
+          setProducts(realProducts);
+          console.log(`✅ Productos reales cargados: ${realProducts.length}`);
+          return;
+        }
+
+        // Si no hay productos reales, usar productos de ejemplo
+        console.log('⚠️ No hay productos reales, usando productos de ejemplo');
         const exampleProducts: RealProduct[] = [
           {
             id: 'cachapa-1',
@@ -67,9 +132,10 @@ export function useRealProducts() {
         ];
 
         setProducts(exampleProducts);
+        console.log(`✅ Productos de ejemplo cargados: ${exampleProducts.length}`);
 
       } catch (err) {
-        console.error('Error al cargar productos:', err);
+        console.error('❌ Error al cargar productos:', err);
         setError(err instanceof Error ? err.message : 'Error desconocido');
         
         // Fallback con productos de ejemplo
@@ -117,6 +183,7 @@ export function useRealProducts() {
         ];
         
         setProducts(fallbackProducts);
+        console.log(`✅ Productos de fallback cargados: ${fallbackProducts.length}`);
       } finally {
         setLoading(false);
       }
