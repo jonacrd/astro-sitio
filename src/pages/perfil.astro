@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import NotificationsWidget from '../components/react/NotificationsWidget.tsx'
 import UserPoints from '../components/react/UserPoints.tsx'
 import OrderHistory from '../components/react/OrderHistory.tsx'
+import SellerStatusToggle from '../components/react/SellerStatusToggle.tsx'
 import { getUser, getUserProfile } from '../lib/session'
 ---
 
@@ -38,6 +39,12 @@ import { getUser, getUserProfile } from '../lib/session'
 
       <!-- Panel de vendedor (solo para vendedores) -->
       <div id="seller-panel" class="hidden">
+        <!-- Estado Online/Offline -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-lg font-semibold text-white mb-4">Estado de Vendedor</h2>
+          <SellerStatusToggle client:load />
+        </div>
+        
         <!-- Resumen de ventas -->
         <div class="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 class="text-lg font-semibold text-white mb-4">Resumen de Ventas</h2>

@@ -122,8 +122,19 @@ export default function Header() {
               <h1 className="text-xl sm:text-2xl font-bold text-white">🛍️ Tienda</h1>
             </div>
             
-            {/* Notificaciones, Carrito y Autenticación */}
+            {/* Búsqueda, Notificaciones, Carrito y Autenticación */}
             <div className="flex items-center gap-2 sm:gap-4">
+              {/* Búsqueda */}
+              <button 
+                onClick={() => window.location.href = '/buscar'}
+                className="search-btn-opaque p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                title="Buscar productos"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+              
               {/* Notificaciones */}
               <button 
                 onClick={handleNotificationsClick}

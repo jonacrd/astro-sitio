@@ -5,68 +5,118 @@ import { createClient } from '@supabase/supabase-js';
 async function parseQueryWithAI(userText: string) {
   const text = userText.toLowerCase();
   
-  // Mapeo de sinónimos y variaciones
+  // Mapeo de sinónimos y variaciones MEJORADO
   const synonymMap = {
-    // Comida
-    'perro': ['perro caliente', 'hot dog', 'perro'],
-    'perros': ['perro caliente', 'hot dog', 'perro'],
-    'empanada': ['empanada', 'empanadas'],
-    'empanadas': ['empanada', 'empanadas'],
-    'hamburguesa': ['hamburguesa', 'hamburguesas', 'burger'],
-    'hamburguesas': ['hamburguesa', 'hamburguesas', 'burger'],
-    'pizza': ['pizza', 'pizzas'],
-    'pizzas': ['pizza', 'pizzas'],
-    'arepa': ['arepa', 'arepas'],
-    'arepas': ['arepa', 'arepas'],
-    'cachapa': ['cachapa', 'cachapas'],
-    'cachapas': ['cachapa', 'cachapas'],
-    'lasaña': ['lasaña', 'lasagna', 'pasta'],
-    'lasagna': ['lasaña', 'lasagna', 'pasta'],
-    'tequeños': ['tequeños', 'tequeño'],
-    'tequeño': ['tequeños', 'tequeño'],
+    // Comida - Lenguaje natural chileno
+    'perro': ['perro caliente', 'hot dog', 'perro', 'completo', 'completos'],
+    'perros': ['perro caliente', 'hot dog', 'perro', 'completo', 'completos'],
+    'completo': ['perro caliente', 'hot dog', 'perro', 'completo', 'completos'],
+    'completos': ['perro caliente', 'hot dog', 'perro', 'completo', 'completos'],
+    'empanada': ['empanada', 'empanadas', 'empanadita', 'empanaditas'],
+    'empanadas': ['empanada', 'empanadas', 'empanadita', 'empanaditas'],
+    'hamburguesa': ['hamburguesa', 'hamburguesas', 'burger', 'hamburguesita'],
+    'hamburguesas': ['hamburguesa', 'hamburguesas', 'burger', 'hamburguesita'],
+    'pizza': ['pizza', 'pizzas', 'pizzita', 'pizzitas'],
+    'pizzas': ['pizza', 'pizzas', 'pizzita', 'pizzitas'],
+    'arepa': ['arepa', 'arepas', 'arepita', 'arepitas'],
+    'arepas': ['arepa', 'arepas', 'arepita', 'arepitas'],
+    'cachapa': ['cachapa', 'cachapas', 'cachapita', 'cachapitas'],
+    'cachapas': ['cachapa', 'cachapas', 'cachapita', 'cachapitas'],
+    'lasaña': ['lasaña', 'lasagna', 'pasta', 'pastas'],
+    'lasagna': ['lasaña', 'lasagna', 'pasta', 'pastas'],
+    'pasta': ['pasta', 'pastas', 'fideos', 'fideo'],
+    'pastas': ['pasta', 'pastas', 'fideos', 'fideo'],
+    'fideos': ['fideos', 'fideo', 'pasta', 'pastas', 'spaghetti', 'espagueti'],
+    'fideo': ['fideos', 'fideo', 'pasta', 'pastas', 'spaghetti', 'espagueti'],
+    'spaghetti': ['spaghetti', 'espagueti', 'fideos', 'fideo', 'pasta larga'],
+    'espagueti': ['spaghetti', 'espagueti', 'fideos', 'fideo', 'pasta larga'],
+    'pasta larga': ['spaghetti', 'espagueti', 'fideos', 'fideo', 'pasta larga'],
+    'tequeños': ['tequeños', 'tequeño', 'tequeñitos'],
+    'tequeño': ['tequeños', 'tequeño', 'tequeñitos'],
     
-    // Bebidas
-    'malta': ['malta', 'maltas'],
-    'maltas': ['malta', 'maltas'],
-    'coca': ['coca cola', 'coca', 'refresco'],
-    'cerveza': ['cerveza', 'cervezas', 'beer'],
-    'cervezas': ['cerveza', 'cervezas', 'beer'],
-    'agua': ['agua', 'aguas'],
-    'aguas': ['agua', 'aguas'],
+    // Bebidas - Lenguaje natural chileno
+    'malta': ['malta', 'maltas', 'maltita', 'maltitas'],
+    'maltas': ['malta', 'maltas', 'maltita', 'maltitas'],
+    'coca': ['coca cola', 'coca', 'refresco', 'cola', 'col cola', 'cocacola'],
+    'cola': ['coca cola', 'coca', 'refresco', 'cola', 'col cola', 'cocacola'],
+    'col cola': ['coca cola', 'coca', 'refresco', 'cola', 'col cola', 'cocacola'],
+    'cocacola': ['coca cola', 'coca', 'refresco', 'cola', 'col cola', 'cocacola'],
+    'cerveza': ['cerveza', 'cervezas', 'chela', 'chelas', 'birra', 'birras'],
+    'cervezas': ['cerveza', 'cervezas', 'chela', 'chelas', 'birra', 'birras'],
+    'chela': ['cerveza', 'cervezas', 'chela', 'chelas', 'birra', 'birras'],
+    'chelas': ['cerveza', 'cervezas', 'chela', 'chelas', 'birra', 'birras'],
+    'agua': ['agua', 'aguas', 'aguita', 'aguas'],
+    'aguas': ['agua', 'aguas', 'aguita', 'aguas'],
     
-    // Alcohol
-    'ron': ['ron', 'cacique'],
-    'whisky': ['whisky', 'whiskey'],
-    'vodka': ['vodka'],
+    // Alcohol - Lenguaje natural chileno
+    'ron': ['ron', 'cacique', 'roncito'],
+    'whisky': ['whisky', 'whiskey', 'wisky', 'wiskey'],
+    'wisky': ['whisky', 'whiskey', 'wisky', 'wiskey'],
+    'vodka': ['vodka', 'vodkita'],
     
-    // Postres
-    'torta': ['torta', 'tortas', 'cake'],
-    'tortas': ['torta', 'tortas', 'cake'],
-    'quesillo': ['quesillo', 'flan'],
-    'flan': ['flan', 'quesillo'],
+    // Postres - Lenguaje natural chileno
+    'torta': ['torta', 'tortas', 'tortita', 'tortitas', 'cake', 'queque'],
+    'tortas': ['torta', 'tortas', 'tortita', 'tortitas', 'cake', 'queque'],
+    'queque': ['torta', 'tortas', 'tortita', 'tortitas', 'cake', 'queque'],
+    'quesillo': ['quesillo', 'flan', 'quesillito'],
+    'flan': ['flan', 'quesillo', 'quesillito'],
     
-    // Servicios
-    'corte': ['corte de cabello', 'corte', 'peluquería'],
-    'manicure': ['manicure', 'manicura'],
-    'mecánica': ['mecánica', 'taller', 'revisión'],
+    // Servicios - Lenguaje natural chileno
+    'corte': ['corte de cabello', 'corte', 'peluquería', 'peluquero', 'peluquera'],
+    'peluquero': ['corte de cabello', 'corte', 'peluquería', 'peluquero', 'peluquera'],
+    'peluquera': ['corte de cabello', 'corte', 'peluquería', 'peluquero', 'peluquera'],
+    'manicure': ['manicure', 'manicura', 'manicurista'],
+    'manicura': ['manicure', 'manicura', 'manicurista'],
+    'mecánica': ['mecánica', 'taller', 'revisión', 'mecánico', 'mecanico'],
+    'mecánico': ['mecánica', 'taller', 'revisión', 'mecánico', 'mecanico'],
+    'mecanico': ['mecánica', 'taller', 'revisión', 'mecánico', 'mecanico'],
     
-    // Adjetivos de precio
-    'barato': ['barato', 'económico', 'cheap'],
-    'barata': ['barata', 'económica', 'cheap'],
-    'baratos': ['baratos', 'económicos', 'cheap'],
-    'baratas': ['baratas', 'económicas', 'cheap'],
+    // Adjetivos de precio - Lenguaje natural chileno
+    'barato': ['barato', 'económico', 'cheap', 'baratito', 'económico'],
+    'barata': ['barata', 'económica', 'cheap', 'baratita', 'económica'],
+    'baratos': ['baratos', 'económicos', 'cheap', 'baratitos', 'económicos'],
+    'baratas': ['baratas', 'económicas', 'cheap', 'baratitas', 'económicas'],
+    'baratito': ['barato', 'económico', 'cheap', 'baratito', 'económico'],
+    'baratita': ['barata', 'económica', 'cheap', 'baratita', 'económica'],
+    'baratitos': ['baratos', 'económicos', 'cheap', 'baratitos', 'económicos'],
+    'baratitas': ['baratas', 'económicas', 'cheap', 'baratitas', 'económicas'],
     'caro': ['caro', 'costoso', 'expensive'],
     'cara': ['cara', 'costosa', 'expensive'],
     'caros': ['caros', 'costosos', 'expensive'],
     'caras': ['caras', 'costosas', 'expensive']
   };
 
-  // Detectar categorías
+  // Detectar categorías - Lenguaje natural chileno
   const categoryKeywords = {
-    'comida': ['comida', 'alimento', 'alimentos', 'comer', 'cenar', 'almorzar', 'desayunar'],
-    'bebidas': ['bebida', 'bebidas', 'tomar', 'beber', 'refresco', 'refrescos'],
-    'minimarket': ['minimarket', 'supermercado', 'tienda', 'comestibles', 'abastos'],
-    'servicios': ['servicio', 'servicios', 'trabajo', 'trabajos', 'oficio', 'oficios']
+    'comida': [
+      'comida', 'alimento', 'alimentos', 'comer', 'cenar', 'almorzar', 'desayunar',
+      'empanada', 'hamburguesa', 'pizza', 'arepa', 'cachapa', 'perro', 'lasaña',
+      'completo', 'completos', 'fideos', 'pasta', 'spaghetti', 'espagueti', 'tequeños',
+      'empanadita', 'empanaditas', 'hamburguesita', 'pizzita', 'arepita', 'cachapita',
+      'tequeñitos', 'pastas', 'fideo', 'pasta larga'
+    ],
+    'bebidas': [
+      'bebida', 'bebidas', 'tomar', 'beber', 'refresco', 'refrescos', 'malta', 'coca',
+      'cerveza', 'agua', 'cola', 'col cola', 'cocacola', 'chela', 'birra', 'maltita',
+      'aguita', 'refresquita'
+    ],
+    'alcohol': [
+      'alcohol', 'ron', 'whisky', 'vodka', 'licor', 'trago', 'cacique', 'roncito',
+      'wisky', 'wiskey', 'vodkita', 'birra', 'chela'
+    ],
+    'postres': [
+      'postre', 'torta', 'quesillo', 'flan', 'dulce', 'azúcar', 'chocolate', 'tortita',
+      'quesillito', 'queque', 'postrecito'
+    ],
+    'servicios': [
+      'servicio', 'servicios', 'trabajo', 'trabajos', 'oficio', 'oficios', 'corte',
+      'manicure', 'mecánica', 'taller', 'peluquería', 'peluquero', 'peluquera',
+      'manicura', 'manicurista', 'mecánico', 'mecanico'
+    ],
+    'minimarket': [
+      'minimarket', 'supermercado', 'tienda', 'comestibles', 'abastos', 'pan', 'leche',
+      'huevo', 'abarrotes', 'panecito', 'lechecita', 'huevito', 'abarrotito'
+    ]
   };
 
   // Detectar términos de entrega

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import CategoryCatalog from '@/components/react/CategoryCatalog.tsx'
-import SmartSearch from '@/components/react/SmartSearch.tsx'
+import SearchBarEnhanced from '@/components/react/SearchBarEnhanced.tsx'
 ---
 
 <BaseLayout 
@@ -19,7 +19,22 @@ import SmartSearch from '@/components/react/SmartSearch.tsx'
           <p class="text-gray-600 text-center mb-8">
             Explora todos los productos disponibles organizados por categorías
           </p>
-          <SmartSearch client:load />
+          <SearchBarEnhanced 
+            client:load
+            onAddToCart={(productId, sellerId) => {
+              console.log('🛒 Añadir al carrito:', productId, sellerId);
+              // TODO: Implementar añadir al carrito
+            }}
+            onViewProduct={(productId) => {
+              console.log('👁️ Ver producto:', productId);
+              // TODO: Implementar ver producto
+            }}
+            onViewSeller={(sellerId) => {
+              console.log('🏪 Ver vendedor:', sellerId);
+              // TODO: Implementar ver vendedor
+            }}
+            placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
+          />
         </div>
       </div>
     </section>

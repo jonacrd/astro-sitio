@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SearchBarEnhanced from '../components/react/SearchBarEnhanced';
+---
+
+<BaseLayout title="Buscar Productos">
+  <div class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <!-- Header -->
+    <div class="container mx-auto px-4 py-8">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-white mb-4">
+          🔍 Buscar Productos
+        </h1>
+        <p class="text-white/80 text-lg">
+          Encuentra productos de vendedores activos en tu comunidad
+        </p>
+      </div>
+
+      <!-- Barra de búsqueda mejorada -->
+      <div class="max-w-4xl mx-auto">
+        <SearchBarEnhanced 
+          client:load
+          onAddToCart={(productId, sellerId) => {
+            console.log('🛒 Añadir al carrito:', productId, sellerId);
+            // TODO: Implementar añadir al carrito
+          }}
+          onViewProduct={(productId) => {
+            console.log('👁️ Ver producto:', productId);
+            // TODO: Implementar ver producto
+          }}
+          onViewSeller={(sellerId) => {
+            console.log('🏪 Ver vendedor:', sellerId);
+            // TODO: Implementar ver vendedor
+          }}
+          placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
+        />
+      </div>
+
+      <!-- Información adicional -->
+      <div class="max-w-4xl mx-auto mt-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+          <h3 class="text-xl font-semibold text-white mb-4">
+            💡 Cómo funciona la búsqueda
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-white/80">
+            <div class="text-center">
+              <div class="text-3xl mb-2">🟢</div>
+              <h4 class="font-semibold mb-2">Vendedores Online</h4>
+              <p class="text-sm">Priorizamos vendedores que están disponibles ahora</p>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl mb-2">📦</div>
+              <h4 class="font-semibold mb-2">Productos Activos</h4>
+              <p class="text-sm">Solo mostramos productos con stock disponible</p>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl mb-2">🏪</div>
+              <h4 class="font-semibold mb-2">Por Vendedor</h4>
+              <p class="text-sm">Agrupamos productos por vendedor para mejor organización</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  // Limpiar caché de búsqueda al cargar la página
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🧹 Limpiando caché de búsqueda...');
+    
+    // Limpiar localStorage relacionado con búsquedas
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('search') || key.includes('query') || key.includes('results'))) {
+        keysToRemove.push(key);
+      }
+    }
+    
+    keysToRemove.forEach(key => {
+      localStorage.removeItem(key);
+      console.log('🗑️ Eliminado:', key);
+    });
+    
+    console.log('✅ Caché de búsqueda limpiado');
+  });
+</script>
