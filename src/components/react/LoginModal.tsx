@@ -23,52 +23,89 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
     setError('');
 
     try {
+      console.log('🔄 Intentando autenticación...', { isLogin, email });
+      
       if (isLogin) {
         // Iniciar sesión
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
           password,
         });
 
+        console.log('📝 Resultado de login:', { data: !!data, error });
+
         if (error) {
-          setError('Credenciales incorrectas. Verifica tu email y contraseña.');
+          console.error('❌ Error de login:', error);
+          
+          // Mensajes de error más específicos
+          if (error.message.includes('Invalid login credentials')) {
+            setError('Email o contraseña incorrectos. Verifica tus datos.');
+          } else if (error.message.includes('Email not confirmed')) {
+            setError('Tu email no está confirmado. Revisa tu bandeja de entrada.');
+          } else if (error.message.includes('Too many requests')) {
+            setError('Demasiados intentos. Espera unos minutos e intenta nuevamente.');
+          } else {
+            setError(`Error de inicio de sesión: ${error.message}`);
+          }
           return;
         }
 
-        // Éxito
-        onSuccess?.();
-        onClose();
+        if (data.user) {
+          console.log('✅ Login exitoso:', data.user.email);
+          // Éxito
+          onSuccess?.();
+          onClose();
+        }
       } else {
         // Registro
+        console.log('🔄 Intentando registro...', { email, name });
+        
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: {
             data: {
-              name,
-              phone,
+              name: name.trim(),
+              phone: phone.trim(),
               is_seller: false
             }
           }
         });
 
+        console.log('📝 Resultado de registro:', { data: !!data, error });
+
         if (error) {
-          setError(error.message);
+          console.error('❌ Error de registro:', error);
+          
+          // Mensajes de error más específicos
+          if (error.message.includes('User already registered')) {
+            setError('Este email ya está registrado. Intenta iniciar sesión.');
+          } else if (error.message.includes('Password should be at least')) {
+            setError('La contraseña debe tener al menos 6 caracteres.');
+          } else if (error.message.includes('Invalid email')) {
+            setError('Por favor ingresa un email válido.');
+          } else {
+            setError(`Error de registro: ${error.message}`);
+          }
           return;
         }
 
-        if (data.user && !data.user.email_confirmed_at) {
-          setError('Revisa tu email para confirmar tu cuenta.');
-          return;
-        }
+        if (data.user) {
+          console.log('✅ Registro exitoso:', data.user.email);
+          
+          if (!data.user.email_confirmed_at) {
+            setError('Revisa tu email para confirmar tu cuenta antes de iniciar sesión.');
+            return;
+          }
 
-        // Éxito
-        onSuccess?.();
-        onClose();
+          // Éxito
+          onSuccess?.();
+          onClose();
+        }
       }
     } catch (error) {
-      setError('Error inesperado. Intenta nuevamente.');
-      console.error('Auth error:', error);
+      console.error('❌ Error inesperado:', error);
+      setError('Error de conexión. Verifica tu internet e intenta nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -143,7 +180,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-gray-900 bg-white"
               placeholder="tu@email.com"
             />
           </div>
@@ -159,7 +196,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-gray-900 bg-white"
               placeholder="••••••••"
               minLength={6}
             />
@@ -178,7 +215,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-gray-900 bg-white"
                   placeholder="Tu nombre completo"
                 />
               </div>
@@ -192,7 +229,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess, initialMode = '
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-gray-900 bg-white"
                   placeholder="+56 9 1234 5678"
                 />
               </div>
