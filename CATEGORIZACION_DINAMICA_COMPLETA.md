@@ -225,3 +225,4 @@ const categoryIcons = {
 - **Efecto slider** implementado
 
 **¡El sistema está listo para producción!** 🚀
+

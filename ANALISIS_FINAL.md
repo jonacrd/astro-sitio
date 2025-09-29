@@ -223,3 +223,4 @@ npm run dev
 6. **VERIFICAR que solo aparecen 10 productos activos del vendedor**
 
 **¡El sistema está completamente configurado y funcional!** 🚀
+

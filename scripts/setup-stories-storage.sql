@@ -166,3 +166,4 @@ VALUES (
   '{"contentType": "text/html"}'::jsonb
 )
 ON CONFLICT (bucket_id, name) DO NOTHING;
+

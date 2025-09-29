@@ -1,0 +1,146 @@
+---
+// Página de prueba del sistema UI
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test UI System</title>
+  <link rel="stylesheet" href="/src/styles/design-tokens.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: { 
+              app: 'var(--bg-app)', 
+              surface: 'var(--bg-surface)', 
+              paper: 'var(--bg-paper)' 
+            },
+            ink: { 
+              base: 'var(--text-primary)', 
+              inverse: 'var(--text-inverse)', 
+              muted: 'var(--muted)' 
+            },
+            brand: { 
+              primary: 'var(--primary)', 
+              primary600: 'var(--primary-600)', 
+              accent: 'var(--accent)' 
+            },
+            state: { 
+              success: 'var(--success)', 
+              danger: 'var(--danger)', 
+              warn: 'var(--warning)' 
+            },
+            stroke: { 
+              soft: 'var(--border-soft)' 
+            }
+          },
+          borderRadius: { xl: 'var(--radius)' },
+          boxShadow: { elev: 'var(--shadow-elev)' },
+          fontFamily: { sans: ['var(--font-sans)'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-bg-app text-ink-base min-h-screen">
+  <div class="ui-container ui-section">
+    <h1 class="text-3xl font-bold text-ink-base mb-8">🎨 Sistema UI - Test</h1>
+    
+    <!-- Verificar que los colores se aplican -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-bg-app p-4 rounded-xl border">
+        <div class="text-sm font-medium text-ink-base">bg-app</div>
+        <div class="text-xs text-ink-muted">#0F1115</div>
+      </div>
+      <div class="bg-bg-surface p-4 rounded-xl border border-white/10">
+        <div class="text-sm font-medium text-ink-base">bg-surface</div>
+        <div class="text-xs text-ink-muted">#151A21</div>
+      </div>
+      <div class="bg-bg-paper p-4 rounded-xl border border-stroke-soft">
+        <div class="text-sm font-medium text-ink-inverse">bg-paper</div>
+        <div class="text-xs text-ink-muted">#F7F6F2</div>
+      </div>
+    </div>
+    
+    <!-- Botones de prueba -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-ink-base mb-4">Botones</h2>
+      <div class="flex flex-wrap gap-4">
+        <button class="ui-btn bg-brand-primary text-white hover:bg-brand-primary600">Primary</button>
+        <button class="ui-btn bg-bg-surface text-ink-base hover:bg-[#1A2029] border border-white/10">Secondary</button>
+        <button class="ui-btn bg-transparent text-ink-base hover:bg-white/5">Ghost</button>
+      </div>
+    </div>
+    
+    <!-- Cards de prueba -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-ink-base mb-4">Cards</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="ui-card bg-bg-paper text-ink-inverse border border-stroke-soft p-6">
+          <h3 class="font-semibold mb-2">Card Paper</h3>
+          <p class="text-ink-muted">Fondo claro para contenido principal</p>
+        </div>
+        <div class="ui-card bg-bg-surface text-ink-base border border-white/10 p-6">
+          <h3 class="font-semibold mb-2">Card Surface</h3>
+          <p class="text-ink-muted">Fondo oscuro para contenedores</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Inputs de prueba -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-ink-base mb-4">Inputs</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-ink-base mb-2">Input Light</label>
+          <input class="ui-input w-full rounded-xl border border-stroke-soft bg-white text-ink-inverse placeholder-ink-muted px-4 py-3" placeholder="Escribe aquí..." />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-ink-base mb-2">Input Dark</label>
+          <input class="ui-input-dark w-full rounded-xl border border-white/10 bg-bg-surface text-ink-base placeholder-ink-muted px-4 py-3" placeholder="Escribe aquí..." />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Badges de prueba -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-ink-base mb-4">Badges</h2>
+      <div class="flex flex-wrap gap-2">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-brand-accent text-white">Accent</span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-success text-white">Success</span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-danger text-white">Danger</span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-warn text-white">Warning</span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ink-muted text-ink-base">Muted</span>
+      </div>
+    </div>
+    
+    <!-- Estado del sistema -->
+    <div class="bg-bg-surface p-6 rounded-xl border border-white/10">
+      <h3 class="font-semibold text-ink-base mb-4">Estado del Sistema UI</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-state-success rounded-full"></span>
+          <span class="text-ink-base">Design tokens cargados</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-state-success rounded-full"></span>
+          <span class="text-ink-base">Tailwind configurado</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-state-success rounded-full"></span>
+          <span class="text-ink-base">Colores aplicados</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-state-success rounded-full"></span>
+          <span class="text-ink-base">Componentes funcionando</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

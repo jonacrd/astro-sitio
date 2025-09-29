@@ -1,0 +1,83 @@
+---
+// Página de demostración del nuevo sistema UI
+---
+
+<div class="ui-container ui-section">
+  <h1 class="text-3xl font-bold text-ink-base mb-8">Sistema UI - Demo</h1>
+  
+  <!-- Botones -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-ink-base mb-4">Botones</h2>
+    <div class="flex flex-wrap gap-4">
+      <button class="ui-btn bg-brand-primary text-white hover:bg-brand-primary600">Primary</button>
+      <button class="ui-btn bg-bg-surface text-ink-base hover:bg-[#1A2029] border border-white/10">Secondary</button>
+      <button class="ui-btn bg-transparent text-ink-base hover:bg-white/5">Ghost</button>
+      <button class="ui-btn rounded-full px-5 bg-bg-surface text-ink-base border border-white/10">Pill</button>
+    </div>
+  </section>
+  
+  <!-- Cards -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-ink-base mb-4">Cards</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="ui-card bg-bg-paper text-ink-inverse border border-stroke-soft p-6">
+        <h3 class="font-semibold mb-2">Card Paper</h3>
+        <p class="text-ink-muted">Fondo claro para contenido principal</p>
+      </div>
+      <div class="ui-card bg-bg-surface text-ink-base border border-white/10 p-6">
+        <h3 class="font-semibold mb-2">Card Surface</h3>
+        <p class="text-ink-muted">Fondo oscuro para contenedores</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Inputs -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-ink-base mb-4">Inputs</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-ink-base mb-2">Input Light</label>
+        <input class="ui-input w-full rounded-xl border border-stroke-soft bg-white text-ink-inverse placeholder-ink-muted px-4 py-3" placeholder="Escribe aquí..." />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-ink-base mb-2">Input Dark</label>
+        <input class="ui-input-dark w-full rounded-xl border border-white/10 bg-bg-surface text-ink-base placeholder-ink-muted px-4 py-3" placeholder="Escribe aquí..." />
+      </div>
+    </div>
+  </section>
+  
+  <!-- Badges -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-ink-base mb-4">Badges</h2>
+    <div class="flex flex-wrap gap-2">
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-brand-accent text-white">Accent</span>
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-success text-white">Success</span>
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-danger text-white">Danger</span>
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-state-warn text-white">Warning</span>
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ink-muted text-ink-base">Muted</span>
+    </div>
+  </section>
+  
+  <!-- Colores del sistema -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-ink-base mb-4">Colores del Sistema</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-bg-app p-4 rounded-xl">
+        <div class="text-sm font-medium text-ink-base">bg-app</div>
+        <div class="text-xs text-ink-muted">#0F1115</div>
+      </div>
+      <div class="bg-bg-surface p-4 rounded-xl">
+        <div class="text-sm font-medium text-ink-base">bg-surface</div>
+        <div class="text-xs text-ink-muted">#151A21</div>
+      </div>
+      <div class="bg-bg-paper p-4 rounded-xl border border-stroke-soft">
+        <div class="text-sm font-medium text-ink-inverse">bg-paper</div>
+        <div class="text-xs text-ink-muted">#F7F6F2</div>
+      </div>
+      <div class="bg-brand-primary p-4 rounded-xl">
+        <div class="text-sm font-medium text-white">brand-primary</div>
+        <div class="text-xs text-white/80">#2563EB</div>
+      </div>
+    </div>
+  </section>
+</div>

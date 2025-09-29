@@ -1,0 +1,164 @@
+---
+// Página de prueba de colores
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Test - Sistema UI</title>
+  <style>
+    :root {
+      --bg-app: #0F1115;
+      --bg-surface: #151A21;
+      --bg-paper: #F7F6F2;
+      --border-soft: #E7E3DA;
+      --muted: #9AA4B2;
+      --text-primary: #FFFFFF;
+      --text-inverse: #0E1116;
+      --primary: #2563EB;
+      --primary-600: #1D4ED8;
+      --accent: #F97316;
+      --success: #10B981;
+      --danger: #E11D48;
+      --warning: #F59E0B;
+    }
+    
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .color-card {
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .bg-app { background-color: var(--bg-app); color: var(--text-primary); }
+    .bg-surface { background-color: var(--bg-surface); color: var(--text-primary); }
+    .bg-paper { background-color: var(--bg-paper); color: var(--text-inverse); }
+    .bg-primary { background-color: var(--primary); color: white; }
+    .bg-accent { background-color: var(--accent); color: white; }
+    .bg-success { background-color: var(--success); color: white; }
+    .bg-danger { background-color: var(--danger); color: white; }
+    
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 10px;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-600);
+    }
+    
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .btn-secondary:hover {
+      background-color: #1A2029;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="color: var(--text-primary); font-size: 2rem; margin-bottom: 2rem;">
+      🎨 Test de Colores del Sistema UI
+    </h1>
+    
+    <div class="color-grid">
+      <div class="color-card bg-app">
+        <h3>bg-app</h3>
+        <p>#0F1115</p>
+        <p>Fondo principal de la app</p>
+      </div>
+      
+      <div class="color-card bg-surface">
+        <h3>bg-surface</h3>
+        <p>#151A21</p>
+        <p>Contenedores y cards</p>
+      </div>
+      
+      <div class="color-card bg-paper">
+        <h3>bg-paper</h3>
+        <p>#F7F6F2</p>
+        <p>Fondo claro para productos</p>
+      </div>
+      
+      <div class="color-card bg-primary">
+        <h3>primary</h3>
+        <p>#2563EB</p>
+        <p>Botones principales</p>
+      </div>
+      
+      <div class="color-card bg-accent">
+        <h3>accent</h3>
+        <p>#F97316</p>
+        <p>Badges y ofertas</p>
+      </div>
+      
+      <div class="color-card bg-success">
+        <h3>success</h3>
+        <p>#10B981</p>
+        <p>Estados de éxito</p>
+      </div>
+      
+      <div class="color-card bg-danger">
+        <h3>danger</h3>
+        <p>#E11D48</p>
+        <p>Errores y alertas</p>
+      </div>
+    </div>
+    
+    <div style="margin: 40px 0;">
+      <h2 style="color: var(--text-primary); margin-bottom: 20px;">Botones de Prueba</h2>
+      <a href="#" class="button btn-primary">Botón Primary</a>
+      <a href="#" class="button btn-secondary">Botón Secondary</a>
+    </div>
+    
+    <div style="background-color: var(--bg-surface); padding: 20px; border-radius: 12px; margin: 20px 0;">
+      <h3 style="color: var(--text-primary);">Card de Ejemplo</h3>
+      <p style="color: var(--muted);">Este es un ejemplo de card con el nuevo sistema de colores.</p>
+    </div>
+    
+    <div style="background-color: var(--bg-paper); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid var(--border-soft);">
+      <h3 style="color: var(--text-inverse);">Card Paper</h3>
+      <p style="color: var(--muted);">Este es un ejemplo de card con fondo paper para productos.</p>
+    </div>
+    
+    <div style="margin: 40px 0; text-align: center;">
+      <h2 style="color: var(--text-primary);">✅ Sistema UI Funcionando</h2>
+      <p style="color: var(--muted);">Si ves colores diferentes a los anteriores, el sistema está funcionando correctamente.</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -143,3 +143,4 @@ const { data: sellerProductsData, error: sellerError } = await supabase
 - **Error 400 solucionado** completamente
 
 **¡El sistema está listo para producción!** 🚀
+

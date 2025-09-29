@@ -522,3 +522,4 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 }
 
 fixCartRealFlow();
+

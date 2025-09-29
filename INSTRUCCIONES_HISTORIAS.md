@@ -94,3 +94,4 @@ El sistema de historias estará 100% funcional:
 - ✅ Expiración automática a 24h
 - ✅ Feed mezclado con posts
 - ✅ Sin errores en la consola
+

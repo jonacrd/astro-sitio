@@ -87,3 +87,4 @@ INSERT INTO public.products (id, title, description, price_cents, category, imag
 ON CONFLICT (id) DO NOTHING;
 
 
+

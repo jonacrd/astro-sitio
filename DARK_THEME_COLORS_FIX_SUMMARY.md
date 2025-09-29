@@ -133,3 +133,4 @@ Creé un sistema completo de colores más opacos y suaves:
 
 **Los colores ahora son más opacos y armonizan perfectamente con el tema oscuro.** 🎨✨
 
+

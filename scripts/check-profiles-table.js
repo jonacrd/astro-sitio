@@ -65,3 +65,4 @@ checkProfilesTable()
     console.error('❌ Error fatal:', error);
     process.exit(1);
   });
+

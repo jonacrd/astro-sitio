@@ -329,3 +329,4 @@ BEGIN
     RAISE NOTICE '⚡ Funciones auxiliares creadas';
     RAISE NOTICE '🎉 ¡Sistema listo para usar!';
 END $$;
+

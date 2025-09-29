@@ -565,3 +565,4 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
 }
 
 fixRealDataLoading();
+

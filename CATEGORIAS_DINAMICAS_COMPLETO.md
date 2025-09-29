@@ -191,3 +191,4 @@ const categoryIcons = {
 - **Organización automática** por tipo de negocio
 
 **¡El sistema está listo para producción!** 🚀
+

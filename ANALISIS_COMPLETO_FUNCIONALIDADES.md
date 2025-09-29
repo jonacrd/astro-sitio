@@ -232,3 +232,4 @@ El proyecto actual es **funcional y sólido** para un MVP básico, pero necesita
 
 El sistema tiene una **base técnica excelente** y está bien arquitecturado para escalar.
 
+

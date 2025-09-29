@@ -29,3 +29,4 @@ CREATE POLICY "System can create points" ON user_points
 
 
 
+

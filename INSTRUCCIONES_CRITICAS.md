@@ -196,3 +196,4 @@ npm run dev
 5. **VERIFICAR que no hay productos inactivos visibles**
 
 **¡El sistema está completamente corregido y funcional!** 🚀
+

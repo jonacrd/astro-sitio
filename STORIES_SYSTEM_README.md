@@ -258,3 +258,4 @@ GROUP BY story_id;
 - Limpieza automática de archivos
 
 **¡El sistema de historias está 100% funcional y listo para producción!** 🎉
+

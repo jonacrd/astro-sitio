@@ -1,0 +1,90 @@
+/* FORZAR CAMBIOS UI - SOBRESCRIBIR TODO */
+
+/* Fondo principal */
+body {
+  background-color: #0F1115 !important;
+  color: #FFFFFF !important;
+}
+
+/* Headers y navbars */
+header, nav, .header, .navbar {
+  background-color: #151A21 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* Cards y contenedores */
+.card, .product-card, .bg-gray-800, .bg-gray-900 {
+  background-color: #151A21 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* Botones principales */
+button, .btn, .button {
+  background-color: #2563EB !important;
+  color: white !important;
+  border: none !important;
+}
+
+button:hover, .btn:hover, .button:hover {
+  background-color: #1D4ED8 !important;
+}
+
+/* Botones secundarios */
+.btn-secondary, .button-secondary {
+  background-color: #151A21 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+/* Badges y etiquetas */
+.badge, .tag, .label {
+  background-color: #F97316 !important;
+  color: white !important;
+}
+
+/* Inputs */
+input, textarea, select {
+  background-color: white !important;
+  color: #0E1116 !important;
+  border: 1px solid #E7E3DA !important;
+}
+
+/* Textos */
+h1, h2, h3, h4, h5, h6 {
+  color: #FFFFFF !important;
+}
+
+p, span, div {
+  color: #FFFFFF !important;
+}
+
+/* Links */
+a {
+  color: #2563EB !important;
+}
+
+a:hover {
+  color: #1D4ED8 !important;
+}
+
+/* Productos con fondo claro */
+.product-image, .product-photo {
+  background-color: #F7F6F2 !important;
+  border: 1px solid #E7E3DA !important;
+}
+
+/* Estados */
+.success, .bg-green {
+  background-color: #10B981 !important;
+  color: white !important;
+}
+
+.danger, .bg-red {
+  background-color: #E11D48 !important;
+  color: white !important;
+}
+
+.warning, .bg-yellow {
+  background-color: #F59E0B !important;
+  color: white !important;
+}
