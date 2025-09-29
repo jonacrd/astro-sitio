@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -18,8 +18,34 @@ export const GET: APIRoute = async () => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Obtener pedidos del vendedor específico (sin autenticación para pruebas)
-    const sellerUuid = 'df33248a-5462-452b-a4f1-5d17c8c05a51';
+    // Obtener token de autorización
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No autorizado'
+      }), { 
+        status: 401,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    // Verificar usuario autenticado
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Usuario no autenticado'
+      }), { 
+        status: 401,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    const sellerUuid = user.id;
     
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
@@ -79,6 +105,7 @@ export const GET: APIRoute = async () => {
     // Formatear datos
     const formattedOrders = orders?.map(order => ({
       ...order,
+      buyer_name: order.buyer?.name || 'Cliente',
       items: orderItems[order.id] || []
     })) || [];
 

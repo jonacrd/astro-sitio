@@ -1,385 +1,181 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useCart } from '../../hooks/useCart';
+import React, { useState, useEffect } from 'react';
+import AddToCartButton from './AddToCartButton';
 
-interface SearchResult {
+interface Product {
   id: string;
-  productId: string;
   title: string;
-  description: string;
-  category: string;
+  price_cents: number;
   image_url: string;
-  price: number;
+  seller_name: string;
+  seller_id: string;
   stock: number;
-  sellerId: string;
-  sellerName: string;
-  sellerOnline: boolean;
-  isActive: boolean;
-  productUrl: string;
-  addToCartUrl: string;
-  sellerUrl: string;
+  category: string;
 }
 
 interface SearchBarEnhancedProps {
-  onSubmit?: (query: string) => void;
-  onAddToCart?: (productId: string, sellerId: string) => void;
-  onViewProduct?: (productId: string) => void;
-  onViewSeller?: (sellerId: string) => void;
+  onSearch?: (query: string) => void;
+  onCategoryClick?: (category: string) => void;
+  onSellerClick?: (sellerId: string) => void;
   placeholder?: string;
-  className?: string;
 }
 
-export default function SearchBarEnhanced({ 
-  onSubmit, 
-  onAddToCart,
-  onViewProduct,
-  onViewSeller,
-  placeholder = "¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello...",
-  className = ""
+export default function SearchBarEnhanced({
+  onSearch,
+  onCategoryClick,
+  onSellerClick,
+  placeholder = "¿Qué necesitas?"
 }: SearchBarEnhancedProps) {
   const [query, setQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [groupedResults, setGroupedResults] = useState<Record<string, { seller: any; products: any[] }>>({});
+  const [results, setResults] = useState<Product[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [lastQuery, setLastQuery] = useState('');
-  
-  const inputRef = useRef<HTMLInputElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const { addToCart, loading: cartLoading } = useCart();
+  const [loading, setLoading] = useState(false);
 
-  // Sugerencias de búsqueda
-  const suggestions = [
-    'Cerveza',
-    'Hamburguesa',
-    'Pizza',
-    'Corte de cabello',
-    'Impresiones',
-    'Café',
-    'Pan',
-    'Servicios'
-  ];
+  const handleSearch = async (searchQuery: string) => {
+    if (!searchQuery.trim()) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      await performSearch(query.trim());
-    }
-  };
+    setLoading(true);
+    setShowResults(true);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
-  const performSearch = async (searchQuery: string) => {
     try {
-      setIsSearching(true);
-      setError(null);
-      setShowResults(true);
-      setLastQuery(searchQuery);
-
-      console.log('🔍 Buscando:', searchQuery);
-
-      // Intentar búsqueda inteligente primero
-      let response = await fetch(`/api/nl-search-real?q=${encodeURIComponent(searchQuery)}`);
-      let data = await response.json();
-
-      // Si la búsqueda inteligente falla, usar búsqueda básica
-      if (!data.success || !data.items || data.items.length === 0) {
-        console.log('🔄 Búsqueda inteligente falló, usando búsqueda básica...');
-        response = await fetch(`/api/search/active?q=${encodeURIComponent(searchQuery)}`);
-        data = await response.json();
-      }
-
-      if (!response.ok) {
-        throw new Error('Error en la búsqueda');
-      }
+      console.log('🔍 Buscando en base de datos:', searchQuery);
       
-      if (data.success) {
-        // Adaptar resultados de búsqueda inteligente
-        if (data.items) {
-          const adaptedResults = data.items.map((item: any) => ({
-            id: `${item.sellerId}-${item.productId}`,
-            productId: item.productId,
-            title: item.productTitle,
-            description: item.description,
-            category: item.category,
-            image_url: item.imageUrl,
-            price: Math.round(item.priceCents / 100),
-            price_cents: item.priceCents,
-            stock: item.stock,
-            sellerId: item.sellerId,
-            sellerName: item.sellerName,
-            sellerOnline: item.online || false,
-            isActive: true,
-            productUrl: `/producto/${item.productId}`,
-            addToCartUrl: `/api/cart/add?productId=${item.productId}&sellerId=${item.sellerId}`,
-            sellerUrl: `/vendedor/${item.sellerId}`
-          }));
+      // Usar el endpoint de búsqueda que ya existe
+      const response = await fetch(`/api/search/simple?q=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      
+      console.log('📊 Respuesta de búsqueda:', data);
 
-          setResults(adaptedResults);
-          
-          // Agrupar por vendedor
-          const grouped = adaptedResults.reduce((acc: any, product: any) => {
-            const sellerId = product.sellerId;
-            if (!acc[sellerId]) {
-              acc[sellerId] = {
-                seller: {
-                  id: product.sellerId,
-                  name: product.sellerName,
-                  online: product.sellerOnline
-                },
-                products: []
-              };
-            }
-            acc[sellerId].products.push(product);
-            return acc;
-          }, {});
+      if (data.success && data.data && data.data.results) {
+        const products = data.data.results.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          price_cents: item.price,
+          image_url: item.image || '/img/placeholders/tecnologia.jpg',
+          seller_name: item.sellerName || 'Vendedor',
+          seller_id: item.sellerId,
+          stock: item.stock || 0,
+          category: item.category || 'General'
+        }));
 
-          setGroupedResults(grouped);
-          console.log(`✅ Búsqueda inteligente exitosa: ${adaptedResults.length} productos`);
-        } else {
-          // Usar resultados de búsqueda básica
-          setResults(data.data.results || []);
-          setGroupedResults(data.data.groupedResults || {});
-          console.log(`✅ Búsqueda básica exitosa: ${data.data.total} productos de ${data.data.sellersCount} vendedores`);
-        }
+        setResults(products);
+        console.log('✅ Resultados de búsqueda:', products.length);
       } else {
-        throw new Error(data.error || 'Error en la búsqueda');
+        setResults([]);
+        console.log('⚠️ No se encontraron resultados');
+        console.log('📊 Estructura de datos recibida:', {
+          success: data.success,
+          hasData: !!data.data,
+          hasResults: !!(data.data && data.data.results),
+          resultsLength: data.data?.results?.length || 0
+        });
       }
-
-      // Llamar al callback del padre si existe
-      if (onSubmit) {
-        onSubmit(searchQuery);
-      }
-
-    } catch (err) {
-      console.error('❌ Error en búsqueda:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } catch (error) {
+      console.error('❌ Error en búsqueda:', error);
       setResults([]);
-      setGroupedResults({});
     } finally {
-      setIsSearching(false);
+      setLoading(false);
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    performSearch(suggestion);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(query);
+    onSearch?.(query);
   };
 
-  const handleAddToCart = async (productId: string, sellerId: string, title: string, price_cents: number, image_url?: string) => {
-    console.log('🛒 Añadir al carrito:', productId, sellerId);
-    
-    // Agregar al carrito real
-    const success = await addToCart(productId, sellerId, title, price_cents, 1, image_url);
-    
-    if (success) {
-      console.log('✅ Producto agregado al carrito:', title);
-    } else {
-      console.error('❌ Error agregando al carrito:', title);
-    }
-    
-    // Callback opcional
-    if (onAddToCart) {
-      onAddToCart(productId, sellerId);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch(query);
+      onSearch?.(query);
     }
   };
-
-  const handleViewProduct = (productId: string) => {
-    console.log('👁️ Ver producto:', productId);
-    if (onViewProduct) {
-      onViewProduct(productId);
-    }
-  };
-
-  const handleViewSeller = (sellerId: string) => {
-    console.log('🏪 Ver vendedor:', sellerId);
-    if (onViewSeller) {
-      onViewSeller(sellerId);
-    }
-  };
-
-  // Cerrar resultados al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (resultsRef.current && !resultsRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className="relative">
       {/* Barra de búsqueda */}
       <form onSubmit={handleSubmit} className="relative">
-        <div className="flex gap-2 items-stretch w-full">
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            className="flex-1 rounded-xl px-4 py-3 bg-white text-gray-900 placeholder:text-gray-500 ring-2 ring-white/25 focus:ring-blue-500 focus:outline-none transition-all duration-200"
-            disabled={isSearching}
-          />
-          <button
-            type="submit"
-            disabled={isSearching || !query.trim()}
-            className="btn-primary-opaque rounded-xl px-5 py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95"
-          >
-            {isSearching ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Buscando...</span>
-              </div>
-            ) : (
-              'Buscar'
-            )}
-          </button>
-        </div>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder={placeholder}
+          className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button
+          type="submit"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
       </form>
 
-      {/* Sugerencias */}
-      <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
-        {suggestions.map(suggestion => (
-          <button
-            key={suggestion}
-            onClick={() => handleSuggestionClick(suggestion)}
-            className="tag-opaque shrink-0 text-sm px-3 py-1.5 rounded-full hover:bg-white/20 transition-colors duration-200"
-          >
-            {suggestion}
-          </button>
-        ))}
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div className="mt-3 text-red-100 bg-red-600/70 border border-red-400 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <span className="text-red-200">⚠️</span>
-            <span>{error}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Resultados */}
+      {/* Resultados de búsqueda */}
       {showResults && (
-        <div ref={resultsRef} className="mt-4 bg-gray-900 rounded-xl shadow-lg border border-gray-700 max-h-96 overflow-y-auto">
-          {results.length === 0 ? (
-            <div className="p-6 text-center text-gray-400">
-              <div className="text-4xl mb-2">🔍</div>
-              <p className="text-lg font-medium text-white">No se encontraron productos</p>
-              <p className="text-sm text-gray-400">Intenta con otros términos de búsqueda</p>
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+          {loading ? (
+            <div className="p-4 text-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="text-gray-500 mt-2">Buscando en base de datos...</p>
             </div>
-          ) : (
-            <div className="p-4">
-              {/* Header con icono de robot */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">🤖</span>
-                </div>
-                <h3 className="text-sm text-gray-300">Resultado de búsqueda</h3>
-              </div>
-
-              {/* Query principal */}
-              <div className="mb-6">
-                <h4 className="text-lg font-bold text-white mb-4">
-                  {lastQuery} con delivery gratis ahora:
-                </h4>
-              </div>
-
-              {/* Resultados agrupados por vendedor */}
-              {Object.entries(groupedResults).map(([sellerId, group]) => (
-                <div key={sellerId} className="mb-6 last:mb-0">
-                  {/* Productos del vendedor */}
-                  <div className="space-y-4">
-                    {group.products.map(product => (
-                      <div key={product.id} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
-                        <div className="flex gap-4">
-                          {/* Imagen del producto */}
-                          <div className="w-20 h-20 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
-                            <img
-                              src={product.image_url || '/default-product.png'}
-                              alt={product.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/default-product.png';
-                              }}
-                            />
-                          </div>
-
-                          {/* Información del producto */}
-                          <div className="flex-1 min-w-0">
-                            {/* Badge de disponibilidad */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                DISPONIBLE AHORA
-                              </span>
-                              {group.seller.online && (
-                                <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                                  ONLINE
-                                </span>
-                              )}
-                            </div>
-
-                            <h5 className="font-bold text-white text-lg mb-1">{product.title}</h5>
-                            <p className="text-gray-300 text-sm mb-2">{group.seller.name}</p>
-                            <p className="text-gray-400 text-sm mb-2">Envío gratis</p>
-                            <p className="text-2xl font-bold text-white">${product.price.toLocaleString('es-CL')}</p>
-                          </div>
-                        </div>
-
-                        {/* Botón de acción principal */}
-                        <button
-                          onClick={() => handleAddToCart(product.productId, product.sellerId, product.title, product.price_cents, product.image_url)}
-                          disabled={cartLoading}
-                          className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {cartLoading ? 'AGREGANDO...' : 'PEDIR AHORA'}
-                        </button>
-                      </div>
-                    ))}
+          ) : results.length > 0 ? (
+            <div className="p-2">
+              {results.map((product) => (
+                <div key={product.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg">
+                  <img
+                    src={product.image_url}
+                    alt={product.title}
+                    className="w-12 h-12 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-product.jpg';
+                    }}
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900 text-sm">{product.title}</h3>
+                    <p className="text-gray-500 text-xs">{product.seller_name}</p>
+                    <p className="text-blue-600 font-semibold text-sm">
+                      $${(product.price_cents / 100).toLocaleString()}
+                    </p>
+                    <p className="text-green-600 text-xs">Stock: {product.stock}</p>
                   </div>
+                  <AddToCartButton
+                    productId={product.id}
+                    title={product.title}
+                    price={product.price_cents / 100}
+                    image={product.image_url}
+                    sellerName={product.seller_name}
+                    sellerId={product.seller_id}
+                    className="bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition-colors text-xs"
+                  />
                 </div>
               ))}
-
-              {/* Productos relacionados */}
-              {results.length > 1 && (
-                <div className="mt-6">
-                  <h4 className="text-white font-semibold mb-4">Productos relacionados</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {results.slice(1, 3).map(product => (
-                      <div key={product.id} className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-                        <div className="w-full h-20 bg-gray-700 rounded-lg overflow-hidden mb-2">
-                          <img
-                            src={product.image_url || '/default-product.png'}
-                            alt={product.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/default-product.png';
-                            }}
-                          />
-                        </div>
-                        <p className="text-white text-sm font-medium">{product.title}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            </div>
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-gray-500">No se encontraron productos</p>
             </div>
           )}
         </div>
       )}
+
+      {/* Categorías rápidas */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        {['Electrónicos', 'Ropa', 'Hogar', 'Deportes', 'Libros'].map((category) => (
+          <button
+            key={category}
+            onClick={() => {
+              setQuery(category);
+              handleSearch(category);
+              onCategoryClick?.(category);
+            }}
+            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+          >
+            {category}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

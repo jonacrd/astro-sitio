@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
-import { formatPrice } from '../../lib/money';
+import { formatPrice, pesosToCents } from '../../lib/money';
 import CartSummary from '../checkout/CartSummary';
 import DeliveryInfo from '../checkout/DeliveryInfo';
 import PaymentMethod from '../checkout/PaymentMethod';
@@ -61,10 +61,12 @@ export default function Checkout({}: CheckoutProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('🔐 Verificando autenticación en checkout...');
         const { data: { user } } = await supabase.auth.getUser();
+        console.log('👤 Usuario encontrado:', user ? user.email : 'null');
         setUser(user);
       } catch (error) {
-        console.error('Error checking auth:', error);
+        console.error('❌ Error checking auth:', error);
         setUser(null);
       }
     };
@@ -141,6 +143,28 @@ export default function Checkout({}: CheckoutProps) {
     try {
       if (!user) return;
 
+      // Verificar si ya existe una dirección idéntica
+      const { data: existingAddress, error: checkError } = await supabase
+        .from('user_addresses')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('full_name', deliveryAddress.fullName)
+        .eq('phone', deliveryAddress.phone)
+        .eq('address', deliveryAddress.address)
+        .eq('city', deliveryAddress.city)
+        .eq('state', deliveryAddress.state)
+        .eq('zip_code', deliveryAddress.zipCode)
+        .single();
+
+      if (existingAddress) {
+        console.log('📍 Dirección ya existe, seleccionando existente');
+        setSelectedAddressId(existingAddress.id);
+        setShowNewAddressForm(false);
+        alert('Esta dirección ya está guardada');
+        return;
+      }
+
+      // Si no existe, crear nueva dirección
       const { data, error } = await supabase
         .from('user_addresses')
         .insert({
@@ -230,11 +254,11 @@ export default function Checkout({}: CheckoutProps) {
           cartId: user?.id || 'local',
           productId: item.id,
           title: item.title,
-          priceCents: price, // Ya está en pesos, no convertir
+          priceCents: pesosToCents(price), // Convertir pesos a centavos
           quantity: quantity, // Cambiar qty por quantity para el backend
           sellerId: 'seller_1', // UUID fijo para evitar errores
           sellerName: item.vendor || 'Vendedor',
-          totalCents: price * quantity // Ya está en pesos
+          totalCents: pesosToCents(price * quantity) // Convertir total a centavos
         };
       });
 
@@ -264,7 +288,20 @@ export default function Checkout({}: CheckoutProps) {
   };
 
   const handleCheckout = async () => {
-    if (!user || cartItems.length === 0) {
+    console.log('🛒 Iniciando proceso de checkout...');
+    console.log('👤 Usuario actual:', user ? user.email : 'null');
+    console.log('🛍️ Items en carrito:', cartItems.length);
+    
+    // Verificar si hay sesión activa
+    if (!user) {
+      console.log('🔐 No hay sesión activa, mostrando modal de inicio de sesión');
+      // Disparar evento para mostrar modal de inicio de sesión
+      window.dispatchEvent(new CustomEvent('show-login-modal'));
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      console.log('❌ No hay productos en el carrito');
       alert('No hay productos en el carrito');
       return;
     }
@@ -301,11 +338,20 @@ export default function Checkout({}: CheckoutProps) {
       }, 0);
       console.log('💰 Total calculado en frontend:', calculatedTotal);
 
+      // Obtener token de sesión
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.log('❌ No hay token de sesión');
+        alert('Sesión expirada. Por favor, inicia sesión nuevamente.');
+        return;
+      }
+
       // Usar el flujo de checkout existente que ya funciona
       const response = await fetch('/api/cart/checkout', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           customerName: deliveryAddress.fullName,
@@ -453,7 +499,7 @@ export default function Checkout({}: CheckoutProps) {
       const itemCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   return (
-    <div className="checkout-container min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] pb-24">
+    <div className="checkout-container min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] pb-40">
       <div className="max-w-md mx-auto px-4 py-6">
         {/* Header con botón de volver */}
         <div className="flex items-center gap-4 mb-6">

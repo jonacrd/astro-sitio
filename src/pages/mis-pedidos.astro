@@ -6,28 +6,50 @@ import { getUser, getUserProfile } from '../lib/session'
 ---
 
 <BaseLayout title="Mis Pedidos">
-  <main class="min-h-screen bg-gray-50 pb-20">
+  <main class="min-h-screen bg-gray-900 pb-20">
     <div class="container mx-auto px-4 py-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Mis Pedidos</h1>
-        <p class="text-gray-600">Gestiona tus pedidos, puntos y recompensas</p>
+      <!-- Header con iconos -->
+      <div class="bg-gray-800 px-4 py-4 rounded-lg mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <div class="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full"></div>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-white">Mis Pedidos</h1>
+            <p class="text-gray-400 text-sm">Gestiona tus pedidos y recompensas</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <!-- Notificaciones -->
+          <button class="relative p-2 text-gray-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.5 19.5L9 15l4.5 4.5" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Resumen de puntos -->
-      <div class="mb-8" id="points-summary-container">
+      <div class="mb-6" id="points-summary-container">
         <PointsSummaryCard client:load userId="" />
       </div>
 
       <!-- Filtros y opciones -->
       <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-sm p-4">
+        <div class="bg-gray-800 rounded-lg shadow-sm p-4">
           <div class="flex flex-wrap items-center gap-4">
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-gray-700">Filtrar por estado:</label>
-              <select id="status-filter" class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500">
+              <label class="text-sm font-medium text-gray-300">Filtrar por estado:</label>
+              <select id="status-filter" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-sm text-white focus:outline-none focus:border-blue-500">
                 <option value="">Todos los pedidos</option>
-                <option value="placed">🛒 Realizados (Pendientes)</option>
-                <option value="seller_confirmed">✅ Confirmados por vendedor</option>
+                <option value="pending">🛒 Pendientes</option>
+                <option value="seller_confirmed">✅ Confirmados</option>
                 <option value="delivered">📦 Entregados</option>
                 <option value="completed">🎉 Completados</option>
                 <option value="cancelled">❌ Cancelados</option>
@@ -35,14 +57,14 @@ import { getUser, getUserProfile } from '../lib/session'
             </div>
             
             <div class="flex items-center gap-2">
-              <label class="text-sm font-medium text-gray-700">Mostrar:</label>
+              <label class="text-sm font-medium text-gray-300">Mostrar:</label>
               <label class="flex items-center">
-                <input type="checkbox" id="show-points" class="mr-2" checked>
-                <span class="text-sm text-gray-600">Información de puntos</span>
+                <input type="checkbox" id="show-points" class="mr-2 bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500" checked>
+                <span class="text-sm text-gray-400">Información de puntos</span>
               </label>
               <label class="flex items-center ml-4">
-                <input type="checkbox" id="show-redemption" class="mr-2">
-                <span class="text-sm text-gray-600">Opciones de canje</span>
+                <input type="checkbox" id="show-redemption" class="mr-2 bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500">
+                <span class="text-sm text-gray-400">Opciones de canje</span>
               </label>
             </div>
           </div>
@@ -52,58 +74,58 @@ import { getUser, getUserProfile } from '../lib/session'
       <!-- Estadísticas rápidas -->
       <div class="mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-sm p-4">
+          <div class="bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-700">
             <div class="flex items-center">
-              <div class="p-2 bg-blue-100 rounded-lg">
-                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="p-2 bg-blue-600/20 rounded-lg">
+                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium text-gray-600">Total Pedidos</p>
-                <p class="text-2xl font-bold text-gray-900" id="total-orders">-</p>
+                <p class="text-sm font-medium text-gray-400">Total Pedidos</p>
+                <p class="text-2xl font-bold text-white" id="total-orders">-</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-4">
+          <div class="bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-700">
             <div class="flex items-center">
-              <div class="p-2 bg-green-100 rounded-lg">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="p-2 bg-green-600/20 rounded-lg">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium text-gray-600">Puntos Ganados</p>
-                <p class="text-2xl font-bold text-gray-900" id="total-points-earned">-</p>
+                <p class="text-sm font-medium text-gray-400">Puntos Ganados</p>
+                <p class="text-2xl font-bold text-white" id="total-points-earned">-</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-4">
+          <div class="bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-700">
             <div class="flex items-center">
-              <div class="p-2 bg-yellow-100 rounded-lg">
-                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="p-2 bg-yellow-600/20 rounded-lg">
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium text-gray-600">Puntos Disponibles</p>
-                <p class="text-2xl font-bold text-gray-900" id="total-points-available">-</p>
+                <p class="text-sm font-medium text-gray-400">Puntos Disponibles</p>
+                <p class="text-2xl font-bold text-white" id="total-points-available">-</p>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-4">
+          <div class="bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-700">
             <div class="flex items-center">
-              <div class="p-2 bg-purple-100 rounded-lg">
-                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="p-2 bg-purple-600/20 rounded-lg">
+                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm font-medium text-gray-600">Ahorro Total</p>
-                <p class="text-2xl font-bold text-gray-900" id="total-savings">-</p>
+                <p class="text-sm font-medium text-gray-400">Ahorro Total</p>
+                <p class="text-2xl font-bold text-white" id="total-savings">-</p>
               </div>
             </div>
           </div>
@@ -115,7 +137,7 @@ import { getUser, getUserProfile } from '../lib/session'
         <div id="orders-container">
           <div class="text-center py-8">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-600">Cargando pedidos...</p>
+            <p class="text-gray-400">Cargando pedidos...</p>
           </div>
         </div>
       </div>
@@ -169,53 +191,26 @@ import { getUser, getUserProfile } from '../lib/session'
         root.render(createElement(PointsSummaryCard, { userId: user.id }));
       }
 
-      // Consultar pedidos del comprador con información completa
+      // Consultar pedidos del comprador usando el endpoint
       console.log('🔍 Cargando pedidos para usuario:', user.id);
       
-      // Consulta básica primero (sin columnas que pueden no existir)
-      let { data, error } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          total_cents,
-          status,
-          payment_method,
-          created_at,
-          seller_id,
-          sellers:profiles!orders_seller_id_fkey(name, phone)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Error cargando pedidos básicos:', error);
-        throw error;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No hay sesión activa');
       }
-
-      // Intentar agregar columnas adicionales si existen
-      try {
-        const { data: extendedData, error: extendedError } = await supabase
-          .from('orders')
-          .select(`
-            id,
-            payment_status,
-            expires_at,
-            points_awarded
-          `)
-          .eq('user_id', user.id);
-
-        if (!extendedError && extendedData) {
-          // Combinar datos básicos con extendidos
-          const extendedMap = new Map(extendedData.map(item => [item.id, item]));
-          data = data?.map(order => ({
-            ...order,
-            ...extendedMap.get(order.id)
-          })) || [];
+      
+      const response = await fetch('/api/customer/orders', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
         }
-      } catch (extendedErr) {
-        console.warn('⚠️ No se pudieron cargar columnas extendidas, usando datos básicos:', extendedErr);
-        // Continuar con datos básicos
+      });
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error cargando pedidos');
       }
+      
+      const data = result.data.orders || [];
 
       console.log('📦 Pedidos cargados:', data);
       allOrders = data || [];
@@ -264,8 +259,8 @@ import { getUser, getUserProfile } from '../lib/session'
 
   function renderOrders() {
     const ordersContainer = document.getElementById('orders-container');
-    const showPoints = document.getElementById('show-points')?.checked ?? true;
-    const showRedemption = document.getElementById('show-redemption')?.checked ?? false;
+    const showPoints = (document.getElementById('show-points') as HTMLInputElement)?.checked ?? true;
+    const showRedemption = (document.getElementById('show-redemption') as HTMLInputElement)?.checked ?? false;
 
     if (filteredOrders.length === 0) {
       ordersContainer.innerHTML = `
@@ -279,26 +274,82 @@ import { getUser, getUserProfile } from '../lib/session'
       return;
     }
 
-    // Limpiar contenedor
-    ordersContainer.innerHTML = '';
-    
-    // Renderizar cada pedido con React
-    filteredOrders.forEach(order => {
-      const orderDiv = document.createElement('div');
-      orderDiv.className = 'mb-6';
-      ordersContainer.appendChild(orderDiv);
+    // Renderizar pedidos con HTML directo
+    ordersContainer.innerHTML = filteredOrders.map(order => {
+      const orderId = order.id.substring(0, 8);
+      const date = new Date(order.created_at);
+      const formattedDate = date.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+      const time = date.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const price = (order.total_cents / 100).toFixed(2);
+      const sellerName = order.seller?.name || 'Vendedor';
       
-      const root = createRoot(orderDiv);
-      root.render(createElement(EnhancedOrderCard, {
-        order: order,
-        onStatusChange: () => {
-          console.log('Estado del pedido actualizado');
-          loadBuyerOrders(); // Recargar pedidos
-        },
-        showPointsInfo: showPoints,
-        showRedemption: showRedemption
-      }));
-    });
+      let statusClass = '';
+      let statusText = '';
+      
+      switch (order.status) {
+        case 'pending':
+          statusClass = 'text-yellow-600 bg-yellow-100';
+          statusText = 'Pendiente';
+          break;
+        case 'seller_confirmed':
+          statusClass = 'text-blue-600 bg-blue-100';
+          statusText = 'Confirmado';
+          break;
+        case 'delivered':
+          statusClass = 'text-green-600 bg-green-100';
+          statusText = 'Entregado';
+          break;
+        case 'completed':
+          statusClass = 'text-purple-600 bg-purple-100';
+          statusText = 'Completado';
+          break;
+        case 'cancelled':
+          statusClass = 'text-red-600 bg-red-100';
+          statusText = 'Cancelado';
+          break;
+        default:
+          statusClass = 'text-gray-600 bg-gray-100';
+          statusText = order.status;
+      }
+
+      return `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-4">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">Pedido #${orderId}</h3>
+              <p class="text-sm text-gray-500">${formattedDate}, ${time}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-medium ${statusClass}">
+              ${statusText}
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
+                <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="text-sm text-gray-700">Vendedor: ${sellerName}</span>
+            </div>
+            <span class="text-lg font-bold text-blue-600">$${price}</span>
+          </div>
+          
+          <div class="flex items-center justify-between text-sm text-gray-500">
+            <span>Método: ${order.payment_method || 'Efectivo'}</span>
+            <span>ID: ${order.id}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   async function updateStatistics() {
@@ -355,9 +406,9 @@ import { getUser, getUserProfile } from '../lib/session'
       }
 
       // Actualizar elementos del DOM
-      document.getElementById('total-orders').textContent = totalOrders;
-      document.getElementById('total-points-earned').textContent = totalPointsEarned;
-      document.getElementById('total-points-available').textContent = totalPointsAvailable;
+      document.getElementById('total-orders').textContent = totalOrders.toString();
+      document.getElementById('total-points-earned').textContent = totalPointsEarned.toString();
+      document.getElementById('total-points-available').textContent = totalPointsAvailable.toString();
       document.getElementById('total-savings').textContent = `$${Math.floor(totalSavings / 100).toLocaleString('es-CL')}`;
     } catch (error) {
       console.error('Error actualizando estadísticas:', error);
@@ -365,7 +416,7 @@ import { getUser, getUserProfile } from '../lib/session'
   }
 
   function applyFilters() {
-    const statusFilter = document.getElementById('status-filter')?.value;
+    const statusFilter = (document.getElementById('status-filter') as HTMLSelectElement)?.value;
     
     if (!statusFilter) {
       filteredOrders = [...allOrders];
@@ -404,7 +455,7 @@ import { getUser, getUserProfile } from '../lib/session'
   });
 
   // Función global para recargar pedidos
-  window.refreshOrders = loadBuyerOrders;
+  (window as any).refreshOrders = loadBuyerOrders;
 </script>
 
 <!-- Bottom Navigation -->

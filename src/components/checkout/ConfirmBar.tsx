@@ -16,7 +16,7 @@ export default function ConfirmBar({ total, onCheckout, processing = false }: Co
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-[#0E1626] via-[#0E1626]/95 to-transparent backdrop-blur">
+    <div className="fixed inset-x-0 bottom-20 z-[100] bg-gradient-to-t from-[#0E1626] via-[#0E1626]/95 to-transparent backdrop-blur">
       <div className="px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="text-left">

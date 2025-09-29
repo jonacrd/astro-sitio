@@ -1,169 +1,43 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase-browser';
-import type { User } from '@supabase/supabase-js';
-
-interface AuthState {
-  user: User | null;
-  loading: boolean;
-  isSeller: boolean;
-}
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    loading: true,
-    isSeller: false
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let mounted = true;
-
-    // Verificar sesión inicial
-    const initAuth = async () => {
+    // Obtener sesión inicial
+    const getInitialSession = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        
-        if (!mounted) return;
-
-        if (error || !user) {
-          setAuthState({
-            user: null,
-            loading: false,
-            isSeller: false
-          });
-          return;
-        }
-
-        // Obtener rol del usuario
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_seller')
-          .eq('id', user.id)
-          .single();
-
-        if (mounted) {
-          setAuthState({
-            user,
-            loading: false,
-            isSeller: profile?.is_seller || false
-          });
-        }
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
       } catch (error) {
-        console.error('❌ Error in initAuth:', error);
-        if (mounted) {
-          setAuthState({
-            user: null,
-            loading: false,
-            isSeller: false
-          });
-        }
+        console.error('Error obteniendo sesión inicial:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    initAuth();
+    getInitialSession();
 
     // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
-        
-        console.log('🔄 Auth state changed:', event, session?.user?.email);
-        
-        if (session?.user) {
-          // Obtener rol del usuario
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_seller')
-            .eq('id', session.user.id)
-            .single();
+        console.log('🔄 Estado de autenticación cambiado:', event, session?.user?.email);
+        setUser(session?.user ?? null);
+        setLoading(false);
 
-          if (mounted) {
-            setAuthState({
-              user: session.user,
-              loading: false,
-              isSeller: profile?.is_seller || false
-            });
-          }
-        } else {
-          if (mounted) {
-            setAuthState({
-              user: null,
-              loading: false,
-              isSeller: false
-            });
-          }
+        // Disparar evento personalizado
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth-state-changed', {
+            detail: { user: session?.user, type: event }
+          }));
         }
       }
     );
 
-    // Escuchar eventos personalizados
-    const handleAuthStateChanged = (event: CustomEvent) => {
-      if (!mounted) return;
-      console.log('📡 Custom auth event received:', event.detail);
-      initAuth();
-    };
-
-    window.addEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-      window.removeEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
-  const checkSession = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error || !user) {
-        setAuthState({
-          user: null,
-          loading: false,
-          isSeller: false
-        });
-        return;
-      }
-
-      // Obtener rol del usuario
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('is_seller')
-        .eq('id', user.id)
-        .single();
-
-      setAuthState({
-        user,
-        loading: false,
-        isSeller: profile?.is_seller || false
-      });
-
-    } catch (error) {
-      console.error('❌ Error checking session:', error);
-      setAuthState({
-        user: null,
-        loading: false,
-        isSeller: false
-      });
-    }
-  };
-
-  const logout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setAuthState({
-        user: null,
-        loading: false,
-        isSeller: false
-      });
-    } catch (error) {
-      console.error('❌ Error logging out:', error);
-    }
-  };
-
-  return {
-    ...authState,
-    logout,
-    checkSession
-  };
+  return { user, loading };
 }

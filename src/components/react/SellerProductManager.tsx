@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { formatPrice } from '../../lib/money';
 import { getUser } from '../../lib/session';
 import ImageUpload from './ImageUpload';
 
@@ -240,12 +241,13 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Precio (centavos)
+                        Precio ($)
                       </label>
                       <input
                         type="number"
-                        value={editForm.priceCents}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, priceCents: parseInt(e.target.value) || 0 }))}
+                        step="0.01"
+                        value={editForm.priceCents / 100}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, priceCents: Math.round(parseFloat(e.target.value) * 100) || 0 }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -291,7 +293,7 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <span className="text-lg font-bold text-blue-600">
-                      ${(product.priceCents / 100).toFixed(2)}
+                      {formatPrice(product.priceCents)}
                     </span>
                     <span className="text-sm text-gray-600">
                       Stock: {product.stock}

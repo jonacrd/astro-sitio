@@ -76,7 +76,7 @@ export const GET: APIRoute = async ({ url }) => {
     const sellerIds = sellerProducts.map(sp => sp.seller_id);
     const { data: sellers, error: sError } = await supabase
       .from('profiles')
-      .select('id, name, phone')
+      .select('id, name')
       .in('id', sellerIds);
 
     if (sError) {
@@ -90,68 +90,34 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    // Obtener estados
-    const { data: statuses, error: stError } = await supabase
-      .from('seller_status')
-      .select('seller_id, online')
-      .in('seller_id', sellerIds);
-
-    if (stError) {
-      console.error('Error obteniendo statuses:', stError);
-    }
-
-    // Crear mapas para joins
-    const productMap = products?.reduce((acc, p) => {
-      acc[p.id] = p;
-      return acc;
-    }, {}) || {};
-
-    const sellerMap = sellers?.reduce((acc, s) => {
-      acc[s.id] = s;
-      return acc;
-    }, {}) || {};
-
-    const statusMap = statuses?.reduce((acc, s) => {
-      acc[s.seller_id] = s.online;
-      return acc;
-    }, {}) || {};
-
-    // Formatear datos
-    const formattedProducts = sellerProducts.map(sp => {
-      const product = productMap[sp.product_id];
-      const seller = sellerMap[sp.seller_id];
-      const isOnline = statusMap[sp.seller_id] || false;
-
-      if (!product || !seller) {
-        return null;
-      }
-
+    // Combinar datos
+    const combinedProducts = sellerProducts.map(sp => {
+      const product = products?.find(p => p.id === sp.product_id);
+      const seller = sellers?.find(s => s.id === sp.seller_id);
+      
       return {
-        id: `${sp.seller_id}::${sp.product_id}`,
-        productId: sp.product_id,
-        sellerId: sp.seller_id,
-        title: product.title,
-        description: product.description,
-        category: product.category,
-        imageUrl: product.image_url,
-        priceCents: sp.price_cents,
+        id: sp.product_id,
+        title: product?.title || 'Producto',
+        description: product?.description || '',
+        category: product?.category || 'General',
+        image: product?.image_url || '/img/placeholders/tecnologia.jpg',
+        price: sp.price_cents,
         stock: sp.stock,
-        sellerName: seller.name,
-        sellerPhone: seller.phone,
-        isOnline: isOnline,
-        updatedAt: sp.updated_at,
-        productUrl: `/producto/${sp.product_id}?seller=${sp.seller_id}`,
-        addToCartUrl: `/api/cart/add?sellerProductId=${sp.seller_id}::${sp.product_id}&qty=1`
+        sellerId: sp.seller_id,
+        sellerName: seller?.name || 'Vendedor',
+        active: sp.active,
+        updated_at: sp.updated_at
       };
-    }).filter(Boolean);
+    });
 
-    console.log(`✅ Productos formateados: ${formattedProducts.length}`);
+    console.log(`✅ Productos combinados: ${combinedProducts.length}`);
 
     return new Response(JSON.stringify({
       success: true,
       data: {
-        products: formattedProducts,
-        total: formattedProducts.length
+        products: combinedProducts,
+        total: combinedProducts.length,
+        message: 'Productos cargados exitosamente'
       }
     }), { 
       headers: { 'content-type': 'application/json' }
@@ -168,7 +134,3 @@ export const GET: APIRoute = async ({ url }) => {
     });
   }
 };
-
-
-
-

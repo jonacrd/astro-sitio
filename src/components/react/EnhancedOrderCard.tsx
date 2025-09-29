@@ -76,6 +76,50 @@ export default function EnhancedOrderCard({
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch('/api/orders/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          newStatus: newStatus,
+          userType: 'seller' // Asumimos que es el vendedor quien cambia el estado
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ Estado de orden actualizado:', newStatus);
+        
+        // Disparar evento de notificación
+        window.dispatchEvent(new CustomEvent('order-status-updated', {
+          detail: {
+            orderId: order.id,
+            newStatus: newStatus,
+            updatedAt: new Date().toISOString()
+          }
+        }));
+        
+        // Recargar la página para mostrar el nuevo estado
+        window.location.reload();
+      } else {
+        console.error('❌ Error actualizando estado:', data.error);
+        alert('Error actualizando el estado de la orden: ' + data.error);
+      }
+    } catch (error) {
+      console.error('❌ Error en handleStatusChange:', error);
+      alert('Error actualizando el estado de la orden');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -138,14 +182,14 @@ export default function EnhancedOrderCard({
   const isExpired = order.expires_at && new Date(order.expires_at) < new Date();
 
   return (
-    <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
+    <div className={`bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700 ${className}`}>
       {/* Header del pedido */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-white">
             Pedido #{order.id.substring(0, 8)}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-400">
             {new Date(order.created_at).toLocaleString('es-ES')}
           </p>
           <p className="text-sm text-gray-500">
@@ -153,11 +197,11 @@ export default function EnhancedOrderCard({
           </p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-blue-400">
             {formatPrice(order.total_cents)}
           </div>
           {order.points_awarded && (
-            <div className="text-sm text-green-600 font-medium">
+            <div className="text-sm text-green-400 font-medium">
               +{order.points_awarded} puntos
             </div>
           )}
@@ -191,44 +235,44 @@ export default function EnhancedOrderCard({
 
       {/* Información de puntos */}
       {showPointsInfo && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div className="mb-4 p-3 bg-gray-700 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-yellow-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Puntos</span>
+              <span className="text-sm font-medium text-gray-300">Puntos</span>
             </div>
             {loadingPoints ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-500"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
             ) : pointsInfo ? (
               <div className="text-sm">
-                <span className="text-green-600 font-medium">+{pointsInfo.points_earned || 0} ganados</span>
+                <span className="text-green-400 font-medium">+{pointsInfo.points_earned || 0} ganados</span>
                 {pointsInfo.points_spent && (
-                  <span className="text-red-600 ml-2">-{pointsInfo.points_spent} gastados</span>
+                  <span className="text-red-400 ml-2">-{pointsInfo.points_spent} gastados</span>
                 )}
               </div>
             ) : (
-              <span className="text-sm text-gray-500">Sin información de puntos</span>
+              <span className="text-sm text-gray-400">Sin información de puntos</span>
             )}
           </div>
           
           {pointsInfo?.description && (
-            <p className="text-xs text-gray-600 mt-1">{pointsInfo.description}</p>
+            <p className="text-xs text-gray-400 mt-1">{pointsInfo.description}</p>
           )}
         </div>
       )}
 
       {/* Información de pago */}
-      <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+      <div className="mb-4 p-3 bg-blue-600/20 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            <span className="text-sm font-medium text-gray-700">Método de pago</span>
+            <span className="text-sm font-medium text-gray-300">Método de pago</span>
           </div>
-          <span className="text-sm text-gray-600 capitalize">
+          <span className="text-sm text-gray-400 capitalize">
             {order.payment_method === 'transfer' ? 'Transferencia' : order.payment_method}
           </span>
         </div>
@@ -286,6 +330,37 @@ export default function EnhancedOrderCard({
         >
           👁️ Ver Detalles
         </button>
+
+        {/* Botones para cambiar estado (solo para vendedores) */}
+        {order.status === 'pending' && (
+          <button
+            onClick={() => handleStatusChange('seller_confirmed')}
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm disabled:opacity-50"
+          >
+            {loading ? '⏳' : '✅'} Confirmar Pedido
+          </button>
+        )}
+        
+        {order.status === 'seller_confirmed' && (
+          <button
+            onClick={() => handleStatusChange('delivered')}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+          >
+            {loading ? '⏳' : '🚚'} Marcar como Entregado
+          </button>
+        )}
+        
+        {order.status === 'delivered' && (
+          <button
+            onClick={() => handleStatusChange('completed')}
+            disabled={loading}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm disabled:opacity-50"
+          >
+            {loading ? '⏳' : '✅'} Completar Pedido
+          </button>
+        )}
       </div>
 
       {/* Información adicional */}

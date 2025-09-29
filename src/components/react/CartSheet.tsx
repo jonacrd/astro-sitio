@@ -1,321 +1,175 @@
-import React, { useState, useEffect } from 'react';
-
-interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  image?: string;
-  sellerName: string;
-}
+import React from 'react';
 
 interface CartSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  items?: CartItem[];
+  items: any[];
+  onProceedToCheckout: () => void;
   onUpdateQuantity?: (itemId: string, quantity: number) => void;
   onRemoveItem?: (itemId: string) => void;
-  onCheckout?: () => void;
+  onClearCart?: () => void;
 }
 
-function CartSheet({
-  isOpen,
-  onClose,
-  items = [],
-  onUpdateQuantity,
-  onRemoveItem,
-  onCheckout
+export default function CartSheet({ 
+  isOpen, 
+  onClose, 
+  items, 
+  onProceedToCheckout,
+  onUpdateQuantity, 
+  onRemoveItem, 
+  onClearCart 
 }: CartSheetProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  if (!isOpen) return null;
 
-  // Cargar items del localStorage al montar
-  useEffect(() => {
-    const loadCartItems = () => {
-      try {
-        const stored = localStorage.getItem('cart');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          console.log('🛒 CartSheet: Cargando items del localStorage:', parsed);
-          setCartItems(parsed);
-        }
-      } catch (error) {
-        console.error('❌ Error cargando carrito:', error);
-        setCartItems([]);
-      }
-    };
-
-    loadCartItems();
-  }, []);
-
-  // Escuchar cambios en localStorage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const stored = localStorage.getItem('cart');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        console.log('🛒 CartSheet: Actualizando desde localStorage:', parsed);
-        setCartItems(parsed);
-      }
-    };
-
-    window.addEventListener('cart-updated', handleStorageChange);
-    return () => window.removeEventListener('cart-updated', handleStorageChange);
-  }, []);
-
-  // Función para actualizar cantidad
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      handleRemoveItem(itemId);
-      return;
-    }
-
-    try {
-      const updatedItems = cartItems.map(item => 
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      );
-      
-      setCartItems(updatedItems);
-      localStorage.setItem('cart', JSON.stringify(updatedItems));
-      
-      // Disparar evento
-      window.dispatchEvent(new CustomEvent('cart-updated', { 
-        detail: { cart: updatedItems } 
-      }));
-      
-      console.log('📈 Cantidad actualizada:', itemId, newQuantity);
-    } catch (error) {
-      console.error('❌ Error actualizando cantidad:', error);
-    }
+  // Función segura para obtener total de items
+  const getTotalItems = () => {
+    if (!items || !Array.isArray(items)) return 0;
+    return items.reduce((sum, item) => {
+      if (!item || typeof item.quantity !== 'number') return sum + 1;
+      return sum + item.quantity;
+    }, 0);
   };
 
-  // Función para eliminar item
-  const handleRemoveItem = (itemId: string) => {
-    try {
-      const updatedItems = cartItems.filter(item => item.id !== itemId);
-      setCartItems(updatedItems);
-      localStorage.setItem('cart', JSON.stringify(updatedItems));
-      
-      // Disparar evento
-      window.dispatchEvent(new CustomEvent('cart-updated', { 
-        detail: { cart: updatedItems } 
-      }));
-      
-      console.log('🗑️ Item eliminado:', itemId);
-    } catch (error) {
-      console.error('❌ Error eliminando item:', error);
-    }
+  // Función segura para obtener precio total
+  const getTotalPrice = () => {
+    if (!items || !Array.isArray(items)) return 0;
+    return items.reduce((sum, item) => {
+      if (!item || typeof item.price !== 'number') return sum;
+      const quantity = typeof item.quantity === 'number' ? item.quantity : 1;
+      return sum + (item.price * quantity);
+    }, 0);
   };
 
-  // Función para limpiar carrito
-  const handleClearCart = () => {
-    try {
-      setCartItems([]);
-      localStorage.setItem('cart', '[]');
-      
-      // Disparar evento
-      window.dispatchEvent(new CustomEvent('cart-updated', { 
-        detail: { cart: [] } 
-      }));
-      
-      console.log('🧹 Carrito limpiado');
-    } catch (error) {
-      console.error('❌ Error limpiando carrito:', error);
-    }
+  // Función segura para formatear precio
+  const formatPrice = (price: number) => {
+    if (typeof price !== 'number' || isNaN(price)) return '$0';
+    return '$' + price.toLocaleString();
   };
-
-  // Función para ir al checkout
-  const handleCheckout = () => {
-    console.log('💳 Redirigiendo al checkout...');
-    // Redirigir al checkout real
-    window.location.href = '/checkout';
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsVisible(true);
-      // Prevenir scroll del body
-      document.body.style.overflow = 'hidden';
-    } else {
-      setIsVisible(false);
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
-
-  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  const handleSwipeDown = (e: React.TouchEvent) => {
-    const startY = e.touches[0].clientY;
-    const handleTouchMove = (moveEvent: TouchEvent) => {
-      const currentY = moveEvent.touches[0].clientY;
-      const diff = currentY - startY;
-      
-      if (diff > 100) { // Swipe down threshold
-        onClose();
-        document.removeEventListener('touchmove', handleTouchMove);
-        document.removeEventListener('touchend', handleTouchEnd);
-      }
-    };
-    
-    const handleTouchEnd = () => {
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-    
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
-  };
-
-  if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={handleBackdropClick}
-      />
-      
-      {/* Sheet */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 bg-surface rounded-t-3xl shadow-2xl max-h-[70vh] flex flex-col"
-        onTouchStart={handleSwipeDown}
-      >
-        {/* Handle */}
-        <div className="flex justify-center py-3">
-          <div className="w-12 h-1 bg-white/30 rounded-full" />
-        </div>
-        
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50">
+      <div className="bg-white h-full w-full max-w-md shadow-xl transform transition-transform duration-300 ease-in-out">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">
-              Carrito ({itemCount} {itemCount === 1 ? 'item' : 'items'})
-            </h2>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              aria-label="Cerrar carrito"
-            >
-              ✕
-            </button>
-          </div>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Carrito ({getTotalItems()})
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        
-        {/* Items */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          {cartItems.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🛒</div>
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Tu carrito está vacío
-              </h3>
-              <p className="text-white/70">
-                Agrega algunos productos para comenzar
-              </p>
+
+        {/* Cart Items */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {!items || items.length === 0 ? (
+            <div className="text-center py-8">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h6" />
+              </svg>
+              <p className="text-gray-500 text-lg">Tu carrito está vacío</p>
+              <p className="text-gray-400 text-sm">Agrega algunos productos para comenzar</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-4 bg-surface/50 rounded-xl">
-                  {/* Image */}
-                  <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
-                    {item.image ? (
-                      <img 
-                        src={item.image} 
-                        alt={item.title}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <span className="text-2xl">📦</span>
-                    )}
+              {items.map((item, index) => {
+                // Validar que el item existe y tiene las propiedades necesarias
+                if (!item || typeof item !== 'object') {
+                  console.warn('Item inválido en el carrito:', item);
+                  return null;
+                }
+
+                const itemId = item.id || `item-${index}`;
+                const itemTitle = item.title || 'Producto sin nombre';
+                const itemPrice = typeof item.price === 'number' ? item.price : 0;
+                const itemQuantity = typeof item.quantity === 'number' ? item.quantity : 1;
+                const itemImage = item.image || '/placeholder-product.jpg';
+                const itemSellerName = item.sellerName || 'Vendedor';
+
+                return (
+                  <div key={itemId} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                    <img
+                      src={itemImage}
+                      alt={itemTitle}
+                      className="w-16 h-16 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder-product.jpg';
+                      }}
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 text-sm">{itemTitle}</h3>
+                      <p className="text-gray-500 text-xs">{itemSellerName}</p>
+                      <p className="text-blue-600 font-semibold text-sm">
+                        {formatPrice(itemPrice)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onUpdateQuantity?.(itemId, Math.max(1, itemQuantity - 1))}
+                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
+                        </svg>
+                      </button>
+                      <span className="w-8 text-center font-medium">{itemQuantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity?.(itemId, itemQuantity + 1)}
+                        className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => onRemoveItem?.(itemId)}
+                        className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center transition-colors ml-2"
+                      >
+                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-medium truncate">
-                      {item.title}
-                    </h4>
-                    <p className="text-white/70 text-sm truncate">
-                      {item.sellerName}
-                    </p>
-                    <p className="text-accent font-semibold">
-                      ${item.price.toLocaleString()}
-                    </p>
-                  </div>
-                  
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                      className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                    >
-                      −
-                    </button>
-                    <span className="text-white font-medium min-w-[2rem] text-center">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                      className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-                  
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/30 transition-colors"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
-        
+
         {/* Footer */}
-        {cartItems.length > 0 && (
-          <div className="px-6 py-4 border-t border-white/10">
+        {items && items.length > 0 && (
+          <div className="border-t border-gray-200 p-4">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-white/70">Total:</span>
-              <span className="text-2xl font-bold text-white">
-                ${total.toLocaleString()}
+              <span className="text-lg font-semibold text-gray-900">Total:</span>
+              <span className="text-xl font-bold text-blue-600">
+                {formatPrice(getTotalPrice())}
               </span>
             </div>
-            
-            {/* Botón Limpiar Carrito */}
-            <button
-              onClick={handleClearCart}
-              className="w-full mb-3 bg-red-500/20 text-red-400 py-2 px-4 rounded-lg hover:bg-red-500/30 transition-colors"
-            >
-              🧹 Limpiar Carrito
-            </button>
-            
-            <button
-              onClick={handleCheckout}
-              className="w-full bg-accent text-primary py-4 rounded-2xl font-semibold hover:bg-accent/90 transition-colors duration-200 mb-20"
-            >
-              💳 Pagar Ahora
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  onClearCart?.();
+                  console.log('🧹 Carrito limpiado');
+                }}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Limpiar Carrito
+              </button>
+              <button
+                onClick={onProceedToCheckout}
+                className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Proceder al Pago
+              </button>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 }
-
-export default CartSheet;

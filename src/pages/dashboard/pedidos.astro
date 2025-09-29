@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import SellerGuard from '../../components/react/SellerGuard.tsx'
 import OrderNotification from '../../components/react/OrderNotification.tsx'
+import EnhancedOrderCard from '../../components/react/EnhancedOrderCard.tsx'
+import React from 'react'
 ---
 
 <BaseLayout title="Mis Pedidos">
@@ -35,7 +37,7 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
             <div class="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-              <span class="text-xs text-white font-bold">3</span>
+              <span class="text-xs text-white font-bold" id="notification-count">0</span>
             </div>
           </button>
         </div>
@@ -47,10 +49,10 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
           <button class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap" data-filter="all">
             Todos
           </button>
-          <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-blue-500 text-blue-500" data-filter="placed">
-            Pendientes <span class="ml-1 px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs">1</span>
+          <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-blue-500 text-blue-500" data-filter="pending">
+            Pendientes <span class="ml-1 px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs" id="pending-count">0</span>
           </button>
-          <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-blue-500 text-blue-500" data-filter="seller_confirmed">
+          <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-blue-500 text-blue-500" data-filter="confirmed">
             Confirmado
           </button>
           <button class="filter-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap border border-blue-500 text-blue-500" data-filter="completed">
@@ -72,7 +74,7 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
     </main>
     
     <!-- Notificación de nuevos pedidos -->
-    <OrderNotification client:load sellerId="" />
+    <OrderNotification client:load sellerId="8f0a8848-8647-41e7-b9d0-323ee000d379" />
   </SellerGuard>
 </BaseLayout>
 
@@ -94,49 +96,60 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
 <script>
   import { supabase } from '../../lib/supabase-browser';
 
-  // Cargar pedidos del vendedor
+  // UUID específico para Diego Ramírez (vendedor activo)
+  const SELLER_ID = '8f0a8848-8647-41e7-b9d0-323ee000d379';
+
+  // Cargar pedidos del vendedor usando endpoint
   async function loadOrders(filter = 'all') {
+    console.log('🔍 Cargando pedidos con filtro:', filter);
+    
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      // Obtener token de autorización
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No hay sesión activa');
+      }
       
-      if (userError || !user) {
-        console.error('Error obteniendo usuario:', userError);
-        return;
+      const response = await fetch('/api/seller/orders-simple', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Error cargando pedidos');
+      }
+      
+      let orders = result.data.orders || [];
+      
+      // Aplicar filtro
+      if (filter === 'pending') {
+        orders = orders.filter(order => order.status === 'pending');
+      } else if (filter === 'confirmed') {
+        orders = orders.filter(order => order.status === 'seller_confirmed');
+      } else if (filter === 'completed') {
+        orders = orders.filter(order => order.status === 'completed');
       }
 
-      let query = supabase
-        .from('orders')
-        .select(`
-          id,
-          status,
-          total_cents,
-          created_at,
-          user_id
-        `)
-        .eq('seller_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (filter !== 'all') {
-        query = query.eq('status', filter);
-      }
-
-      const { data: orders, error: ordersError } = await query;
-
-      if (ordersError) {
-        console.error('Error cargando pedidos:', ordersError);
-        return;
-      }
-
-      await renderOrders(orders || []);
+      console.log(`✅ Pedidos obtenidos: ${orders.length}`);
+      await renderOrders(orders);
+      
+      // Actualizar contadores
+      updateCounters(orders);
+      
     } catch (error) {
-      console.error('Error cargando pedidos:', error);
+      console.error('❌ Error cargando pedidos:', error);
+      showError('Error inesperado: ' + error.message);
     }
   }
 
-  // Renderizar pedidos
+  // Renderizar pedidos con HTML directo
   async function renderOrders(orders) {
     const container = document.getElementById('orders-container');
     if (!container) return;
+
+    console.log(`🎨 Renderizando ${orders.length} pedidos`);
 
     if (orders.length === 0) {
       container.innerHTML = `
@@ -152,20 +165,16 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
       return;
     }
 
-    // Obtener nombres de compradores
-    const buyerIds = [...new Set(orders.map(order => order.user_id))];
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('id, name')
-      .in('id', buyerIds);
-
+    // Usar nombres de compradores del endpoint
     const profilesMap = {};
-    if (!profilesError && profiles) {
-      profiles.forEach(profile => {
-        profilesMap[profile.id] = profile.name;
-      });
-    }
+    orders.forEach(order => {
+      if (order.buyer_name) {
+        profilesMap[order.user_id] = order.buyer_name;
+      }
+    });
+    console.log('✅ Nombres de compradores:', profilesMap);
 
+    // Renderizar pedidos con HTML directo
     container.innerHTML = orders.map(order => {
       const orderId = order.id.substring(0, 8);
       const date = new Date(order.created_at);
@@ -185,7 +194,7 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
       let statusText = '';
       
       switch (order.status) {
-        case 'placed':
+        case 'pending':
           statusClass = 'text-yellow-500';
           statusText = 'Pendiente';
           break;
@@ -193,9 +202,13 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
           statusClass = 'text-blue-500';
           statusText = 'Confirmado';
           break;
-        case 'completed':
+        case 'delivered':
           statusClass = 'text-green-500';
           statusText = 'Entregado';
+          break;
+        case 'completed':
+          statusClass = 'text-purple-500';
+          statusText = 'Completado';
           break;
         case 'cancelled':
           statusClass = 'text-red-500';
@@ -207,8 +220,8 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
       }
 
       return `
-        <div class="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors">
-          <div class="flex items-start justify-between mb-2">
+        <div class="bg-gray-800 rounded-lg p-4 mb-4 hover:bg-gray-750 transition-colors">
+          <div class="flex items-start justify-between mb-3">
             <div>
               <h3 class="text-white font-semibold">Pedido #${orderId}</h3>
               <p class="text-gray-400 text-sm">${formattedDate}, ${time}</p>
@@ -216,7 +229,7 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
             <span class="${statusClass} font-medium">${statusText}</span>
           </div>
           
-          <div class="flex items-center justify-between">
+          <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
               <div class="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
                 <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -227,10 +240,138 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
             </div>
             <span class="text-blue-500 font-semibold">$${price}</span>
           </div>
+          
+          <!-- Botones de estado -->
+          <div class="flex gap-2 flex-wrap">
+            ${order.status === 'pending' ? `
+              <button 
+                onclick="updateOrderStatus('${order.id}', 'seller_confirmed')"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                ✅ Confirmar Pedido
+              </button>
+            ` : ''}
+            
+            ${order.status === 'seller_confirmed' ? `
+              <button 
+                onclick="updateOrderStatus('${order.id}', 'delivered')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                🚚 Marcar como Entregado
+              </button>
+            ` : ''}
+            
+            ${order.status === 'delivered' ? `
+              <button 
+                onclick="updateOrderStatus('${order.id}', 'completed')"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              >
+                ✅ Completar Pedido
+              </button>
+            ` : ''}
+            
+            <button 
+              onclick="viewOrderDetails('${order.id}')"
+              class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+            >
+              👁️ Ver Detalles
+            </button>
+          </div>
         </div>
       `;
     }).join('');
+    
+    console.log('✅ Pedidos renderizados correctamente');
   }
+
+  // Actualizar contadores
+  function updateCounters(orders) {
+    const pendingCount = orders.filter(order => order.status === 'pending').length;
+    const totalCount = orders.length;
+    
+    const pendingCountElement = document.getElementById('pending-count');
+    const notificationCountElement = document.getElementById('notification-count');
+    
+    if (pendingCountElement) {
+      pendingCountElement.textContent = pendingCount.toString();
+    }
+    
+    if (notificationCountElement) {
+      notificationCountElement.textContent = totalCount.toString();
+    }
+    
+    console.log(`📊 Contadores actualizados: ${pendingCount} pendientes, ${totalCount} total`);
+  }
+
+  // Mostrar error
+  function showError(message) {
+    const container = document.getElementById('orders-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+      <div class="text-center py-8">
+        <div class="w-16 h-16 bg-red-900 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <p class="text-red-400">${message}</p>
+      </div>
+    `;
+  }
+
+  // Actualizar estado de orden
+  async function updateOrderStatus(orderId, newStatus) {
+    try {
+      console.log('🔄 Actualizando estado de orden:', orderId, newStatus);
+      
+      const response = await fetch('/api/orders/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          newStatus: newStatus,
+          userType: 'seller'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ Estado de orden actualizado:', newStatus);
+        
+        // Disparar evento de notificación
+        window.dispatchEvent(new CustomEvent('order-status-updated', {
+          detail: {
+            orderId: orderId,
+            newStatus: newStatus,
+            updatedAt: new Date().toISOString()
+          }
+        }));
+        
+        // Recargar pedidos
+        await loadOrders();
+      } else {
+        console.error('❌ Error actualizando estado:', data.error);
+        alert('Error actualizando el estado de la orden: ' + data.error);
+      }
+    } catch (error) {
+      console.error('❌ Error en updateOrderStatus:', error);
+      alert('Error actualizando el estado de la orden');
+    }
+  }
+
+  // Ver detalles de orden
+  function viewOrderDetails(orderId) {
+    console.log('👁️ Ver detalles de orden:', orderId);
+    alert('Funcionalidad de ver detalles - próximamente');
+  }
+
+  // Hacer funciones globales
+  (window as any).updateOrderStatus = updateOrderStatus;
+  (window as any).viewOrderDetails = viewOrderDetails;
 
   // Manejar filtros
   function setupFilters() {
@@ -238,6 +379,8 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
     
     filterButtons.forEach(button => {
       button.addEventListener('click', () => {
+        console.log('🔍 Filtro clickeado:', (button as HTMLButtonElement).dataset.filter);
+        
         // Remover clase active de todos los botones
         filterButtons.forEach(btn => {
           btn.classList.remove('active');
@@ -250,13 +393,21 @@ import OrderNotification from '../../components/react/OrderNotification.tsx'
         
         // Cargar pedidos con el filtro seleccionado
         const filter = (button as HTMLButtonElement).dataset.filter;
-        loadOrders(filter);
+        loadOrders(filter).catch(error => {
+          console.error('❌ Error cargando pedidos:', error);
+        });
       });
     });
   }
 
   // Inicializar cuando se carga la página
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Inicializando dashboard de pedidos...');
+    
+    // Importar React
+    const React = await import('react');
+    window.React = React;
+    
     loadOrders();
     setupFilters();
   });
