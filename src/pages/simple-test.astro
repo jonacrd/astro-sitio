@@ -1,0 +1,94 @@
+---
+// Página de prueba súper simple
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Simple</title>
+  <style>
+    body {
+      background-color: #0F1115 !important;
+      color: #FFFFFF !important;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .card {
+      background-color: #151A21 !important;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    .button {
+      background-color: #2563EB !important;
+      color: white !important;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    
+    .button:hover {
+      background-color: #1D4ED8 !important;
+    }
+    
+    .badge {
+      background-color: #F97316 !important;
+      color: white !important;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .product-card {
+      background-color: #F7F6F2 !important;
+      color: #0E1116 !important;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 1px solid #E7E3DA !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Test Simple - Cambios Forzados</h1>
+  
+  <div class="card">
+    <h2>Card Normal</h2>
+    <p>Este es un card con fondo #151A21</p>
+    <button class="button">Botón Azul</button>
+    <span class="badge">Badge Naranja</span>
+  </div>
+  
+  <div class="product-card">
+    <h2>Product Card</h2>
+    <p>Este es un card de producto con fondo #F7F6F2</p>
+    <button class="button">Agregar al Carrito</button>
+  </div>
+  
+  <div class="card">
+    <h2>Estados</h2>
+    <button class="button" style="background-color: #10B981 !important;">Éxito</button>
+    <button class="button" style="background-color: #E11D48 !important;">Error</button>
+    <button class="button" style="background-color: #F59E0B !important;">Advertencia</button>
+  </div>
+  
+  <div class="card">
+    <h2>✅ Si ves estos colores, el sistema funciona:</h2>
+    <ul>
+      <li>Fondo principal: #0F1115 (muy oscuro)</li>
+      <li>Cards: #151A21 (gris oscuro)</li>
+      <li>Botones: #2563EB (azul)</li>
+      <li>Badges: #F97316 (naranja)</li>
+      <li>Product cards: #F7F6F2 (beige claro)</li>
+    </ul>
+  </div>
+</body>
+</html>

@@ -125,3 +125,4 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 - **Datos reales** cargándose correctamente
 
 **¡El sistema está listo para producción!** 🚀
+

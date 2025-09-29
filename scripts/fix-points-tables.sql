@@ -226,3 +226,4 @@ SELECT
   'seller_reward_tiers' as tabla,
   COUNT(*) as registros
 FROM seller_reward_tiers;
+

@@ -161,3 +161,4 @@ function verifyMasonryDesign() {
 }
 
 verifyMasonryDesign();
+

@@ -70,3 +70,4 @@ async function checkSellerProductsTable() {
 }
 
 checkSellerProductsTable();
+

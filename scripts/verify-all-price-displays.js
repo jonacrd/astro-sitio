@@ -186,3 +186,4 @@ async function verifyAllPriceDisplays() {
 }
 
 verifyAllPriceDisplays();
+

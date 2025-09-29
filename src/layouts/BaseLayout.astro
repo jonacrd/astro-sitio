@@ -4,6 +4,9 @@ import Header from '@components/react/Header.tsx'
 import BottomNavAuth from '@components/react/BottomNavAuth.tsx'
 import NotificationSystem from '@components/react/NotificationSystem.tsx'
 import GlobalLoginHandler from '@components/react/GlobalLoginHandler.tsx'
+import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
+import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
+import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 
 export interface Props {
   title?: string
@@ -24,6 +27,133 @@ const {
   <title>{title}</title>
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <!-- FORZAR CAMBIOS UI -->
+  <link rel="stylesheet" href="/src/styles/force-ui-override.css">
+  
+  <!-- Design Tokens -->
+  <style>
+    :root {
+      /* Neutros cálidos (amables con fotos blancas) */
+      --bg-app: #0F1115;              /* fondo app (oscuro, no negro puro) */
+      --bg-surface: #151A21;          /* contenedores oscuros */
+      --bg-paper: #F7F6F2;            /* "papel" para cards de producto */
+      --border-soft: #E7E3DA;         /* borde sutil sobre paper */
+      --muted: #9AA4B2;               /* textos secundarios */
+      --text-primary: #FFFFFF;
+      --text-inverse: #0E1116;
+
+      /* Accentos */
+      --primary: #2563EB;             /* CTA principal (azul) */
+      --primary-600: #1D4ED8;
+      --accent: #F97316;              /* badges/ofertas */
+      --success: #10B981;
+      --danger: #E11D48;
+      --warning: #F59E0B;
+
+      /* Radius & sombras */
+      --radius: 16px;
+      --shadow-elev: 0 8px 28px -12px rgba(0,0,0,.45);
+
+      /* Tipografía */
+      --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Noto Sans", Arial, sans-serif;
+    }
+
+    /* Utilidades globales */
+    .ui-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .ui-section {
+      padding: 2rem 0;
+    }
+
+    .ui-card {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-elev);
+    }
+
+    .ui-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      padding: 0 1rem;
+      height: 2.75rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .ui-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .ui-link {
+      color: var(--primary);
+      transition: color 0.2s;
+    }
+
+    .ui-link:hover {
+      color: var(--primary-600);
+    }
+
+    /* Break-inside para masonry */
+    .break-inside-avoid {
+      break-inside: avoid;
+    }
+
+    /* Safe area para navbars */
+    .ui-navbar-top {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .ui-navbar-bottom {
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Focus visible mejorado */
+    .ui-focus-visible {
+      outline: none;
+    }
+
+    .ui-focus-visible:focus {
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* Estados de botones */
+    .ui-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Inputs con contraste correcto */
+    .ui-input {
+      background-color: white;
+      color: var(--text-inverse);
+    }
+
+    .ui-input::placeholder {
+      color: var(--muted);
+    }
+
+    .ui-input-dark {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+    }
+
+    .ui-input-dark::placeholder {
+      color: var(--muted);
+    }
+  </style>
   
   <!-- Importar CSS de prueba -->
   <link rel="stylesheet" href="/src/styles/test.css">
@@ -51,17 +181,17 @@ const {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#0E1626] text-white min-h-screen">
+<body class="min-h-screen" style="background-color: var(--bg-app); color: var(--text-primary);">
   <!-- Header Navigation -->
-  <Header client:load />
+  <HeaderWrapper client:load />
 
   <!-- Contenido principal -->
-  <main class="min-h-screen bg-[#0E1626]">
+  <main class="min-h-screen" style="background-color: var(--bg-app);">
     <slot />
   </main>
 
   <!-- Bottom Navigation -->
-  <BottomNavAuth client:load />
+  <BottomNavWrapper client:load />
 
   <!-- Notificaciones del carrito -->
   <CartNotification client:load />
@@ -69,8 +199,11 @@ const {
   <!-- Sistema de notificaciones -->
   <NotificationSystem client:load />
 
+  <!-- Login Modal -->
+  <LoginModalWrapper client:load />
+
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-12">
+  <footer class="bg-bg-surface text-ink-base py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Información de la tienda -->

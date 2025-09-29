@@ -112,3 +112,4 @@ return <ProfileDropdown onNavigate={handleNavigate} />;
 
 **El botón de perfil ahora funciona como dropdown con todas las opciones esperadas.** 🎉
 
+

@@ -235,3 +235,4 @@ curl "https://tu-proyecto.supabase.dev/api/points/summary?userId=test-user-id"
 Los errores se deben a **tablas faltantes** en la base de datos. La solución es ejecutar el script `fix-points-tables.sql` en Supabase SQL Editor, que creará todas las tablas necesarias con las relaciones correctas y políticas RLS apropiadas.
 
 **¡Una vez ejecutado el script, el sistema de puntos funcionará perfectamente!** 🎉
+

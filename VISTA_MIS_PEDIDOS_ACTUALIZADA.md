@@ -230,3 +230,4 @@ La vista "Mis Pedidos" ahora es una **experiencia completa de gestión de recomp
 - 🚀 **Está 100% funcional**: Todo el sistema de recompensas integrado
 
 **¡La vista "Mis Pedidos" está ahora completamente actualizada y muestra todo el sistema de recompensas implementado!** 🎉
+

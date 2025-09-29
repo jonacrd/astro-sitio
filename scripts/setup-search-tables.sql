@@ -176,3 +176,4 @@ $$ LANGUAGE plpgsql;
 -- 10. Verificar configuración
 SELECT 'FTS configuration completed successfully' as status;
 
+

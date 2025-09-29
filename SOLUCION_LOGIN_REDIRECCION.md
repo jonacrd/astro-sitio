@@ -178,3 +178,4 @@ if (data.user) {
 5. **Sistema funcional** → Usuario puede usar todas las funciones
 
 **¡El sistema de login y redirección está 100% funcional!** 🚀
+

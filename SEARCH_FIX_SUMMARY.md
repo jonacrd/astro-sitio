@@ -128,3 +128,4 @@ category: product.category
 
 **La búsqueda ahora muestra datos reales de la base de datos en lugar de información ficticia.** 🎉
 
+

@@ -1,0 +1,89 @@
+/**
+ * Design Tokens - Sistema de diseño consistente
+ * Carga globalmente en el layout raíz
+ */
+
+:root {
+  /* Neutros cálidos (amables con fotos blancas) */
+  --bg-app: #0F1115;              /* fondo app (oscuro, no negro puro) */
+  --bg-surface: #151A21;          /* contenedores oscuros */
+  --bg-paper: #F7F6F2;            /* "papel" para cards de producto */
+  --border-soft: #E7E3DA;         /* borde sutil sobre paper */
+  --muted: #9AA4B2;               /* textos secundarios */
+  --text-primary: #FFFFFF;
+  --text-inverse: #0E1116;
+
+  /* Accentos */
+  --primary: #2563EB;             /* CTA principal (azul) */
+  --primary-600: #1D4ED8;
+  --accent: #F97316;              /* badges/ofertas */
+  --success: #10B981;
+  --danger: #E11D48;
+  --warning: #F59E0B;
+
+  /* Radius & sombras */
+  --radius: 16px;
+  --shadow-elev: 0 8px 28px -12px rgba(0,0,0,.45);
+
+  /* Tipografía */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Noto Sans", Arial, sans-serif;
+}
+
+/* Utilidades globales */
+.ui-container {
+  @apply max-w-7xl mx-auto px-4;
+}
+
+.ui-section {
+  @apply py-8;
+}
+
+.ui-card {
+  @apply rounded-xl shadow-elev;
+}
+
+.ui-btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 h-11 font-semibold transition focus:outline-none focus:ring-2 focus:ring-brand-primary;
+}
+
+.ui-link {
+  @apply text-brand-primary hover:text-brand-primary600 transition-colors;
+}
+
+/* Break-inside para masonry */
+.break-inside-avoid {
+  break-inside: avoid;
+}
+
+/* Safe area para navbars */
+.ui-navbar-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.ui-navbar-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Focus visible mejorado */
+.ui-focus-visible {
+  @apply focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-bg-app;
+}
+
+/* Estados de botones */
+.ui-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Inputs con contraste correcto */
+.ui-input {
+  @apply bg-white text-ink-inverse placeholder-ink-muted border-stroke-soft focus:ring-2 focus:ring-brand-primary;
+}
+
+.ui-input-dark {
+  @apply bg-bg-surface text-ink-base placeholder-ink-muted border-white/10 focus:ring-2 focus:ring-brand-primary;
+}

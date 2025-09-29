@@ -106,3 +106,4 @@ CREATE POLICY "Users can view own points" ON user_points
 
 
 
+

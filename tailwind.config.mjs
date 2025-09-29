@@ -4,16 +4,40 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ['var(--font-sans)'],
       },
       colors: {
-        // Tokens de diseño para feed tipo red social - Más oscuros
-        primary: "#0A0A0A", // Negro profundo, fondo principal
-        surface: "#1A1A1A", // Cards y superficies más oscuras
-        muted: "#2A2A2A", // Elementos secundarios más oscuros
-        accent: "#F8C20A", // Llamados a la acción/etiquetas
-        success: "#16A34A", // Estado "abierto"/delivery
-        dark: "#111111", // Fondo alternativo más oscuro
+        // Design tokens del sistema UI
+        bg: { 
+          app: 'var(--bg-app)', 
+          surface: 'var(--bg-surface)', 
+          paper: 'var(--bg-paper)' 
+        },
+        ink: { 
+          base: 'var(--text-primary)', 
+          inverse: 'var(--text-inverse)', 
+          muted: 'var(--muted)' 
+        },
+        brand: { 
+          primary: 'var(--primary)', 
+          primary600: 'var(--primary-600)', 
+          accent: 'var(--accent)' 
+        },
+        state: { 
+          success: 'var(--success)', 
+          danger: 'var(--danger)', 
+          warn: 'var(--warning)' 
+        },
+        stroke: { 
+          soft: 'var(--border-soft)' 
+        },
+        // Mantener colores existentes para compatibilidad
+        primary: "#0A0A0A",
+        surface: "#1A1A1A",
+        muted: "#2A2A2A",
+        accent: "#F8C20A",
+        success: "#16A34A",
+        dark: "#111111",
       },
       backgroundImage: {
         // Gradiente brand de Town
@@ -32,10 +56,23 @@ export default {
         "elevation-3": "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)",
       },
       borderRadius: {
-        // Radio de borde de Town
-        "2xl": "1rem", // 16px
-        "3xl": "1.5rem", // 24px
-        "4xl": "2rem", // 32px
+        // Design tokens
+        xl: 'var(--radius)',
+        // Mantener radios existentes
+        "2xl": "1rem",
+        "3xl": "1.5rem", 
+        "4xl": "2rem",
+      },
+      boxShadow: {
+        // Design tokens
+        elev: 'var(--shadow-elev)',
+        // Mantener sombras existentes
+        "card": "0 10px 30px rgba(0, 0, 0, 0.25)",
+        "card-hover": "0 15px 40px rgba(0, 0, 0, 0.35)",
+        "card-inset": "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
+        "elevation-1": "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
+        "elevation-2": "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)",
+        "elevation-3": "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)",
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",

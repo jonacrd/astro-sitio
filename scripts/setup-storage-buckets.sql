@@ -192,3 +192,4 @@ CREATE INDEX IF NOT EXISTS idx_storage_objects_name ON storage.objects(name);
 -- SELECT get_public_url('receipts', 'user123/receipt.jpg');
 -- SELECT * FROM get_storage_stats();
 -- SELECT cleanup_orphaned_receipts();
+

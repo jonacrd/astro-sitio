@@ -186,3 +186,4 @@ query = query.order('price_cents', { ascending: false });
 4. **Consulta corregida** - Sin columnas inexistentes
 
 **¡El feed está completamente funcional y listo para producción!** 🎯
+

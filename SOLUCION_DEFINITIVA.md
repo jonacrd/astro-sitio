@@ -197,3 +197,4 @@ npm run dev
 6. **VERIFICAR que aparecen 246 productos activos del vendedor**
 
 **¡El sistema está completamente configurado y funcional!** 🚀
+

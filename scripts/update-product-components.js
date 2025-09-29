@@ -173,3 +173,4 @@ function updateProductComponents() {
 }
 
 updateProductComponents();
+

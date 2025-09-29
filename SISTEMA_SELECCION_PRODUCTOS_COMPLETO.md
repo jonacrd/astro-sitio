@@ -178,3 +178,4 @@ Los vendedores ahora pueden:
 - **Datos reales** para mejor experiencia
 
 **¡El sistema de selección de productos está 100% funcional y listo para usar!** 🛒✨
+

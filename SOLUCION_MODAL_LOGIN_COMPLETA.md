@@ -175,3 +175,4 @@ showLoginModal('login');
 - **UI responsive** y atractiva
 
 **¡El sistema de autenticación y historias está 100% funcional!** 🚀
+

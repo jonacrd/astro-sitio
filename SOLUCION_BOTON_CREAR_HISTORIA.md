@@ -115,3 +115,4 @@ Usuario autenticado → Click "Crear Historia" → Modal se abre → Subir media
 5. **¡Disfruta del sistema completo!**
 
 **¡El sistema de historias para vendedores está 100% funcional!** 🚀
+

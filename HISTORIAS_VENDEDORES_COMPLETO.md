@@ -167,3 +167,4 @@ Se ha implementado un sistema completo de historias para vendedores que expiran 
 - ✅ **Sin errores** en la consola
 
 **¡Los vendedores ya pueden crear historias de sus productos que desaparecen en 24 horas!** 🚀
+

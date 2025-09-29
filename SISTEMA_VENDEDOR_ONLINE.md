@@ -125,3 +125,4 @@ node scripts/test-seller-status-system.js
 **¡El sistema de vendedor online/offline está completamente funcional!** 🎉
 
 Ahora los vendedores pueden controlar su visibilidad y los compradores ven primero a los vendedores disponibles.
+

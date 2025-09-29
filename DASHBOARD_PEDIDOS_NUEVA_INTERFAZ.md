@@ -239,3 +239,4 @@ function setupFilters() {
 - **100% funcional** y responsive
 
 **¡El sistema de dashboard/pedidos está completamente implementado y listo para producción!** 🚀
+

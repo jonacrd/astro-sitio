@@ -236,3 +236,4 @@ npm run dev
 6. **VERIFICAR que solo aparecen productos activos**
 
 **¡El sistema está completamente corregido y funcional!** 🚀
+

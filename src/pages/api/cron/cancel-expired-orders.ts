@@ -61,3 +61,4 @@ export const GET: APIRoute = async ({ request }) => {
 
 // También permitir POST para llamadas programáticas
 export const POST = GET;
+

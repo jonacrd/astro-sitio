@@ -7,6 +7,13 @@ export function formatPrice(cents: number): string {
     return '$0';
   }
   
+  // CORRECCIÓN: Si el precio es muy alto (>$1000), probablemente está mal
+  // y necesita ser dividido por 100 adicional
+  if (cents > 100000) { // Más de $1000
+    console.log('🔧 Detectado precio sospechoso:', cents, 'dividiendo por 100 adicional');
+    cents = cents / 100;
+  }
+  
   // SIEMPRE tratar como centavos y dividir por 100 para obtener pesos
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',

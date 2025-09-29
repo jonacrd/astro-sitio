@@ -299,3 +299,4 @@ SELECT
 FROM auth.users 
 WHERE id NOT IN (SELECT user_id FROM user_consents WHERE consent_key = 'stories_creation')
 ON CONFLICT (user_id, consent_key) DO NOTHING;
+

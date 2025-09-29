@@ -263,3 +263,4 @@ async function testSmartSearch() {
 }
 
 testSmartSearch();
+
