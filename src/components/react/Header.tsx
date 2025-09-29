@@ -8,15 +8,47 @@ import { supabase } from '../../lib/supabase-browser';
 export default function Header() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  
-  // Log cuando cambie el estado del carrito
-  useEffect(() => {
-    console.log('🛒 Estado del carrito cambió:', { cartOpen });
-  }, [cartOpen]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Función para cargar items del carrito
+  const loadCartItems = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      console.log('🛒 Cargando items del carrito desde localStorage:', cart);
+      
+      // Validar que cart es un array
+      if (!Array.isArray(cart)) {
+        console.warn('Cart no es un array, inicializando como array vacío');
+        localStorage.setItem('cart', '[]');
+        setCartItems([]);
+        setCartCount(0);
+        return;
+      }
+      
+      // Filtrar items válidos
+      const validItems = cart.filter(item => {
+        if (!item || typeof item !== 'object') return false;
+        if (!item.id) return false;
+        if (typeof item.price !== 'number' || isNaN(item.price)) return false;
+        return true;
+      });
+      
+      setCartItems(validItems);
+      setCartCount(validItems.length);
+      
+      console.log('✅ Items del carrito cargados:', validItems);
+      console.log('📊 Contador del carrito actualizado:', validItems.length);
+    } catch (error) {
+      console.error('❌ Error cargando items del carrito:', error);
+      // Limpiar localStorage corrupto
+      localStorage.setItem('cart', '[]');
+      setCartItems([]);
+      setCartCount(0);
+    }
+  };
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -24,38 +56,9 @@ export default function Header() {
         const user = await getUser();
         if (user) {
           setUserId(user.id);
-          // Cargar contadores reales
-          loadCounters(user.id);
         }
       } catch (error) {
         console.error('Error loading user data:', error);
-      }
-    };
-
-    // Función para cargar items del carrito
-    const loadCartItems = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        console.log('🛒 Cargando items del carrito desde localStorage:', cart);
-        
-        // Convertir formato de localStorage a formato de CartItem
-        const cartItems = cart.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          quantity: item.quantity || 1,
-          image: item.image,
-          sellerName: item.vendor || 'Vendedor'
-        }));
-        
-        setCartItems(cartItems);
-        setCartCount(cartItems.length);
-        
-        console.log('✅ Items del carrito cargados:', cartItems);
-      } catch (error) {
-        console.error('❌ Error cargando items del carrito:', error);
-        setCartItems([]);
-        setCartCount(0);
       }
     };
 
@@ -77,27 +80,13 @@ export default function Header() {
 
   const loadCounters = async (userId: string) => {
     try {
-      // Usar localStorage para evitar errores de Supabase
-      console.log('📊 Cargando contadores desde localStorage para evitar errores de DB');
-      
       // Notificaciones desde localStorage
       const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
       const unreadNotifications = notifications.filter((n: any) => !n.read);
       setUnreadCount(unreadNotifications.length);
-
-      // Carrito desde localStorage
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const totalItems = cart.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
-      setCartCount(totalItems);
-      
-      console.log('📊 Contadores cargados:', { 
-        notifications: unreadNotifications.length, 
-        cartItems: totalItems 
-      });
     } catch (error) {
       console.error('Error loading counters:', error);
       setUnreadCount(0);
-      setCartCount(0);
     }
   };
 
@@ -110,6 +99,69 @@ export default function Header() {
     console.log('🛒 Abriendo carrito...');
     setCartOpen(true);
     console.log('🛒 Estado después de setCartOpen:', { cartOpen: true });
+  };
+
+  const handleCartClose = () => {
+    console.log('🛒 Cerrando carrito...');
+    setCartOpen(false);
+  };
+
+  const handleProceedToCheckout = async () => {
+    console.log('🛒 Procediendo al checkout...');
+    setCartOpen(false);
+    
+    // Verificar si hay sesión activa
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('👤 Usuario encontrado:', user ? user.email : 'null');
+      
+      if (!user) {
+        console.log('🔐 No hay sesión activa, mostrando modal de inicio de sesión');
+        // Disparar evento para mostrar modal de inicio de sesión
+        window.dispatchEvent(new CustomEvent('show-login-modal'));
+        return;
+      }
+      
+      // Si hay sesión, redirigir al checkout
+      console.log('✅ Usuario autenticado, redirigiendo al checkout');
+      window.location.href = '/checkout';
+    } catch (error) {
+      console.error('❌ Error verificando autenticación:', error);
+      // En caso de error, mostrar modal de inicio de sesión
+      window.dispatchEvent(new CustomEvent('show-login-modal'));
+    }
+  };
+
+  const handleUpdateQuantity = (itemId: string, quantity: number) => {
+    console.log('🔄 Actualizando cantidad:', itemId, quantity);
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = cart.map((item: any) => 
+        item.id === itemId ? { ...item, quantity: Math.max(1, quantity) } : item
+      );
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      loadCartItems();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    console.log('🗑️ Removiendo item:', itemId);
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = cart.filter((item: any) => item.id !== itemId);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      loadCartItems();
+    } catch (error) {
+      console.error('Error removing item:', error);
+    }
+  };
+
+  const handleClearCart = () => {
+    console.log('🧹 Limpiando carrito');
+    localStorage.setItem('cart', '[]');
+    loadCartItems();
   };
 
   return (
@@ -178,39 +230,22 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Panel de Notificaciones Real */}
-        <NotificationsPanel
-          isOpen={notificationsOpen}
-          onClose={() => setNotificationsOpen(false)}
-          userId={userId}
-        />
+      {/* Panel de Notificaciones */}
+      <NotificationsPanel
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        userId={userId}
+      />
 
-      {/* Carrito Original */}
+      {/* Carrito funcional */}
       <CartSheet
         isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
+        onClose={handleCartClose}
         items={cartItems}
-        onUpdateQuantity={(itemId, quantity) => {
-          console.log('🔄 Actualizando cantidad:', itemId, quantity);
-          // Actualizar localStorage
-          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-          const updatedCart = cart.map((item: any) => 
-            item.id === itemId ? { ...item, quantity } : item
-          );
-          localStorage.setItem('cart', JSON.stringify(updatedCart));
-          loadCartItems(); // Recargar items
-        }}
-        onRemoveItem={(itemId) => {
-          console.log('🗑️ Removiendo item:', itemId);
-          // Remover de localStorage
-          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-          const updatedCart = cart.filter((item: any) => item.id !== itemId);
-          localStorage.setItem('cart', JSON.stringify(updatedCart));
-          loadCartItems(); // Recargar items
-        }}
-        onCheckout={() => {
-          console.log('💳 Procesando checkout');
-        }}
+        onProceedToCheckout={handleProceedToCheckout}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveItem}
+        onClearCart={handleClearCart}
       />
     </>
   );

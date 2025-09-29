@@ -2,8 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SearchBarEnhanced from '../components/react/SearchBarEnhanced.tsx'
 import QuickActions from '../components/react/QuickActions.tsx'
-import DynamicGridBlocksSimple from '../components/react/DynamicGridBlocksSimple.tsx'
-import MixedFeedSimple from '../components/react/MixedFeedSimple.tsx'
+import RealGridBlocks from '../components/react/RealGridBlocks.tsx'
+import RealProductFeed from '../components/react/RealProductFeed.tsx'
 import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
 ---
@@ -64,26 +64,26 @@ import SaleModal from '../components/react/SaleModal.tsx'
       }}
     />
 
-    <!-- Grid Dinámico de 4 Bloques -->
-    <DynamicGridBlocksSimple 
-      client:load 
-      onAddToCart={(productId) => {
-        console.log('Add to cart:', productId);
-        // TODO: Implementar añadir al carrito
-      }}
-      onViewProduct={(productId) => {
-        console.log('View product:', productId);
-        // TODO: Implementar ver producto
-      }}
-      onContactService={(serviceId) => {
-        console.log('Contact service:', serviceId);
-        // TODO: Implementar contacto con servicio
-      }}
-    />
+        <!-- Grid Dinámico de 4 Bloques - DATOS REALES -->
+        <RealGridBlocks 
+          client:load 
+          onAddToCart={(productId) => {
+            console.log('Add to cart:', productId);
+            // TODO: Implementar añadir al carrito
+          }}
+          onViewProduct={(productId) => {
+            console.log('View product:', productId);
+            // TODO: Implementar ver producto
+          }}
+          onContactService={(serviceId) => {
+            console.log('Contact service:', serviceId);
+            // TODO: Implementar contacto con servicio
+          }}
+        />
 
-    <!-- Feed Principal - Mezclado -->
+    <!-- Feed Principal - DATOS REALES -->
     <main class="pb-20">
-      <MixedFeedSimple 
+      <RealProductFeed 
         client:load 
         className=""
       />

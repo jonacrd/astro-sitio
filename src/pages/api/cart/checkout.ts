@@ -23,6 +23,18 @@ export const POST: APIRoute = async (context) => {
       );
     }
 
+    // Obtener token de autorización
+    const authHeader = context.request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No autorizado - Token requerido'
+      }), { 
+        status: 401,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
     // Configurar Supabase
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -38,6 +50,22 @@ export const POST: APIRoute = async (context) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verificar usuario autenticado
+    const token = authHeader.split(' ')[1];
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Usuario no autenticado'
+      }), { 
+        status: 401,
+        headers: { 'content-type': 'application/json' }
+      });
+    }
+
+    console.log('👤 Usuario autenticado:', user.email);
 
     // Obtener items del carrito desde el body de la request
     const cartItems = body.cartItems || [
@@ -77,29 +105,105 @@ export const POST: APIRoute = async (context) => {
       });
     }
 
-    // Usar UUIDs existentes de la base de datos
-    const clientUuid = '98e2217c-5c17-4970-a7d1-ae1bea6d3027'; // Cliente existente
-    const sellerUuid = 'df33248a-5462-452b-a4f1-5d17c8c05a51'; // Vendedor existente
+    // Usar el ID del usuario autenticado
+    const clientUuid = user.id; // Usuario autenticado
+    const sellerUuid = '8f0a8848-8647-41e7-b9d0-323ee000d379'; // Diego Ramírez (vendedor activo)
     
-    // Crear la orden en la base de datos usando la estructura existente
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        user_id: clientUuid, // UUID existente para usuario
-        seller_id: sellerUuid, // UUID existente para vendedor
-        total_cents: totalCents,
-        status: 'pending',
-        payment_method: paymentMethod || 'cash',
-        delivery_cents: 0, // Costo de entrega
-        delivery_address: deliveryAddress ? JSON.stringify(deliveryAddress) : null,
-        delivery_notes: orderNotes || null,
-        created_at: new Date().toISOString()
-      })
-      .select()
+    console.log('👤 Usuario ID:', clientUuid);
+    console.log('🏪 Vendedor ID:', sellerUuid);
+    
+    console.log('🎯 Verificando carrito existente o creando uno nuevo...');
+    
+    // 1. Verificar si ya existe un carrito para este usuario y vendedor
+    const { data: existingCart, error: findError } = await supabase
+      .from('carts')
+      .select('id')
+      .eq('user_id', clientUuid)
+      .eq('seller_id', sellerUuid)
       .single();
 
+    let cart;
+    
+    if (existingCart) {
+      // Usar carrito existente
+      console.log('✅ Usando carrito existente:', existingCart.id);
+      cart = existingCart;
+      
+      // Limpiar items existentes del carrito
+      const { error: deleteError } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('cart_id', cart.id);
+        
+      if (deleteError) {
+        console.error('❌ Error limpiando carrito existente:', deleteError);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Error limpiando carrito existente: ' + deleteError.message
+        }), { 
+          status: 500,
+          headers: { 'content-type': 'application/json' }
+        });
+      }
+      
+      console.log('✅ Carrito existente limpiado');
+    } else {
+      // Crear nuevo carrito
+      const { data: newCart, error: cartError } = await supabase
+        .from('carts')
+        .insert({
+          user_id: clientUuid,
+          seller_id: sellerUuid,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (cartError) {
+        console.error('❌ Error creando carrito:', cartError);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Error creando carrito: ' + cartError.message
+        }), { 
+          status: 500,
+          headers: { 'content-type': 'application/json' }
+        });
+      }
+
+      console.log('✅ Carrito nuevo creado:', newCart.id);
+      cart = newCart;
+    }
+
+    // 2. Agregar items al carrito temporal
+    for (const item of cartItems) {
+      const { error: itemError } = await supabase
+        .from('cart_items')
+        .insert({
+          cart_id: cart.id,
+          product_id: item.productId,
+          title: item.title,
+          price_cents: item.priceCents,
+          qty: item.quantity
+        });
+
+      if (itemError) {
+        console.log('⚠️ Error agregando item al carrito:', itemError.message);
+        // Continuar con el siguiente item
+      } else {
+        console.log('✅ Item agregado al carrito:', item.title);
+      }
+    }
+
+    // 3. Usar la función place_order que otorga puntos automáticamente
+    const { data: orderResult, error: orderError } = await supabase
+      .rpc('place_order', {
+        p_user_id: clientUuid,
+        p_seller_id: sellerUuid,
+        p_payment_method: paymentMethod || 'cash'
+      });
+
     if (orderError) {
-      console.error('❌ Error creando orden:', orderError);
+      console.error('❌ Error en función place_order:', orderError);
       return new Response(JSON.stringify({
         success: false,
         error: 'Error creando la orden: ' + orderError.message
@@ -109,30 +213,22 @@ export const POST: APIRoute = async (context) => {
       });
     }
 
-    console.log('✅ Orden creada:', order);
-
-    // Crear items de la orden (usando la estructura existente si existe)
-    for (const item of cartItems) {
-      // Verificar si la tabla order_items existe
-      const { error: itemError } = await supabase
-        .from('order_items')
-        .insert({
-          order_id: order.id,
-          product_id: item.productId,
-          product_title: item.title,
-          price_cents: item.priceCents,
-          quantity: item.quantity,
-          seller_id: sellerUuid, // UUID existente para vendedor
-          seller_name: item.sellerName
-        });
-
-      if (itemError) {
-        console.log('⚠️ Tabla order_items no existe o tiene estructura diferente:', itemError.message);
-        // Continuar sin items de orden por ahora
-      } else {
-        console.log('✅ Item de orden creado');
-      }
+    if (!orderResult.success) {
+      console.error('❌ Error en resultado de place_order:', orderResult.error);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Error en la orden: ' + orderResult.error
+      }), { 
+        status: 500,
+        headers: { 'content-type': 'application/json' }
+      });
     }
+
+    console.log('✅ Orden creada con puntos:', orderResult);
+    console.log('🎯 Puntos otorgados:', orderResult.pointsAdded);
+
+    // Los items ya fueron creados por la función place_order, no necesitamos crearlos de nuevo
+    console.log('✅ Items de la orden ya fueron creados por place_order');
 
     // Crear notificación para el vendedor (usando la estructura existente si existe)
     const { error: notificationError } = await supabase
@@ -143,7 +239,7 @@ export const POST: APIRoute = async (context) => {
         title: 'Nueva Orden Recibida',
         message: `Tienes una nueva orden #${orderCode} de ${customerName}`,
         data: {
-          orderId: order.id,
+          orderId: orderResult.orderId,
           orderCode: orderCode,
           customerName: customerName,
           totalCents: totalCents
@@ -163,7 +259,11 @@ export const POST: APIRoute = async (context) => {
         orderCode: orderCode,
         totalCents: totalCents,
         message: "Orden creada exitosamente",
-        orderId: order.id
+        orderId: orderResult.orderId,
+        pointsAdded: orderResult.pointsAdded || 0,
+        pointsMessage: orderResult.pointsAdded > 0 ? 
+          `¡Felicidades! Has ganado ${orderResult.pointsAdded} puntos por tu compra` : 
+          'No se otorgaron puntos para esta compra'
       }),
       {
         status: 200,

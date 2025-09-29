@@ -2,6 +2,8 @@
 import CartNotification from '@components/react/CartNotification.tsx'
 import Header from '@components/react/Header.tsx'
 import BottomNavAuth from '@components/react/BottomNavAuth.tsx'
+import NotificationSystem from '@components/react/NotificationSystem.tsx'
+import GlobalLoginHandler from '@components/react/GlobalLoginHandler.tsx'
 
 export interface Props {
   title?: string
@@ -64,6 +66,9 @@ const {
   <!-- Notificaciones del carrito -->
   <CartNotification client:load />
 
+  <!-- Sistema de notificaciones -->
+  <NotificationSystem client:load />
+
   <!-- Footer -->
   <footer class="bg-gray-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -103,5 +108,8 @@ const {
       </div>
     </div>
   </footer>
+
+  <!-- Manejador global de inicio de sesión -->
+  <GlobalLoginHandler client:load />
 </body>
 </html>

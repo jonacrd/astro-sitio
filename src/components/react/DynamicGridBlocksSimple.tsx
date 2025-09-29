@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AddToCartButton from './AddToCartButton';
 import { supabase } from '../../lib/supabase-browser';
 import { useCart } from '../../hooks/useCart';
 

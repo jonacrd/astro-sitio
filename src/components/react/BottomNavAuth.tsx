@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUser } from '../../lib/session';
 import { supabase } from '../../lib/supabase-browser';
-import LoginModal from './LoginModal';
+import FixedLoginModal from './FixedLoginModal';
 
 interface BottomNavAuthProps {
   role?: 'buyer' | 'seller';
@@ -209,13 +209,17 @@ export default function BottomNavAuth({
         </div>
       </nav>
 
-      {/* Modal de Login */}
-      <LoginModal
+      {/* Modal de Login Corregido */}
+      <FixedLoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
-        onSuccess={() => {
+        onLoginSuccess={(user) => {
+          console.log('✅ Login exitoso desde BottomNav:', user.email);
+          setIsAuthenticated(true);
           // Recargar la página para actualizar el estado de autenticación
-          window.location.reload();
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
         }}
       />
     </>

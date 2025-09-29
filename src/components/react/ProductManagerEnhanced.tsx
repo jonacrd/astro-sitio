@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { formatPrice } from '../../lib/money';
 
 interface Product {
   id: string;
@@ -267,11 +268,19 @@ export default function ProductManagerEnhanced() {
   const handleUpdateProduct = async (price: number, stock: number, active: boolean) => {
     if (!editingProduct) return;
 
+    console.log('🔧 Actualizando producto:', {
+      productId: editingProduct.product_id,
+      price: price,
+      priceCents: Math.round(price * 100),
+      stock: stock,
+      active: active
+    });
+
     try {
       const { error } = await supabase
         .from('seller_products')
         .update({
-          price_cents: price * 100,
+          price_cents: Math.round(price * 100), // Convertir pesos a centavos
           stock: stock,
           active: active
         })
@@ -675,11 +684,26 @@ interface EditProductModalProps {
 }
 
 function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
+  // Mostrar precio en pesos para el usuario, convertir a centavos al guardar
   const [price, setPrice] = useState(product.price_cents / 100);
   const [stock, setStock] = useState(product.stock);
   const [active, setActive] = useState(product.active);
 
+  console.log('📝 Modal cargado con producto:', {
+    productId: product.product_id,
+    priceCents: product.price_cents,
+    pricePesos: product.price_cents / 100,
+    stock: product.stock,
+    active: product.active
+  });
+
   const handleSave = () => {
+    console.log('💾 Guardando producto:', {
+      price: price,
+      priceCents: Math.round(price * 100),
+      stock: stock,
+      active: active
+    });
     onSave(price, stock, active);
   };
 

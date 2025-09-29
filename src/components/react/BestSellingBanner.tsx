@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatPrice } from "../../lib/money";
 
 interface Product {
   id: number;
@@ -149,7 +150,7 @@ export default function BestSellingBanner({
 
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                           <div className="text-3xl font-bold text-red-600">
-                            ${price.toFixed(2)}
+                            {formatPrice(product.priceCents)}
                           </div>
                           <div className="flex items-center gap-2">
                             <span

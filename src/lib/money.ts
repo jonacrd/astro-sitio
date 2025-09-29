@@ -7,14 +7,7 @@ export function formatPrice(cents: number): string {
     return '$0';
   }
   
-  // Si el precio es muy grande, probablemente ya está en pesos, no centavos
-  if (cents > 1000) {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(cents);
-  }
+  // SIEMPRE tratar como centavos y dividir por 100 para obtener pesos
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP',
@@ -27,6 +20,20 @@ export function formatPrice(cents: number): string {
  */
 export function dollarsToCents(dollars: number): number {
   return Math.round(dollars * 100);
+}
+
+/**
+ * Convertir precio en pesos chilenos a centavos
+ */
+export function pesosToCents(pesos: number): number {
+  return Math.round(pesos * 100);
+}
+
+/**
+ * Convertir centavos a pesos chilenos
+ */
+export function centsToPesos(cents: number): number {
+  return cents / 100;
 }
 
 /**
