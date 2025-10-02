@@ -31,7 +31,6 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
     // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔄 Auth state changed:', event, session?.user?.email);
       if (session?.user) {
         setIsAuthenticated(true);
         setUserEmail(session.user.email || '');
@@ -73,10 +72,8 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
   };
 
   const handleLoginClick = () => {
-    console.log('🔐 CLICK EN INICIAR SESIÓN');
-    setShowLoginModal(true);
     setIsOpen(false);
-    console.log('🔐 showLoginModal debería ser true ahora');
+    setShowLoginModal(true);
   };
 
   if (!isAuthenticated) {
@@ -219,15 +216,71 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
       )}
 
       {/* Modal de login */}
-      {console.log('🔐 ProfileDropdown - showLoginModal:', showLoginModal)}
-      <FixedLoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLoginSuccess={(user) => {
-          setIsAuthenticated(true);
-          setUserEmail(user.email || '');
-        }}
-      />
+      {showLoginModal && (
+        <div 
+          onClick={() => setShowLoginModal(false)}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="tu@email.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  type="button"
+                  className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                  Iniciar Sesión
+                </button>
+                
+                <button
+                  type="button"
+                  className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                >
+                  Registrarse
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

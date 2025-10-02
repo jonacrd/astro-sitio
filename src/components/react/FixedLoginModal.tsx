@@ -193,13 +193,9 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
     }
   };
 
-  console.log('🔐 FixedLoginModal - isOpen:', isOpen);
-  
   if (!isOpen) {
     return null;
   }
-
-  console.log('🔐 FixedLoginModal - RENDERIZANDO');
 
   return (
     <div 
@@ -210,27 +206,45 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        backgroundColor: 'rgba(255, 0, 0, 0.9)', // ROJO MUY VISIBLE
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 99999
+        zIndex: 999999,
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        padding: 0
       }}
     >
       <div 
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'yellow', // AMARILLO MUY VISIBLE
           borderRadius: '1rem',
           padding: '2rem',
           maxWidth: '28rem',
           width: '90%',
           maxHeight: '90vh',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          border: '5px solid red',
+          fontSize: '1.5rem',
+          fontWeight: 'bold'
         }}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
+          <div style={{
+            backgroundColor: 'red',
+            color: 'white',
+            padding: '8px',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: 'bold'
+          }}>
+            MODAL FUNCIONANDO
+          </div>
           <div style={{
             backgroundColor: 'lime',
             color: 'black',
