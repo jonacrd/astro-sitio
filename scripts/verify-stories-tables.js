@@ -71,3 +71,5 @@ verifyTables()
     process.exit(1);
   });
 
+
+

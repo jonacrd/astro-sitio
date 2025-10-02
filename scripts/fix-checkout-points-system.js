@@ -348,3 +348,5 @@ async function fixCheckoutPointsSystem() {
 
 fixCheckoutPointsSystem();
 
+
+

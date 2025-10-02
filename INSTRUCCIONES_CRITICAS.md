@@ -197,3 +197,5 @@ npm run dev
 
 **¡El sistema está completamente corregido y funcional!** 🚀
 
+
+

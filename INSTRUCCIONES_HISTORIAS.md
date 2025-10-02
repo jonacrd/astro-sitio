@@ -95,3 +95,5 @@ El sistema de historias estará 100% funcional:
 - ✅ Feed mezclado con posts
 - ✅ Sin errores en la consola
 
+
+

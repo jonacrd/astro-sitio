@@ -176,3 +176,5 @@ showLoginModal('login');
 
 **¡El sistema de autenticación y historias está 100% funcional!** 🚀
 
+
+

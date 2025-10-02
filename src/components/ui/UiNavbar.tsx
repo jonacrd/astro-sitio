@@ -14,3 +14,5 @@ export function UiNavbar({ children, className = '' }: UiNavbarProps) {
     </nav>
   );
 }
+
+

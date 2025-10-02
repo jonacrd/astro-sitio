@@ -328,3 +328,5 @@ COMMENT ON FUNCTION place_order_with_expiration(UUID, UUID, VARCHAR, INTEGER) IS
 COMMENT ON FUNCTION calculate_redeemable_points(UUID, UUID, INTEGER) IS 'Función para calcular puntos disponibles para canje según configuración del vendedor';
 COMMENT ON VIEW user_points_summary IS 'Vista resumen de puntos por usuario y vendedor con estadísticas';
 
+
+

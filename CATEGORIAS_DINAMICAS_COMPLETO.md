@@ -192,3 +192,5 @@ const categoryIcons = {
 
 **¡El sistema está listo para producción!** 🚀
 
+
+

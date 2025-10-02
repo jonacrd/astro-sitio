@@ -196,3 +196,5 @@ Después de ejecutar los scripts SQL:
 
 **¡El sistema de "Mis Pedidos" está 100% corregido y mejorado!** 🚀
 
+
+

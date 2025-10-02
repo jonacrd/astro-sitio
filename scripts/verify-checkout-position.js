@@ -93,3 +93,5 @@ function verifyCheckoutPosition() {
 
 verifyCheckoutPosition();
 
+
+

@@ -154,3 +154,5 @@ import NotificationsPanel from './NotificationsPanel';
 **La aplicación ahora funciona sin errores en la consola.** 🎉
 
 
+
+

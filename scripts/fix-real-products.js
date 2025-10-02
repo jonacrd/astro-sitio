@@ -594,3 +594,5 @@ export default function SearchBarEnhanced({
 
 fixRealProducts();
 
+
+

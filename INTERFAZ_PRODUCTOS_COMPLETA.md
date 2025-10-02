@@ -153,3 +153,5 @@ La interfaz ahora tiene:
 
 **¡La interfaz de productos está 100% implementada con el diseño oscuro, categorías divididas, búsqueda con autocompletado y todas las funcionalidades solicitadas!** 🛒✨
 
+
+

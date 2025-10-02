@@ -150,3 +150,5 @@ const handleConfigClick = () => {
 
 **¡La funcionalidad de edición discreta está completamente operativa y lista para producción!** 🚀
 
+
+

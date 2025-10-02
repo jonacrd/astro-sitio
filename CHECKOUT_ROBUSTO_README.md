@@ -256,3 +256,5 @@ SELECT cleanup_orphaned_receipts();
 
 MIT License - ver archivo LICENSE para más detalles.
 
+
+

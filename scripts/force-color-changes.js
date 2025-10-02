@@ -46,3 +46,5 @@ console.log('1. Reiniciar servidor');
 console.log('2. Limpiar cache');
 console.log('3. Visitar /color-test');
 console.log('4. Comparar con página principal');
+
+

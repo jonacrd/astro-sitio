@@ -176,3 +176,5 @@ useEffect(() => {
 
 **¡El sistema está 100% funcional y estable!** 🚀
 
+
+

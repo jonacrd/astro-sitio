@@ -7,29 +7,32 @@ export default {
         sans: ['var(--font-sans)'],
       },
       colors: {
-        // Design tokens del sistema UI
-        bg: { 
-          app: 'var(--bg-app)', 
-          surface: 'var(--bg-surface)', 
-          paper: 'var(--bg-paper)' 
+        // Nueva paleta de rediseño
+        dark: {
+          primary: '#0F172A',      // Fondo principal
+          secondary: '#1E293B',    // Tarjetas y paneles
+          tertiary: '#334155',     // Elementos secundarios
         },
-        ink: { 
-          base: 'var(--text-primary)', 
-          inverse: 'var(--text-inverse)', 
-          muted: 'var(--muted)' 
+        text: {
+          primary: '#F1F5F9',      // Texto principal
+          secondary: '#CBD5E1',    // Texto secundario
+          muted: '#94A3B8',        // Texto atenuado
         },
-        brand: { 
-          primary: 'var(--primary)', 
-          primary600: 'var(--primary-600)', 
-          accent: 'var(--accent)' 
+        button: {
+          primary: '#2563EB',      // Botón primario
+          'primary-hover': '#1D4ED8',
+          secondary: '#EA580C',    // Botón secundario
+          'secondary-hover': '#C2410C',
         },
-        state: { 
-          success: 'var(--success)', 
-          danger: 'var(--danger)', 
-          warn: 'var(--warning)' 
+        status: {
+          success: '#22C55E',      // Verde para stock
+          danger: '#E11D48',       // Rojo para alertas
+          warning: '#F59E0B',      // Amarillo para advertencias
+          info: '#3B82F6',         // Azul para información
         },
-        stroke: { 
-          soft: 'var(--border-soft)' 
+        border: {
+          default: '#334155',      // Bordes sutiles
+          light: '#475569',        // Bordes más visibles
         },
         // Mantener colores existentes para compatibilidad
         primary: "#0A0A0A",
@@ -37,7 +40,6 @@ export default {
         muted: "#2A2A2A",
         accent: "#F8C20A",
         success: "#16A34A",
-        dark: "#111111",
       },
       backgroundImage: {
         // Gradiente brand de Town

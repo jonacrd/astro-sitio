@@ -193,3 +193,5 @@ CREATE INDEX IF NOT EXISTS idx_storage_objects_name ON storage.objects(name);
 -- SELECT * FROM get_storage_stats();
 -- SELECT cleanup_orphaned_receipts();
 
+
+

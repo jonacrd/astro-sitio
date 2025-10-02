@@ -49,3 +49,5 @@ async function checkPrices() {
 
 checkPrices();
 
+
+

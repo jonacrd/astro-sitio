@@ -168,3 +168,5 @@ async function checkPointsTables() {
 
 checkPointsTables();
 
+
+

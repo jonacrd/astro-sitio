@@ -1,0 +1,216 @@
+---
+// Página de prueba del rediseño visual completo
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rediseño Visual - Test</title>
+  <link rel="stylesheet" href="/src/styles/global-redesign.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              primary: '#0F172A',
+              secondary: '#1E293B',
+              tertiary: '#334155',
+            },
+            text: {
+              primary: '#F1F5F9',
+              secondary: '#CBD5E1',
+              muted: '#94A3B8',
+            },
+            button: {
+              primary: '#2563EB',
+              'primary-hover': '#1D4ED8',
+              secondary: '#EA580C',
+              'secondary-hover': '#C2410C',
+            },
+            status: {
+              success: '#22C55E',
+              danger: '#E11D48',
+              warning: '#F59E0B',
+              info: '#3B82F6',
+            },
+            border: {
+              default: '#334155',
+              light: '#475569',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-dark-primary text-text-primary min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-text-primary mb-8 text-center">
+      🎨 Rediseño Visual Completo
+    </h1>
+    
+    <!-- Paleta de colores -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Paleta de Colores</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-dark-primary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold">Fondo Principal</h3>
+          <p class="text-text-secondary text-sm">#0F172A</p>
+        </div>
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold">Tarjetas</h3>
+          <p class="text-text-secondary text-sm">#1E293B</p>
+        </div>
+        <div class="bg-button-primary p-6 rounded-lg">
+          <h3 class="text-white font-semibold">Botón Primario</h3>
+          <p class="text-white/80 text-sm">#2563EB</p>
+        </div>
+        <div class="bg-button-secondary p-6 rounded-lg">
+          <h3 class="text-white font-semibold">Botón Secundario</h3>
+          <p class="text-white/80 text-sm">#EA580C</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Botones -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Botones</h2>
+      <div class="flex flex-wrap gap-4">
+        <button class="bg-button-primary text-white px-6 py-3 rounded-lg hover:bg-button-primary-hover transition-colors">
+          Botón Primario
+        </button>
+        <button class="bg-button-secondary text-white px-6 py-3 rounded-lg hover:bg-button-secondary-hover transition-colors">
+          Botón Secundario
+        </button>
+        <button class="bg-status-success text-white px-6 py-3 rounded-lg hover:opacity-90 transition-colors">
+          Éxito
+        </button>
+        <button class="bg-status-danger text-white px-6 py-3 rounded-lg hover:opacity-90 transition-colors">
+          Peligro
+        </button>
+      </div>
+    </section>
+    
+    <!-- Cards -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Cards</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold mb-2">Card Normal</h3>
+          <p class="text-text-secondary mb-4">Este es un card con el nuevo diseño.</p>
+          <button class="bg-button-primary text-white px-4 py-2 rounded-lg hover:bg-button-primary-hover transition-colors">
+            Acción
+          </button>
+        </div>
+        
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold mb-2">Producto</h3>
+          <p class="text-text-secondary mb-2">Precio: $25.000</p>
+          <p class="text-status-success mb-4">Stock: 10 unidades</p>
+          <button class="bg-button-primary text-white px-4 py-2 rounded-lg hover:bg-button-primary-hover transition-colors">
+            Agregar al Carrito
+          </button>
+        </div>
+        
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold mb-2">Estado</h3>
+          <div class="flex gap-2 mb-4">
+            <span class="bg-status-success text-white px-2 py-1 rounded text-sm">Activo</span>
+            <span class="bg-button-secondary text-white px-2 py-1 rounded text-sm">Nuevo</span>
+          </div>
+          <button class="bg-button-secondary text-white px-4 py-2 rounded-lg hover:bg-button-secondary-hover transition-colors">
+            Ver Detalles
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Formularios -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Formularios</h2>
+      <div class="bg-dark-secondary p-6 rounded-lg border border-border-default max-w-md">
+        <h3 class="text-text-primary font-semibold mb-4">Iniciar Sesión</h3>
+        <form class="space-y-4">
+          <div>
+            <label class="block text-text-primary text-sm font-medium mb-2">Email</label>
+            <input 
+              type="email" 
+              placeholder="tu@email.com"
+              class="w-full bg-dark-tertiary text-text-primary border border-border-default rounded-lg px-4 py-3 focus:border-button-primary focus:ring-2 focus:ring-button-primary/20"
+            />
+          </div>
+          <div>
+            <label class="block text-text-primary text-sm font-medium mb-2">Contraseña</label>
+            <input 
+              type="password" 
+              placeholder="••••••••"
+              class="w-full bg-dark-tertiary text-text-primary border border-border-default rounded-lg px-4 py-3 focus:border-button-primary focus:ring-2 focus:ring-button-primary/20"
+            />
+          </div>
+          <button 
+            type="submit"
+            class="w-full bg-button-primary text-white py-3 rounded-lg hover:bg-button-primary-hover transition-colors"
+          >
+            Iniciar Sesión
+          </button>
+        </form>
+      </div>
+    </section>
+    
+    <!-- Navegación -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Navegación</h2>
+      <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+        <nav class="flex space-x-6">
+          <a href="#" class="text-text-secondary hover:text-text-primary transition-colors">Inicio</a>
+          <a href="#" class="text-text-primary font-semibold">Productos</a>
+          <a href="#" class="text-text-secondary hover:text-text-primary transition-colors">Carrito</a>
+          <a href="#" class="text-text-secondary hover:text-text-primary transition-colors">Perfil</a>
+        </nav>
+      </div>
+    </section>
+    
+    <!-- Estados del sistema -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold text-text-primary mb-6">Estados del Sistema</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold mb-4">✅ Rediseño Aplicado</h3>
+          <ul class="space-y-2 text-text-secondary">
+            <li>• Paleta de colores oscura moderna</li>
+            <li>• Botones con colores consistentes</li>
+            <li>• Cards con fondos oscuros</li>
+            <li>• Formularios con contraste correcto</li>
+            <li>• Navegación sticky</li>
+            <li>• Tipografía legible</li>
+          </ul>
+        </div>
+        
+        <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+          <h3 class="text-text-primary font-semibold mb-4">🎯 Características</h3>
+          <ul class="space-y-2 text-text-secondary">
+            <li>• Fondo principal: #0F172A</li>
+            <li>• Tarjetas: #1E293B</li>
+            <li>• Botón primario: #2563EB</li>
+            <li>• Botón secundario: #EA580C</li>
+            <li>• Verde stock: #22C55E</li>
+            <li>• Rojo alertas: #E11D48</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <div class="text-center">
+      <p class="text-text-muted">
+        Si ves estos colores y estilos, el rediseño se aplicó correctamente.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+
+

@@ -158,13 +158,19 @@ export default function BottomNavAuth({
       <nav 
         className={`
           fixed bottom-0 left-0 right-0 z-50
-          bg-surface/80 backdrop-blur-md border-t border-white/10
-          safe-area-pb
+          bg-dark-secondary/95 backdrop-blur-md border-t border-border-default
+          pb-safe-area-inset-bottom
           transition-opacity duration-300
+          bottom-nav-fix
           ${scrollDirection === 'down' ? 'opacity-90' : 'opacity-100'}
         `}
         role="navigation"
         aria-label="Navegación principal"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          backgroundColor: 'rgba(30, 41, 59, 0.95)',
+          borderTop: '1px solid #334155'
+        }}
       >
         <div className="flex items-center justify-around px-2 py-2 max-w-md mx-auto">
           {navItems.map((item) => (
@@ -177,10 +183,14 @@ export default function BottomNavAuth({
                 transition-all duration-200
                 min-w-0 flex-1
                 ${isActive(item.href) 
-                  ? 'text-accent bg-accent/10' 
-                  : 'text-white/70 hover:text-white hover:bg-white/5'
+                  ? 'text-button-primary bg-button-primary/10' 
+                  : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
                 }
               `}
+              style={{
+                color: isActive(item.href) ? '#2563EB' : '#CBD5E1',
+                backgroundColor: isActive(item.href) ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+              }}
               aria-label={item.label}
             >
               {/* Icono */}
@@ -189,7 +199,10 @@ export default function BottomNavAuth({
                 
                 {/* Badge */}
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 bg-accent text-primary text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center">
+                  <span 
+                    className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center"
+                    style={{ backgroundColor: '#E11D48' }}
+                  >
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}

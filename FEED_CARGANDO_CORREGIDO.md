@@ -187,3 +187,5 @@ query = query.order('price_cents', { ascending: false });
 
 **¡El feed está completamente funcional y listo para producción!** 🎯
 
+
+

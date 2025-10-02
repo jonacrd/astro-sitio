@@ -1,0 +1,163 @@
+---
+// Página de prueba del bottom navigation
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bottom Nav Test</title>
+  <link rel="stylesheet" href="/src/styles/global-redesign.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              primary: '#0F172A',
+              secondary: '#1E293B',
+              tertiary: '#334155',
+            },
+            text: {
+              primary: '#F1F5F9',
+              secondary: '#CBD5E1',
+              muted: '#94A3B8',
+            },
+            button: {
+              primary: '#2563EB',
+              'primary-hover': '#1D4ED8',
+              secondary: '#EA580C',
+              'secondary-hover': '#C2410C',
+            },
+            status: {
+              success: '#22C55E',
+              danger: '#E11D48',
+              warning: '#F59E0B',
+              info: '#3B82F6',
+            },
+            border: {
+              default: '#334155',
+              light: '#475569',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-dark-primary text-text-primary min-h-screen">
+  <div class="container mx-auto px-4 py-8 pb-24">
+    <h1 class="text-3xl font-bold text-text-primary mb-8">🔍 Test Bottom Navigation</h1>
+    
+    <!-- Contenido de prueba -->
+    <div class="space-y-6">
+      <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+        <h2 class="text-xl font-semibold text-text-primary mb-4">Estado del Bottom Nav</h2>
+        <div class="space-y-2 text-text-secondary">
+          <p>✅ CSS global cargado</p>
+          <p>✅ Estilos aplicados</p>
+          <p>✅ Bottom nav debería ser visible</p>
+        </div>
+      </div>
+      
+      <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+        <h2 class="text-xl font-semibold text-text-primary mb-4">Características del Bottom Nav</h2>
+        <ul class="space-y-2 text-text-secondary">
+          <li>• Fondo: #1E293B (gris oscuro)</li>
+          <li>• Borde superior: #334155</li>
+          <li>• Posición: fixed bottom</li>
+          <li>• Z-index: 50</li>
+          <li>• Backdrop blur</li>
+          <li>• Safe area support</li>
+        </ul>
+      </div>
+      
+      <div class="bg-dark-secondary p-6 rounded-lg border border-border-default">
+        <h2 class="text-xl font-semibold text-text-primary mb-4">Navegación</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <a href="/" class="bg-button-primary text-white px-4 py-2 rounded-lg text-center hover:bg-button-primary-hover transition-colors">
+            Inicio
+          </a>
+          <a href="/catalogo" class="bg-button-secondary text-white px-4 py-2 rounded-lg text-center hover:bg-button-secondary-hover transition-colors">
+            Catálogo
+          </a>
+          <a href="/carrito" class="bg-status-success text-white px-4 py-2 rounded-lg text-center hover:opacity-90 transition-colors">
+            Carrito
+          </a>
+          <a href="/perfil" class="bg-status-info text-white px-4 py-2 rounded-lg text-center hover:opacity-90 transition-colors">
+            Perfil
+          </a>
+        </div>
+      </div>
+      
+      <!-- Simular bottom nav manual -->
+      <div class="bg-dark-secondary p-4 rounded-lg border border-border-default">
+        <h3 class="text-text-primary font-semibold mb-4">Bottom Nav Manual (para comparar)</h3>
+        <nav class="flex items-center justify-around">
+          <button class="flex flex-col items-center text-button-primary">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span class="text-xs">Inicio</span>
+          </button>
+          <button class="flex flex-col items-center text-text-secondary">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span class="text-xs">Buscar</span>
+          </button>
+          <button class="flex flex-col items-center text-text-secondary">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <span class="text-xs">Pedidos</span>
+          </button>
+          <button class="flex flex-col items-center text-text-secondary">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span class="text-xs">Perfil</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+    
+    <!-- Espaciado para que no se oculte el contenido -->
+    <div class="h-32"></div>
+  </div>
+  
+  <!-- Bottom Nav Manual Fijo -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-dark-secondary border-t border-border-default" style="background-color: rgba(30, 41, 59, 0.95); border-top: 1px solid #334155;">
+    <div class="flex items-center justify-around px-2 py-2 max-w-md mx-auto">
+      <button class="flex flex-col items-center text-button-primary px-3 py-2 rounded-xl">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span class="text-xs font-medium">Inicio</span>
+      </button>
+      <button class="flex flex-col items-center text-text-secondary hover:text-text-primary px-3 py-2 rounded-xl">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span class="text-xs font-medium">Buscar</span>
+      </button>
+      <button class="flex flex-col items-center text-text-secondary hover:text-text-primary px-3 py-2 rounded-xl">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <span class="text-xs font-medium">Pedidos</span>
+      </button>
+      <button class="flex flex-col items-center text-text-secondary hover:text-text-primary px-3 py-2 rounded-xl">
+        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <span class="text-xs font-medium">Perfil</span>
+      </button>
+    </div>
+  </nav>
+</body>
+</html>
+
+

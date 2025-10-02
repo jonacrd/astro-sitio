@@ -237,3 +237,5 @@ export default function DynamicGridBlocksSimpleNoQuery({ onAddToCart, onViewProd
   );
 }
 
+
+

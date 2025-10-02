@@ -240,3 +240,5 @@ function setupFilters() {
 
 **¡El sistema de dashboard/pedidos está completamente implementado y listo para producción!** 🚀
 
+
+

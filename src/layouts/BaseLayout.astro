@@ -7,6 +7,8 @@ import GlobalLoginHandler from '@components/react/GlobalLoginHandler.tsx'
 import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
 import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
 import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
+import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
+import TestComponent from '@components/react/TestComponent.tsx'
 
 export interface Props {
   title?: string
@@ -28,8 +30,14 @@ const {
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   
+  <!-- REDISEÑO VISUAL COMPLETO -->
+  <link rel="stylesheet" href="/src/styles/global-redesign.css">
+  
   <!-- FORZAR CAMBIOS UI -->
   <link rel="stylesheet" href="/src/styles/force-ui-override.css">
+  
+  <!-- FORZAR BOTTOM NAV VISIBLE -->
+  <link rel="stylesheet" href="/src/styles/force-bottom-nav.css">
   
   <!-- Design Tokens -->
   <style>
@@ -176,21 +184,24 @@ const {
   <!-- Importar CSS para colores opacos del tema oscuro -->
   <link rel="stylesheet" href="/src/styles/dark-theme-colors.css">
   
+  <!-- Fix para modal de login -->
+  <link rel="stylesheet" href="/src/styles/modal-fix.css">
+  
   <!-- Importar fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen" style="background-color: var(--bg-app); color: var(--text-primary);">
+<body class="min-h-screen bg-dark-primary text-text-primary">
   <!-- Header Navigation -->
   <HeaderWrapper client:load />
 
   <!-- Contenido principal -->
-  <main class="min-h-screen" style="background-color: var(--bg-app);">
+  <main class="min-h-screen bg-dark-primary">
     <slot />
   </main>
 
-  <!-- Bottom Navigation -->
+  <!-- Bottom Navigation - EMERGENCY FIX -->
   <BottomNavWrapper client:load />
 
   <!-- Notificaciones del carrito -->
@@ -244,5 +255,8 @@ const {
 
   <!-- Manejador global de inicio de sesión -->
   <GlobalLoginHandler client:load />
+  
+  <!-- Componente de prueba -->
+  <TestComponent client:load />
 </body>
 </html>

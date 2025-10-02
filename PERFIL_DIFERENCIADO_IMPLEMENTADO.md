@@ -199,3 +199,5 @@ async function loadBuyerData(buyerId) {
 
 **¡El sistema de perfil diferenciado está completamente implementado y listo para producción!** 🚀
 
+
+
