@@ -193,21 +193,54 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
     }
   };
 
-  if (!isOpen) return null;
+  console.log('🔐 FixedLoginModal - isOpen:', isOpen);
+  
+  if (!isOpen) {
+    return null;
+  }
 
-  console.log('🔐 FixedLoginModal renderizando con isOpen:', isOpen);
+  console.log('🔐 FixedLoginModal - RENDERIZANDO');
 
   return (
     <div 
       onClick={onClose}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 99999
+      }}
     >
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '1rem',
+          padding: '2rem',
+          maxWidth: '28rem',
+          width: '90%',
+          maxHeight: '90vh',
+          overflowY: 'auto'
+        }}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">Iniciar Sesión</h2>
+          <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
+          <div style={{
+            backgroundColor: 'lime',
+            color: 'black',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}>
+            MODAL ACTIVO
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"

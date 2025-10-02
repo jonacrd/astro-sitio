@@ -155,23 +155,12 @@ export default function BottomNavAuth({
 
   return (
     <>
-      <nav 
-        className={`
-          fixed bottom-0 left-0 right-0 z-50
-          bg-dark-secondary/95 backdrop-blur-md border-t border-border-default
-          pb-safe-area-inset-bottom
-          transition-opacity duration-300
-          bottom-nav-fix
-          ${scrollDirection === 'down' ? 'opacity-90' : 'opacity-100'}
-        `}
-        role="navigation"
-        aria-label="Navegación principal"
-        style={{
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          backgroundColor: 'rgba(30, 41, 59, 0.95)',
-          borderTop: '1px solid #334155'
-        }}
-      >
+    <div 
+      className={`
+        transition-opacity duration-300
+        ${scrollDirection === 'down' ? 'opacity-90' : 'opacity-100'}
+      `}
+    >
         <div className="flex items-center justify-around px-2 py-2 max-w-md mx-auto">
           {navItems.map((item) => (
             <button
@@ -220,7 +209,7 @@ export default function BottomNavAuth({
             </button>
           ))}
         </div>
-      </nav>
+      </div>
 
       {/* Modal de Login Corregido */}
       <FixedLoginModal
