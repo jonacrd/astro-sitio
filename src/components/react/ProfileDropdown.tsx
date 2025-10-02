@@ -74,8 +74,10 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
   const handleLoginClick = () => {
     console.log('🔐 Abriendo modal de login...');
+    console.log('🔐 Estado actual showLoginModal:', showLoginModal);
     setShowLoginModal(true);
     setIsOpen(false);
+    console.log('🔐 Después de setShowLoginModal(true)');
   };
 
   if (!isAuthenticated) {
@@ -96,7 +98,7 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
         {/* Dropdown para usuarios no autenticados */}
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 profile-dropdown-menu">
             <div className="px-4 py-3 border-b border-gray-200">
               <p className="text-sm font-medium text-gray-900">Acceder a tu cuenta</p>
               <p className="text-xs text-gray-600">Inicia sesión o regístrate</p>
@@ -171,7 +173,7 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
       {/* Dropdown para usuarios autenticados */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 profile-dropdown-menu">
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-sm font-medium text-gray-900">{userEmail}</p>
             <p className="text-xs text-gray-500">Tu cuenta</p>
@@ -217,10 +219,14 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
         </div>
       )}
 
-      {/* Modal de login corregido */}
+      {/* Modal de login */}
+      {console.log('🔐 ProfileDropdown renderizando con showLoginModal:', showLoginModal)}
       <FixedLoginModal
         isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
+        onClose={() => {
+          console.log('🔐 Cerrando modal de login');
+          setShowLoginModal(false);
+        }}
         onLoginSuccess={(user) => {
           console.log('✅ Login exitoso:', user.email);
           setIsAuthenticated(true);

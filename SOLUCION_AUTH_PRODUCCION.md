@@ -261,3 +261,5 @@ SUPABASE_SERVICE_ROLE_KEY=tu_service_key
 
 **¡Ya no habrá más problemas de autenticación en producción!** 🎉
 
+
+

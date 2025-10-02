@@ -54,3 +54,5 @@ console.log('   - Verificar que el servidor se reinició');
 console.log('   - Verificar que el cache se limpió');
 console.log('   - Verificar que no hay errores en consola');
 console.log('   - Verificar que /test-ui carga correctamente');
+
+

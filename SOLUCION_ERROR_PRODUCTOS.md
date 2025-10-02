@@ -144,3 +144,5 @@ const { data: sellerProductsData, error: sellerError } = await supabase
 
 **¡El sistema está listo para producción!** 🚀
 
+
+

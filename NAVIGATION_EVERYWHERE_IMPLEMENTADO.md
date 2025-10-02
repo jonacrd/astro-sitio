@@ -132,3 +132,5 @@ import BottomNavAuth from '@components/react/BottomNavAuth.tsx'
 
 **¡El sistema está completamente funcional y listo para producción!** 🚀
 
+
+

@@ -41,3 +41,5 @@ WHERE table_name = 'orders'
   AND column_name IN ('payment_status', 'expires_at', 'points_awarded')
 ORDER BY column_name;
 
+
+

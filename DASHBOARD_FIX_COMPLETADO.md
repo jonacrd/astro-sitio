@@ -126,3 +126,5 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 
 **¡El sistema está listo para producción!** 🚀
 
+
+

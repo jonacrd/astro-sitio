@@ -125,3 +125,5 @@ async function checkCurrentPrices() {
 
 checkCurrentPrices();
 
+
+

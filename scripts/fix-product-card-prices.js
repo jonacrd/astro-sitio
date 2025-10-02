@@ -105,3 +105,5 @@ async function fixProductCardPrices() {
 }
 
 fixProductCardPrices();
+
+

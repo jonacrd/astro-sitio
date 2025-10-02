@@ -151,3 +151,5 @@ window.addEventListener('show-login-modal', handleShowLoginModal);
 
 **¡El sistema está 100% funcional y sin errores!** 🚀
 
+
+

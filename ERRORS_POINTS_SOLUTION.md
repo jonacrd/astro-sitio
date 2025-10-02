@@ -236,3 +236,5 @@ Los errores se deben a **tablas faltantes** en la base de datos. La solución es
 
 **¡Una vez ejecutado el script, el sistema de puntos funcionará perfectamente!** 🎉
 
+
+

@@ -126,3 +126,5 @@ node scripts/test-seller-status-system.js
 
 Ahora los vendedores pueden controlar su visibilidad y los compradores ven primero a los vendedores disponibles.
 
+
+

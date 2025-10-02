@@ -224,3 +224,5 @@ npm run dev
 
 **¡El sistema está completamente configurado y funcional!** 🚀
 
+
+

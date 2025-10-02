@@ -568,3 +568,5 @@ export default function OptimizedGridBlocks({ onAddToCart, onViewProduct, onCont
 
 optimizeDataLoading();
 
+
+

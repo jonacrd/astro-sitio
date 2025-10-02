@@ -66,3 +66,5 @@ checkProfilesTable()
     process.exit(1);
   });
 
+
+

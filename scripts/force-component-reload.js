@@ -54,3 +54,5 @@ console.log('2. Limpiar cache');
 console.log('3. Probar configuración de producto');
 console.log('4. Verificar logs en consola');
 
+
+

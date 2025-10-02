@@ -71,3 +71,5 @@ async function checkSellerProductsTable() {
 
 checkSellerProductsTable();
 
+
+

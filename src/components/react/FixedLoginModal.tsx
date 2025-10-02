@@ -21,7 +21,18 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
       setPassword('');
       setError(null);
       setSuccess(false);
+      
+      // Prevenir scroll del body
+      document.body.classList.add('modal-open');
+    } else {
+      // Restaurar scroll del body
+      document.body.classList.remove('modal-open');
     }
+    
+    // Cleanup al desmontar
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
   }, [isOpen]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -184,9 +195,17 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
 
   if (!isOpen) return null;
 
+  console.log('🔐 FixedLoginModal renderizando con isOpen:', isOpen);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Iniciar Sesión</h2>
           <button
