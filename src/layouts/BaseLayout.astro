@@ -8,7 +8,6 @@ import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
 import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
 import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
-import TestComponent from '@components/react/TestComponent.tsx'
 
 export interface Props {
   title?: string
@@ -26,7 +25,7 @@ const {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title}</title>
+  <title>{title} - CACHE TEST</title>
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   
@@ -201,7 +200,7 @@ const {
     <slot />
   </main>
 
-  <!-- Bottom Navigation - EMERGENCY FIX -->
+  <!-- Bottom Navigation -->
   <BottomNavWrapper client:load />
 
   <!-- Notificaciones del carrito -->
@@ -255,8 +254,5 @@ const {
 
   <!-- Manejador global de inicio de sesión -->
   <GlobalLoginHandler client:load />
-  
-  <!-- Componente de prueba -->
-  <TestComponent client:load />
 </body>
 </html>
