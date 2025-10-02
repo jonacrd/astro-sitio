@@ -73,11 +73,10 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
   };
 
   const handleLoginClick = () => {
-    console.log('🔐 Abriendo modal de login...');
-    console.log('🔐 Estado actual showLoginModal:', showLoginModal);
+    console.log('🔐 CLICK EN INICIAR SESIÓN');
     setShowLoginModal(true);
     setIsOpen(false);
-    console.log('🔐 Después de setShowLoginModal(true)');
+    console.log('🔐 showLoginModal debería ser true ahora');
   };
 
   if (!isAuthenticated) {
@@ -220,15 +219,11 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
       )}
 
       {/* Modal de login */}
-      {console.log('🔐 ProfileDropdown renderizando con showLoginModal:', showLoginModal)}
+      {console.log('🔐 ProfileDropdown - showLoginModal:', showLoginModal)}
       <FixedLoginModal
         isOpen={showLoginModal}
-        onClose={() => {
-          console.log('🔐 Cerrando modal de login');
-          setShowLoginModal(false);
-        }}
+        onClose={() => setShowLoginModal(false)}
         onLoginSuccess={(user) => {
-          console.log('✅ Login exitoso:', user.email);
           setIsAuthenticated(true);
           setUserEmail(user.email || '');
         }}
