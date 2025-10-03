@@ -65,8 +65,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           )
         `)
         .eq('active', true)
-        .gt('stock', 0)
-        .order('created_at', { ascending: false });
+        .gt('stock', 0);
 
       if (productsError) {
         throw new Error('Error cargando productos: ' + productsError.message);
