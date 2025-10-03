@@ -31,16 +31,26 @@ export default function OneSignalSubscriber() {
 
             console.log('👤 Usuario autenticado, configurando OneSignal...');
 
-            // Configurar el external_user_id con el UUID de Supabase
-            await OneSignal.login(user.id);
-            
-            console.log('✅ Usuario suscrito a OneSignal con ID:', user.id);
-
-            // Verificar estado de la suscripción
+            // Primero verificar si ya está suscrito
             const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
             
             if (isPushEnabled) {
-              console.log('🔔 Notificaciones push activadas');
+              console.log('🔔 Usuario ya suscrito, asociando External ID...');
+              
+              // Asociar el external_user_id con el UUID de Supabase
+              try {
+                await OneSignal.login(user.id);
+                console.log('✅ External ID asociado:', user.id);
+              } catch (loginError) {
+                console.warn('⚠️ Error al asociar External ID (esto es normal la primera vez):', loginError);
+                // Intentar de nuevo con setExternalUserId
+                try {
+                  await OneSignal.User.addAlias('external_id', user.id);
+                  console.log('✅ External ID asociado con addAlias:', user.id);
+                } catch (aliasError) {
+                  console.warn('⚠️ Error al asociar con addAlias:', aliasError);
+                }
+              }
             } else {
               console.log('⚠️ Notificaciones push no activadas. Click en el botón azul para activar.');
             }
