@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PushDiagnostic from '../components/react/PushDiagnostic.tsx';
+import PushNotificationManager from '../components/react/PushNotificationManager.tsx';
+---
+
+<BaseLayout 
+  title="Diagnóstico de Notificaciones Push - Town"
+  description="Prueba y diagnóstico del sistema de notificaciones push"
+>
+  <div class="min-h-screen bg-dark-primary py-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">
+          🔔 Diagnóstico de Notificaciones Push
+        </h1>
+        <p class="text-gray-600 mb-6">
+          Esta página te ayudará a diagnosticar y solucionar problemas con las notificaciones push.
+        </p>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h2 class="font-semibold text-blue-900 mb-2">ℹ️ Instrucciones:</h2>
+          <ol class="list-decimal list-inside space-y-2 text-sm text-blue-800">
+            <li>Revisa el diagnóstico automático abajo</li>
+            <li>Si hay problemas marcados en rojo, sigue las recomendaciones</li>
+            <li>Para iOS: Debes instalar la app como PWA (Compartir → Agregar a pantalla de inicio)</li>
+            <li>Para otros dispositivos: Asegúrate de aceptar los permisos de notificaciones</li>
+          </ol>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+          <h2 class="font-semibold text-yellow-900 mb-2">⚠️ Limitaciones de iOS:</h2>
+          <p class="text-sm text-yellow-800">
+            Safari en iPhone NO soporta notificaciones push en navegador web normal. 
+            Debes instalar la app como PWA (ícono en pantalla de inicio) para que funcionen.
+          </p>
+        </div>
+
+        <div class="border-t pt-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">🔔 Activar Notificaciones</h2>
+          <p class="text-gray-600 text-sm mb-4">
+            Usa este botón para activar las notificaciones push:
+          </p>
+          <PushNotificationManager client:load />
+        </div>
+
+        <div class="border-t pt-6 mt-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">🔍 Diagnóstico Automático</h2>
+          <p class="text-gray-600 text-sm mb-4">
+            El diagnóstico aparecerá en la esquina inferior derecha
+          </p>
+        </div>
+      </div>
+
+      <!-- Guía rápida -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">📚 Guía Rápida</h2>
+        
+        <div class="space-y-6">
+          <!-- Android/Desktop -->
+          <div class="border-l-4 border-green-500 pl-4">
+            <h3 class="font-semibold text-gray-900 mb-2">✅ Android / Desktop</h3>
+            <ol class="list-decimal list-inside space-y-1 text-sm text-gray-600">
+              <li>Abre el sitio en Chrome, Firefox o Edge</li>
+              <li>Aparecerá un popup pidiendo permiso para notificaciones</li>
+              <li>Click en "Permitir"</li>
+              <li>¡Listo! Recibirás notificaciones</li>
+            </ol>
+          </div>
+
+          <!-- iOS -->
+          <div class="border-l-4 border-yellow-500 pl-4">
+            <h3 class="font-semibold text-gray-900 mb-2">⚠️ iOS (iPhone/iPad)</h3>
+            <ol class="list-decimal list-inside space-y-1 text-sm text-gray-600">
+              <li>Abre el sitio en <strong>Safari</strong></li>
+              <li>Toca el botón "Compartir" (icono ↗️)</li>
+              <li>Desplaza y toca "Agregar a pantalla de inicio"</li>
+              <li><strong>Abre la app desde el ícono</strong> en tu pantalla de inicio</li>
+              <li>Ahora sí aparecerá el popup de permisos</li>
+              <li>Acepta los permisos</li>
+              <li>¡Listo! Recibirás notificaciones</li>
+            </ol>
+          </div>
+
+          <!-- Qué notificaciones recibirás -->
+          <div class="border-l-4 border-blue-500 pl-4">
+            <h3 class="font-semibold text-gray-900 mb-2">📱 Notificaciones que recibirás:</h3>
+            <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+              <li><strong>Como Vendedor:</strong> Cuando recibas un nuevo pedido</li>
+              <li><strong>Como Cliente:</strong> Cuando confirmen tu pedido</li>
+              <li><strong>Como Cliente:</strong> Cuando tu pedido esté en camino</li>
+              <li><strong>Como Cliente:</strong> Cuando llegue tu pedido</li>
+              <li><strong>Como Cliente:</strong> Cuando completen tu pedido</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Componente de diagnóstico -->
+  <PushDiagnostic client:load />
+</BaseLayout>
+
