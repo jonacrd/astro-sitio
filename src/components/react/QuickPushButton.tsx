@@ -33,31 +33,34 @@ export default function QuickPushButton() {
     setLoading(true);
 
     try {
-      // @ts-ignore - Esperar a que OneSignal esté listo
-      if (typeof window.OneSignalDeferred === 'undefined') {
-        alert('OneSignal no está disponible. Recarga la página.');
-        setLoading(false);
-        return;
-      }
-
-      console.log('📱 Mostrando prompt de OneSignal...');
+      console.log('📱 Solicitando permisos de notificación...');
       
-      // @ts-ignore
-      window.OneSignalDeferred.push(async function(OneSignal) {
-        try {
-          // Mostrar el prompt de OneSignal
-          await OneSignal.Slidedown.promptPush();
-          
-          // Esperar 1 segundo para que el usuario responda
-          setTimeout(() => {
-            setPermission(Notification.permission);
-            setLoading(false);
-          }, 1000);
-        } catch (err: any) {
-          console.error('Error en OneSignal prompt:', err);
-          setLoading(false);
+      // Solicitar permisos directamente del navegador
+      const perm = await Notification.requestPermission();
+      console.log('🔔 Permiso otorgado:', perm);
+      
+      setPermission(perm);
+      setLoading(false);
+
+      if (perm === 'granted') {
+        // Inicializar OneSignal después de obtener permisos
+        // @ts-ignore
+        if (typeof window.OneSignalDeferred !== 'undefined') {
+          // @ts-ignore
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            try {
+              console.log('✅ Configurando OneSignal...');
+              // OneSignal ya está inicializado, solo verificamos el estado
+              const opted = await OneSignal.User.PushSubscription.optedIn;
+              console.log('Estado de suscripción:', opted);
+            } catch (err) {
+              console.error('Error configurando OneSignal:', err);
+            }
+          });
         }
-      });
+      } else {
+        alert('Debes permitir las notificaciones para activarlas');
+      }
 
     } catch (err: any) {
       console.error('Error activando notificaciones:', err);
