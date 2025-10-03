@@ -11,43 +11,49 @@ export default function OneSignalSubscriber() {
 
     const subscribeUser = async () => {
       try {
-        // Verificar que OneSignal esté cargado
+        // Esperar a que OneSignal esté listo usando OneSignalDeferred
         // @ts-ignore
-        if (typeof OneSignal === 'undefined') {
-          console.log('⏳ Esperando a que OneSignal se cargue...');
+        if (typeof window.OneSignalDeferred === 'undefined') {
+          console.log('⏳ OneSignal SDK no cargado, reintentando...');
           setTimeout(subscribeUser, 1000);
           return;
         }
 
-        // Obtener usuario autenticado
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user || !isMounted) return;
-
-        console.log('👤 Usuario autenticado, configurando OneSignal...');
-
-        // Configurar el external_user_id con el UUID de Supabase
         // @ts-ignore
-        await OneSignal.login(user.id);
-        
-        console.log('✅ Usuario suscrito a OneSignal con ID:', user.id);
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          if (!isMounted) return;
 
-        // Verificar estado de la suscripción
-        // @ts-ignore
-        const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
-        
-        if (isPushEnabled) {
-          console.log('🔔 Notificaciones push activadas');
-        } else {
-          console.log('⚠️ Notificaciones push no activadas, mostrando prompt...');
-          
-          // Mostrar el prompt de notificaciones automáticamente
-          // @ts-ignore
-          await OneSignal.Slidedown.promptPush();
-        }
+          try {
+            // Obtener usuario autenticado
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user || !isMounted) return;
+
+            console.log('👤 Usuario autenticado, configurando OneSignal...');
+
+            // Configurar el external_user_id con el UUID de Supabase
+            await OneSignal.login(user.id);
+            
+            console.log('✅ Usuario suscrito a OneSignal con ID:', user.id);
+
+            // Verificar estado de la suscripción
+            const isPushEnabled = await OneSignal.User.PushSubscription.optedIn;
+            
+            if (isPushEnabled) {
+              console.log('🔔 Notificaciones push activadas');
+            } else {
+              console.log('⚠️ Notificaciones push no activadas, mostrando prompt...');
+              
+              // Mostrar el prompt de notificaciones automáticamente
+              await OneSignal.Slidedown.promptPush();
+            }
+          } catch (error) {
+            console.error('❌ Error configurando OneSignal:', error);
+          }
+        });
 
       } catch (error) {
-        console.error('❌ Error configurando OneSignal:', error);
+        console.error('❌ Error en subscribeUser:', error);
       }
     };
 

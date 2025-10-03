@@ -33,8 +33,8 @@ export default function QuickPushButton() {
     setLoading(true);
 
     try {
-      // @ts-ignore - OneSignal se carga globalmente
-      if (typeof OneSignal === 'undefined') {
+      // @ts-ignore - Esperar a que OneSignal esté listo
+      if (typeof window.OneSignalDeferred === 'undefined') {
         alert('OneSignal no está disponible. Recarga la página.');
         setLoading(false);
         return;
@@ -42,15 +42,22 @@ export default function QuickPushButton() {
 
       console.log('📱 Mostrando prompt de OneSignal...');
       
-      // Mostrar el prompt de OneSignal
       // @ts-ignore
-      await OneSignal.Slidedown.promptPush();
-      
-      // Esperar 1 segundo para que el usuario responda
-      setTimeout(() => {
-        setPermission(Notification.permission);
-        setLoading(false);
-      }, 1000);
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          // Mostrar el prompt de OneSignal
+          await OneSignal.Slidedown.promptPush();
+          
+          // Esperar 1 segundo para que el usuario responda
+          setTimeout(() => {
+            setPermission(Notification.permission);
+            setLoading(false);
+          }, 1000);
+        } catch (err: any) {
+          console.error('Error en OneSignal prompt:', err);
+          setLoading(false);
+        }
+      });
 
     } catch (err: any) {
       console.error('Error activando notificaciones:', err);
