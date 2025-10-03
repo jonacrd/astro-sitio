@@ -175,24 +175,42 @@ export const POST: APIRoute = async (context) => {
     }
 
     // 2. Agregar items al carrito temporal
+    console.log('📝 Items a procesar:', cartItems.length);
+    
     for (const item of cartItems) {
+      console.log('🔍 Procesando item:', {
+        id: item.id || item.productId,
+        title: item.title,
+        quantity: item.quantity || item.qty,
+        priceCents: item.priceCents
+      });
+      
       const { error: itemError } = await supabase
         .from('cart_items')
         .insert({
           cart_id: cart.id,
-          product_id: item.productId,
+          product_id: item.id || item.productId, // Usar id o productId
           title: item.title,
           price_cents: item.priceCents,
-          qty: item.quantity
+          qty: item.quantity || item.qty || 1 // Usar quantity o qty
         });
 
       if (itemError) {
-        console.log('⚠️ Error agregando item al carrito:', itemError.message);
-        // Continuar con el siguiente item
+        console.error('❌ Error agregando item al carrito:', itemError.message, itemError);
+        // No continuar si falla, lanzar error
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Error agregando items al carrito: ' + itemError.message
+        }), { 
+          status: 500,
+          headers: { 'content-type': 'application/json' }
+        });
       } else {
         console.log('✅ Item agregado al carrito:', item.title);
       }
     }
+    
+    console.log('✅ Todos los items agregados al carrito temporal');
 
     // 3. Usar la función place_order que otorga puntos automáticamente
     const { data: orderResult, error: orderError } = await supabase
