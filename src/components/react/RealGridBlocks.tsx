@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CartToast from './CartToast';
 
 interface Product {
   id: string;
@@ -17,10 +18,17 @@ interface Props {
   onContactService?: (serviceId: string) => void;
 }
 
+interface ToastData {
+  productName: string;
+  productImage: string;
+}
+
 export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactService }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastData, setToastData] = useState<ToastData | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -110,9 +118,19 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
   const badges = ['Producto del Mes', 'Oferta Especial', 'Nuevo', 'Servicio Premium'];
 
   return (
-    <section className="px-4 mb-6">
-      <div className="max-w-[420px] mx-auto">
-        <div className="columns-2 gap-3 md:columns-3">
+    <>
+      {/* Toast de notificación */}
+      {showToast && toastData && (
+        <CartToast
+          productName={toastData.productName}
+          productImage={toastData.productImage}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+
+      <section className="px-4 mb-6">
+        <div className="max-w-[420px] mx-auto">
+          <div className="columns-2 gap-3 md:columns-3">
           {products.slice(0, 4).map((product, i) => (
             <div
               key={product.id}
@@ -155,7 +173,13 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
                   
                   {/* Botón + a la derecha del precio */}
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      // Animación del botón
+                      const button = e.currentTarget;
+                      button.classList.add('animate-bounce');
+                      setTimeout(() => button.classList.remove('animate-bounce'), 500);
+
+                      // Agregar al carrito
                       const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
                       const existingIndex = currentCart.findIndex((it: any) => it.id === product.id);
                       if (existingIndex >= 0) {
@@ -173,12 +197,20 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
                       }
                       localStorage.setItem('cart', JSON.stringify(currentCart));
                       window.dispatchEvent(new CustomEvent('cart-updated', { detail: { cart: currentCart }}));
+                      
+                      // Mostrar toast
+                      setToastData({
+                        productName: product.title,
+                        productImage: product.image_url
+                      });
+                      setShowToast(true);
+                      
                       onAddToCart?.(product.id);
                     }}
-                    className="h-8 w-8 rounded-full bg-blue-600 text-white grid place-items-center hover:bg-blue-500 active:scale-95 transition"
+                    className="h-8 w-8 rounded-full bg-blue-600 text-white grid place-items-center hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
                     aria-label="Agregar al carrito"
                   >
-                    +
+                    <span className="text-xl font-bold leading-none">+</span>
                   </button>
                 </div>
               </div>
@@ -200,7 +232,8 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
             </button>
           </div>
         )}
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 }

@@ -260,8 +260,8 @@ export default function DeliveryInfo({
 
       {/* Modal para cambiar/agregar dirección */}
       {showChangeModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4">
-          <div className="w-full max-w-md bg-[#1D2939] rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto flex flex-col">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end justify-center p-4 pb-20">
+          <div className="w-full max-w-md bg-[#1D2939] rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto flex flex-col mb-2">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white text-lg font-semibold">Cambiar Dirección</h3>
               <button 
@@ -386,10 +386,10 @@ export default function DeliveryInfo({
               </div>
             </div>
             
-            <div className="sticky bottom-0 bg-[#1D2939] pt-4 -mx-6 px-6 border-t-2 border-green-500/20">
+            <div className="sticky bottom-0 bg-[#1D2939] pt-6 pb-4 -mx-6 px-6 border-t-2 border-green-500/20 mt-6">
               <button
                 onClick={handleSave}
-                className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition-all duration-200 flex items-center justify-center gap-3 text-xl shadow-lg shadow-green-600/25 hover:shadow-green-600/40"
+                className="w-full bg-green-600 text-white py-5 rounded-xl font-bold hover:bg-green-700 transition-all duration-200 flex items-center justify-center gap-3 text-xl shadow-lg shadow-green-600/25 hover:shadow-green-600/40 active:scale-95"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -398,7 +398,7 @@ export default function DeliveryInfo({
               </button>
               <button
                 onClick={() => setShowChangeModal(false)}
-                className="w-full mt-3 py-3 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors font-medium"
+                className="w-full mt-3 py-3 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors font-medium active:scale-95"
               >
                 Cancelar
               </button>

@@ -6,6 +6,7 @@ import RealGridBlocks from '../components/react/RealGridBlocks.tsx'
 import RealProductFeed from '../components/react/RealProductFeed.tsx'
 import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
+import BannerSlider from '../components/react/BannerSlider.tsx'
 ---
 
 <BaseLayout 
@@ -18,19 +19,18 @@ import SaleModal from '../components/react/SaleModal.tsx'
 
 
 
-    <!-- Banner Promocional -->
+    <!-- Banner Slider -->
     <section class="px-4 py-6">
       <div class="max-w-7xl mx-auto">
-        <div class="relative aspect-[16/9] rounded-2xl overflow-hidden">
-          <div class="absolute inset-0 bg-gradient-to-r from-accent/20 to-accent/10 flex items-center justify-center">
-            <div class="text-center text-white">
-              <h2 class="text-3xl font-bold mb-2">¡ENVÍO GRATIS</h2>
-              <p class="text-lg opacity-90">En compras superiores a $10.000</p>
-            </div>
-          </div>
-          <!-- Imagen de fondo opcional -->
-          <div class="absolute inset-0 bg-gradient-to-br from-primary via-muted to-surface opacity-50"></div>
-        </div>
+        <BannerSlider 
+          client:load
+          images={[
+            '/banners/primer_banner.png',
+            '/banners/segundo_banner.png',
+            '/banners/tercer_banner.png'
+          ]}
+          interval={5000}
+        />
       </div>
     </section>
 

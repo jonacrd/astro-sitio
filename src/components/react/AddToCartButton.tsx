@@ -97,37 +97,60 @@ export default function AddToCartButton({
         }
       }));
 
-      // Mostrar notificación de éxito
+      // Mostrar notificación de éxito mejorada
       if (typeof window !== 'undefined') {
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        notification.className = 'fixed top-20 left-1/2 -translate-x-1/2 z-[9999] transform transition-all duration-300 -translate-y-4 opacity-0';
+        notification.style.maxWidth = '90vw';
         notification.innerHTML = `
-          <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            ¡Producto agregado al carrito!
+          <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-green-500">
+            <div class="flex items-center gap-4 p-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                <img src="${image || '/img/placeholders/tecnologia.jpg'}" alt="${title}" class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-900 mb-1">¡Agregado al carrito! 🎉</p>
+                <p class="text-xs text-gray-600 truncate">${title}</p>
+              </div>
+              <button onclick="this.closest('[data-notification]').remove()" class="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div class="h-1 bg-gray-100">
+              <div class="h-full bg-green-500" style="animation: progress 3s linear forwards;"></div>
+            </div>
           </div>
+          <style>
+            @keyframes progress {
+              from { width: 100%; }
+              to { width: 0%; }
+            }
+          </style>
         `;
         
+        notification.setAttribute('data-notification', 'true');
         document.body.appendChild(notification);
         
-        // Animar la notificación
         setTimeout(() => {
-          notification.classList.remove('translate-x-full');
-          notification.classList.add('translate-x-0');
-        }, 100);
+          notification.classList.remove('-translate-y-4', 'opacity-0');
+          notification.classList.add('translate-y-0', 'opacity-100');
+        }, 10);
         
-        // Remover la notificación después de 2 segundos
         setTimeout(() => {
-          notification.classList.remove('translate-x-0');
-          notification.classList.add('translate-x-full');
+          notification.classList.add('-translate-y-4', 'opacity-0');
           setTimeout(() => {
             if (document.body.contains(notification)) {
               document.body.removeChild(notification);
             }
           }, 300);
-        }, 2000);
+        }, 3000);
       }
 
     } catch (error) {
@@ -172,7 +195,7 @@ export default function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isAdding}
-      className={`${className} ${disabled || isAdding ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'} bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2`}
+      className={`${className} ${disabled || isAdding ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600 hover:scale-105'} bg-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95 shadow-md hover:shadow-lg`}
     >
       {isAdding ? (
         <>
