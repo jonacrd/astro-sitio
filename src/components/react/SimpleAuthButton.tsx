@@ -1,19 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
-import LogoutButton from './LogoutButton';
-import FixedLoginModal from './FixedLoginModal';
+import LoginForm from './LoginForm';
 
-interface ProfileDropdownProps {
-  onNavigate: (path: string) => void;
-}
-
-export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function SimpleAuthButton() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
+  // Verificar autenticación
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -43,18 +38,6 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -66,19 +49,19 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
     }
   };
 
-  const handleMenuItemClick = (path: string) => {
-    onNavigate(path);
-    setIsOpen(false);
-  };
-
   const handleLoginClick = () => {
     setIsOpen(false);
     setShowLoginModal(true);
   };
 
+  const handleNavigate = (path: string) => {
+    window.location.href = path;
+    setIsOpen(false);
+  };
+
   if (!isAuthenticated) {
     return (
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
@@ -94,7 +77,7 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
         {/* Dropdown para usuarios no autenticados */}
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 profile-dropdown-menu">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[70]">
             <div className="px-4 py-3 border-b border-gray-200">
               <p className="text-sm font-medium text-gray-900">Acceder a tu cuenta</p>
               <p className="text-xs text-gray-600">Inicia sesión o regístrate</p>
@@ -145,13 +128,83 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
             </div>
           </div>
         )}
+
+        {/* Modal de login simple */}
+        {showLoginModal && (
+          <div 
+            onClick={() => setShowLoginModal(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 999999,
+              width: '100vw',
+              height: '100vh'
+            }}
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '0.75rem',
+                padding: '1.5rem',
+                maxWidth: '28rem',
+                width: '90%',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+              }}
+            >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">🔐 Acceso a tu cuenta</h2>
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <LoginForm 
+                onLoginSuccess={(user) => {
+                  console.log('✅ Login exitoso desde SimpleAuthButton:', user.email);
+                  setIsAuthenticated(true);
+                  setUserEmail(user.email || '');
+                  setShowLoginModal(false);
+                  // Recargar la página para actualizar el estado de autenticación
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 1500);
+                }}
+                onClose={() => setShowLoginModal(false)}
+              />
+
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   // Usuario autenticado
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
@@ -169,7 +222,7 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
 
       {/* Dropdown para usuarios autenticados */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 profile-dropdown-menu">
+        <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[70]">
           <div className="px-4 py-3 border-b border-gray-200">
             <p className="text-sm font-medium text-gray-900">{userEmail}</p>
             <p className="text-xs text-gray-500">Tu cuenta</p>
@@ -184,7 +237,7 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
             ].map((item) => (
               <button
                 key={item.path}
-                onClick={() => handleMenuItemClick(item.path)}
+                onClick={() => handleNavigate(item.path)}
                 className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors"
               >
                 <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -202,83 +255,19 @@ export default function ProfileDropdown({ onNavigate }: ProfileDropdownProps) {
           <div className="border-t border-gray-200 my-1"></div>
 
           {/* Cerrar sesión */}
-          <LogoutButton className="profile-dropdown-item-opaque flex items-center gap-3 w-full px-4 py-3 text-left">
-            <div className="profile-icon-logout w-8 h-8 rounded-lg flex items-center justify-center">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-red-50 transition-colors"
+          >
+            <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-medium">Cerrar Sesión</p>
+              <p className="text-sm font-medium text-red-600">Cerrar Sesión</p>
             </div>
-          </LogoutButton>
-        </div>
-      )}
-
-      {/* Modal de login */}
-      {showLoginModal && (
-        <div 
-          onClick={() => setShowLoginModal(false)}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="tu@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  type="button"
-                  className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
-                >
-                  Iniciar Sesión
-                </button>
-                
-                <button
-                  type="button"
-                  className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
-                >
-                  Registrarse
-                </button>
-              </div>
-            </form>
-          </div>
+          </button>
         </div>
       )}
     </div>
