@@ -199,7 +199,9 @@ export const POST: APIRoute = async (context) => {
       .rpc('place_order', {
         p_user_id: clientUuid,
         p_seller_id: sellerUuid,
-        p_payment_method: paymentMethod || 'cash'
+        p_payment_method: paymentMethod || 'cash',
+        p_delivery_address: deliveryAddress || {},
+        p_delivery_notes: orderNotes || ''
       });
 
     if (orderError) {
