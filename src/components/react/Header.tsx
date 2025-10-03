@@ -170,9 +170,10 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl sm:text-2xl font-bold text-white">🛍️ Tienda</h1>
-            </div>
+            <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <img src="/icon.png" alt="Town" className="w-8 h-8 sm:w-10 sm:h-10" />
+              <h1 className="text-xl sm:text-2xl font-bold text-white">Town</h1>
+            </a>
             
             {/* Búsqueda, Notificaciones, Carrito y Autenticación */}
             <div className="flex items-center gap-2 sm:gap-4">

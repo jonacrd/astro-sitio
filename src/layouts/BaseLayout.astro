@@ -16,8 +16,8 @@ export interface Props {
 }
 
 const { 
-  title = "Tienda Online - Productos de Calidad",
-  description = "Encuentra los mejores productos tecnológicos al mejor precio" 
+  title = "Town - Tu Tienda de Barrio Online",
+  description = "Encuentra los mejores productos de tu barrio al mejor precio" 
 } = Astro.props
 ---
 
@@ -28,7 +28,8 @@ const {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   <meta name="description" content={description}>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="apple-touch-icon" href="/icon.png">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
@@ -236,10 +237,10 @@ const {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <!-- Información de la tienda -->
         <div class="col-span-1 md:col-span-2">
-          <h3 class="text-xl font-bold mb-4">🛍️ Tienda Online</h3>
+          <h3 class="text-xl font-bold mb-4">🏘️ Town</h3>
           <p class="text-gray-400 mb-4">
-            Tu tienda de confianza para productos de tecnología y mucho más. 
-            Calidad garantizada y envíos rápidos.
+            Tu tienda de barrio online. Los mejores productos de tu comunidad 
+            con la comodidad de comprar desde casa.
           </p>
         </div>
 
@@ -265,7 +266,7 @@ const {
       </div>
 
       <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-        <p>&copy; {new Date().getFullYear()} Tienda Online. Todos los derechos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} Town. Todos los derechos reservados.</p>
       </div>
     </div>
   </footer>
