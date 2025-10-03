@@ -10,6 +10,7 @@ import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
 import OneSignalSubscriber from '@components/react/OneSignalSubscriber.tsx'
 import NotificationWelcome from '@components/react/NotificationWelcome.tsx'
+import FloatingNotificationButton from '@components/react/FloatingNotificationButton.tsx'
 
 export interface Props {
   title?: string
@@ -280,5 +281,8 @@ const {
   
   <!-- Modal de bienvenida de notificaciones (después de registrarse) -->
   <NotificationWelcome client:load />
+  
+  <!-- Botón flotante para activar notificaciones (siempre visible si no están activas) -->
+  <FloatingNotificationButton client:load />
 </body>
 </html>
