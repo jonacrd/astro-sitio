@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { formatPrice } from '../../lib/money';
+import ShareProductWhatsApp from './ShareProductWhatsApp';
 
 interface Product {
   id: string;
@@ -449,12 +450,24 @@ export default function ProductManagerEnhanced() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleEditProduct(sellerProduct)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Configurar
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditProduct(sellerProduct)}
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    ⚙️ Configurar
+                  </button>
+                  
+                  {sellerProduct.active && sellerProduct.stock > 0 && (
+                    <ShareProductWhatsApp
+                      productId={sellerProduct.product_id}
+                      productTitle={sellerProduct.products.title}
+                      productPrice={sellerProduct.price_cents / 100}
+                      productImage={sellerProduct.products.image_url}
+                      stock={sellerProduct.stock}
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>
