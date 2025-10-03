@@ -22,10 +22,51 @@ export default function PushNotificationManager() {
       setPermission(Notification.permission);
       console.log('✅ Notificaciones push soportadas');
       console.log('🔐 Permiso actual:', Notification.permission);
+      
+      // Si ya tiene permisos, verificar si tiene suscripción
+      if (Notification.permission === 'granted') {
+        checkExistingSubscription();
+      }
     } else {
       console.error('❌ Notificaciones push NO soportadas');
     }
   }, []);
+
+  const checkExistingSubscription = async () => {
+    try {
+      console.log('🔍 Verificando suscripción existente...');
+      
+      const registration = await navigator.serviceWorker.ready;
+      const existingSubscription = await registration.pushManager.getSubscription();
+      
+      if (existingSubscription) {
+        console.log('✅ Ya existe una suscripción push');
+        setSubscription(existingSubscription);
+        setIsSubscribed(true);
+        
+        // Verificar si está en la BD
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: dbSub } = await supabase
+            .from('push_subscriptions')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (!dbSub) {
+            console.log('⚠️ Suscripción existe localmente pero no en BD, guardando...');
+            await saveSubscription(existingSubscription);
+          } else {
+            console.log('✅ Suscripción también existe en BD');
+          }
+        }
+      } else {
+        console.log('ℹ️ No existe suscripción push previa');
+      }
+    } catch (err) {
+      console.error('Error verificando suscripción:', err);
+    }
+  };
 
   const requestPermission = async () => {
     if (!isSupported) {
@@ -94,28 +135,90 @@ export default function PushNotificationManager() {
 
   const saveSubscription = async (subscription: PushSubscription) => {
     try {
+      console.log('💾 Guardando suscripción en Supabase...');
+      
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setError('Usuario no autenticado');
+        console.error('❌ Usuario no autenticado');
+        setError('Debes iniciar sesión para activar las notificaciones');
         return;
       }
 
-      const { error } = await supabase.from('push_subscriptions').upsert({
-        user_id: user.id,
-        subscription: subscription.toJSON(),
-        created_at: new Date().toISOString()
-      });
+      console.log('👤 Usuario autenticado:', user.id, user.email);
+      
+      // Convertir suscripción a formato adecuado
+      const subJSON = subscription.toJSON();
+      console.log('📦 Suscripción a guardar:', subJSON);
+
+      // Extraer las claves en formato base64
+      const p256dhKey = subJSON.keys?.p256dh || '';
+      const authKey = subJSON.keys?.auth || '';
+
+      console.log('🔑 Endpoint:', subJSON.endpoint);
+      console.log('🔑 p256dh:', p256dhKey.substring(0, 20) + '...');
+      console.log('🔑 auth:', authKey.substring(0, 20) + '...');
+
+      const { data, error } = await supabase
+        .from('push_subscriptions')
+        .upsert({
+          user_id: user.id,
+          endpoint: subJSON.endpoint,
+          p256dh: p256dhKey,
+          auth: authKey,
+          user_agent: navigator.userAgent
+        }, {
+          onConflict: 'user_id'
+        });
 
       if (error) {
-        console.error('Error guardando suscripción:', error);
-        setError('Error guardando suscripción');
+        console.error('❌ Error guardando suscripción en BD:', error);
+        console.error('❌ Error code:', error.code);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error details:', error.details);
+        console.error('❌ Error hint:', error.hint);
+        
+        setError(`Error guardando suscripción: ${error.message}`);
+        
+        // Mostrar notificación de error específico
+        if (typeof window !== 'undefined') {
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] max-w-md';
+          notification.innerHTML = `
+            <div class="flex flex-col gap-2">
+              <p class="font-bold">❌ Error al guardar suscripción</p>
+              <p class="text-sm">${error.message}</p>
+              ${error.code ? `<p class="text-xs opacity-75">Código: ${error.code}</p>` : ''}
+              ${error.hint ? `<p class="text-xs opacity-75">Sugerencia: ${error.hint}</p>` : ''}
+            </div>
+          `;
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 10000);
+        }
       } else {
-        console.log('Suscripción guardada en Supabase');
+        console.log('✅ Suscripción guardada exitosamente en Supabase');
+        console.log('✅ Data:', data);
+        
+        // Mostrar notificación de éxito
+        if (typeof window !== 'undefined') {
+          const notification = document.createElement('div');
+          notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
+          notification.innerHTML = `
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              <p class="font-bold">¡Suscripción guardada exitosamente!</p>
+            </div>
+          `;
+          document.body.appendChild(notification);
+          setTimeout(() => notification.remove(), 3000);
+        }
       }
-    } catch (err) {
-      console.error('Error guardando suscripción:', err);
-      setError('Error guardando suscripción');
+    } catch (err: any) {
+      console.error('❌ Error inesperado guardando suscripción:', err);
+      console.error('❌ Stack:', err.stack);
+      setError('Error inesperado guardando suscripción: ' + err.message);
     }
   };
 

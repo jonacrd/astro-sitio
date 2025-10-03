@@ -30,7 +30,7 @@ serve(async (req) => {
     // Get all push subscriptions
     const { data: subscriptions, error } = await supabaseClient
       .from('push_subscriptions')
-      .select('subscription')
+      .select('endpoint, p256dh, auth')
 
     if (error) {
       console.error('Error fetching subscriptions:', error)
@@ -57,7 +57,14 @@ serve(async (req) => {
     const results = []
     for (const sub of subscriptions) {
       try {
-        const subscription = sub.subscription
+        // Reconstruir objeto subscription desde la BD
+        const subscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth
+          }
+        }
         
         // Prepare the notification payload
         const payload = JSON.stringify({
@@ -103,7 +110,7 @@ serve(async (req) => {
       } catch (error) {
         console.error('Error sending notification:', error)
         results.push({
-          subscription: sub.subscription.endpoint,
+          subscription: sub.endpoint,
           status: 'error',
           success: false,
           error: error.message
