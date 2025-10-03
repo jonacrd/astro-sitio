@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Admin - Notificar Suscripción">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">
+        📢 Notificar a Usuarios No Suscritos
+      </h1>
+      
+      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-blue-700">
+              Esta acción creará notificaciones in-app para todos los usuarios que <strong>NO tienen activadas las notificaciones push</strong>.
+              Las verán la próxima vez que entren a la plataforma.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h3 class="font-semibold text-gray-900 mb-2">¿Qué hace este botón?</h3>
+          <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>Consulta todos los usuarios registrados (compradores)</li>
+            <li>Verifica cuáles tienen OneSignal activo</li>
+            <li>Identifica usuarios sin notificaciones</li>
+            <li>Crea una notificación in-app para cada uno</li>
+            <li>Les recuerda activar las notificaciones push</li>
+          </ul>
+        </div>
+
+        <div id="results" class="hidden">
+          <div class="bg-green-50 border-l-4 border-green-500 p-4">
+            <h3 class="font-semibold text-green-900 mb-2">✅ Notificaciones Creadas</h3>
+            <div id="stats" class="text-sm text-green-700"></div>
+            <div id="users-list" class="mt-4"></div>
+          </div>
+        </div>
+
+        <div id="error" class="hidden">
+          <div class="bg-red-50 border-l-4 border-red-500 p-4">
+            <h3 class="font-semibold text-red-900 mb-2">❌ Error</h3>
+            <p id="error-message" class="text-sm text-red-700"></p>
+          </div>
+        </div>
+
+        <button
+          id="notify-btn"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          🔔 Enviar Notificaciones a Usuarios No Suscritos
+        </button>
+      </div>
+
+      <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
+        <h3 class="font-semibold text-yellow-900 mb-2">⚠️ Importante</h3>
+        <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1">
+          <li>Las notificaciones push solo funcionan si el usuario da permiso</li>
+          <li>Estas notificaciones in-app aparecerán cuando entren a la plataforma</li>
+          <li>El botón flotante también les recordará activar notificaciones</li>
+          <li>No se pueden enviar notificaciones push a usuarios no suscritos</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const notifyBtn = document.getElementById('notify-btn') as HTMLButtonElement;
+    const resultsDiv = document.getElementById('results');
+    const errorDiv = document.getElementById('error');
+    const statsDiv = document.getElementById('stats');
+    const usersListDiv = document.getElementById('users-list');
+    const errorMessageP = document.getElementById('error-message');
+
+    notifyBtn?.addEventListener('click', async () => {
+      notifyBtn.disabled = true;
+      notifyBtn.textContent = '⏳ Procesando...';
+      
+      // Ocultar resultados anteriores
+      resultsDiv?.classList.add('hidden');
+      errorDiv?.classList.add('hidden');
+
+      try {
+        const response = await fetch('/api/admin/notify-users-to-subscribe', {
+          method: 'POST'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Mostrar resultados
+          if (statsDiv) {
+            statsDiv.innerHTML = `
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="font-semibold">Total Usuarios:</p>
+                  <p class="text-2xl">${data.stats.totalUsers}</p>
+                </div>
+                <div>
+                  <p class="font-semibold">Con Notificaciones:</p>
+                  <p class="text-2xl text-green-600">${data.stats.subscribedUsers}</p>
+                </div>
+                <div>
+                  <p class="font-semibold">Sin Notificaciones:</p>
+                  <p class="text-2xl text-red-600">${data.stats.unsubscribedUsers}</p>
+                </div>
+                <div>
+                  <p class="font-semibold">Notificaciones Creadas:</p>
+                  <p class="text-2xl text-blue-600">${data.stats.notificationsCreated}</p>
+                </div>
+              </div>
+            `;
+          }
+
+          // Mostrar lista de usuarios
+          if (usersListDiv && data.unsubscribedUsers.length > 0) {
+            usersListDiv.innerHTML = `
+              <h4 class="font-semibold text-green-900 mb-2">Usuarios notificados:</h4>
+              <ul class="list-disc list-inside text-sm space-y-1">
+                ${data.unsubscribedUsers.map((u: any) => `
+                  <li>${u.name || 'Sin nombre'} (${u.email || 'Sin email'})</li>
+                `).join('')}
+              </ul>
+            `;
+          }
+
+          resultsDiv?.classList.remove('hidden');
+        } else {
+          if (errorMessageP) {
+            errorMessageP.textContent = data.error || 'Error desconocido';
+          }
+          errorDiv?.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        if (errorMessageP) {
+          errorMessageP.textContent = error instanceof Error ? error.message : 'Error de conexión';
+        }
+        errorDiv?.classList.remove('hidden');
+      } finally {
+        notifyBtn.disabled = false;
+        notifyBtn.textContent = '🔔 Enviar Notificaciones a Usuarios No Suscritos';
+      }
+    });
+  </script>
+</BaseLayout>
+
