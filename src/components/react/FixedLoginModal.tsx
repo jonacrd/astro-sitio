@@ -21,18 +21,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
       setPassword('');
       setError(null);
       setSuccess(false);
-      
-      // Prevenir scroll del body
-      document.body.classList.add('modal-open');
-    } else {
-      // Restaurar scroll del body
-      document.body.classList.remove('modal-open');
     }
-    
-    // Cleanup al desmontar
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
   }, [isOpen]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -193,43 +182,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
     }
   };
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div 
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 999999,
-        width: '100vw',
-        height: '100vh'
-      }}
-    >
-      <div 
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: 'white',
-          borderRadius: '0.75rem',
-          padding: '1.5rem',
-          maxWidth: '28rem',
-          width: '90%',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-        }}
-      >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
+          <h2 className="text-xl font-bold text-gray-900">Iniciar Sesión</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
