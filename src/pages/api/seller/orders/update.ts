@@ -87,7 +87,10 @@ export const POST: APIRoute = async ({ request }) => {
       if (onesignalRestKey) {
         const notificationPayload = {
           app_id: onesignalAppId,
-          include_external_user_ids: [updatedOrder.user_id],
+          include_aliases: {
+            external_id: [updatedOrder.user_id]
+          },
+          target_channel: 'push',
           headings: { en: getPushNotificationTitle(status) },
           contents: { en: getPushNotificationBody(status, orderId) },
           data: {
@@ -102,6 +105,9 @@ export const POST: APIRoute = async ({ request }) => {
           chrome_web_badge: '/favicon.svg'
         };
 
+        console.log('📬 Enviando notificación push al cliente:', updatedOrder.user_id);
+        console.log('📦 Payload OneSignal:', JSON.stringify(notificationPayload, null, 2));
+
         const response = await fetch('https://onesignal.com/api/v1/notifications', {
           method: 'POST',
           headers: {
@@ -111,11 +117,12 @@ export const POST: APIRoute = async ({ request }) => {
           body: JSON.stringify(notificationPayload)
         });
 
+        const result = await response.json();
+
         if (response.ok) {
-          console.log('✅ Notificación OneSignal enviada al cliente');
+          console.log('✅ Notificación OneSignal enviada al cliente:', result);
         } else {
-          const error = await response.json();
-          console.error('❌ Error enviando notificación:', error);
+          console.error('❌ Error enviando notificación:', result);
         }
       } else {
         console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
@@ -179,6 +186,10 @@ function getPushNotificationTitle(status: string): string {
   switch (status) {
     case 'confirmed':
       return '✅ ¡Pedido Confirmado!';
+    case 'preparing':
+      return '👨‍🍳 ¡Preparando tu Pedido!';
+    case 'in_transit':
+      return '🚚 ¡Tu pedido va en camino!';
     case 'delivered':
       return '📦 ¡Tu pedido ha llegado!';
     case 'completed':
@@ -194,6 +205,10 @@ function getPushNotificationBody(status: string, orderId: string): string {
   switch (status) {
     case 'confirmed':
       return `Tu pedido #${orderCode} ha sido confirmado y está siendo preparado`;
+    case 'preparing':
+      return `Tu pedido #${orderCode} está siendo preparado con cuidado`;
+    case 'in_transit':
+      return `Tu pedido #${orderCode} ya está en camino. ¡Pronto llegará!`;
     case 'delivered':
       return `Tu pedido #${orderCode} ha llegado a tu dirección. ¡Baja a recibirlo!`;
     case 'completed':
