@@ -179,9 +179,14 @@ export const POST: APIRoute = async ({ request }) => {
       const onesignalRestKey = process.env.ONESIGNAL_REST_API_KEY || '';
 
       if (onesignalRestKey) {
+        console.log('📬 Intentando enviar notificación al vendedor:', sellerId);
+        
         const notificationPayload = {
           app_id: onesignalAppId,
-          include_external_user_ids: [sellerId],
+          include_aliases: {
+            external_id: [sellerId]
+          },
+          target_channel: 'push',
           headings: { en: '🛒 ¡Nuevo Pedido Recibido!' },
           contents: { en: notificationBody },
           data: {
@@ -196,6 +201,8 @@ export const POST: APIRoute = async ({ request }) => {
           chrome_web_badge: '/favicon.svg'
         };
 
+        console.log('📦 Payload:', JSON.stringify(notificationPayload, null, 2));
+
         const response = await fetch('https://onesignal.com/api/v1/notifications', {
           method: 'POST',
           headers: {
@@ -205,11 +212,12 @@ export const POST: APIRoute = async ({ request }) => {
           body: JSON.stringify(notificationPayload)
         });
 
+        const result = await response.json();
+        
         if (response.ok) {
-          console.log('✅ Notificación OneSignal enviada al vendedor');
+          console.log('✅ Notificación OneSignal enviada:', result);
         } else {
-          const error = await response.json();
-          console.error('❌ Error enviando notificación:', error);
+          console.error('❌ Error enviando notificación:', result);
         }
       } else {
         console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
