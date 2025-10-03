@@ -216,6 +216,42 @@ export default function RealCartSheet({ isOpen, onClose, userId }: RealCartSheet
         console.error('Error during checkout:', error);
         alert('Error al procesar el pedido: ' + error.message);
       } else {
+        console.log('✅ Pedido creado exitosamente:', data);
+        
+        // 📱 Enviar notificación al vendedor via OneSignal
+        try {
+          // Obtener el sellerId del primer item (asumimos que todos son del mismo vendedor)
+          const sellerId = cartItems[0]?.seller_id;
+          
+          if (sellerId) {
+            console.log('📬 Enviando notificación al vendedor:', sellerId);
+            
+            const response = await fetch('https://onesignal.com/api/v1/notifications', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Basic os_v2_app_e4ejnwf2fzalzdz3yhto7usyusef5yk3avlcu4umoy7adwyxujdr7kerrk7mfe6myvfiv3762hga7e7xbzxu2zhanilwfo2gtmsl5rga'
+              },
+              body: JSON.stringify({
+                app_id: '270896d8-ba2e-40bc-8f3b-c1e6efd258a1',
+                include_aliases: {
+                  external_id: [sellerId]
+                },
+                target_channel: 'push',
+                headings: { en: '🛒 ¡Nuevo Pedido Recibido!' },
+                contents: { en: `Tienes un nuevo pedido de ${cartItems.length} producto(s)` },
+                chrome_web_icon: '/favicon.svg',
+                firefox_icon: '/favicon.svg'
+              })
+            });
+            
+            const result = await response.json();
+            console.log('📊 Resultado notificación:', result);
+          }
+        } catch (notifError) {
+          console.error('⚠️ Error enviando notificación (no crítico):', notifError);
+        }
+        
         alert('¡Pedido realizado con éxito!');
         setCartItems([]);
         onClose();
