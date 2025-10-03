@@ -253,6 +253,61 @@ export const POST: APIRoute = async (context) => {
       console.log('🔔 Notificación creada para el vendedor');
     }
 
+    // 📱 ENVIAR NOTIFICACIÓN PUSH AL VENDEDOR con OneSignal
+    try {
+      console.log('📬 Intentando enviar notificación push al vendedor:', sellerUuid);
+      
+      const onesignalAppId = '270896d8-ba2e-40bc-8f3b-c1e6efd258a1';
+      const onesignalRestKey = import.meta.env.ONESIGNAL_REST_API_KEY || '';
+
+      if (onesignalRestKey) {
+        const notificationPayload = {
+          app_id: onesignalAppId,
+          include_aliases: {
+            external_id: [sellerUuid]
+          },
+          target_channel: 'push',
+          headings: { en: '🛒 ¡Nuevo Pedido Recibido!' },
+          contents: { en: `Nueva orden #${orderCode} de ${customerName}` },
+          data: {
+            type: 'new_order',
+            orderId: orderResult.orderId,
+            orderCode,
+            url: `/vendedor/pedidos/${orderResult.orderId}`,
+            timestamp: new Date().toISOString()
+          },
+          url: `/vendedor/pedidos/${orderResult.orderId}`,
+          chrome_web_icon: '/favicon.svg',
+          firefox_icon: '/favicon.svg',
+          chrome_web_badge: '/favicon.svg'
+        };
+
+        console.log('📦 Payload OneSignal:', JSON.stringify(notificationPayload, null, 2));
+
+        const response = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${onesignalRestKey}`
+          },
+          body: JSON.stringify(notificationPayload)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+          console.log('✅ Notificación push OneSignal enviada:', result);
+        } else {
+          console.error('❌ Error enviando notificación push:', result);
+        }
+      } else {
+        console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
+      }
+    } catch (pushError) {
+      console.error('⚠️ Error enviando notificación push (no crítico):', pushError);
+      // No fallar el checkout si falla la notificación push
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
