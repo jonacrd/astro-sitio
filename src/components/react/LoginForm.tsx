@@ -170,6 +170,11 @@ export default function LoginForm({ onLoginSuccess, onClose }: LoginFormProps) {
         
         setSuccess(true);
         
+        // Marcar que el usuario acaba de registrarse para mostrar el modal de notificaciones
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('just_registered', 'true');
+        }
+        
         // Mostrar notificación de éxito
         if (typeof window !== 'undefined') {
           const notification = document.createElement('div');

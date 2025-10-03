@@ -9,6 +9,7 @@ import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
 import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
 import OneSignalSubscriber from '@components/react/OneSignalSubscriber.tsx'
+import NotificationWelcome from '@components/react/NotificationWelcome.tsx'
 
 export interface Props {
   title?: string
@@ -276,5 +277,8 @@ const {
   
   <!-- Suscriptor automático de OneSignal -->
   <OneSignalSubscriber client:load />
+  
+  <!-- Modal de bienvenida de notificaciones (después de registrarse) -->
+  <NotificationWelcome client:load />
 </body>
 </html>

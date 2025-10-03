@@ -1,10 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CheckoutComponent from '../components/react/Checkout.tsx';
+import CheckoutNotificationPrompt from '../components/react/CheckoutNotificationPrompt.tsx';
 ---
 
 <BaseLayout title="Finalizar Compra">
-  <CheckoutComponent client:load />
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Prompt de notificaciones -->
+    <CheckoutNotificationPrompt client:load />
+    
+    <!-- Componente de checkout -->
+    <CheckoutComponent client:load />
+  </div>
 </BaseLayout>
 
 
