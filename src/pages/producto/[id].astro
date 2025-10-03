@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductDetailView from '../../components/react/ProductDetailView.tsx';
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Producto - Town">
+  <ProductDetailView productId={id} client:load />
+</BaseLayout>
+
