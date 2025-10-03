@@ -39,7 +39,11 @@ export default function OneSignalSubscriber() {
         if (isPushEnabled) {
           console.log('🔔 Notificaciones push activadas');
         } else {
-          console.log('⚠️ Notificaciones push no activadas (usuario debe dar permiso)');
+          console.log('⚠️ Notificaciones push no activadas, mostrando prompt...');
+          
+          // Mostrar el prompt de notificaciones automáticamente
+          // @ts-ignore
+          await OneSignal.Slidedown.promptPush();
         }
 
       } catch (error) {
