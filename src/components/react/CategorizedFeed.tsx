@@ -19,9 +19,16 @@ interface CategorizedFeedProps {
 
 const CATEGORIES = [
   { id: 'abastos', name: '🥫 Abastos', description: 'Arroz, pasta, aceites, atún, azúcar, etc.' },
-  { id: 'bebidas', name: '🥤 Bebidas', description: 'Jugos, coca cola, agua, etc.' },
+  { id: 'bebidas', name: '🥤 Bebidas', description: 'Jugos, coca cola, agua, bebidas gaseosas, etc.' },
+  { id: 'bebidas_alcoholicas', name: '🍺 Bebidas Alcohólicas y Tabaco', description: 'Cervezas, vinos, licores, cigarros, etc.' },
   { id: 'cereales', name: '🥣 Cereales', description: 'Cereales, granola, avena, etc.' },
   { id: 'comida_rapida', name: '🍔 Comida Rápida', description: 'Hamburguesas, pizza, hot dogs, etc.' },
+  { id: 'lacteos', name: '🥛 Lácteos', description: 'Leche, queso, yogurt, mantequilla, etc.' },
+  { id: 'panaderia', name: '🍞 Panadería', description: 'Pan, pasteles, galletas, etc.' },
+  { id: 'carnes', name: '🥩 Carnes y Embutidos', description: 'Pollo, res, cerdo, salchichas, etc.' },
+  { id: 'frutas_verduras', name: '🥬 Frutas y Verduras', description: 'Frutas frescas, verduras, legumbres, etc.' },
+  { id: 'limpieza', name: '🧹 Limpieza', description: 'Detergentes, desinfectantes, etc.' },
+  { id: 'higiene', name: '🧼 Higiene Personal', description: 'Jabón, shampoo, pasta dental, etc.' },
   { id: 'servicios', name: '🛠️ Servicios', description: 'Reparaciones, delivery, etc.' },
   { id: 'otros', name: '📦 Otros', description: 'Productos varios' }
 ];
