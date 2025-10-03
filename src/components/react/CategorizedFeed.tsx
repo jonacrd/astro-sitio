@@ -49,7 +49,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
     setError(null);
 
     try {
-      console.log('🔍 Cargando productos de todos los vendedores activos (v2)...');
+      console.log('🔍 Cargando productos de todos los vendedores activos (v3)...');
 
       // Obtener TODOS los productos (sin filtrar por vendedor activo)
       const { data: sellerProducts, error: productsError } = await supabase
