@@ -204,7 +204,12 @@ export default function RealCartSheet({ isOpen, onClose, userId }: RealCartSheet
   };
 
   const proceedToCheckout = async () => {
-    if (!userId || cartItems.length === 0) return;
+    console.log('🚀 proceedToCheckout iniciado', { userId, cartItemsCount: cartItems.length });
+    
+    if (!userId || cartItems.length === 0) {
+      console.warn('⚠️ Checkout cancelado: sin userId o carrito vacío');
+      return;
+    }
 
     try {
       // Llamar a la función de checkout del backend
