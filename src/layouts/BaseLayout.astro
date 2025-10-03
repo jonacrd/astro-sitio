@@ -29,6 +29,24 @@ const {
   <meta name="description" content={description}>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('Service Worker registrado:', registration);
+          })
+          .catch((error) => {
+            console.log('Error registrando Service Worker:', error);
+          });
+      });
+    }
+  </script>
+  
   <!-- REDISEÑO VISUAL COMPLETO -->
   <link rel="stylesheet" href="/src/styles/global-redesign.css">
   

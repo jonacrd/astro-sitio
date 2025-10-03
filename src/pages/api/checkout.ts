@@ -166,6 +166,39 @@ export const POST: APIRoute = async ({ request }) => {
     // El carrito ya se limpió en la función place_order_with_expiration
     console.log('✅ Carrito limpiado automáticamente');
 
+    // 📱 ENVIAR NOTIFICACIÓN AL VENDEDOR
+    try {
+      // Obtener nombre del primer producto para la notificación
+      const productName = cartItems[0]?.title || 'productos';
+      const productCount = cartItems.length;
+      const notificationBody = productCount > 1 
+        ? `Tienes un nuevo pedido de ${productCount} productos` 
+        : `Tienes un nuevo pedido de ${productName}`;
+
+      // Enviar notificación al vendedor
+      await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userId: sellerId,
+          title: '🛒 ¡Nuevo Pedido Recibido!',
+          body: notificationBody,
+          icon: '/favicon.svg',
+          badge: '/favicon.svg',
+          tag: `new-order-${orderId}`,
+          data: {
+            type: 'new_order',
+            orderId,
+            url: `/vendedor/pedidos/${orderId}`,
+            timestamp: new Date().toISOString()
+          }
+        }
+      });
+
+      console.log('📱 Notificación enviada al vendedor');
+    } catch (notifError) {
+      console.error('Error enviando notificación al vendedor:', notifError);
+      // No fallar el checkout si falla la notificación
+    }
+
     // Agregar puntos al usuario (opcional)
     const pointsToAdd = Math.floor(totalCents / 100); // 1 punto por cada $1
     if (pointsToAdd > 0) {
