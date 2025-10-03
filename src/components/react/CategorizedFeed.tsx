@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import CartToast from './CartToast';
 
 interface Product {
   id: string;
@@ -39,6 +40,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastData, setToastData] = useState<{ productName: string; productImage: string } | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -160,6 +163,13 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
         }
       }));
       
+      // Mostrar toast de notificación
+      setToastData({
+        productName: product.title,
+        productImage: product.image_url
+      });
+      setShowToast(true);
+      
       console.log('✅ Producto agregado al carrito:', product.title);
     } catch (error) {
       console.error('Error agregando al carrito:', error);
@@ -196,9 +206,26 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
     : CATEGORIES;
 
   return (
-    <div className={`w-full ${className}`}>
-      {/* Filtros de Categoría */}
-      <div className="mb-8 overflow-x-auto">
+    <>
+      {/* Toast de notificación */}
+      {showToast && toastData && (
+        <CartToast
+          productName={toastData.productName}
+          productImage={toastData.productImage}
+          onClose={() => setShowToast(false)}
+          onClick={() => {
+            // Disparar evento para abrir el carrito
+            const cartButton = document.getElementById('cart-button');
+            if (cartButton) {
+              cartButton.click();
+            }
+          }}
+        />
+      )}
+
+      <div className={`w-full ${className}`}>
+        {/* Filtros de Categoría */}
+        <div className="mb-8 overflow-x-auto">
         <div className="flex gap-2 pb-2 min-w-max">
           <button
             onClick={() => setSelectedCategory(null)}
@@ -316,7 +343,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           <p className="text-sm">Los vendedores aún no han activado productos.</p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
