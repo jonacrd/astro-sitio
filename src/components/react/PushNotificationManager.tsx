@@ -11,10 +11,19 @@ export default function PushNotificationManager() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('🔍 PushNotificationManager montado');
+    console.log('📱 Service Worker disponible:', 'serviceWorker' in navigator);
+    console.log('📱 PushManager disponible:', 'PushManager' in window);
+    console.log('📱 Notification API disponible:', 'Notification' in window);
+    
     // Verificar soporte para notificaciones push
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true);
       setPermission(Notification.permission);
+      console.log('✅ Notificaciones push soportadas');
+      console.log('🔐 Permiso actual:', Notification.permission);
+    } else {
+      console.error('❌ Notificaciones push NO soportadas');
     }
   }, []);
 
@@ -46,26 +55,40 @@ export default function PushNotificationManager() {
 
   const subscribeToPush = async () => {
     try {
+      console.log('📝 Iniciando suscripción push...');
+      console.log('🔑 VAPID_PUBLIC_KEY:', VAPID_PUBLIC_KEY);
+      
       // Registrar Service Worker
+      console.log('📝 Registrando Service Worker...');
       const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker registrado:', registration);
+      console.log('✅ Service Worker registrado:', registration);
+
+      // Esperar a que el Service Worker esté activo
+      console.log('⏳ Esperando a que Service Worker esté activo...');
+      await navigator.serviceWorker.ready;
+      console.log('✅ Service Worker listo');
 
       // Obtener suscripción push
+      console.log('📝 Creando suscripción push...');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: VAPID_PUBLIC_KEY
       });
 
+      console.log('✅ Suscripción push creada:', subscription);
       setSubscription(subscription);
       setIsSubscribed(true);
 
       // Guardar suscripción en Supabase
+      console.log('💾 Guardando suscripción en Supabase...');
       await saveSubscription(subscription);
+      console.log('✅ Suscripción guardada en Supabase');
 
-      console.log('Suscripción push creada:', subscription);
-    } catch (err) {
-      console.error('Error creando suscripción push:', err);
-      setError('Error creando suscripción push');
+    } catch (err: any) {
+      console.error('❌ Error creando suscripción push:', err);
+      console.error('❌ Error stack:', err.stack);
+      console.error('❌ Error message:', err.message);
+      setError('Error creando suscripción push: ' + err.message);
     }
   };
 
