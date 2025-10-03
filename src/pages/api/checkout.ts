@@ -166,34 +166,54 @@ export const POST: APIRoute = async ({ request }) => {
     // El carrito ya se limpió en la función place_order_with_expiration
     console.log('✅ Carrito limpiado automáticamente');
 
-    // 📱 ENVIAR NOTIFICACIÓN AL VENDEDOR
+    // 📱 ENVIAR NOTIFICACIÓN AL VENDEDOR con OneSignal
     try {
-      // Obtener nombre del primer producto para la notificación
       const productName = cartItems[0]?.title || 'productos';
       const productCount = cartItems.length;
       const notificationBody = productCount > 1 
         ? `Tienes un nuevo pedido de ${productCount} productos` 
         : `Tienes un nuevo pedido de ${productName}`;
 
-      // Enviar notificación al vendedor
-      await supabase.functions.invoke('send-push-notification', {
-        body: {
-          userId: sellerId,
-          title: '🛒 ¡Nuevo Pedido Recibido!',
-          body: notificationBody,
-          icon: '/favicon.svg',
-          badge: '/favicon.svg',
-          tag: `new-order-${orderId}`,
+      // Enviar notificación usando OneSignal REST API
+      const onesignalAppId = '270896d8-ba2e-40bc-8f3b-c1e6efd258a1';
+      const onesignalRestKey = process.env.ONESIGNAL_REST_API_KEY || '';
+
+      if (onesignalRestKey) {
+        const notificationPayload = {
+          app_id: onesignalAppId,
+          include_external_user_ids: [sellerId],
+          headings: { en: '🛒 ¡Nuevo Pedido Recibido!' },
+          contents: { en: notificationBody },
           data: {
             type: 'new_order',
             orderId,
             url: `/vendedor/pedidos/${orderId}`,
             timestamp: new Date().toISOString()
-          }
-        }
-      });
+          },
+          url: `/vendedor/pedidos/${orderId}`,
+          chrome_web_icon: '/favicon.svg',
+          firefox_icon: '/favicon.svg',
+          chrome_web_badge: '/favicon.svg'
+        };
 
-      console.log('📱 Notificación enviada al vendedor');
+        const response = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${onesignalRestKey}`
+          },
+          body: JSON.stringify(notificationPayload)
+        });
+
+        if (response.ok) {
+          console.log('✅ Notificación OneSignal enviada al vendedor');
+        } else {
+          const error = await response.json();
+          console.error('❌ Error enviando notificación:', error);
+        }
+      } else {
+        console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
+      }
     } catch (notifError) {
       console.error('Error enviando notificación al vendedor:', notifError);
       // No fallar el checkout si falla la notificación
