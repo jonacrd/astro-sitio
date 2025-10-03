@@ -25,12 +25,23 @@ serve(async (req) => {
     )
 
     // Get the request body
-    const { title, body, icon, badge, tag, data } = await req.json()
+    const { title, body, icon, badge, tag, data, userId } = await req.json()
 
-    // Get all push subscriptions
-    const { data: subscriptions, error } = await supabaseClient
+    console.log('📬 Solicitud de notificación recibida:', { title, body, userId })
+
+    // Get push subscriptions - filtrar por userId si se proporciona
+    let query = supabaseClient
       .from('push_subscriptions')
-      .select('endpoint, p256dh, auth')
+      .select('endpoint, p256dh, auth, user_id')
+    
+    if (userId) {
+      query = query.eq('user_id', userId)
+      console.log('🔍 Filtrando notificaciones para usuario:', userId)
+    } else {
+      console.log('📢 Enviando notificación a todos los usuarios')
+    }
+
+    const { data: subscriptions, error } = await query
 
     if (error) {
       console.error('Error fetching subscriptions:', error)
@@ -44,14 +55,21 @@ serve(async (req) => {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
+      console.log('⚠️ No se encontraron suscripciones para:', userId || 'todos los usuarios')
       return new Response(
-        JSON.stringify({ message: 'No subscriptions found' }),
+        JSON.stringify({ 
+          message: 'No subscriptions found',
+          userId: userId || 'all',
+          count: 0
+        }),
         { 
           status: 200, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
     }
+
+    console.log(`✅ Se encontraron ${subscriptions.length} suscripción(es)`)
 
     // Send push notifications
     const results = []
