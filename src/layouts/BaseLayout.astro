@@ -8,6 +8,7 @@ import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
 import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
 import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
+import OneSignalSubscriber from '@components/react/OneSignalSubscriber.tsx'
 
 export interface Props {
   title?: string
@@ -32,19 +33,16 @@ const {
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   
-  <!-- Service Worker -->
+  <!-- OneSignal Web Push SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('Service Worker registrado:', registration);
-          })
-          .catch((error) => {
-            console.log('Error registrando Service Worker:', error);
-          });
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "270896d8-ba2e-40bc-8f3b-c1e6efd258a1",
+        allowLocalhostAsSecureOrigin: true
       });
-    }
+    });
   </script>
   
   <!-- REDISEÑO VISUAL COMPLETO -->
@@ -272,5 +270,8 @@ const {
 
   <!-- Manejador global de inicio de sesión -->
   <GlobalLoginHandler client:load />
+  
+  <!-- Suscriptor automático de OneSignal -->
+  <OneSignalSubscriber client:load />
 </body>
 </html>

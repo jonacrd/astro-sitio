@@ -79,26 +79,47 @@ export const POST: APIRoute = async ({ request }) => {
       console.log('🔔 Notificación creada para el comprador');
     }
 
-    // 📱 ENVIAR NOTIFICACIÓN PUSH AL CLIENTE
+    // 📱 ENVIAR NOTIFICACIÓN PUSH AL CLIENTE con OneSignal
     try {
-      await supabase.functions.invoke('send-push-notification', {
-        body: {
-          userId: updatedOrder.user_id,
-          title: getPushNotificationTitle(status),
-          body: getPushNotificationBody(status, orderId),
-          icon: '/favicon.svg',
-          badge: '/favicon.svg',
-          tag: `order-${status}-${orderId}`,
+      const onesignalAppId = '270896d8-ba2e-40bc-8f3b-c1e6efd258a1';
+      const onesignalRestKey = process.env.ONESIGNAL_REST_API_KEY || '';
+
+      if (onesignalRestKey) {
+        const notificationPayload = {
+          app_id: onesignalAppId,
+          include_external_user_ids: [updatedOrder.user_id],
+          headings: { en: getPushNotificationTitle(status) },
+          contents: { en: getPushNotificationBody(status, orderId) },
           data: {
             type: `order_${status}`,
             orderId,
             url: `/pedidos/${orderId}`,
             timestamp: new Date().toISOString()
-          }
-        }
-      });
+          },
+          url: `/pedidos/${orderId}`,
+          chrome_web_icon: '/favicon.svg',
+          firefox_icon: '/favicon.svg',
+          chrome_web_badge: '/favicon.svg'
+        };
 
-      console.log('📱 Notificación push enviada al cliente');
+        const response = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${onesignalRestKey}`
+          },
+          body: JSON.stringify(notificationPayload)
+        });
+
+        if (response.ok) {
+          console.log('✅ Notificación OneSignal enviada al cliente');
+        } else {
+          const error = await response.json();
+          console.error('❌ Error enviando notificación:', error);
+        }
+      } else {
+        console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
+      }
     } catch (pushError) {
       console.error('Error enviando notificación push:', pushError);
       // No fallar el update si falla la notificación push
