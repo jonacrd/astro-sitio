@@ -79,6 +79,31 @@ export const POST: APIRoute = async ({ request }) => {
       console.log('🔔 Notificación creada para el comprador');
     }
 
+    // 📱 ENVIAR NOTIFICACIÓN PUSH AL CLIENTE
+    try {
+      await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userId: updatedOrder.user_id,
+          title: getPushNotificationTitle(status),
+          body: getPushNotificationBody(status, orderId),
+          icon: '/favicon.svg',
+          badge: '/favicon.svg',
+          tag: `order-${status}-${orderId}`,
+          data: {
+            type: `order_${status}`,
+            orderId,
+            url: `/pedidos/${orderId}`,
+            timestamp: new Date().toISOString()
+          }
+        }
+      });
+
+      console.log('📱 Notificación push enviada al cliente');
+    } catch (pushError) {
+      console.error('Error enviando notificación push:', pushError);
+      // No fallar el update si falla la notificación push
+    }
+
     return new Response(JSON.stringify({
       success: true,
       data: {
@@ -126,5 +151,33 @@ function getNotificationMessage(status: string, orderId: string): string {
       return `Tu pedido #${orderCode} ha sido completado. ¡Gracias por tu compra!`;
     default:
       return `El estado de tu pedido #${orderCode} ha sido actualizado a ${status}.`;
+  }
+}
+
+function getPushNotificationTitle(status: string): string {
+  switch (status) {
+    case 'confirmed':
+      return '✅ ¡Pedido Confirmado!';
+    case 'delivered':
+      return '📦 ¡Tu pedido ha llegado!';
+    case 'completed':
+      return '🎉 ¡Pedido Completado!';
+    default:
+      return '📱 Estado del Pedido Actualizado';
+  }
+}
+
+function getPushNotificationBody(status: string, orderId: string): string {
+  const orderCode = orderId.substring(0, 8);
+  
+  switch (status) {
+    case 'confirmed':
+      return `Tu pedido #${orderCode} ha sido confirmado y está siendo preparado`;
+    case 'delivered':
+      return `Tu pedido #${orderCode} ha llegado a tu dirección. ¡Baja a recibirlo!`;
+    case 'completed':
+      return `Tu pedido #${orderCode} ha sido completado exitosamente. ¡Gracias por tu compra!`;
+    default:
+      return `El estado de tu pedido #${orderCode} ha sido actualizado`;
   }
 }
