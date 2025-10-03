@@ -96,7 +96,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
         }
 
         grouped[category].push({
-          id: `${item.seller_id}::${item.product_id}`,
+          id: item.product_id, // Solo el product_id como UUID válido
           title: item.product.title,
           description: item.product.description,
           category: item.product.category,
