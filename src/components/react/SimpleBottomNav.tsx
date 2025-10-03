@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { getUser } from '../../lib/session';
 import { supabase } from '../../lib/supabase-browser';
-import FixedLoginModal from './FixedLoginModal';
+import LoginForm from './LoginForm';
 
-interface BottomNavAuthProps {
+interface SimpleBottomNavProps {
   role?: 'buyer' | 'seller';
   notifications?: number;
   orders?: number;
   rewards?: number;
 }
 
-export default function BottomNavAuth({ 
+export default function SimpleBottomNav({ 
   role = 'buyer', 
   notifications = 0, 
   orders = 0, 
   rewards = 0 
-}: BottomNavAuthProps) {
+}: SimpleBottomNavProps) {
   const [currentPath, setCurrentPath] = useState('/');
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -140,6 +140,7 @@ export default function BottomNavAuth({
     // Si requiere autenticación y no está autenticado, mostrar modal
     if (item.requiresAuth && !isAuthenticated) {
       e.preventDefault();
+      console.log('🚨 SIMPLE BOTTOM NAV: Abriendo modal de login');
       setLoginModalOpen(true);
       return;
     }
@@ -155,12 +156,12 @@ export default function BottomNavAuth({
 
   return (
     <>
-    <div 
-      className={`
-        transition-opacity duration-300
-        ${scrollDirection === 'down' ? 'opacity-90' : 'opacity-100'}
-      `}
-    >
+      <div 
+        className={`
+          transition-opacity duration-300
+          ${scrollDirection === 'down' ? 'opacity-90' : 'opacity-100'}
+        `}
+      >
         <div className="flex items-center justify-around px-2 py-2 max-w-md mx-auto">
           {navItems.map((item) => (
             <button
@@ -211,19 +212,74 @@ export default function BottomNavAuth({
         </div>
       </div>
 
-      {/* Modal de Login Corregido */}
-      <FixedLoginModal
-        isOpen={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        onLoginSuccess={(user) => {
-          console.log('✅ Login exitoso desde BottomNav:', user.email);
-          setIsAuthenticated(true);
-          // Recargar la página para actualizar el estado de autenticación
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        }}
-      />
+      {/* Modal de login simple - MISMO QUE EL HEADER */}
+      {loginModalOpen && (
+        <div 
+          onClick={() => setLoginModalOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999999,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '0.75rem',
+              padding: '1.5rem',
+              maxWidth: '28rem',
+              width: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">🔐 Acceso a tu cuenta</h2>
+              <button
+                onClick={() => setLoginModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <LoginForm 
+              onLoginSuccess={(user) => {
+                console.log('✅ Login exitoso desde SimpleBottomNav:', user.email);
+                setIsAuthenticated(true);
+                setLoginModalOpen(false);
+                // Recargar la página para actualizar el estado de autenticación
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1500);
+              }}
+              onClose={() => setLoginModalOpen(false)}
+            />
+
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setLoginModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

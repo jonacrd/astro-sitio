@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import AuthButton from './AuthButton';
+import SimpleAuthButton from './SimpleAuthButton';
 import CartSheet from './CartSheet';
 import NotificationsPanel from './NotificationsPanel';
 import { getUser } from '../../lib/session';
@@ -223,7 +223,7 @@ export default function Header() {
 
               {/* Botón de Autenticación */}
               <div className="min-w-0 flex-shrink-0">
-                <AuthButton client:load />
+                <SimpleAuthButton client:load />
               </div>
             </div>
           </div>

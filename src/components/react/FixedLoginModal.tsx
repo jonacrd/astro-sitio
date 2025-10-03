@@ -206,55 +206,30 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(255, 0, 0, 0.9)', // ROJO MUY VISIBLE
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 999999,
         width: '100vw',
-        height: '100vh',
-        margin: 0,
-        padding: 0
+        height: '100vh'
       }}
     >
       <div 
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'yellow', // AMARILLO MUY VISIBLE
-          borderRadius: '1rem',
-          padding: '2rem',
+          backgroundColor: 'white',
+          borderRadius: '0.75rem',
+          padding: '1.5rem',
           maxWidth: '28rem',
           width: '90%',
           maxHeight: '90vh',
           overflowY: 'auto',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          border: '5px solid red',
-          fontSize: '1.5rem',
-          fontWeight: 'bold'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
         }}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">🔐 Iniciar Sesión</h2>
-          <div style={{
-            backgroundColor: 'red',
-            color: 'white',
-            padding: '8px',
-            borderRadius: '4px',
-            fontSize: '14px',
-            fontWeight: 'bold'
-          }}>
-            MODAL FUNCIONANDO
-          </div>
-          <div style={{
-            backgroundColor: 'lime',
-            color: 'black',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 'bold'
-          }}>
-            MODAL ACTIVO
-          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"

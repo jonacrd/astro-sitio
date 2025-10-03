@@ -1,11 +1,11 @@
 import React from 'react';
 import { UiBottomNav } from './UiBottomNav';
-import BottomNavAuth from '../react/BottomNavAuth';
+import SimpleBottomNav from '../react/SimpleBottomNav';
 
 export function BottomNavWrapper() {
   return (
     <UiBottomNav>
-      <BottomNavAuth />
+      <SimpleBottomNav />
     </UiBottomNav>
   );
 }
