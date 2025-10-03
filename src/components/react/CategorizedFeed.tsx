@@ -41,7 +41,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
     setError(null);
 
     try {
-      console.log('🔍 Cargando productos de todos los vendedores activos...');
+      console.log('🔍 Cargando productos de todos los vendedores activos (v2)...');
 
       // Obtener todos los productos activos de todos los vendedores
       const { data: sellerProducts, error: productsError } = await supabase
