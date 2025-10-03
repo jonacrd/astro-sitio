@@ -98,16 +98,16 @@ export default function BannerSlider({
           </div>
         ))}
 
-        {/* Botones de navegación */}
+        {/* Botones de navegación - Más discretos */}
         <button
           onClick={(e) => {
             e.preventDefault();
             goToPrevious();
           }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-95"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 backdrop-blur-sm transition-all duration-200 opacity-60 hover:opacity-100"
           aria-label="Anterior"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
@@ -117,15 +117,15 @@ export default function BannerSlider({
             e.preventDefault();
             goToNext();
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white text-gray-800 rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-95"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 backdrop-blur-sm transition-all duration-200 opacity-60 hover:opacity-100"
           aria-label="Siguiente"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
-        {/* Indicadores (dots) */}
+        {/* Indicadores (dots) - Más discretos */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
           {images.map((_, index) => (
             <button
@@ -136,18 +136,13 @@ export default function BannerSlider({
               }}
               className={`transition-all duration-300 rounded-full ${
                 index === currentIndex
-                  ? 'bg-white w-8 h-3'
-                  : 'bg-white/50 hover:bg-white/75 w-3 h-3'
+                  ? 'bg-white/90 w-6 h-2'
+                  : 'bg-white/30 hover:bg-white/50 w-2 h-2'
               }`}
               aria-label={`Ir al banner ${index + 1}`}
             />
           ))}
         </div>
-      </div>
-
-      {/* Contador (opcional) */}
-      <div className="absolute top-4 right-4 z-10 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
-        {currentIndex + 1} / {images.length}
       </div>
     </div>
   );
