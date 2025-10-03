@@ -371,32 +371,47 @@ export default function Checkout({}: CheckoutProps) {
       }
 
       if (result.success) {
-        // Guardar la dirección automáticamente para futuras compras
-        const addressToSave = {
-          id: `addr_${Date.now()}`,
-          fullName: deliveryAddress.fullName,
-          phone: deliveryAddress.phone,
-          address: deliveryAddress.address,
-          city: deliveryAddress.city,
-          state: deliveryAddress.state,
-          zipCode: deliveryAddress.zipCode,
-          instructions: deliveryAddress.instructions,
-          isDefault: true,
-          createdAt: new Date().toISOString()
-        };
+        // Preguntar si quiere guardar la dirección solo si es la primera compra
+        const hasAddresses = savedAddresses && savedAddresses.length > 0;
         
-        // Obtener direcciones existentes
-        const existingAddresses = JSON.parse(localStorage.getItem('savedAddresses') || '[]');
-        
-        // Marcar todas las direcciones como no predeterminadas
-        const updatedAddresses = existingAddresses.map(addr => ({ ...addr, isDefault: false }));
-        
-        // Agregar la nueva dirección como predeterminada
-        updatedAddresses.push(addressToSave);
-        
-        // Guardar en localStorage
-        localStorage.setItem('savedAddresses', JSON.stringify(updatedAddresses));
-        console.log('🏠 Dirección guardada automáticamente:', addressToSave);
+        if (!hasAddresses) {
+          const shouldSave = window.confirm(
+            '¿Deseas guardar esta dirección para futuras compras?\n\n' +
+            'Podrás editarla o eliminarla desde tu perfil.'
+          );
+          
+          if (shouldSave) {
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              
+              if (user) {
+                const { error: saveError } = await supabase
+                  .from('user_addresses')
+                  .insert({
+                    user_id: user.id,
+                    full_name: deliveryAddress.fullName,
+                    phone: deliveryAddress.phone,
+                    address: deliveryAddress.address,
+                    city: deliveryAddress.city,
+                    state: deliveryAddress.state,
+                    zip_code: deliveryAddress.zipCode || '',
+                    instructions: deliveryAddress.instructions || '',
+                    is_default: true
+                  });
+                
+                if (saveError) {
+                  console.error('Error guardando dirección:', saveError);
+                } else {
+                  console.log('✅ Dirección guardada en la base de datos');
+                  // Recargar direcciones
+                  await loadUserProfile();
+                }
+              }
+            } catch (error) {
+              console.error('Error guardando dirección:', error);
+            }
+          }
+        }
         
         // Preparar datos del carrito para la página de confirmación
         const cartData = {
