@@ -80,6 +80,61 @@ export const POST: APIRoute = async ({ request }) => {
       console.log('✅ Notificación creada');
     }
 
+    // 📱 ENVIAR NOTIFICACIÓN PUSH con OneSignal
+    if (userType === 'seller') {
+      // Si el vendedor actualizó, notificar al cliente
+      try {
+        const onesignalAppId = '270896d8-ba2e-40bc-8f3b-c1e6efd258a1';
+        const onesignalRestKey = import.meta.env.ONESIGNAL_REST_API_KEY || '';
+
+        if (onesignalRestKey) {
+          const notificationPayload = {
+            app_id: onesignalAppId,
+            include_aliases: {
+              external_id: [updatedOrder.user_id]
+            },
+            target_channel: 'push',
+            headings: { en: getPushNotificationTitle(newStatus) },
+            contents: { en: getPushNotificationBody(newStatus, orderId) },
+            data: {
+              type: `order_${newStatus}`,
+              orderId,
+              url: `/pedidos/${orderId}`,
+              timestamp: new Date().toISOString()
+            },
+            url: `/pedidos/${orderId}`,
+            chrome_web_icon: '/favicon.svg',
+            firefox_icon: '/favicon.svg',
+            chrome_web_badge: '/favicon.svg'
+          };
+
+          console.log('📬 Enviando notificación push al cliente:', updatedOrder.user_id);
+          console.log('📦 Payload OneSignal:', JSON.stringify(notificationPayload, null, 2));
+
+          const response = await fetch('https://onesignal.com/api/v1/notifications', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Basic ${onesignalRestKey}`
+            },
+            body: JSON.stringify(notificationPayload)
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            console.log('✅ Notificación push OneSignal enviada al cliente:', result);
+          } else {
+            console.error('❌ Error enviando notificación push:', result);
+          }
+        } else {
+          console.warn('⚠️ ONESIGNAL_REST_API_KEY no configurada');
+        }
+      } catch (pushError) {
+        console.error('⚠️ Error enviando notificación push (no crítico):', pushError);
+      }
+    }
+
     // Disparar evento de notificación en el cliente
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('order-status-updated', {
@@ -112,3 +167,41 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 };
+
+function getPushNotificationTitle(status: string): string {
+  switch (status) {
+    case 'seller_confirmed':
+    case 'confirmed':
+      return '✅ ¡Pedido Confirmado!';
+    case 'preparing':
+      return '👨‍🍳 ¡Preparando tu Pedido!';
+    case 'in_transit':
+      return '🚚 ¡Tu pedido va en camino!';
+    case 'delivered':
+      return '📦 ¡Tu pedido ha llegado!';
+    case 'completed':
+      return '🎉 ¡Pedido Completado!';
+    default:
+      return '📱 Estado del Pedido Actualizado';
+  }
+}
+
+function getPushNotificationBody(status: string, orderId: string): string {
+  const orderCode = orderId.substring(0, 8);
+  
+  switch (status) {
+    case 'seller_confirmed':
+    case 'confirmed':
+      return `Tu pedido #${orderCode} ha sido confirmado y está siendo preparado`;
+    case 'preparing':
+      return `Tu pedido #${orderCode} está siendo preparado con cuidado`;
+    case 'in_transit':
+      return `Tu pedido #${orderCode} ya está en camino. ¡Pronto llegará!`;
+    case 'delivered':
+      return `Tu pedido #${orderCode} ha llegado a tu dirección. ¡Baja a recibirlo!`;
+    case 'completed':
+      return `Tu pedido #${orderCode} ha sido completado exitosamente. ¡Gracias por tu compra!`;
+    default:
+      return `El estado de tu pedido #${orderCode} ha sido actualizado`;
+  }
+}
