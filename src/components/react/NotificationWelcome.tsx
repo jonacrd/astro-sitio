@@ -69,6 +69,25 @@ export default function NotificationWelcome() {
   }, []);
 
   const handleActivate = async () => {
+    // Mostrar explicación antes del prompt del navegador
+    const shouldProceed = window.confirm(
+      '📱 ACTIVAR NOTIFICACIONES DE PEDIDOS\n\n' +
+      '✅ Te notificaremos sobre:\n' +
+      '   • Pedido confirmado por el vendedor\n' +
+      '   • Pedido en preparación\n' +
+      '   • Pedido en camino a tu dirección\n' +
+      '   • Pedido entregado\n' +
+      '   • Ofertas especiales\n\n' +
+      '⚠️ Tu navegador te pedirá permiso a continuación.\n' +
+      'Por favor, selecciona "Permitir" o "Allow".\n\n' +
+      '¿Continuar?'
+    );
+    
+    if (!shouldProceed) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     
     try {

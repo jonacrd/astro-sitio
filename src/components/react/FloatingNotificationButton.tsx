@@ -76,6 +76,21 @@ export default function FloatingNotificationButton() {
   }, []);
 
   const handleActivate = async () => {
+    // Mostrar explicación antes del prompt del navegador
+    const shouldProceed = window.confirm(
+      '📱 ACTIVAR NOTIFICACIONES\n\n' +
+      '✅ Te avisaremos cuando:\n' +
+      '   • Tu pedido sea confirmado\n' +
+      '   • Tu pedido esté en preparación\n' +
+      '   • Tu pedido esté en camino\n' +
+      '   • Tu pedido llegue a tu dirección\n\n' +
+      '⚠️ A continuación, tu navegador te pedirá permiso.\n' +
+      'Por favor, selecciona "Permitir" o "Allow".\n\n' +
+      '¿Continuar?'
+    );
+    
+    if (!shouldProceed) return;
+    
     setIsActivating(true);
     
     try {
@@ -154,10 +169,10 @@ export default function FloatingNotificationButton() {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-bold text-sm mb-1">
-              🔔 Activa las notificaciones
+              📦 Sigue tu pedido en tiempo real
             </h3>
             <p className="text-white/90 text-xs mb-3">
-              Recibe actualizaciones de tus pedidos
+              Te avisaremos cuando esté confirmado, en camino y al llegar
             </p>
 
             {/* Buttons */}

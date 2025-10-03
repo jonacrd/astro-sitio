@@ -56,6 +56,21 @@ export default function CheckoutNotificationPrompt() {
   }, []);
 
   const handleActivate = async () => {
+    // Mostrar explicación antes del prompt del navegador
+    const shouldProceed = window.confirm(
+      '📦 NOTIFICACIONES DE SEGUIMIENTO DE PEDIDO\n\n' +
+      '✅ Recibirás alertas cuando:\n' +
+      '   1️⃣ El vendedor confirme tu pedido\n' +
+      '   2️⃣ Tu pedido esté en preparación\n' +
+      '   3️⃣ Tu pedido salga para entrega\n' +
+      '   4️⃣ Tu pedido llegue a tu dirección\n\n' +
+      '⚠️ El navegador te pedirá permiso.\n' +
+      'Selecciona "Permitir" para activar las notificaciones.\n\n' +
+      '¿Activar notificaciones ahora?'
+    );
+    
+    if (!shouldProceed) return;
+    
     setLoading(true);
     
     try {
