@@ -125,6 +125,13 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
           productName={toastData.productName}
           productImage={toastData.productImage}
           onClose={() => setShowToast(false)}
+          onClick={() => {
+            // Disparar evento para abrir el carrito
+            const cartButton = document.getElementById('cart-button');
+            if (cartButton) {
+              cartButton.click();
+            }
+          }}
         />
       )}
 
