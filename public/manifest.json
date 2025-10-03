@@ -1,7 +1,7 @@
 {
-  "name": "Town - Feed Social de Compras",
+  "name": "Town - Tu Tienda de Barrio Online",
   "short_name": "Town",
-  "description": "Descubre productos locales en un feed tipo red social",
+  "description": "Descubre productos locales de tu barrio. Compra fácil, rápido y seguro.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
@@ -13,36 +13,28 @@
   "categories": ["shopping", "social", "lifestyle"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/favicon.svg",
+      "src": "/icon.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "1280x720",
-      "type": "image/svg+xml",
-      "form_factor": "wide"
     },
     {
-      "src": "/favicon.svg",
-      "sizes": "750x1334",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
@@ -50,22 +42,22 @@
       "name": "Buscar Productos",
       "short_name": "Buscar",
       "description": "Buscar productos en Town",
-      "url": "/?action=search",
+      "url": "/buscar",
       "icons": [
         {
-          "src": "/favicon.svg",
+          "src": "/icon.png",
           "sizes": "96x96"
         }
       ]
     },
     {
-      "name": "Mi Perfil",
-      "short_name": "Perfil",
-      "description": "Ver mi perfil de usuario",
-      "url": "/?action=profile",
+      "name": "Mi Carrito",
+      "short_name": "Carrito",
+      "description": "Ver mi carrito de compras",
+      "url": "/",
       "icons": [
         {
-          "src": "/favicon.svg",
+          "src": "/icon.png",
           "sizes": "96x96"
         }
       ]
