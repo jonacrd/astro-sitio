@@ -10,6 +10,7 @@ interface Product {
   price_cents: number;
   seller_id: string;
   seller_name: string;
+  seller_active: boolean;
   stock: number;
 }
 
@@ -50,7 +51,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
     try {
       console.log('🔍 Cargando productos de todos los vendedores activos (v2)...');
 
-      // Obtener todos los productos activos de todos los vendedores
+      // Obtener TODOS los productos (sin filtrar por vendedor activo)
       const { data: sellerProducts, error: productsError } = await supabase
         .from('seller_products')
         .select(`
@@ -68,7 +69,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           ),
           seller:profiles!seller_products_seller_id_fkey(
             id,
-            name
+            name,
+            is_active
           )
         `)
         .eq('active', true)
@@ -99,6 +101,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           price_cents: item.price_cents,
           seller_id: item.seller_id,
           seller_name: item.seller?.name || 'Vendedor',
+          seller_active: item.seller?.is_active !== false, // Por defecto true si no está definido
           stock: item.stock
         });
       });
@@ -116,6 +119,19 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
 
   const handleAddToCart = (product: Product) => {
     try {
+      // Advertir si el vendedor está inactivo
+      if (!product.seller_active) {
+        const confirmAdd = window.confirm(
+          `⚠️ ${product.seller_name} está temporalmente cerrado.\n\n` +
+          `Puedes agregar este producto al carrito, pero no podrás completar la compra hasta que la tienda esté abierta.\n\n` +
+          `¿Deseas agregarlo de todas formas?`
+        );
+        
+        if (!confirmAdd) {
+          return;
+        }
+      }
+      
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
       
       const existingIndex = cart.findIndex((item: any) => item.id === product.id);
@@ -130,7 +146,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           quantity: 1,
           image: product.image_url,
           seller_id: product.seller_id,
-          seller_name: product.seller_name
+          seller_name: product.seller_name,
+          seller_active: product.seller_active
         });
       }
       
@@ -247,9 +264,13 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                         (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
                       }}
                     />
-                    {/* Badge de vendedor */}
-                    <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                    {/* Badge de vendedor con estado */}
+                    <div className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                      product.seller_active ? 'bg-green-600/90' : 'bg-gray-600/90'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full ${product.seller_active ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></span>
                       {product.seller_name}
+                      {!product.seller_active && ' (Cerrado)'}
                     </div>
                     {/* Badge de stock */}
                     {product.stock < 5 && (
@@ -268,12 +289,17 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                       {formatPrice(product.price_cents)}
                     </p>
                     
-                    {/* Botón Agregar */}
+                    {/* Botón Agregar con estado */}
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition-all text-sm font-medium"
+                      className={`w-full py-2 rounded-lg active:scale-95 transition-all text-sm font-medium ${
+                        product.seller_active
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-gray-400 text-white hover:bg-gray-500'
+                      }`}
+                      title={product.seller_active ? 'Agregar al carrito' : 'Tienda cerrada - Click para más info'}
                     >
-                      + Agregar
+                      {product.seller_active ? '+ Agregar' : '🔒 Tienda Cerrada'}
                     </button>
                   </div>
                 </div>
