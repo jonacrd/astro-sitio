@@ -319,10 +319,33 @@ export default function SmartSearchBar({
               {/* Sin resultados */}
               {results.length === 0 && sellers.length === 0 && (
                 <div className="p-4 text-center">
-                  <p className="text-gray-500">No se encontraron resultados para "{query}"</p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    Prueba con otras palabras o busca por categoría
-                  </p>
+                  <p className="text-gray-500">No se encontraron resultados específicos para "{query}"</p>
+                  {relatedCategories.length > 0 ? (
+                    <div className="mt-3">
+                      <p className="text-gray-400 text-sm mb-2">
+                        Pero puedes explorar estas categorías relacionadas:
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {relatedCategories.map((category, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setQuery(category);
+                              handleSearch(category);
+                              onCategoryClick?.(category);
+                            }}
+                            className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm hover:bg-blue-200 transition-colors"
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm mt-1">
+                      Prueba con otras palabras o busca por categoría
+                    </p>
+                  )}
                 </div>
               )}
             </div>

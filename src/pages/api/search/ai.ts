@@ -78,7 +78,7 @@ export const GET: APIRoute = async ({ url }) => {
             messages: [
               {
                 role: 'system',
-                content: `Eres un asistente de búsqueda para una plataforma de comercio local. 
+                content: `Eres un asistente de búsqueda inteligente para una plataforma de comercio local. 
                 
                 CATEGORÍAS DISPONIBLES: ${availableCategories.join(', ')}
                 
@@ -86,17 +86,25 @@ export const GET: APIRoute = async ({ url }) => {
                 
                 VENDEDORES DISPONIBLES (ejemplos): ${availableSellers.slice(0, 10).join(', ')}
                 
+                REGLAS IMPORTANTES:
+                1. Si el usuario busca "mida" o "comida" → corregir a "comida" y sugerir categorías: ["Comida Rápida", "Abastos"]
+                2. Si busca "perro caliente" → mantener "perro caliente" y sugerir: ["Comida Rápida", "Abastos"]
+                3. Si busca algo muy específico que no existe → sugerir categorías relacionadas
+                4. Siempre incluir categorías relacionadas para búsquedas amplias
+                5. Corregir errores obvios de tipeo
+                6. Entender sinónimos y variaciones
+                
                 Tu tarea es:
                 1. Corregir errores ortográficos y de tipeo
                 2. Identificar la intención de búsqueda (producto, vendedor, categoría)
-                3. Encontrar categorías relacionadas
+                3. Encontrar categorías relacionadas (SIEMPRE incluir al menos 2-3)
                 4. Generar términos de búsqueda alternativos
                 
                 Responde SOLO con un JSON válido:
                 {
                   "correctedQuery": "query corregida",
                   "searchIntent": "product|seller|category",
-                  "relatedCategories": ["categoria1", "categoria2"],
+                  "relatedCategories": ["categoria1", "categoria2", "categoria3"],
                   "alternativeTerms": ["termino1", "termino2"],
                   "confidence": 0.95
                 }`
@@ -198,7 +206,7 @@ export const GET: APIRoute = async ({ url }) => {
     }
 
     // 6. Búsqueda inteligente con múltiples criterios
-    const searchTerms = processedQuery.toLowerCase().split(' ').filter(term => term.length > 2);
+    const searchTerms = processedQuery.toLowerCase().split(' ').filter(term => term.length > 1);
     
     const combinedProducts = sellerProducts.map(sp => {
       const product = products?.find(p => p.id === sp.product_id);
@@ -221,8 +229,8 @@ export const GET: APIRoute = async ({ url }) => {
       };
     }).filter(Boolean);
 
-    // 7. Filtrar y ordenar por relevancia
-    const filteredProducts = combinedProducts
+    // 7. Búsqueda inteligente con fallback
+    let filteredProducts = combinedProducts
       .filter(product => 
         // Búsqueda principal
         product.title.toLowerCase().includes(processedQuery.toLowerCase()) ||
@@ -241,8 +249,39 @@ export const GET: APIRoute = async ({ url }) => {
           product.category.toLowerCase().includes(cat.toLowerCase())
         )
       )
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 50);
+      .sort((a, b) => b.relevanceScore - a.relevanceScore);
+
+    // 8. Si no hay resultados, hacer búsqueda más amplia
+    if (filteredProducts.length === 0) {
+      console.log('🔍 No hay resultados específicos, haciendo búsqueda amplia...');
+      
+      // Búsqueda por categorías relacionadas
+      if (relatedCategories.length > 0) {
+        filteredProducts = combinedProducts
+          .filter(product => 
+            relatedCategories.some(cat => 
+              product.category.toLowerCase().includes(cat.toLowerCase())
+            )
+          )
+          .sort((a, b) => b.relevanceScore - a.relevanceScore);
+      }
+      
+      // Si aún no hay resultados, mostrar productos de categorías populares
+      if (filteredProducts.length === 0) {
+        const popularCategories = ['Comida Rápida', 'Bebidas', 'Abastos', 'Servicios'];
+        filteredProducts = combinedProducts
+          .filter(product => 
+            popularCategories.some(cat => 
+              product.category.toLowerCase().includes(cat.toLowerCase())
+            )
+          )
+          .sort((a, b) => b.relevanceScore - a.relevanceScore)
+          .slice(0, 20);
+      }
+    }
+
+    // Limitar a 50 resultados
+    filteredProducts = filteredProducts.slice(0, 50);
 
     // 8. Crear lista de vendedores únicos
     const uniqueSellers = sellers?.map(seller => ({
@@ -296,10 +335,14 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
     score += 100;
   }
   
-  // Coincidencia en título con palabras individuales
+  // Coincidencia parcial en título (más flexible)
   searchTerms.forEach(term => {
     if (product.title.toLowerCase().includes(term)) {
       score += 50;
+    }
+    // Bonus por coincidencia al inicio de palabra
+    if (product.title.toLowerCase().split(' ').some(word => word.startsWith(term))) {
+      score += 30;
     }
   });
   
@@ -314,10 +357,10 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
     }
   });
   
-  // Bonus por categorías relacionadas
+  // Bonus por categorías relacionadas (muy importante)
   relatedCategories.forEach(cat => {
     if (product.category.toLowerCase().includes(cat.toLowerCase())) {
-      score += 20;
+      score += 25; // Aumentado de 20 a 25
     }
   });
   
@@ -338,6 +381,16 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
       score += 12;
     }
   });
+  
+  // Bonus por productos populares (con stock)
+  if (product.stock > 0) {
+    score += 5;
+  }
+  
+  // Bonus por vendedores activos
+  if (seller.is_active) {
+    score += 3;
+  }
   
   return score;
 }
