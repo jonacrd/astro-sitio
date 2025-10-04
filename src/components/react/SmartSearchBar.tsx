@@ -48,6 +48,7 @@ export default function SmartSearchBar({
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [relatedCategories, setRelatedCategories] = useState<string[]>([]);
   const [correctedQuery, setCorrectedQuery] = useState('');
+  const [localCorrection, setLocalCorrection] = useState('');
   const [searchIntent, setSearchIntent] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,7 @@ export default function SmartSearchBar({
         setSellers(sellersData);
         setRelatedCategories(searchData.relatedCategories || []);
         setCorrectedQuery(searchData.correctedQuery || searchQuery);
+        setLocalCorrection(searchData.localCorrection || '');
         setSearchIntent(searchData.searchIntent || 'product');
         
         console.log(`✅ Resultados con IA: ${products.length} productos, ${sellersData.length} vendedores`);
@@ -213,14 +215,22 @@ export default function SmartSearchBar({
             </div>
           ) : (
             <div className="p-2">
-              {/* Información de búsqueda con IA */}
-              {correctedQuery && correctedQuery !== query && (
-                <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-700">
-                    <span className="font-semibold">🤖 IA corrigió:</span> "{query}" → "{correctedQuery}"
-                  </p>
-                </div>
-              )}
+                     {/* Información de búsqueda con IA */}
+                     {localCorrection && localCorrection !== query && (
+                       <div className="mb-3 p-2 bg-green-50 rounded-lg border border-green-200">
+                         <p className="text-sm text-green-700">
+                           <span className="font-semibold">🔤 Corrección automática:</span> "{query}" → "{localCorrection}"
+                         </p>
+                       </div>
+                     )}
+                     
+                     {correctedQuery && correctedQuery !== localCorrection && correctedQuery !== query && (
+                       <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                         <p className="text-sm text-blue-700">
+                           <span className="font-semibold">🤖 IA mejoró:</span> "{localCorrection}" → "{correctedQuery}"
+                         </p>
+                       </div>
+                     )}
 
               {/* Categorías relacionadas */}
               {relatedCategories.length > 0 && (

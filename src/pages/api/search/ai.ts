@@ -58,8 +58,12 @@ export const GET: APIRoute = async ({ url }) => {
     const availableProducts = allProducts?.map(p => p.title) || [];
     const availableSellers = allSellers?.map(s => s.name) || [];
 
-    // 3. Usar OpenAI para procesar la búsqueda
-    let processedQuery = query;
+    // 3. Corrección de tipeo local (respaldo)
+    const correctedQuery = correctTypo(query);
+    console.log(`🔤 Corrección local: "${query}" → "${correctedQuery}"`);
+
+    // 4. Usar OpenAI para procesar la búsqueda
+    let processedQuery = correctedQuery;
     let relatedCategories: string[] = [];
     let searchIntent = 'product';
 
@@ -84,23 +88,63 @@ export const GET: APIRoute = async ({ url }) => {
                 
                 VENDEDORES DISPONIBLES (ejemplos): ${availableSellers.slice(0, 10).join(', ')}
                 
-                REGLAS IMPORTANTES:
-                1. Si el usuario busca "mida" o "comida" → corregir a "comida" y sugerir categorías: ["Comida Rápida", "Abastos"]
-                2. Si busca "perro caliente" → mantener "perro caliente" y sugerir: ["Comida Rápida", "Abastos"]
-                3. Si busca "perros" → entender como "perros calientes" (comida) NO como "pan para perros"
-                4. Si busca "pizza" → mantener "pizza" y sugerir: ["Comida Rápida", "Abastos"]
-                5. Si busca algo muy específico que no existe → sugerir categorías relacionadas
-                6. Siempre incluir categorías relacionadas para búsquedas amplias
-                7. Corregir errores obvios de tipeo
-                8. Entender sinónimos y variaciones
-                9. PRIORIZAR: Solo productos de vendedores activos con stock real
-                10. CONTEXTO: Esta es una app de delivery/comida local, no una tienda de mascotas
+                REGLAS IMPORTANTES DE CORRECCIÓN DE TIPEO:
+                1. "mida" → "comida"
+                2. "peeros" → "perros" → "perros calientes"
+                3. "piza" → "pizza"
+                4. "hamburguesa" → "hamburguesa" (mantener)
+                5. "empanada" → "empanada" (mantener)
+                6. "bebida" → "bebida" (mantener)
+                7. "cerveza" → "cerveza" (mantener)
+                8. "cafe" → "café"
+                9. "te" → "té"
+                10. "jugo" → "jugo" (mantener)
+                11. "agua" → "agua" (mantener)
+                12. "pan" → "pan" (mantener)
+                13. "queso" → "queso" (mantener)
+                14. "carne" → "carne" (mantener)
+                15. "pollo" → "pollo" (mantener)
+                16. "pescado" → "pescado" (mantener)
+                17. "vegetal" → "vegetal" (mantener)
+                18. "fruta" → "fruta" (mantener)
+                19. "dulce" → "dulce" (mantener)
+                20. "salado" → "salado" (mantener)
+                
+                REGLAS DE CONTEXTO:
+                - "perros" = "perros calientes" (comida), NO "pan para perros"
+                - "pizza" = comida italiana
+                - "hamburguesa" = comida rápida
+                - "empanada" = comida colombiana/venezolana
+                - "bebida" = líquidos para beber
+                - "cerveza" = bebida alcohólica
+                - "café" = bebida caliente
+                - "té" = bebida caliente
+                - "jugo" = bebida de frutas
+                - "agua" = bebida natural
+                - "pan" = alimento básico
+                - "queso" = lácteo
+                - "carne" = proteína animal
+                - "pollo" = proteína animal
+                - "pescado" = proteína animal
+                - "vegetal" = verdura
+                - "fruta" = alimento dulce
+                - "dulce" = postre
+                - "salado" = comida con sal
+                
+                PRIORIZAR: Solo productos de vendedores activos con stock real
+                CONTEXTO: Esta es una app de delivery/comida local, no una tienda de mascotas
                 
                 Tu tarea es:
-                1. Corregir errores ortográficos y de tipeo
-                2. Identificar la intención de búsqueda (producto, vendedor, categoría)
-                3. Encontrar categorías relacionadas (SIEMPRE incluir al menos 2-3)
-                4. Generar términos de búsqueda alternativos
+                1. CORREGIR AGRESIVAMENTE errores ortográficos y de tipeo usando las reglas de arriba
+                2. Si no hay regla específica, usar distancia de Levenshtein para encontrar la palabra más cercana
+                3. Identificar la intención de búsqueda (producto, vendedor, categoría)
+                4. Encontrar categorías relacionadas (SIEMPRE incluir al menos 2-3)
+                5. Generar términos de búsqueda alternativos
+                6. SIEMPRE corregir "peeros" → "perros" → "perros calientes"
+                7. SIEMPRE corregir "piza" → "pizza"
+                8. SIEMPRE corregir "mida" → "comida"
+                9. SIEMPRE corregir "cafe" → "café"
+                10. SIEMPRE corregir "te" → "té"
                 
                 Responde SOLO con un JSON válido:
                 {
@@ -320,6 +364,8 @@ export const GET: APIRoute = async ({ url }) => {
         sellers: filteredSellers,
         relatedCategories: relatedCategories,
         correctedQuery: processedQuery,
+        originalQuery: query,
+        localCorrection: correctedQuery,
         searchIntent: searchIntent,
         total: filteredProducts.length,
         message: 'Búsqueda con IA completada'
@@ -412,4 +458,85 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
   }
   
   return score;
+}
+
+// Función de corrección de tipeo local
+function correctTypo(query: string): string {
+  const corrections: Record<string, string> = {
+    // Errores comunes de tipeo
+    'peeros': 'perros',
+    'peros': 'perros',
+    'perro': 'perros',
+    'piza': 'pizza',
+    'pizz': 'pizza',
+    'mida': 'comida',
+    'comid': 'comida',
+    'cafe': 'café',
+    'te': 'té',
+    'hamburguesa': 'hamburguesa',
+    'hamburgues': 'hamburguesa',
+    'empanada': 'empanada',
+    'empanad': 'empanada',
+    'bebida': 'bebida',
+    'bebid': 'bebida',
+    'cerveza': 'cerveza',
+    'cervez': 'cerveza',
+    'jugo': 'jugo',
+    'agua': 'agua',
+    'pan': 'pan',
+    'queso': 'queso',
+    'ques': 'queso',
+    'carne': 'carne',
+    'carn': 'carne',
+    'pollo': 'pollo',
+    'poll': 'pollo',
+    'pescado': 'pescado',
+    'pescad': 'pescado',
+    'vegetal': 'vegetal',
+    'veget': 'vegetal',
+    'fruta': 'fruta',
+    'frut': 'fruta',
+    'dulce': 'dulce',
+    'dulc': 'dulce',
+    'salado': 'salado',
+    'salad': 'salado',
+    // Errores de tipeo más complejos
+    'peeros calientes': 'perros calientes',
+    'peros calientes': 'perros calientes',
+    'piza pepperoni': 'pizza pepperoni',
+    'pizz margherita': 'pizza margherita',
+    'hamburgues clásica': 'hamburguesa clásica',
+    'empanad colombiana': 'empanada colombiana',
+    'bebid gaseosa': 'bebida gaseosa',
+    'cervez corona': 'cerveza corona',
+    'caf americano': 'café americano',
+    't verde': 'té verde',
+    'jug naranja': 'jugo naranja',
+    'agu natural': 'agua natural',
+    'pan integral': 'pan integral',
+    'ques mozzarella': 'queso mozzarella',
+    'carn asada': 'carne asada',
+    'poll frito': 'pollo frito',
+    'pescad frito': 'pescado frito',
+    'veget mixto': 'vegetal mixto',
+    'frut fresca': 'fruta fresca',
+    'dulc postre': 'dulce postre',
+    'salad snack': 'salado snack'
+  };
+
+  // Buscar corrección exacta
+  const lowerQuery = query.toLowerCase().trim();
+  if (corrections[lowerQuery]) {
+    return corrections[lowerQuery];
+  }
+
+  // Buscar corrección parcial (para frases)
+  for (const [wrong, correct] of Object.entries(corrections)) {
+    if (lowerQuery.includes(wrong)) {
+      return lowerQuery.replace(wrong, correct);
+    }
+  }
+
+  // Si no hay corrección específica, devolver la query original
+  return query;
 }
