@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import SearchBarEnhanced from '../components/react/SearchBarEnhanced.tsx'
+import SmartSearchBar from '../components/react/SmartSearchBar.tsx'
 import QuickActions from '../components/react/QuickActions.tsx'
 import RealGridBlocks from '../components/react/RealGridBlocks.tsx'
 import RealProductFeed from '../components/react/RealProductFeed.tsx'
@@ -39,19 +39,16 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
     <!-- Search Bar Mejorado -->
     <section class="px-4 pb-6">
       <div class="max-w-7xl mx-auto">
-        <SearchBarEnhanced 
+        <SmartSearchBar 
           client:load 
-          onAddToCart={(productId, sellerId) => {
-            console.log('🛒 Añadir al carrito:', productId, sellerId);
-            // TODO: Implementar añadir al carrito
+          onSearch={(query) => {
+            console.log('🔍 Búsqueda realizada:', query);
           }}
-          onViewProduct={(productId) => {
-            console.log('👁️ Ver producto:', productId);
-            // TODO: Implementar ver producto
+          onCategoryClick={(category) => {
+            console.log('📂 Categoría seleccionada:', category);
           }}
-          onViewSeller={(sellerId) => {
-            console.log('🏪 Ver vendedor:', sellerId);
-            // TODO: Implementar ver vendedor
+          onSellerClick={(sellerId) => {
+            console.log('🏪 Vendedor seleccionado:', sellerId);
           }}
           placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
         />
