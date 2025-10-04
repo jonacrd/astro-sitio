@@ -5,6 +5,7 @@ import vercel from "@astrojs/vercel/serverless"; // 👈 volver a serverless
 import path from "node:path";
 
 export default defineConfig({
+  site: "https://astro-sitio.vercel.app", // 👈 URL de producción para Open Graph
   output: "server",
   adapter: vercel(),
   integrations: [react(), tailwind()],

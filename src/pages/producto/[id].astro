@@ -1,11 +1,121 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductDetailView from '../../components/react/ProductDetailView.tsx';
+import { createClient } from '@supabase/supabase-js';
 
 const { id } = Astro.params;
+
+// Inicializar Supabase
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Cargar datos del producto para los metadatos
+let productData = null;
+let pageTitle = 'Producto - Town';
+let pageDescription = 'Encuentra los mejores productos de tu barrio al mejor precio';
+let productImage = '/icon.png';
+let productPrice = '';
+
+try {
+  const { data, error } = await supabase
+    .from('seller_products')
+    .select(`
+      seller_id,
+      product_id,
+      price_cents,
+      stock,
+      active,
+      product:products!inner(
+        id,
+        title,
+        description,
+        category,
+        image_url
+      ),
+      seller:profiles!seller_products_seller_id_fkey(
+        id,
+        name
+      )
+    `)
+    .eq('product_id', id)
+    .eq('active', true)
+    .single();
+
+  if (!error && data && data.product) {
+    productData = data;
+    const product = Array.isArray(data.product) ? data.product[0] : data.product;
+    pageTitle = `${product.title} - Town`;
+    pageDescription = product.description || `Compra ${product.title} en Town`;
+    
+    // Convertir a URL absoluta para Open Graph (WhatsApp, Facebook, etc)
+    if (product.image_url.startsWith('http')) {
+      productImage = product.image_url;
+    } else {
+      const baseUrl = Astro.site || new URL(Astro.url.origin);
+      productImage = new URL(product.image_url, baseUrl).toString();
+    }
+    
+    productPrice = `$${(data.price_cents / 100).toLocaleString('es-CL')}`;
+  }
+} catch (err) {
+  console.error('Error cargando producto:', err);
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
-<BaseLayout title="Producto - Town">
-  <ProductDetailView productId={id} client:load />
-</BaseLayout>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- SEO Básico -->
+  <title>{pageTitle}</title>
+  <meta name="description" content={pageDescription} />
+  <link rel="canonical" href={canonicalURL} />
+  
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="product" />
+  <meta property="og:site_name" content="Town - Tu Tienda de Barrio Online" />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={pageDescription} />
+  <meta property="og:image" content={productImage} />
+  <meta property="og:image:secure_url" content={productImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={productData?.product?.title || 'Producto'} />
+  <meta property="og:url" content={canonicalURL} />
+  
+  {productPrice && (
+    <>
+      <meta property="product:price:amount" content={(productData?.price_cents / 100).toString()} />
+      <meta property="product:price:currency" content="CLP" />
+    </>
+  )}
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={pageTitle} />
+  <meta name="twitter:description" content={pageDescription} />
+  <meta name="twitter:image" content={productImage} />
+  
+  <!-- WhatsApp específico -->
+  <meta property="og:locale" content="es_CL" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+  
+  <!-- Importar estilos globales -->
+  <link rel="stylesheet" href="/global.css" />
+</head>
+<body>
+  <BaseLayout title={pageTitle}>
+    <ProductDetailView productId={id} client:load />
+  </BaseLayout>
+</body>
+</html>
+
 
