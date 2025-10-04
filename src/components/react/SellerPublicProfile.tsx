@@ -20,18 +20,11 @@ interface Seller {
 }
 
 interface Product {
-  id: string;
   product_id: string;
   seller_id: string;
   price_cents: number;
   stock: number;
   active: boolean;
-  inventory_mode: string;
-  available_today: boolean;
-  sold_out: boolean;
-  portion_limit: number;
-  portion_used: number;
-  prep_minutes: number;
   product: {
     id: string;
     title: string;
@@ -109,7 +102,6 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
       const { data: productsData, error: productsError } = await supabase
         .from('seller_products')
         .select(`
-          id,
           product_id,
           seller_id,
           price_cents,
@@ -124,8 +116,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
           )
         `)
         .eq('seller_id', sellerId)
-        .eq('active', true)
-        .order('created_at', { ascending: false });
+        .eq('active', true);
 
       if (productsError) {
         console.error('Error cargando productos:', productsError);
@@ -378,7 +369,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                   
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {sectionProducts.map(product => (
-                      <div key={product.id} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div key={product.product_id} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="aspect-square bg-white rounded-lg mb-3 overflow-hidden">
                           <img
                             src={product.product.image_url || '/images/placeholder.jpg'}
@@ -456,7 +447,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
         {/* Grid de productos */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {(selectedCategory ? productsByCategory[selectedCategory] || [] : products).map(product => (
-            <div key={product.id} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={product.product_id} className="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="aspect-square bg-white rounded-lg mb-3 overflow-hidden">
                 <img
                   src={product.product.image_url || '/images/placeholder.jpg'}
