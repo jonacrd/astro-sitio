@@ -291,28 +291,27 @@ export const GET: APIRoute = async ({ url }) => {
       };
     });
 
-    // 7. Búsqueda inteligente más estricta
+    // 7. Búsqueda inteligente más flexible
     let filteredProducts = combinedProducts
       .filter(product => {
         const titleMatch = product.title.toLowerCase().includes(processedQuery.toLowerCase());
-        const descriptionMatch = product.description.toLowerCase().includes(processedQuery.toLowerCase());
+        const descriptionMatch = product.description && product.description.toLowerCase().includes(processedQuery.toLowerCase());
         const categoryMatch = product.category.toLowerCase().includes(processedQuery.toLowerCase());
         const sellerMatch = product.sellerName.toLowerCase().includes(processedQuery.toLowerCase());
         
-        // Búsqueda por palabras clave (más estricta)
+        // Búsqueda por palabras clave (más flexible)
         const keywordMatch = searchTerms.some(term => 
           product.title.toLowerCase().includes(term) ||
-          product.description.toLowerCase().includes(term)
+          (product.description && product.description.toLowerCase().includes(term)) ||
+          product.category.toLowerCase().includes(term)
         );
         
-        // Búsqueda por categorías relacionadas (solo si hay coincidencia en título o descripción)
+        // Búsqueda por categorías relacionadas (más flexible)
         const relatedCategoryMatch = relatedCategories.some(cat => 
-          product.category.toLowerCase().includes(cat.toLowerCase()) &&
-          (product.title.toLowerCase().includes(processedQuery.toLowerCase()) ||
-           product.description.toLowerCase().includes(processedQuery.toLowerCase()))
+          product.category.toLowerCase().includes(cat.toLowerCase())
         );
         
-        // Solo mostrar si hay coincidencia real
+        // Mostrar si hay cualquier coincidencia
         return titleMatch || descriptionMatch || categoryMatch || sellerMatch || keywordMatch || relatedCategoryMatch;
       })
       .sort((a, b) => b.relevanceScore - a.relevanceScore);
@@ -332,10 +331,19 @@ export const GET: APIRoute = async ({ url }) => {
           .sort((a, b) => b.relevanceScore - a.relevanceScore);
       }
       
-      // Si aún no hay resultados, NO mostrar productos aleatorios
+      // Si aún no hay resultados, mostrar productos de categorías relacionadas
       if (filteredProducts.length === 0) {
-        console.log('🔍 No hay resultados específicos, no mostrando productos aleatorios');
-        filteredProducts = []; // No mostrar nada si no hay coincidencias
+        console.log('🔍 No hay resultados específicos, mostrando productos de categorías relacionadas...');
+        
+        // Mostrar productos de categorías relacionadas
+        filteredProducts = combinedProducts
+          .filter(product => 
+            relatedCategories.some(cat => 
+              product.category.toLowerCase().includes(cat.toLowerCase())
+            )
+          )
+          .sort((a, b) => b.relevanceScore - a.relevanceScore)
+          .slice(0, 20); // Limitar a 20 productos
       }
     }
 
@@ -475,8 +483,12 @@ function correctTypo(query: string): string {
     'piza': 'pizza',
     'pizz': 'pizza',
     'pisa': 'pizza', // Error común
+    'pizzaa': 'pizza', // Error común
+    'pizzaaa': 'pizza', // Error común
     'mida': 'comida',
     'comid': 'comida',
+    'comidaa': 'comida', // Error común
+    'cocomida': 'comida', // Error común
     'cafe': 'café',
     'te': 'té',
     'cerveza': 'cerveza',
