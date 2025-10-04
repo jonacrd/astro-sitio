@@ -277,26 +277,30 @@ export const GET: APIRoute = async ({ url }) => {
       };
     }).filter(Boolean);
 
-    // 7. Búsqueda inteligente con fallback
+    // 7. Búsqueda inteligente más estricta
     let filteredProducts = combinedProducts
-      .filter(product => 
-        // Búsqueda principal
-        product.title.toLowerCase().includes(processedQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(processedQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(processedQuery.toLowerCase()) ||
-        product.sellerName.toLowerCase().includes(processedQuery.toLowerCase()) ||
-        // Búsqueda por palabras clave
-        searchTerms.some(term => 
+      .filter(product => {
+        const titleMatch = product.title.toLowerCase().includes(processedQuery.toLowerCase());
+        const descriptionMatch = product.description.toLowerCase().includes(processedQuery.toLowerCase());
+        const categoryMatch = product.category.toLowerCase().includes(processedQuery.toLowerCase());
+        const sellerMatch = product.sellerName.toLowerCase().includes(processedQuery.toLowerCase());
+        
+        // Búsqueda por palabras clave (más estricta)
+        const keywordMatch = searchTerms.some(term => 
           product.title.toLowerCase().includes(term) ||
-          product.description.toLowerCase().includes(term) ||
-          product.category.toLowerCase().includes(term) ||
-          product.sellerName.toLowerCase().includes(term)
-        ) ||
-        // Búsqueda por categorías relacionadas
-        relatedCategories.some(cat => 
-          product.category.toLowerCase().includes(cat.toLowerCase())
-        )
-      )
+          product.description.toLowerCase().includes(term)
+        );
+        
+        // Búsqueda por categorías relacionadas (solo si hay coincidencia en título o descripción)
+        const relatedCategoryMatch = relatedCategories.some(cat => 
+          product.category.toLowerCase().includes(cat.toLowerCase()) &&
+          (product.title.toLowerCase().includes(processedQuery.toLowerCase()) ||
+           product.description.toLowerCase().includes(processedQuery.toLowerCase()))
+        );
+        
+        // Solo mostrar si hay coincidencia real
+        return titleMatch || descriptionMatch || categoryMatch || sellerMatch || keywordMatch || relatedCategoryMatch;
+      })
       .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
     // 8. Si no hay resultados, hacer búsqueda más amplia
@@ -314,29 +318,10 @@ export const GET: APIRoute = async ({ url }) => {
           .sort((a, b) => b.relevanceScore - a.relevanceScore);
       }
       
-      // Si aún no hay resultados, mostrar productos de categorías populares
+      // Si aún no hay resultados, NO mostrar productos aleatorios
       if (filteredProducts.length === 0) {
-        console.log('🔍 No hay resultados específicos, mostrando productos populares...');
-        
-        // Priorizar categorías relacionadas con la búsqueda
-        let fallbackCategories = ['Comida Rápida', 'Bebidas', 'Abastos', 'Servicios'];
-        
-        // Si la búsqueda parece ser de comida, priorizar categorías de comida
-        if (processedQuery.toLowerCase().includes('comida') || 
-            processedQuery.toLowerCase().includes('perro') || 
-            processedQuery.toLowerCase().includes('pizza') ||
-            processedQuery.toLowerCase().includes('hamburguesa')) {
-          fallbackCategories = ['Comida Rápida', 'Abastos', 'Bebidas', 'Servicios'];
-        }
-        
-        filteredProducts = combinedProducts
-          .filter(product => 
-            fallbackCategories.some(cat => 
-              product.category.toLowerCase().includes(cat.toLowerCase())
-            )
-          )
-          .sort((a, b) => b.relevanceScore - a.relevanceScore)
-          .slice(0, 15); // Reducido a 15 para ser más selectivo
+        console.log('🔍 No hay resultados específicos, no mostrando productos aleatorios');
+        filteredProducts = []; // No mostrar nada si no hay coincidencias
       }
     }
 
