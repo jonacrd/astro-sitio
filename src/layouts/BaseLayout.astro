@@ -284,5 +284,47 @@ const {
   
   <!-- Botón flotante para activar notificaciones (siempre visible si no están activas) -->
   <FloatingNotificationButton client:load />
+  
+  <!-- Script para sincronizar género desde Google -->
+  <script>
+    import { supabase } from '../lib/supabase-browser';
+    
+    async function syncUserGender() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) return;
+        
+        // Si el usuario inició sesión con Google y tiene gender en metadata
+        const googleGender = user.user_metadata?.gender;
+        
+        if (googleGender) {
+          // Actualizar el perfil con el género de Google
+          const { error } = await supabase
+            .from('profiles')
+            .update({ gender: googleGender })
+            .eq('id', user.id);
+          
+          if (!error) {
+            console.log('✅ Género sincronizado desde Google:', googleGender);
+          }
+        }
+      } catch (error) {
+        console.error('Error sincronizando género:', error);
+      }
+    }
+    
+    // Ejecutar al cargar la página
+    if (typeof window !== 'undefined') {
+      window.addEventListener('DOMContentLoaded', syncUserGender);
+      
+      // También sincronizar cuando cambie el estado de autenticación
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          syncUserGender();
+        }
+      });
+    }
+  </script>
 </body>
 </html>

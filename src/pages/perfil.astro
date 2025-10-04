@@ -15,7 +15,7 @@ import { getUser, getUserProfile } from '../lib/session'
         <!-- Foto de perfil -->
         <div class="relative inline-block mb-4">
           <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto overflow-hidden">
-            <img id="profile-avatar" src="/default-avatar.png" alt="Avatar" class="w-full h-full object-cover rounded-full" />
+            <img id="profile-avatar" src="/male-icon.png" alt="Avatar" class="w-full h-full object-cover rounded-full" />
           </div>
           <button class="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,6 +197,7 @@ import { getUser, getUserProfile } from '../lib/session'
 
   <script>
     import { supabase } from '../lib/supabase-browser';
+    import { getUserAvatar } from '../lib/avatar-utils';
 
     // Cargar información del perfil
     async function loadProfile() {
@@ -210,7 +211,7 @@ import { getUser, getUserProfile } from '../lib/session'
 
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('name, phone, is_seller')
+          .select('name, phone, is_seller, avatar_url, gender')
           .eq('id', user.id)
           .single();
 
@@ -222,6 +223,22 @@ import { getUser, getUserProfile } from '../lib/session'
         // Actualizar información básica
         document.getElementById('profile-name').textContent = profile.name || 'Usuario';
         document.getElementById('profile-role').textContent = profile.is_seller ? 'Vendedor' : 'Comprador';
+        
+        // Actualizar avatar según el tipo de usuario y género
+        const avatarElement = document.getElementById('profile-avatar') as HTMLImageElement;
+        if (avatarElement) {
+          const avatarUrl = getUserAvatar({
+            avatar_url: profile.avatar_url,
+            is_seller: profile.is_seller,
+            gender: profile.gender,
+            raw_user_meta_data: user.user_metadata
+          });
+          avatarElement.src = avatarUrl;
+          avatarElement.onerror = () => {
+            // Fallback si la imagen no carga
+            avatarElement.src = '/male-icon.png';
+          };
+        }
         
         // Mostrar panel según el tipo de usuario
         if (profile.is_seller) {

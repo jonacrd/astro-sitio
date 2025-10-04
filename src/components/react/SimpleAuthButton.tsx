@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import LoginForm from './LoginForm';
+import { getUserAvatar } from '../../lib/avatar-utils';
 
 export default function SimpleAuthButton() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -16,6 +18,18 @@ export default function SimpleAuthButton() {
         if (session?.user) {
           setIsAuthenticated(true);
           setUserEmail(session.user.email || '');
+          
+          // Cargar perfil del usuario
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('avatar_url, is_seller, gender')
+            .eq('id', session.user.id)
+            .single();
+          
+          setUserProfile({
+            ...profile,
+            raw_user_meta_data: session.user.user_metadata
+          });
         }
       } catch (error) {
         console.error('Error checking auth:', error);
@@ -25,13 +39,26 @@ export default function SimpleAuthButton() {
     checkAuth();
 
     // Escuchar cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setIsAuthenticated(true);
         setUserEmail(session.user.email || '');
+        
+        // Cargar perfil del usuario
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url, is_seller, gender')
+          .eq('id', session.user.id)
+          .single();
+        
+        setUserProfile({
+          ...profile,
+          raw_user_meta_data: session.user.user_metadata
+        });
       } else {
         setIsAuthenticated(false);
         setUserEmail('');
+        setUserProfile(null);
       }
     });
 
@@ -43,6 +70,7 @@ export default function SimpleAuthButton() {
       await supabase.auth.signOut();
       setIsAuthenticated(false);
       setUserEmail('');
+      setUserProfile(null);
       setIsOpen(false);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -203,17 +231,23 @@ export default function SimpleAuthButton() {
   }
 
   // Usuario autenticado
+  const avatarUrl = getUserAvatar(userProfile);
+  
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-white/80 hover:text-white transition-colors rounded-lg hover:bg-white/5"
       >
-        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-          <span className="text-xs font-medium text-white">
-            {userEmail.charAt(0).toUpperCase()}
-          </span>
-        </div>
+        <img 
+          src={avatarUrl} 
+          alt="Avatar" 
+          className="w-8 h-8 rounded-full object-cover border-2 border-white/20"
+          onError={(e) => {
+            // Fallback si la imagen no carga
+            e.currentTarget.src = '/male-icon.png';
+          }}
+        />
         <span className="hidden sm:inline text-sm">{userEmail}</span>
         <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
