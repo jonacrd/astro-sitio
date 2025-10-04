@@ -239,11 +239,11 @@ const {
   <!-- Notificaciones del carrito -->
   <CartNotification client:load />
 
-  <!-- Sistema de notificaciones - Carga diferida -->
-  <NotificationSystem client:visible />
+  <!-- Sistema de notificaciones - Solo cargar cuando sea necesario -->
+  <NotificationSystem client:idle />
 
-  <!-- Login Modal - Carga diferida -->
-  <LoginModalWrapper client:visible />
+  <!-- Login Modal - Solo cargar cuando sea necesario -->
+  <LoginModalWrapper client:idle />
 
   <!-- Footer -->
   <footer class="bg-bg-surface text-ink-base py-12">
@@ -288,14 +288,14 @@ const {
   <!-- Manejador global de inicio de sesión -->
   <GlobalLoginHandler client:load />
   
-  <!-- Suscriptor automático de OneSignal - Carga diferida -->
-  <OneSignalSubscriber client:visible />
+  <!-- Suscriptor automático de OneSignal - Solo cuando sea necesario -->
+  <OneSignalSubscriber client:idle />
   
-  <!-- Modal de bienvenida de notificaciones - Carga diferida -->
-  <NotificationWelcome client:visible />
+  <!-- Modal de bienvenida de notificaciones - Solo cuando sea necesario -->
+  <NotificationWelcome client:idle />
   
-  <!-- Botón flotante para activar notificaciones - Carga diferida -->
-  <FloatingNotificationButton client:visible />
+  <!-- Botón flotante para activar notificaciones - Solo cuando sea necesario -->
+  <FloatingNotificationButton client:idle />
   
   <!-- Script para sincronizar género desde Google - Optimizado -->
   <script>

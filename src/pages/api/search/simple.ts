@@ -34,13 +34,13 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    // Buscar productos activos con stock
+    // Buscar productos activos con stock (optimizado)
     const { data: sellerProducts, error: spError } = await supabase
       .from('seller_products')
-      .select('seller_id, product_id, price_cents, stock, active, updated_at')
+      .select('seller_id, product_id, price_cents, stock, active')
       .eq('active', true)
       .gt('stock', 0)
-      .limit(20);
+      .limit(15); // Reducir límite para mejorar rendimiento
 
     if (spError) {
       console.error('Error obteniendo seller_products:', spError);

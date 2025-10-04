@@ -60,7 +60,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
     try {
       console.log('🔍 Cargando productos de todos los vendedores activos (v3)...');
 
-      // Obtener TODOS los productos activos
+      // Obtener productos activos con límite y paginación
       const { data: sellerProducts, error: productsError } = await supabase
         .from('seller_products')
         .select(`
@@ -82,7 +82,9 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
             is_active
           )
         `)
-        .eq('active', true);
+        .eq('active', true)
+        .gt('stock', 0)
+        .limit(50); // Limitar a 50 productos para mejorar rendimiento
 
       if (productsError) {
         throw new Error('Error cargando productos: ' + productsError.message);
@@ -215,9 +217,24 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Cargando productos...</p>
+      <div className="space-y-6">
+        {/* Skeleton para categorías */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {[1,2,3,4,5].map(i => (
+            <div key={i} className="flex-shrink-0 w-24 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+          ))}
+        </div>
+        
+        {/* Skeleton para productos */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {[1,2,3,4,5,6,7,8,9,10].map(i => (
+            <div key={i} className="bg-gray-100 rounded-lg p-4 animate-pulse">
+              <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
