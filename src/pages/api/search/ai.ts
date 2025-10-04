@@ -232,7 +232,7 @@ export const GET: APIRoute = async ({ url }) => {
           relatedCategories: [],
           correctedQuery: processedQuery,
           originalQuery: query,
-          localCorrection: correctedQuery,
+          localCorrection: processedQuery,
           searchIntent: searchIntent,
           total: 0,
           message: 'No hay productos activos de vendedores activos con stock.'
