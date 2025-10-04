@@ -145,13 +145,25 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
     }
   };
 
-  const getFilteredProducts = () => {
-    if (!selectedCategory) return products;
-    return products.filter(product => product.category === selectedCategory);
-  };
-
   const getProductsByCategory = (category: string) => {
     return products.filter(product => product.category === category);
+  };
+
+  const getGroupedProducts = () => {
+    if (selectedCategory) {
+      return { [selectedCategory]: getProductsByCategory(selectedCategory) };
+    }
+    
+    const grouped: Record<string, Product[]> = {};
+    products.forEach(product => {
+      const category = product.category || 'otros';
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(product);
+    });
+    
+    return grouped;
   };
 
   if (loading) {
@@ -192,10 +204,10 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
     );
   }
 
-  const filteredProducts = getFilteredProducts();
+  const groupedProducts = getGroupedProducts();
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-8 ${className}`}>
       {/* Categorías */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {CATEGORIES.map(category => {
@@ -222,52 +234,74 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
         })}
       </div>
 
-      {/* Grid de productos */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {filteredProducts.map(product => (
-          <div key={product.id} className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow relative">
-            {/* Badge de vendedor */}
-            <a 
-              href={`/vendedor/${product.seller_id}`}
-              className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer ${
-                product.seller_active ? 'bg-green-600/90 hover:bg-green-500/90' : 'bg-gray-600/90 hover:bg-gray-500/90'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-current"></span>
-              {product.seller_name}
-            </a>
+      {/* Productos organizados por categorías */}
+      {Object.entries(groupedProducts).map(([categoryId, categoryProducts]) => {
+        if (categoryProducts.length === 0) return null;
+        
+        const categoryInfo = CATEGORIES.find(c => c.id === categoryId) || 
+          { id: categoryId, name: categoryId, icon: '📦' };
 
-            {/* Imagen del producto */}
-            <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
-              <img
-                src={product.image_url || '/images/placeholder.jpg'}
-                alt={product.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
+        return (
+          <div key={categoryId} className="space-y-4">
+            {/* Título de la categoría */}
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold text-gray-900">
+                {categoryInfo.icon} {categoryInfo.name}
+              </h2>
+              <span className="text-sm text-gray-500">
+                ({categoryProducts.length} productos)
+              </span>
             </div>
 
-            {/* Información del producto */}
-            <div className="space-y-2">
-              <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
-                {product.title}
-              </h3>
-              
-              <p className="text-lg font-bold text-blue-600">
-                {formatPrice(product.price_cents)}
-              </p>
-              
-              <button
-                onClick={() => handleAddToCart(product)}
-                disabled={!product.seller_active && !window.confirm}
-                className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-              >
-                {!product.seller_active ? 'Tienda cerrada' : 'Agregar'}
-              </button>
+            {/* Grid de productos de la categoría */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {categoryProducts.map(product => (
+                <div key={product.id} className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow relative">
+                  {/* Badge de vendedor */}
+                  <a 
+                    href={`/vendedor/${product.seller_id}`}
+                    className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer ${
+                      product.seller_active ? 'bg-green-600/90 hover:bg-green-500/90' : 'bg-gray-600/90 hover:bg-gray-500/90'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-current"></span>
+                    {product.seller_name}
+                  </a>
+
+                  {/* Imagen del producto */}
+                  <div className="aspect-square bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                    <img
+                      src={product.image_url || '/images/placeholder.jpg'}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Información del producto */}
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-gray-900 text-sm line-clamp-2">
+                      {product.title}
+                    </h3>
+                    
+                    <p className="text-lg font-bold text-blue-600">
+                      {formatPrice(product.price_cents)}
+                    </p>
+                    
+                    <button
+                      onClick={() => handleAddToCart(product)}
+                      disabled={!product.seller_active && !window.confirm}
+                      className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {!product.seller_active ? 'Tienda cerrada' : 'Agregar'}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
 
       {/* Botón cargar más */}
       {hasMore && (
