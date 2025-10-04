@@ -4,6 +4,7 @@ import Header from '@components/react/Header.tsx'
 import BottomNavAuth from '@components/react/BottomNavAuth.tsx'
 import NotificationSystem from '@components/react/NotificationSystem.tsx'
 import GlobalLoginHandler from '@components/react/GlobalLoginHandler.tsx'
+import { AuthProvider } from '@components/react/AuthContext.tsx'
 import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
 import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
 import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
@@ -230,7 +231,9 @@ const {
 
   <!-- Contenido principal -->
   <main class="min-h-screen bg-dark-primary pt-[72px]">
-    <slot />
+    <AuthProvider client:load>
+      <slot />
+    </AuthProvider>
   </main>
 
   <!-- Bottom Navigation -->
