@@ -117,8 +117,7 @@ export const GET: APIRoute = async ({ url }) => {
         stock: sp.stock,
         sellerId: sp.seller_id,
         sellerName: seller?.name || 'Vendedor',
-        active: sp.active,
-        updated_at: sp.updated_at
+        active: sp.active
       };
     }).filter(product => 
       product.title.toLowerCase().includes(query.toLowerCase()) ||
