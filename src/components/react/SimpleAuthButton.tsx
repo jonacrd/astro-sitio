@@ -22,7 +22,7 @@ export default function SimpleAuthButton() {
           // Cargar perfil del usuario
           const { data: profile } = await supabase
             .from('profiles')
-            .select('avatar_url, is_seller, gender')
+            .select('is_seller')
             .eq('id', session.user.id)
             .single();
           
@@ -47,7 +47,7 @@ export default function SimpleAuthButton() {
         // Cargar perfil del usuario
         const { data: profile } = await supabase
           .from('profiles')
-          .select('avatar_url, is_seller, gender')
+          .select('is_seller')
           .eq('id', session.user.id)
           .single();
         

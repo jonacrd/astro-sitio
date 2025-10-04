@@ -211,7 +211,7 @@ import { getUser, getUserProfile } from '../lib/session'
 
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('name, phone, is_seller, avatar_url, gender')
+          .select('name, phone, is_seller')
           .eq('id', user.id)
           .single();
 
@@ -228,9 +228,9 @@ import { getUser, getUserProfile } from '../lib/session'
         const avatarElement = document.getElementById('profile-avatar') as HTMLImageElement;
         if (avatarElement) {
           const avatarUrl = getUserAvatar({
-            avatar_url: profile.avatar_url,
+            avatar_url: null, // No existe la columna aún
             is_seller: profile.is_seller,
-            gender: profile.gender,
+            gender: null, // No existe la columna aún
             raw_user_meta_data: user.user_metadata
           });
           avatarElement.src = avatarUrl;

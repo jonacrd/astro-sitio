@@ -299,14 +299,19 @@ const {
         const googleGender = user.user_metadata?.gender;
         
         if (googleGender) {
-          // Actualizar el perfil con el género de Google
-          const { error } = await supabase
-            .from('profiles')
-            .update({ gender: googleGender })
-            .eq('id', user.id);
-          
-          if (!error) {
-            console.log('✅ Género sincronizado desde Google:', googleGender);
+          // Actualizar el perfil con el género de Google (solo si la columna existe)
+          try {
+            const { error } = await supabase
+              .from('profiles')
+              .update({ gender: googleGender })
+              .eq('id', user.id);
+            
+            if (!error) {
+              console.log('✅ Género sincronizado desde Google:', googleGender);
+            }
+          } catch (err) {
+            // La columna gender no existe aún, ignorar el error
+            console.log('⚠️ Columna gender no existe aún, se creará más tarde');
           }
         }
       } catch (error) {

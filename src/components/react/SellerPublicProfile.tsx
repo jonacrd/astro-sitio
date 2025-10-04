@@ -77,7 +77,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
       // Cargar información del vendedor
       const { data: sellerData, error: sellerError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, name, email, phone, description, address, is_active, created_at')
         .eq('id', sellerId)
         .eq('is_seller', true)
         .single();
@@ -100,12 +100,6 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
           price_cents,
           stock,
           active,
-          inventory_mode,
-          available_today,
-          sold_out,
-          portion_limit,
-          portion_used,
-          prep_minutes,
           product:products!inner(
             id,
             title,
@@ -126,20 +120,22 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
 
       setProducts(productsData || []);
 
-      // Cargar secciones personalizadas
-      const { data: sectionsData, error: sectionsError } = await supabase
-        .from('seller_custom_sections')
-        .select('*')
-        .eq('seller_id', sellerId)
-        .eq('is_active', true)
-        .order('order_index', { ascending: true });
+      // Cargar secciones personalizadas (omitir por ahora hasta que se cree la tabla)
+      // const { data: sectionsData, error: sectionsError } = await supabase
+      //   .from('seller_custom_sections')
+      //   .select('*')
+      //   .eq('seller_id', sellerId)
+      //   .eq('is_active', true)
+      //   .order('order_index', { ascending: true });
 
-      if (sectionsError) {
-        console.error('Error cargando secciones:', sectionsError);
-        // No es crítico, continuar sin secciones personalizadas
-      } else {
-        setCustomSections(sectionsData || []);
-      }
+      // if (sectionsError) {
+      //   console.error('Error cargando secciones:', sectionsError);
+      //   // No es crítico, continuar sin secciones personalizadas
+      // } else {
+      //   setCustomSections(sectionsData || []);
+      // }
+      
+      setCustomSections([]); // Sin secciones personalizadas por ahora
 
     } catch (err) {
       console.error('Error inesperado:', err);
@@ -269,9 +265,9 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
   }
 
   const avatarUrl = getUserAvatar({
-    avatar_url: seller.avatar_url,
+    avatar_url: null, // No existe la columna aún
     is_seller: true,
-    gender: seller.gender
+    gender: null // No existe la columna aún
   });
 
   return (
@@ -386,12 +382,10 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                         </p>
                         <button
                           onClick={() => handleAddToCart(product)}
-                          disabled={!seller.is_active || (product.inventory_mode === 'availability' && (!product.available_today || product.sold_out))}
+                          disabled={!seller.is_active}
                           className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
-                          {!seller.is_active ? 'Tienda cerrada' : 
-                           product.inventory_mode === 'availability' && (!product.available_today || product.sold_out) ? 'No disponible' :
-                           'Agregar'}
+                          {!seller.is_active ? 'Tienda cerrada' : 'Agregar'}
                         </button>
                       </div>
                     ))}
@@ -466,12 +460,10 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
               </p>
               <button
                 onClick={() => handleAddToCart(product)}
-                disabled={!seller.is_active || (product.inventory_mode === 'availability' && (!product.available_today || product.sold_out))}
+                disabled={!seller.is_active}
                 className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                {!seller.is_active ? 'Tienda cerrada' : 
-                 product.inventory_mode === 'availability' && (!product.available_today || product.sold_out) ? 'No disponible' :
-                 'Agregar'}
+                {!seller.is_active ? 'Tienda cerrada' : 'Agregar'}
               </button>
             </div>
           ))}
