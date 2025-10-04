@@ -323,14 +323,18 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                         (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
                       }}
                     />
-                    {/* Badge de vendedor con estado */}
-                    <div className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
-                      product.seller_active ? 'bg-green-600/90' : 'bg-gray-600/90'
-                    }`}>
+                    {/* Badge de vendedor con estado - clickeable */}
+                    <a 
+                      href={`/vendedor/${product.seller_id}`}
+                      className={`absolute top-2 left-2 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 hover:scale-105 transition-transform cursor-pointer ${
+                        product.seller_active ? 'bg-green-600/90 hover:bg-green-500/90' : 'bg-gray-600/90 hover:bg-gray-500/90'
+                      }`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <span className={`w-2 h-2 rounded-full ${product.seller_active ? 'bg-white animate-pulse' : 'bg-gray-400'}`}></span>
                       {product.seller_name}
                       {!product.seller_active && ' (Cerrado)'}
-                    </div>
+                    </a>
                     
                     {/* Badges de disponibilidad/stock */}
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
