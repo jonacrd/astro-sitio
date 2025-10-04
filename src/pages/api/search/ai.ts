@@ -187,30 +187,35 @@ export const GET: APIRoute = async ({ url }) => {
     // 4. Usar EXACTAMENTE la misma consulta que el feed (con Service Role Key)
     const supabaseService = createClient(supabaseUrl, import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
     
-    const { data: feedProducts, error: feedError } = await supabaseService
-      .from('seller_products')
-      .select(`
-        seller_id,
-        product_id,
-        price_cents,
-        stock,
-        active,
-        product:products!inner(
-          id,
-          title,
-          description,
-          category,
-          image_url
-        ),
-        seller:profiles!seller_products_seller_id_fkey(
-          id,
-          name,
-          is_active
-        )
-      `)
-      .eq('active', true)
-      .gt('stock', 0)
-      .eq('seller.is_active', true);
+           const { data: feedProducts, error: feedError } = await supabaseService
+             .from('seller_products')
+             .select(`
+               seller_id,
+               product_id,
+               price_cents,
+               stock,
+               active,
+               inventory_mode,
+               available_today,
+               portion_limit,
+               portion_used,
+               sold_out,
+               product:products!inner(
+                 id,
+                 title,
+                 description,
+                 category,
+                 image_url
+               ),
+               seller:profiles!seller_products_seller_id_fkey(
+                 id,
+                 name,
+                 is_active
+               )
+             `)
+             .eq('active', true)
+             .eq('seller.is_active', true)
+             .or('and(inventory_mode.eq.count,stock.gt.0),and(inventory_mode.eq.availability,available_today.eq.true,sold_out.eq.false)');
 
     if (feedError) {
       console.error('Error obteniendo productos del feed:', feedError);
@@ -284,6 +289,11 @@ export const GET: APIRoute = async ({ url }) => {
         sellerId: item.seller_id,
         sellerName: seller.name,
         active: item.active,
+        inventory_mode: item.inventory_mode || 'count',
+        available_today: item.available_today || false,
+        sold_out: item.sold_out || false,
+        portion_limit: item.portion_limit,
+        portion_used: item.portion_used || 0,
         relevanceScore: calculateRelevanceScore(product, seller, searchTerms, processedQuery.toLowerCase(), relatedCategories)
       };
     });

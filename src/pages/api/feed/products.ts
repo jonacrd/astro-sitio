@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ url }) => {
     
     console.log(`🔍 Cargando feed - página ${page}, límite ${limit}`);
 
-    // Query optimizada con índices específicos
+    // Query optimizada con índices específicos - Soporte para ambos modos de inventario
     const { data: sellerProducts, error: productsError } = await supabase
       .from('seller_products')
       .select(`
@@ -33,6 +33,11 @@ export const GET: APIRoute = async ({ url }) => {
         product_id,
         price_cents,
         stock,
+        inventory_mode,
+        available_today,
+        portion_limit,
+        portion_used,
+        sold_out,
         product:products!inner(
           id,
           title,
@@ -47,8 +52,8 @@ export const GET: APIRoute = async ({ url }) => {
         )
       `)
       .eq('active', true)
-      .gt('stock', 0)
       .eq('seller.is_active', true) // Solo vendedores activos
+      .or('and(inventory_mode.eq.count,stock.gt.0),and(inventory_mode.eq.availability,available_today.eq.true,sold_out.eq.false)') // Productos con stock O disponibles hoy
       .order('product_id', { ascending: false }) // Ordenar por ID de producto
       .range(offset, offset + limit - 1);
 
@@ -75,9 +80,11 @@ export const GET: APIRoute = async ({ url }) => {
       seller_name: item.seller?.name || 'Vendedor',
       seller_active: item.seller?.is_active !== false,
       stock: item.stock,
-      inventory_mode: 'count',
-      available_today: true,
-      sold_out: false
+      inventory_mode: item.inventory_mode || 'count',
+      available_today: item.available_today || false,
+      sold_out: item.sold_out || false,
+      portion_limit: item.portion_limit,
+      portion_used: item.portion_used || 0
     })) || [];
 
     console.log(`✅ Feed cargado: ${formattedProducts.length} productos`);
