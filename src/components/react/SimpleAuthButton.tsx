@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { getSupabase, isSupabaseAvailable } from '../../lib/supabase-config';
-import LoginForm from './LoginForm';
 import { getUserAvatar } from '../../lib/avatar-utils';
 import { getCachedAuth, setCachedAuth, clearAuthCache } from '../../lib/auth-cache';
 
@@ -9,7 +8,6 @@ export default function SimpleAuthButton() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string>('');
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   // Verificar autenticación (optimizado)
@@ -195,7 +193,18 @@ export default function SimpleAuthButton() {
 
   const handleLoginClick = () => {
     setIsOpen(false);
-    setShowLoginModal(true);
+    // Usar el sistema global de modales
+    window.dispatchEvent(new CustomEvent('show-login-modal', { 
+      detail: { mode: 'login' } 
+    }));
+  };
+
+  const handleRegisterClick = () => {
+    setIsOpen(false);
+    // Usar el sistema global de modales
+    window.dispatchEvent(new CustomEvent('show-login-modal', { 
+      detail: { mode: 'register' } 
+    }));
   };
 
   const handleNavigate = (path: string) => {
@@ -244,7 +253,7 @@ export default function SimpleAuthButton() {
               </button>
 
               <button
-                onClick={handleLoginClick}
+                onClick={handleRegisterClick}
                 className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-green-50 transition-colors"
               >
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
@@ -273,75 +282,6 @@ export default function SimpleAuthButton() {
           </div>
         )}
 
-        {/* Modal de login simple */}
-        {showLoginModal && (
-          <div 
-            onClick={() => setShowLoginModal(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 999999,
-              width: '100vw',
-              height: '100vh'
-            }}
-          >
-            <div 
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '0.75rem',
-                padding: '1.5rem',
-                maxWidth: '28rem',
-                width: '90%',
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-              }}
-            >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">🔐 Acceso a tu cuenta</h2>
-                <button
-                  onClick={() => setShowLoginModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              <LoginForm 
-                onLoginSuccess={(user) => {
-                  console.log('✅ Login exitoso desde SimpleAuthButton:', user.email);
-                  setIsAuthenticated(true);
-                  setUserEmail(user.email || '');
-                  setShowLoginModal(false);
-                  // Recargar la página para actualizar el estado de autenticación
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1500);
-                }}
-                onClose={() => setShowLoginModal(false)}
-              />
-
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => setShowLoginModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
