@@ -87,10 +87,14 @@ export const GET: APIRoute = async ({ url }) => {
                 REGLAS IMPORTANTES:
                 1. Si el usuario busca "mida" o "comida" → corregir a "comida" y sugerir categorías: ["Comida Rápida", "Abastos"]
                 2. Si busca "perro caliente" → mantener "perro caliente" y sugerir: ["Comida Rápida", "Abastos"]
-                3. Si busca algo muy específico que no existe → sugerir categorías relacionadas
-                4. Siempre incluir categorías relacionadas para búsquedas amplias
-                5. Corregir errores obvios de tipeo
-                6. Entender sinónimos y variaciones
+                3. Si busca "perros" → entender como "perros calientes" (comida) NO como "pan para perros"
+                4. Si busca "pizza" → mantener "pizza" y sugerir: ["Comida Rápida", "Abastos"]
+                5. Si busca algo muy específico que no existe → sugerir categorías relacionadas
+                6. Siempre incluir categorías relacionadas para búsquedas amplias
+                7. Corregir errores obvios de tipeo
+                8. Entender sinónimos y variaciones
+                9. PRIORIZAR: Solo productos de vendedores activos con stock real
+                10. CONTEXTO: Esta es una app de delivery/comida local, no una tienda de mascotas
                 
                 Tu tarea es:
                 1. Corregir errores ortográficos y de tipeo
@@ -137,7 +141,7 @@ export const GET: APIRoute = async ({ url }) => {
       }
     }
 
-    // 4. Buscar productos activos
+    // 4. Buscar productos activos SOLO de vendedores activos con stock
     const { data: sellerProducts, error: spError } = await supabase
       .from('seller_products')
       .select(`
@@ -147,7 +151,8 @@ export const GET: APIRoute = async ({ url }) => {
         stock, 
         active
       `)
-      .eq('active', true);
+      .eq('active', true)
+      .gt('stock', 0); // Solo productos con stock disponible
 
     if (spError) {
       console.error('Error obteniendo seller_products:', spError);
@@ -265,15 +270,27 @@ export const GET: APIRoute = async ({ url }) => {
       
       // Si aún no hay resultados, mostrar productos de categorías populares
       if (filteredProducts.length === 0) {
-        const popularCategories = ['Comida Rápida', 'Bebidas', 'Abastos', 'Servicios'];
+        console.log('🔍 No hay resultados específicos, mostrando productos populares...');
+        
+        // Priorizar categorías relacionadas con la búsqueda
+        let fallbackCategories = ['Comida Rápida', 'Bebidas', 'Abastos', 'Servicios'];
+        
+        // Si la búsqueda parece ser de comida, priorizar categorías de comida
+        if (processedQuery.toLowerCase().includes('comida') || 
+            processedQuery.toLowerCase().includes('perro') || 
+            processedQuery.toLowerCase().includes('pizza') ||
+            processedQuery.toLowerCase().includes('hamburguesa')) {
+          fallbackCategories = ['Comida Rápida', 'Abastos', 'Bebidas', 'Servicios'];
+        }
+        
         filteredProducts = combinedProducts
           .filter(product => 
-            popularCategories.some(cat => 
+            fallbackCategories.some(cat => 
               product.category.toLowerCase().includes(cat.toLowerCase())
             )
           )
           .sort((a, b) => b.relevanceScore - a.relevanceScore)
-          .slice(0, 20);
+          .slice(0, 15); // Reducido a 15 para ser más selectivo
       }
     }
 
@@ -379,14 +396,19 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
     }
   });
   
-  // Bonus por productos populares (con stock)
+  // Bonus por productos con stock (muy importante)
   if (product.stock > 0) {
-    score += 5;
+    score += 10; // Aumentado de 5 a 10
   }
   
-  // Bonus por vendedores activos
+  // Bonus por vendedores activos (muy importante)
   if (seller.is_active) {
-    score += 3;
+    score += 8; // Aumentado de 3 a 8
+  }
+  
+  // Bonus por stock alto (productos más disponibles)
+  if (product.stock > 10) {
+    score += 5;
   }
   
   return score;
