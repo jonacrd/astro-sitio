@@ -27,6 +27,16 @@ interface SmartSearchBarProps {
   placeholder?: string;
 }
 
+interface SearchResult {
+  results: Product[];
+  sellers: Seller[];
+  relatedCategories: string[];
+  correctedQuery: string;
+  searchIntent: string;
+  total: number;
+  message: string;
+}
+
 export default function SmartSearchBar({
   onSearch,
   onCategoryClick,
@@ -36,6 +46,9 @@ export default function SmartSearchBar({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [sellers, setSellers] = useState<Seller[]>([]);
+  const [relatedCategories, setRelatedCategories] = useState<string[]>([]);
+  const [correctedQuery, setCorrectedQuery] = useState('');
+  const [searchIntent, setSearchIntent] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchMode, setSearchMode] = useState<'products' | 'sellers' | 'all'>('all');
@@ -44,6 +57,9 @@ export default function SmartSearchBar({
     if (!searchQuery.trim()) {
       setResults([]);
       setSellers([]);
+      setRelatedCategories([]);
+      setCorrectedQuery('');
+      setSearchIntent('');
       setShowResults(false);
       return;
     }
@@ -52,16 +68,18 @@ export default function SmartSearchBar({
     setShowResults(true);
 
     try {
-      console.log('🔍 Búsqueda inteligente:', searchQuery);
+      console.log('🤖 Búsqueda con IA:', searchQuery);
       
-      // Usar el nuevo endpoint mejorado
-      const response = await fetch(`/api/search/enhanced?q=${encodeURIComponent(searchQuery)}`);
+      // Usar el nuevo endpoint con IA
+      const response = await fetch(`/api/search/ai?q=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       
-      console.log('📊 Respuesta de búsqueda mejorada:', data);
+      console.log('📊 Respuesta de búsqueda con IA:', data);
 
       if (data.success && data.data) {
-        const products = data.data.results?.map((item: any) => ({
+        const searchData: SearchResult = data.data;
+        
+        const products = searchData.results?.map((item: any) => ({
           id: item.id,
           title: item.title,
           price_cents: item.price,
@@ -73,7 +91,7 @@ export default function SmartSearchBar({
           relevanceScore: item.relevanceScore
         })) || [];
 
-        const sellersData = data.data.sellers?.map((seller: any) => ({
+        const sellersData = searchData.sellers?.map((seller: any) => ({
           id: seller.id,
           name: seller.name,
           isActive: seller.isActive,
@@ -82,16 +100,28 @@ export default function SmartSearchBar({
 
         setResults(products);
         setSellers(sellersData);
-        console.log(`✅ Resultados: ${products.length} productos, ${sellersData.length} vendedores`);
+        setRelatedCategories(searchData.relatedCategories || []);
+        setCorrectedQuery(searchData.correctedQuery || searchQuery);
+        setSearchIntent(searchData.searchIntent || 'product');
+        
+        console.log(`✅ Resultados con IA: ${products.length} productos, ${sellersData.length} vendedores`);
+        console.log(`🔍 Query corregida: "${searchData.correctedQuery}"`);
+        console.log(`📂 Categorías relacionadas: ${searchData.relatedCategories?.join(', ')}`);
       } else {
         setResults([]);
         setSellers([]);
+        setRelatedCategories([]);
+        setCorrectedQuery('');
+        setSearchIntent('');
         console.log('⚠️ No se encontraron resultados');
       }
     } catch (error) {
-      console.error('❌ Error en búsqueda inteligente:', error);
+      console.error('❌ Error en búsqueda con IA:', error);
       setResults([]);
       setSellers([]);
+      setRelatedCategories([]);
+      setCorrectedQuery('');
+      setSearchIntent('');
     } finally {
       setLoading(false);
     }
@@ -179,10 +209,41 @@ export default function SmartSearchBar({
           {loading ? (
             <div className="p-4 text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-500 mt-2">Buscando en base de datos...</p>
+              <p className="text-gray-500 mt-2">🤖 Procesando con IA...</p>
             </div>
           ) : (
             <div className="p-2">
+              {/* Información de búsqueda con IA */}
+              {correctedQuery && correctedQuery !== query && (
+                <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-700">
+                    <span className="font-semibold">🤖 IA corrigió:</span> "{query}" → "{correctedQuery}"
+                  </p>
+                </div>
+              )}
+
+              {/* Categorías relacionadas */}
+              {relatedCategories.length > 0 && (
+                <div className="mb-3 p-2 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-700 font-semibold mb-1">📂 Categorías relacionadas:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {relatedCategories.map((category, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setQuery(category);
+                          handleSearch(category);
+                          onCategoryClick?.(category);
+                        }}
+                        className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200 transition-colors"
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Productos */}
               {(searchMode === 'all' || searchMode === 'products') && results.length > 0 && (
                 <div className="mb-4">
