@@ -74,19 +74,36 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
       setLoading(true);
       setError(null);
 
+      // Validar que sellerId existe
+      if (!sellerId || sellerId === 'undefined') {
+        setError('ID de vendedor no válido');
+        return;
+      }
+
+      console.log('🔍 Cargando vendedor con ID:', sellerId);
+
       // Cargar información del vendedor
       const { data: sellerData, error: sellerError } = await supabase
         .from('profiles')
-        .select('id, name, email, phone, description, address, is_active, created_at')
+        .select('id, name, phone, description, address, is_active, created_at')
         .eq('id', sellerId)
         .eq('is_seller', true)
         .single();
 
       if (sellerError) {
         console.error('Error cargando vendedor:', sellerError);
+        console.error('SellerId usado:', sellerId);
         setError('Vendedor no encontrado');
         return;
       }
+
+      if (!sellerData) {
+        console.error('No se encontró vendedor con ID:', sellerId);
+        setError('Vendedor no encontrado');
+        return;
+      }
+
+      console.log('✅ Vendedor encontrado:', sellerData);
 
       setSeller(sellerData);
 

@@ -1,26 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import SellerPublicProfile from '../../components/react/SellerPublicProfile.tsx'
-import { supabase } from '../../lib/supabase-browser'
 
-export async function getStaticPaths() {
-  // Obtener todos los vendedores activos
-  const { data: sellers } = await supabase
-    .from('profiles')
-    .select('id, name, slug')
-    .eq('is_seller', true)
-    .not('name', 'is', null)
-
-  return sellers?.map(seller => ({
-    params: { id: seller.id },
-    props: { sellerId: seller.id, sellerName: seller.name }
-  })) || []
-}
-
-const { sellerId, sellerName } = Astro.props
+// Usar rutas dinámicas en lugar de estáticas
+const { id: sellerId } = Astro.params
 ---
 
-<BaseLayout title={`${sellerName} - Tienda`}>
+<BaseLayout title="Perfil del Vendedor">
   <main class="min-h-screen bg-gray-50 pb-20">
     <SellerPublicProfile sellerId={sellerId} client:load />
   </main>
