@@ -753,7 +753,7 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
               Precio (pesos chilenos)
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white font-semibold text-lg">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-lg pointer-events-none">
                 $
               </span>
               <input
@@ -761,7 +761,7 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
                 inputMode="numeric"
                 value={priceDisplay}
                 onChange={handlePriceChange}
-                className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 pl-8 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0"
               />
             </div>
