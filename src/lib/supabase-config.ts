@@ -43,11 +43,18 @@ export const createSupabaseServerClient = () => {
   });
 };
 
-// Cliente por defecto (navegador) - Singleton
+// Cliente por defecto (navegador) - Singleton mejorado
 let supabaseInstance: any = null;
 export const supabase = (() => {
-  if (!supabaseInstance) {
+  if (!supabaseInstance && typeof window !== 'undefined') {
+    console.log('🔧 Inicializando cliente Supabase...');
     supabaseInstance = createSupabaseClient();
+    
+    // Marcar como inicializado globalmente
+    if (!(window as any).supabaseClientInitialized) {
+      (window as any).supabaseClientInitialized = true;
+      console.log('✅ Cliente Supabase inicializado correctamente');
+    }
   }
   return supabaseInstance;
 })();

@@ -1,20 +1,28 @@
 /* Force Bottom Navigation Bar to be visible and fixed */
-.bottom-nav {
+.bottom-nav,
+.ui-navbar-bottom,
+[class*="bottom-nav"],
+[class*="BottomNav"] {
   position: fixed !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
   z-index: 1000 !important;
-  background: white !important;
-  border-top: 1px solid #e5e7eb !important;
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-top: 1px solid #334155 !important;
   display: flex !important;
   justify-content: space-around !important;
   align-items: center !important;
   padding: 8px 0 !important;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
-.bottom-nav button {
+.bottom-nav button,
+.ui-navbar-bottom button,
+[class*="bottom-nav"] button,
+[class*="BottomNav"] button {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -22,16 +30,30 @@
   padding: 8px 12px !important;
   background: transparent !important;
   border: none !important;
-  color: #6b7280 !important;
+  color: #94a3b8 !important;
   font-size: 12px !important;
   transition: color 0.2s !important;
+  cursor: pointer !important;
 }
 
-.bottom-nav button.active {
-  color: #3b82f6 !important;
+.bottom-nav button.active,
+.ui-navbar-bottom button.active,
+[class*="bottom-nav"] button.active,
+[class*="BottomNav"] button.active {
+  color: #60a5fa !important;
 }
 
-.bottom-nav button svg {
+.bottom-nav button:hover,
+.ui-navbar-bottom button:hover,
+[class*="bottom-nav"] button:hover,
+[class*="BottomNav"] button:hover {
+  color: #ffffff !important;
+}
+
+.bottom-nav button svg,
+.ui-navbar-bottom button svg,
+[class*="bottom-nav"] button svg,
+[class*="BottomNav"] button svg {
   width: 20px !important;
   height: 20px !important;
 }

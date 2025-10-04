@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import LoginForm from './LoginForm';
 import { getUserAvatar } from '../../lib/avatar-utils';
+import { getCachedAuth, setCachedAuth, clearAuthCache } from '../../lib/auth-cache';
 
 export default function SimpleAuthButton() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,79 +11,138 @@ export default function SimpleAuthButton() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Verificar autenticación
+  // Verificar autenticación (optimizado)
   useEffect(() => {
+    let isMounted = true;
+    
     const checkAuth = async () => {
       try {
+        // Verificar cache primero
+        const cached = getCachedAuth();
+        if (cached && isMounted) {
+          console.log('⚡ Usando datos de cache para auth');
+          setIsAuthenticated(true);
+          setUserEmail(cached.user.email || '');
+          setUserProfile(cached.profile);
+          return;
+        }
+        
+        // Verificar si ya hay una sesión en cache
         const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return; // Evitar actualizaciones si el componente se desmontó
+        
         if (session?.user) {
+          console.log('🔍 Usuario autenticado encontrado:', session.user.email);
           setIsAuthenticated(true);
           setUserEmail(session.user.email || '');
           
-          // Cargar perfil del usuario
+          // Cargar perfil del usuario solo si no está en cache
           const { data: profile } = await supabase
             .from('profiles')
             .select('is_seller')
             .eq('id', session.user.id)
             .single();
           
-          setUserProfile({
-            ...profile,
-            raw_user_meta_data: session.user.user_metadata
-          });
+          if (isMounted) {
+            const profileData = {
+              ...profile,
+              raw_user_meta_data: session.user.user_metadata
+            };
+            setUserProfile(profileData);
+            
+            // Guardar en cache
+            setCachedAuth(session.user, profileData);
+          }
+        } else {
+          console.log('🔍 No hay sesión activa');
+          if (isMounted) {
+            setIsAuthenticated(false);
+            setUserEmail('');
+            setUserProfile(null);
+            clearAuthCache();
+          }
         }
       } catch (error) {
         console.error('Error checking auth:', error);
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setUserEmail('');
+          setUserProfile(null);
+          clearAuthCache();
+        }
       }
     };
 
     checkAuth();
+    
+    return () => {
+      isMounted = false;
+    };
 
-    // Escuchar eventos personalizados de autenticación
+    // Escuchar eventos personalizados de autenticación (optimizado)
     const handleAuthStateChanged = async (event: CustomEvent) => {
+      if (!isMounted) return;
+      
       console.log('📢 Auth state changed event received:', event.detail);
       if (event.detail?.user) {
         setIsAuthenticated(true);
         setUserEmail(event.detail.user.email || '');
         
-        // Cargar perfil del usuario
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_seller')
-          .eq('id', event.detail.user.id)
-          .single();
-        
-        setUserProfile({
-          ...profile,
-          raw_user_meta_data: event.detail.user.user_metadata
-        });
+        // Cargar perfil del usuario solo si es necesario
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_seller')
+            .eq('id', event.detail.user.id)
+            .single();
+          
+          if (isMounted) {
+            setUserProfile({
+              ...profile,
+              raw_user_meta_data: event.detail.user.user_metadata
+            });
+          }
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
       }
     };
 
     window.addEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
 
-    // Escuchar cambios de autenticación
+    // Escuchar cambios de autenticación (optimizado)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+      
       console.log('🔄 Auth state changed:', event, session?.user?.email);
       if (session?.user) {
         setIsAuthenticated(true);
         setUserEmail(session.user.email || '');
         
-        // Cargar perfil del usuario
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_seller')
-          .eq('id', session.user.id)
-          .single();
-        
-        setUserProfile({
-          ...profile,
-          raw_user_meta_data: session.user.user_metadata
-        });
+        // Cargar perfil del usuario solo si es necesario
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_seller')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (isMounted) {
+            setUserProfile({
+              ...profile,
+              raw_user_meta_data: session.user.user_metadata
+            });
+          }
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
       } else {
-        setIsAuthenticated(false);
-        setUserEmail('');
-        setUserProfile(null);
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setUserEmail('');
+          setUserProfile(null);
+        }
       }
     });
 

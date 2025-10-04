@@ -77,10 +77,8 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
       onSuccess?.();
       onClose();
       
-      // Redirigir al feed principal
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 500);
+      // No redirigir automáticamente, dejar que el usuario decida
+      console.log('✅ Login exitoso, modal cerrado');
 
     } catch (error) {
       console.error('❌ Error inesperado:', error);
@@ -134,10 +132,8 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
       onSuccess?.();
       onClose();
       
-      // Redirigir al feed principal
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 500);
+      // No redirigir automáticamente, dejar que el usuario decida
+      console.log('✅ Login exitoso, modal cerrado');
 
     } catch (error) {
       console.error('❌ Error inesperado:', error);
