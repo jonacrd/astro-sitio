@@ -95,7 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
         stock: stockValue,
         active: active,
         inventory_mode: inventoryMode,
-        available_today: inventoryMode === 'availability' ? false : null,
+        available_today: inventoryMode === 'availability' ? true : null,
         portion_limit: null,
         portion_used: 0,
         sold_out: inventoryMode === 'availability' ? false : null
