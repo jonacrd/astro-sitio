@@ -713,16 +713,18 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Remover todo excepto números
-    const numericValue = value.replace(/[^\d]/g, '');
+    // Remover todo excepto números y puntos
+    const cleanValue = value.replace(/[^\d.]/g, '');
     
-    if (numericValue === '') {
+    if (cleanValue === '' || cleanValue === '.') {
       setPrice(0);
       setPriceDisplay('');
       return;
     }
 
-    const priceValue = parseInt(numericValue);
+    // Remover puntos para obtener el valor numérico real
+    const numericValue = cleanValue.replace(/\./g, '');
+    const priceValue = parseInt(numericValue) || 0;
     setPrice(priceValue);
     
     // Formatear con separadores de miles
