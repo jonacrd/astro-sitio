@@ -10,12 +10,12 @@ SELECT
   p.title,
   p.category,
   pr.name as seller_name,
-  sp.created_at
+  p.created_at
 FROM seller_products sp
 JOIN products p ON sp.product_id = p.id
 JOIN profiles pr ON sp.seller_id = pr.id
 WHERE sp.active = false
-ORDER BY sp.created_at DESC
+ORDER BY p.created_at DESC
 LIMIT 10;
 
 -- 2. Activar productos inactivos que tienen stock
@@ -48,5 +48,5 @@ JOIN profiles pr ON sp.seller_id = pr.id
 WHERE sp.active = true 
   AND sp.stock > 0 
   AND pr.is_active = true
-ORDER BY sp.created_at DESC
+ORDER BY p.created_at DESC
 LIMIT 10;

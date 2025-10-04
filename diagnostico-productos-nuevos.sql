@@ -11,11 +11,11 @@ SELECT
   p.category,
   pr.name as seller_name,
   pr.is_active as seller_active,
-  sp.created_at
+  p.created_at
 FROM seller_products sp
 JOIN products p ON sp.product_id = p.id
 JOIN profiles pr ON sp.seller_id = pr.id
-ORDER BY sp.created_at DESC
+ORDER BY p.created_at DESC
 LIMIT 10;
 
 -- 2. Ver productos que NO aparecen en el feed (inactivos o sin stock)
@@ -41,7 +41,7 @@ JOIN profiles pr ON sp.seller_id = pr.id
 WHERE sp.active = false 
    OR sp.stock <= 0 
    OR pr.is_active = false
-ORDER BY sp.created_at DESC
+ORDER BY p.created_at DESC
 LIMIT 10;
 
 -- 3. Ver productos que SÍ aparecen en el feed
@@ -61,7 +61,7 @@ JOIN profiles pr ON sp.seller_id = pr.id
 WHERE sp.active = true 
   AND sp.stock > 0 
   AND pr.is_active = true
-ORDER BY sp.created_at DESC
+ORDER BY p.created_at DESC
 LIMIT 10;
 
 -- 4. Contar productos por estado
