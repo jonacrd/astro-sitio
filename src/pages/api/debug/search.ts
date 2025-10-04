@@ -122,7 +122,7 @@ export const GET: APIRoute = async ({ url }) => {
       );
     }
 
-    // 6. Estadísticas detalladas
+    // 6. Estadísticas
     const stats = {
       totalSellerProducts: sellerProducts?.length || 0,
       totalProducts: products?.length || 0,
@@ -130,16 +130,7 @@ export const GET: APIRoute = async ({ url }) => {
       combinedProducts: combinedProducts.length,
       searchResults: searchResults.length,
       categories: [...new Set(products?.map(p => p.category) || [])],
-      productTitles: products?.map(p => p.title) || [],
-      // Información de vendedores
-      sellersInfo: sellers?.map(seller => ({
-        id: seller.id,
-        name: seller.name,
-        isActive: seller.is_active,
-        isSeller: seller.is_seller,
-        productCount: sellerProducts?.filter(sp => sp.seller_id === seller.id).length || 0,
-        activeProductCount: sellerProducts?.filter(sp => sp.seller_id === seller.id && sp.active).length || 0
-      })) || []
+      productTitles: products?.map(p => p.title) || []
     };
 
     console.log('📊 Debug stats:', stats);
