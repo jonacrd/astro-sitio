@@ -58,12 +58,9 @@ export const GET: APIRoute = async ({ url }) => {
     const availableProducts = allProducts?.map(p => p.title) || [];
     const availableSellers = allSellers?.map(s => s.name) || [];
 
-    // 3. Corrección de tipeo local (respaldo)
-    const correctedQuery = correctTypo(query);
-    console.log(`🔤 Corrección local: "${query}" → "${correctedQuery}"`);
-
-    // 4. Usar OpenAI para procesar la búsqueda
-    let processedQuery = correctedQuery;
+    // 3. Usar la query original sin correcciones por ahora
+    const processedQuery = query;
+    console.log(`🔤 Query original: "${query}"`);
     let relatedCategories: string[] = [];
     let searchIntent = 'product';
 
@@ -368,10 +365,9 @@ export const GET: APIRoute = async ({ url }) => {
         relatedCategories: relatedCategories,
         correctedQuery: processedQuery,
         originalQuery: query,
-        localCorrection: correctedQuery,
         searchIntent: searchIntent,
         total: filteredProducts.length,
-        message: 'Búsqueda con IA completada'
+        message: 'Búsqueda completada'
       }
     }), { 
       headers: { 'content-type': 'application/json' }
