@@ -43,11 +43,7 @@ export const GET: APIRoute = async ({ url }) => {
         product_id, 
         price_cents, 
         stock, 
-        active,
-        inventory_mode,
-        available_today,
-        sold_out,
-        prep_minutes
+        active
       `)
       .eq('active', true)
       .limit(100); // Aumentar límite para más resultados
@@ -132,10 +128,6 @@ export const GET: APIRoute = async ({ url }) => {
         image: product.image_url || '/img/placeholders/product-placeholder.jpg',
         price: sp.price_cents,
         stock: sp.stock,
-        inventory_mode: sp.inventory_mode,
-        available_today: sp.available_today,
-        sold_out: sp.sold_out,
-        prep_minutes: sp.prep_minutes,
         sellerId: sp.seller_id,
         sellerName: seller.name,
         active: sp.active,

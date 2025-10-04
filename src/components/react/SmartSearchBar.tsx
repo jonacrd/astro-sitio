@@ -10,10 +10,6 @@ interface Product {
   seller_id: string;
   stock: number;
   category: string;
-  inventory_mode?: string;
-  available_today?: boolean;
-  sold_out?: boolean;
-  prep_minutes?: number;
   relevanceScore: number;
 }
 
@@ -74,10 +70,6 @@ export default function SmartSearchBar({
           seller_id: item.sellerId,
           stock: item.stock,
           category: item.category,
-          inventory_mode: item.inventory_mode,
-          available_today: item.available_today,
-          sold_out: item.sold_out,
-          prep_minutes: item.prep_minutes,
           relevanceScore: item.relevanceScore
         })) || [];
 
@@ -119,24 +111,10 @@ export default function SmartSearchBar({
   };
 
   const getAvailabilityBadge = (product: Product) => {
-    if (product.inventory_mode === 'availability') {
-      if (product.sold_out) {
-        return <span className="text-red-600 text-xs">Agotado hoy</span>;
-      } else if (product.available_today) {
-        return <span className="text-green-600 text-xs">Disponible hoy</span>;
-      }
-    }
     if (product.stock > 0) {
       return <span className="text-green-600 text-xs">Stock: {product.stock}</span>;
     }
     return <span className="text-gray-500 text-xs">Sin stock</span>;
-  };
-
-  const getPrepTime = (product: Product) => {
-    if (product.prep_minutes && product.prep_minutes > 0) {
-      return <span className="text-blue-600 text-xs">{product.prep_minutes} min</span>;
-    }
-    return null;
   };
 
   return (
@@ -229,7 +207,6 @@ export default function SmartSearchBar({
                         </p>
                         <div className="flex gap-2 mt-1">
                           {getAvailabilityBadge(product)}
-                          {getPrepTime(product)}
                         </div>
                       </div>
                       <AddToCartButton
