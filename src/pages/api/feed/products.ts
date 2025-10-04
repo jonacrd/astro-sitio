@@ -49,7 +49,7 @@ export const GET: APIRoute = async ({ url }) => {
       .eq('active', true)
       .gt('stock', 0)
       .eq('seller.is_active', true) // Solo vendedores activos
-      .order('created_at', { ascending: false }) // Ordenar por más recientes
+      .order('product_id', { ascending: false }) // Ordenar por ID de producto
       .range(offset, offset + limit - 1);
 
     if (productsError) {

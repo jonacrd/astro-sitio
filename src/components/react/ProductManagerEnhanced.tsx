@@ -86,7 +86,7 @@ export default function ProductManagerEnhanced() {
           )
         `)
         .eq('seller_id', user.id)
-        .order('created_at', { ascending: false })
+        .order('product_id', { ascending: false })
         .limit(100); // Limitar a 100 productos para mejorar rendimiento
 
       if (error) throw error;

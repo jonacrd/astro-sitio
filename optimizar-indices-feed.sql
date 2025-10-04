@@ -3,7 +3,7 @@
 
 -- 1. Índice compuesto para seller_products (el más importante)
 CREATE INDEX IF NOT EXISTS idx_seller_products_feed_optimized 
-ON seller_products (active, stock, created_at DESC) 
+ON seller_products (active, stock) 
 WHERE active = true AND stock > 0;
 
 -- 2. Índice para filtrar por vendedor activo
@@ -21,7 +21,7 @@ ON products USING gin(to_tsvector('spanish', title || ' ' || description));
 
 -- 5. Índice para seller_products por vendedor (para dashboard)
 CREATE INDEX IF NOT EXISTS idx_seller_products_by_seller 
-ON seller_products (seller_id, created_at DESC);
+ON seller_products (seller_id);
 
 -- 6. Índice para order_items por pedido (para optimizar consultas de pedidos)
 CREATE INDEX IF NOT EXISTS idx_order_items_by_order 
@@ -29,7 +29,7 @@ ON order_items (order_id);
 
 -- 7. Índice para orders por vendedor (para dashboard de vendedores)
 CREATE INDEX IF NOT EXISTS idx_orders_by_seller 
-ON orders (seller_id, created_at DESC);
+ON orders (seller_id);
 
 -- 8. Estadísticas actualizadas para el optimizador de consultas
 ANALYZE seller_products;
