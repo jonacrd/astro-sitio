@@ -135,16 +135,18 @@ export const GET: APIRoute = async ({ url }) => {
                 CONTEXTO: Esta es una app de delivery/comida local, no una tienda de mascotas
                 
                 Tu tarea es:
-                1. CORREGIR AGRESIVAMENTE errores ortográficos y de tipeo usando las reglas de arriba
+                1. CORREGIR DISCRETAMENTE errores ortográficos y de tipeo usando las reglas de arriba
                 2. Si no hay regla específica, usar distancia de Levenshtein para encontrar la palabra más cercana
                 3. Identificar la intención de búsqueda (producto, vendedor, categoría)
                 4. Encontrar categorías relacionadas (SIEMPRE incluir al menos 2-3)
                 5. Generar términos de búsqueda alternativos
-                6. SIEMPRE corregir "peeros" → "perros" → "perros calientes"
-                7. SIEMPRE corregir "piza" → "pizza"
-                8. SIEMPRE corregir "mida" → "comida"
-                9. SIEMPRE corregir "cafe" → "café"
-                10. SIEMPRE corregir "te" → "té"
+                6. SIEMPRE corregir "peris" → "perros" → "perros calientes"
+                7. SIEMPRE corregir "cerbesa" → "cerveza"
+                8. SIEMPRE corregir "piza" → "pizza"
+                9. SIEMPRE corregir "mida" → "comida"
+                10. SIEMPRE corregir "cafe" → "café"
+                11. SIEMPRE corregir "te" → "té"
+                12. SER INTELIGENTE: entender la intención aunque esté mal escrito
                 
                 Responde SOLO con un JSON válido:
                 {
@@ -466,62 +468,95 @@ function correctTypo(query: string): string {
     // Errores comunes de tipeo
     'peeros': 'perros',
     'peros': 'perros',
+    'peris': 'perros', // Error común
     'perro': 'perros',
     'piza': 'pizza',
     'pizz': 'pizza',
+    'pisa': 'pizza', // Error común
     'mida': 'comida',
     'comid': 'comida',
     'cafe': 'café',
     'te': 'té',
-    'hamburguesa': 'hamburguesa',
-    'hamburgues': 'hamburguesa',
-    'empanada': 'empanada',
-    'empanad': 'empanada',
-    'bebida': 'bebida',
-    'bebid': 'bebida',
     'cerveza': 'cerveza',
     'cervez': 'cerveza',
+    'cerbesa': 'cerveza', // Error común
+    'cerbes': 'cerveza', // Error común
+    'hamburguesa': 'hamburguesa',
+    'hamburgues': 'hamburguesa',
+    'hamburguesas': 'hamburguesa', // Plural
+    'empanada': 'empanada',
+    'empanad': 'empanada',
+    'empanadas': 'empanada', // Plural
+    'bebida': 'bebida',
+    'bebid': 'bebida',
+    'bebidas': 'bebida', // Plural
     'jugo': 'jugo',
+    'jugos': 'jugo', // Plural
     'agua': 'agua',
     'pan': 'pan',
     'queso': 'queso',
     'ques': 'queso',
+    'quesos': 'queso', // Plural
     'carne': 'carne',
     'carn': 'carne',
+    'carnes': 'carne', // Plural
     'pollo': 'pollo',
     'poll': 'pollo',
+    'pollos': 'pollo', // Plural
     'pescado': 'pescado',
     'pescad': 'pescado',
+    'pescados': 'pescado', // Plural
     'vegetal': 'vegetal',
     'veget': 'vegetal',
+    'vegetales': 'vegetal', // Plural
     'fruta': 'fruta',
     'frut': 'fruta',
+    'frutas': 'fruta', // Plural
     'dulce': 'dulce',
     'dulc': 'dulce',
+    'dulces': 'dulce', // Plural
     'salado': 'salado',
     'salad': 'salado',
+    'salados': 'salado', // Plural
     // Errores de tipeo más complejos
     'peeros calientes': 'perros calientes',
     'peros calientes': 'perros calientes',
+    'peris calientes': 'perros calientes', // Error común
+    'perros caliente': 'perros calientes', // Singular
     'piza pepperoni': 'pizza pepperoni',
     'pizz margherita': 'pizza margherita',
+    'pisa margherita': 'pizza margherita', // Error común
     'hamburgues clásica': 'hamburguesa clásica',
+    'hamburguesas clásicas': 'hamburguesa clásica', // Plural
     'empanad colombiana': 'empanada colombiana',
+    'empanadas colombianas': 'empanada colombiana', // Plural
     'bebid gaseosa': 'bebida gaseosa',
+    'bebidas gaseosas': 'bebida gaseosa', // Plural
     'cervez corona': 'cerveza corona',
+    'cerbesa corona': 'cerveza corona', // Error común
+    'cervezas corona': 'cerveza corona', // Plural
     'caf americano': 'café americano',
     't verde': 'té verde',
     'jug naranja': 'jugo naranja',
+    'jugos naranja': 'jugo naranja', // Plural
     'agu natural': 'agua natural',
     'pan integral': 'pan integral',
     'ques mozzarella': 'queso mozzarella',
+    'quesos mozzarella': 'queso mozzarella', // Plural
     'carn asada': 'carne asada',
+    'carnes asadas': 'carne asada', // Plural
     'poll frito': 'pollo frito',
+    'pollos fritos': 'pollo frito', // Plural
     'pescad frito': 'pescado frito',
+    'pescados fritos': 'pescado frito', // Plural
     'veget mixto': 'vegetal mixto',
+    'vegetales mixtos': 'vegetal mixto', // Plural
     'frut fresca': 'fruta fresca',
+    'frutas frescas': 'fruta fresca', // Plural
     'dulc postre': 'dulce postre',
-    'salad snack': 'salado snack'
+    'dulces postres': 'dulce postre', // Plural
+    'salad snack': 'salado snack',
+    'salados snacks': 'salado snack' // Plural
   };
 
   // Buscar corrección exacta

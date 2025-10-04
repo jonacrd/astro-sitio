@@ -215,19 +215,11 @@ export default function SmartSearchBar({
             </div>
           ) : (
             <div className="p-2">
-                     {/* Información de búsqueda con IA */}
-                     {localCorrection && localCorrection !== query && (
-                       <div className="mb-3 p-2 bg-green-50 rounded-lg border border-green-200">
-                         <p className="text-sm text-green-700">
-                           <span className="font-semibold">🔤 Corrección automática:</span> "{query}" → "{localCorrection}"
-                         </p>
-                       </div>
-                     )}
-                     
-                     {correctedQuery && correctedQuery !== localCorrection && correctedQuery !== query && (
-                       <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                         <p className="text-sm text-blue-700">
-                           <span className="font-semibold">🤖 IA mejoró:</span> "{localCorrection}" → "{correctedQuery}"
+                     {/* Solo mostrar si no hay resultados y hay corrección */}
+                     {results.length === 0 && sellers.length === 0 && (localCorrection !== query || correctedQuery !== query) && (
+                       <div className="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                         <p className="text-sm text-yellow-700">
+                           <span className="font-semibold">💡 ¿Quisiste decir:</span> "{correctedQuery || localCorrection}"?
                          </p>
                        </div>
                      )}
