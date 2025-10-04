@@ -694,6 +694,12 @@ interface EditProductModalProps {
 function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
   // Mostrar precio en pesos para el usuario, convertir a centavos al guardar
   const [price, setPrice] = useState(product.price_cents / 100);
+  const [priceDisplay, setPriceDisplay] = useState(
+    (product.price_cents / 100).toLocaleString('es-CL', { 
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0 
+    })
+  );
   const [stock, setStock] = useState(product.stock);
   const [active, setActive] = useState(product.active);
 
@@ -704,6 +710,27 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
     stock: product.stock,
     active: product.active
   });
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remover todo excepto números
+    const numericValue = value.replace(/[^\d]/g, '');
+    
+    if (numericValue === '') {
+      setPrice(0);
+      setPriceDisplay('');
+      return;
+    }
+
+    const priceValue = parseInt(numericValue);
+    setPrice(priceValue);
+    
+    // Formatear con separadores de miles
+    setPriceDisplay(priceValue.toLocaleString('es-CL', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }));
+  };
 
   const handleSave = () => {
     console.log('💾 Guardando producto:', {
@@ -723,15 +750,24 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Precio (pesos)
+              Precio (pesos chilenos)
             </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white font-semibold text-lg">
+                $
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={priceDisplay}
+                onChange={handlePriceChange}
+                className="w-full p-3 pl-10 bg-gray-700 border border-gray-600 rounded-lg text-white text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Ejemplo: 150 (ciento cincuenta pesos) o 15.000 (quince mil pesos)
+            </p>
           </div>
 
           <div>
