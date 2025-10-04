@@ -1,170 +1,111 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Variables de entorno no configuradas'
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Usar service role key para bypass RLS
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Obtener token de autorización
+    // Obtener token de autenticación
     const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'No autorizado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'No autorizado' }), 
+        { status: 401 }
+      );
     }
 
-    const token = authHeader.split(' ')[1];
-    
-    // Verificar autenticación
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+    const token = authHeader.replace('Bearer ', '');
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+
+    // Verificar usuario autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Usuario no autenticado'
-      }), { 
-        status: 401,
-        headers: { 'content-type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({ error: 'Usuario no autenticado' }), 
+        { status: 401 }
+      );
     }
 
-    // Verificar que es vendedor
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_seller')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.is_seller) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'No tienes permisos de vendedor'
-      }), { 
-        status: 403,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    // Obtener datos del formulario
+    // Obtener el archivo del FormData
     const formData = await request.formData();
-    const file = formData.get('image') as File;
-    const productId = formData.get('productId') as string;
+    const file = formData.get('file') as File;
 
-    if (!file || !productId) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Archivo y productId son requeridos'
-      }), { 
-        status: 400,
-        headers: { 'content-type': 'application/json' }
-      });
+    if (!file) {
+      return new Response(
+        JSON.stringify({ error: 'No se proporcionó ningún archivo' }), 
+        { status: 400 }
+      );
     }
 
-    // Verificar que el producto pertenece al vendedor
-    const { data: existingProduct, error: fetchError } = await supabase
-      .from('seller_products')
-      .select('id, product:products!inner(id)')
-      .eq('id', productId)
-      .eq('seller_id', user.id)
-      .single();
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      return new Response(
+        JSON.stringify({ error: 'Tipo de archivo no permitido. Solo: JPEG, PNG, WEBP, GIF' }), 
+        { status: 400 }
+      );
+    }
 
-    if (fetchError || !existingProduct) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Producto no encontrado o no tienes permisos'
-      }), { 
-        status: 404,
-        headers: { 'content-type': 'application/json' }
-      });
+    // Validar tamaño (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      return new Response(
+        JSON.stringify({ error: 'El archivo es demasiado grande. Máximo 5MB' }), 
+        { status: 400 }
+      );
     }
 
     // Generar nombre único para el archivo
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${existingProduct.product.id}/${Date.now()}.${fileExt}`;
+    const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-    // Subir archivo a Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    console.log('📤 Subiendo imagen:', fileName);
+
+    // Convertir File a ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
+    // Subir a Supabase Storage
+    const { data, error } = await supabase.storage
       .from('product-images')
-      .upload(fileName, file);
-
-    if (uploadError) {
-      console.error('Error subiendo imagen:', uploadError);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Error subiendo imagen: ' + uploadError.message
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false
       });
+
+    if (error) {
+      console.error('❌ Error subiendo imagen:', error);
+      return new Response(
+        JSON.stringify({ error: 'Error subiendo imagen: ' + error.message }), 
+        { status: 400 }
+      );
     }
 
     // Obtener URL pública
-    const { data: { publicUrl } } = supabase.storage
+    const { data: urlData } = supabase.storage
       .from('product-images')
       .getPublicUrl(fileName);
 
-    // Actualizar producto con la nueva imagen
-    const { error: updateError } = await supabase
-      .from('products')
-      .update({ image_url: publicUrl })
-      .eq('id', existingProduct.product.id);
+    console.log('✅ Imagen subida:', urlData.publicUrl);
 
-    if (updateError) {
-      console.error('Error actualizando imagen del producto:', updateError);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Error actualizando imagen del producto: ' + updateError.message
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
-
-    return new Response(JSON.stringify({
-      success: true,
-      data: {
-        imageUrl: publicUrl,
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        url: urlData.publicUrl,
         fileName: fileName
-      },
-      message: 'Imagen subida exitosamente'
-    }), {
-      headers: { 'content-type': 'application/json' }
-    });
+      }), 
+      { status: 200 }
+    );
 
   } catch (error: any) {
-    console.error('Error en /api/seller/products/upload-image:', error);
-    return new Response(JSON.stringify({
-      success: false,
-      error: 'Error interno del servidor: ' + error.message
-    }), {
-      status: 500,
-      headers: { 'content-type': 'application/json' }
-    });
+    console.error('❌ Error en /api/seller/products/upload-image:', error);
+    return new Response(
+      JSON.stringify({ error: error.message || 'Error interno del servidor' }), 
+      { status: 500 }
+    );
   }
 };
-
-
-
-
-
-
-
-

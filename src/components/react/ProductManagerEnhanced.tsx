@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { formatPrice } from '../../lib/money';
 import ShareProductWhatsApp from './ShareProductWhatsApp';
+import CreateCustomProductModal from './CreateCustomProductModal';
 
 interface Product {
   id: string;
@@ -38,6 +39,7 @@ export default function ProductManagerEnhanced() {
   const [productPrice, setProductPrice] = useState('');
   const [productStock, setProductStock] = useState('');
   const [pendingProducts, setPendingProducts] = useState<Array<{product: Product, price: number, stock: number}>>([]);
+  const [showCreateCustomModal, setShowCreateCustomModal] = useState(false);
 
   const categoryLabels = {
     supermercado: 'Abarrotes',
@@ -362,15 +364,30 @@ export default function ProductManagerEnhanced() {
 
       {/* Contenido principal */}
       <div className="px-4 py-6">
-        {/* Título y botón añadir */}
+        {/* Título y botones añadir */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white">Gestión de Productos</h2>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            + Añadir producto
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCreateCustomModal(true)}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all flex items-center gap-2 shadow-lg"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+              </svg>
+              ✨ Crear Producto Personalizado
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+              </svg>
+              Añadir de Catálogo
+            </button>
+          </div>
         </div>
 
         {/* Tabs de categorías dinámicas */}
@@ -678,6 +695,16 @@ export default function ProductManagerEnhanced() {
           onClose={() => {
             setShowEditModal(false);
             setEditingProduct(null);
+          }}
+        />
+      )}
+
+      {/* Modal de crear producto personalizado */}
+      {showCreateCustomModal && (
+        <CreateCustomProductModal
+          onClose={() => setShowCreateCustomModal(false)}
+          onSuccess={() => {
+            loadData(); // Recargar la lista de productos
           }}
         />
       )}
