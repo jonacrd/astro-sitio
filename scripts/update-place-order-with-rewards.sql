@@ -330,3 +330,4 @@ COMMENT ON VIEW user_points_summary IS 'Vista resumen de puntos por usuario y ve
 
 
 
+

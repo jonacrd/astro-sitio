@@ -21,3 +21,4 @@ CREATE INDEX IF NOT EXISTS idx_profiles_is_active ON profiles(is_active);
 -- 4. Verificar
 SELECT id, name, is_seller, is_active FROM profiles WHERE is_seller = TRUE;
 
+

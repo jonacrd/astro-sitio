@@ -153,3 +153,4 @@ Para iOS, asegúrate de tener:
 
 **Estado Actual:** ✅ manifest.json actualizado, falta crear iconos en múltiples tamaños
 
+

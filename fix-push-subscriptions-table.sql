@@ -106,3 +106,4 @@ WHERE table_schema = 'public'
   AND table_name = 'push_subscriptions'
 ORDER BY ordinal_position;
 
+

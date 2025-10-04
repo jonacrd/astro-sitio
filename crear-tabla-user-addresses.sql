@@ -84,3 +84,4 @@ WHERE tablename = 'user_addresses';
 
 SELECT '✅ Tabla user_addresses creada exitosamente con RLS habilitado' as resultado;
 
+

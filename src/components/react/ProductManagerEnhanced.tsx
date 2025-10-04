@@ -325,13 +325,8 @@ export default function ProductManagerEnhanced() {
     return sellerProducts.filter(item => item.products.category === category);
   };
 
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(cents);
-  };
+  // ✅ Usar formatPrice de la librería money.ts (ya importado arriba)
+  // No redefinir aquí, ya maneja la conversión de centavos a pesos correctamente
 
   if (loading) {
     return (

@@ -112,3 +112,4 @@ CREATE TRIGGER update_user_points_updated_at
 
 
 
+

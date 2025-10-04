@@ -280,3 +280,4 @@ Este componente muestra:
 - **HTTPS**: Requerido en producción (localhost funciona sin HTTPS)
 - **Permisos**: Una vez denegados, el usuario debe cambiarlos manualmente en configuración del navegador
 
+

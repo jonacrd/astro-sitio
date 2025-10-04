@@ -92,3 +92,4 @@ CREATE POLICY "Sellers can view points history for their store" ON points_histor
 
 
 
+

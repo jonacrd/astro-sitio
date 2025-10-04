@@ -66,3 +66,4 @@ export const NOTIFICATION_MESSAGES = {
     icon: '/favicon.svg'
   }
 } as const;
+

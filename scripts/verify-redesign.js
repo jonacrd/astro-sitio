@@ -70,3 +70,4 @@ console.log('4. Verificar páginas principales');
 console.log('5. Confirmar que todo se ve unificado');
 
 
+

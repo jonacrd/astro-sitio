@@ -48,3 +48,4 @@ console.log('3. Visitar /color-test');
 console.log('4. Comparar con página principal');
 
 
+

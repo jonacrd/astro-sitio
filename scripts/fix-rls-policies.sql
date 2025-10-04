@@ -31,3 +31,4 @@ ALTER TABLE seller_reward_tiers ENABLE ROW LEVEL SECURITY;
 
 
 
+

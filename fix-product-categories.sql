@@ -31,3 +31,4 @@ SELECT id, title, category FROM products WHERE category = 'bebidas_alcoholicas' 
 -- 6. Ver todas las categorías
 SELECT category, COUNT(*) as total FROM products GROUP BY category ORDER BY total DESC;
 
+
