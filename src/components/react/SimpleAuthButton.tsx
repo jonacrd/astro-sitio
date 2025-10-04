@@ -38,8 +38,32 @@ export default function SimpleAuthButton() {
 
     checkAuth();
 
+    // Escuchar eventos personalizados de autenticación
+    const handleAuthStateChanged = async (event: CustomEvent) => {
+      console.log('📢 Auth state changed event received:', event.detail);
+      if (event.detail?.user) {
+        setIsAuthenticated(true);
+        setUserEmail(event.detail.user.email || '');
+        
+        // Cargar perfil del usuario
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_seller')
+          .eq('id', event.detail.user.id)
+          .single();
+        
+        setUserProfile({
+          ...profile,
+          raw_user_meta_data: event.detail.user.user_metadata
+        });
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
+
     // Escuchar cambios de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.email);
       if (session?.user) {
         setIsAuthenticated(true);
         setUserEmail(session.user.email || '');
@@ -62,7 +86,10 @@ export default function SimpleAuthButton() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
+    };
   }, []);
 
   const handleLogout = async () => {
