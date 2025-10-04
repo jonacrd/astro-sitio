@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SearchBarEnhanced from '../components/react/SearchBarEnhanced';
+import SmartSearchBar from '../components/react/SmartSearchBar';
 ---
 
 <BaseLayout title="Buscar Productos">
@@ -12,25 +12,22 @@ import SearchBarEnhanced from '../components/react/SearchBarEnhanced';
           🔍 Buscar Productos
         </h1>
         <p class="text-white/80 text-lg">
-          Encuentra productos de vendedores activos en tu comunidad
+          Búsqueda inteligente: productos, vendedores y servicios activos
         </p>
       </div>
 
-      <!-- Barra de búsqueda mejorada -->
+      <!-- Barra de búsqueda inteligente -->
       <div class="max-w-4xl mx-auto">
-        <SearchBarEnhanced 
+        <SmartSearchBar 
           client:load
-          onAddToCart={(productId, sellerId) => {
-            console.log('🛒 Añadir al carrito:', productId, sellerId);
-            // TODO: Implementar añadir al carrito
+          onSearch={(query) => {
+            console.log('🔍 Búsqueda realizada:', query);
           }}
-          onViewProduct={(productId) => {
-            console.log('👁️ Ver producto:', productId);
-            // TODO: Implementar ver producto
+          onCategoryClick={(category) => {
+            console.log('📂 Categoría seleccionada:', category);
           }}
-          onViewSeller={(sellerId) => {
-            console.log('🏪 Ver vendedor:', sellerId);
-            // TODO: Implementar ver vendedor
+          onSellerClick={(sellerId) => {
+            console.log('🏪 Vendedor seleccionado:', sellerId);
           }}
           placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
         />
@@ -40,23 +37,28 @@ import SearchBarEnhanced from '../components/react/SearchBarEnhanced';
       <div class="max-w-4xl mx-auto mt-8">
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
           <h3 class="text-xl font-semibold text-white mb-4">
-            💡 Cómo funciona la búsqueda
+            🧠 Búsqueda Inteligente
           </h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-white/80">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-white/80">
             <div class="text-center">
-              <div class="text-3xl mb-2">🟢</div>
-              <h4 class="font-semibold mb-2">Vendedores Online</h4>
-              <p class="text-sm">Priorizamos vendedores que están disponibles ahora</p>
+              <div class="text-3xl mb-2">🔍</div>
+              <h4 class="font-semibold mb-2">Búsqueda Natural</h4>
+              <p class="text-sm">Busca por nombre, categoría, vendedor o descripción</p>
             </div>
             <div class="text-center">
               <div class="text-3xl mb-2">📦</div>
-              <h4 class="font-semibold mb-2">Productos Activos</h4>
-              <p class="text-sm">Solo mostramos productos con stock disponible</p>
+              <h4 class="font-semibold mb-2">Productos & Servicios</h4>
+              <p class="text-sm">Incluye productos con stock y servicios del día</p>
             </div>
             <div class="text-center">
               <div class="text-3xl mb-2">🏪</div>
-              <h4 class="font-semibold mb-2">Por Vendedor</h4>
-              <p class="text-sm">Agrupamos productos por vendedor para mejor organización</p>
+              <h4 class="font-semibold mb-2">Vendedores Activos</h4>
+              <p class="text-sm">Encuentra tiendas y servicios disponibles ahora</p>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl mb-2">⚡</div>
+              <h4 class="font-semibold mb-2">Resultados Relevantes</h4>
+              <p class="text-sm">Ordenados por relevancia y disponibilidad</p>
             </div>
           </div>
         </div>
