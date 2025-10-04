@@ -9,19 +9,14 @@ interface SellerPublicProfileProps {
 interface Seller {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  description: string;
-  address: string;
   is_active: boolean;
-  avatar_url: string;
-  gender: string;
   created_at: string;
-  // Campos adicionales para el perfil público
-  business_hours: string;
-  delivery_zone: string;
-  minimum_order: number;
-  delivery_fee: number;
+  // Campos que no existen aún pero se usan en la UI
+  description?: string;
+  business_hours?: string;
+  delivery_zone?: string;
+  minimum_order?: number;
+  delivery_fee?: number;
 }
 
 interface Product {
@@ -85,7 +80,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
       // Cargar información del vendedor
       const { data: sellerData, error: sellerError } = await supabase
         .from('profiles')
-        .select('id, name, phone, description, address, is_active, created_at')
+        .select('id, name, is_active, created_at')
         .eq('id', sellerId)
         .eq('is_seller', true)
         .single();
