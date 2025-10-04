@@ -62,8 +62,8 @@ export const supabaseServer = (() => {
 })();
 
 // Verificar configuración solo una vez
-if (typeof window !== 'undefined' && !window.supabaseInitialized) {
-  window.supabaseInitialized = true;
+if (typeof window !== 'undefined' && !(window as any).supabaseInitialized) {
+  (window as any).supabaseInitialized = true;
   
   console.log('🔧 Supabase Config:');
   console.log('URL:', SUPABASE_CONFIG.url);

@@ -66,9 +66,12 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
       console.log('✅ Login exitoso:', data.user?.email);
       
       // Disparar evento global para actualizar UI
-      window.dispatchEvent(new CustomEvent('auth-state-changed', { 
+      console.log('📢 Disparando evento auth-state-changed...');
+      const authEvent = new CustomEvent('auth-state-changed', { 
         detail: { user: data.user, type: 'login' } 
-      }));
+      });
+      window.dispatchEvent(authEvent);
+      console.log('📢 Evento auth-state-changed disparado');
       
       // Notificar éxito y cerrar modal
       onSuccess?.();

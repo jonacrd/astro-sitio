@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { formatPrice, pesosToCents } from '../../lib/money';
 import CartSummary from '../checkout/CartSummary';
-import DeliveryInfo from '../checkout/DeliveryInfo';
+import SimpleDeliveryInfo from '../checkout/SimpleDeliveryInfo';
 import PaymentMethod from '../checkout/PaymentMethod';
 import OrderNotes from '../checkout/OrderNotes';
 import ConfirmBar from '../checkout/ConfirmBar';
@@ -29,13 +29,10 @@ export default function Checkout({}: CheckoutProps) {
   const [paymentMethod, setPaymentMethod] = useState<string>('cash');
   const [processing, setProcessing] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState({
-    fullName: '',
-    phone: '',
     address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    instructions: ''
+    tower: '',
+    contact: '',
+    deliveryNotes: ''
   });
 
   // Función para manejar cambios de dirección con logs
@@ -148,12 +145,9 @@ export default function Checkout({}: CheckoutProps) {
         .from('user_addresses')
         .select('id')
         .eq('user_id', user.id)
-        .eq('full_name', deliveryAddress.fullName)
-        .eq('phone', deliveryAddress.phone)
         .eq('address', deliveryAddress.address)
-        .eq('city', deliveryAddress.city)
-        .eq('state', deliveryAddress.state)
-        .eq('zip_code', deliveryAddress.zipCode)
+        .eq('tower', deliveryAddress.tower || '')
+        .eq('phone', deliveryAddress.contact)
         .single();
 
       if (existingAddress) {
@@ -169,13 +163,14 @@ export default function Checkout({}: CheckoutProps) {
         .from('user_addresses')
         .insert({
           user_id: user.id,
-          full_name: deliveryAddress.fullName,
-          phone: deliveryAddress.phone,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Cliente',
+          phone: deliveryAddress.contact,
           address: deliveryAddress.address,
-          city: deliveryAddress.city,
-          state: deliveryAddress.state,
-          zip_code: deliveryAddress.zipCode,
-          instructions: deliveryAddress.instructions,
+          tower: deliveryAddress.tower || '',
+          city: 'Santiago', // Por defecto
+          state: 'RM', // Por defecto
+          zip_code: '', // No requerido
+          instructions: deliveryAddress.deliveryNotes || '',
           is_default: savedAddresses.length === 0 // Primera dirección es por defecto
         })
         .select()
@@ -309,17 +304,13 @@ export default function Checkout({}: CheckoutProps) {
     // Validar datos de domicilio
     console.log('🔍 Validando dirección:', deliveryAddress);
     const missingFields = [];
-    if (!deliveryAddress.fullName?.trim()) missingFields.push('Nombre completo');
-    if (!deliveryAddress.phone?.trim()) missingFields.push('Teléfono');
     if (!deliveryAddress.address?.trim()) missingFields.push('Dirección');
-    if (!deliveryAddress.city?.trim()) missingFields.push('Ciudad');
-    if (!deliveryAddress.state?.trim()) missingFields.push('Estado');
-    if (!deliveryAddress.zipCode?.trim()) missingFields.push('Código postal');
+    if (!deliveryAddress.contact?.trim()) missingFields.push('Número de contacto');
     
     console.log('❌ Campos faltantes:', missingFields);
     
     if (missingFields.length > 0) {
-      alert(`Error procesando la compra: Todos los campos de dirección son obligatorios\n\nCampos faltantes:\n• ${missingFields.join('\n• ')}\n\nHaz clic en "Agregar dirección" para completar los datos.`);
+      alert(`Error procesando la compra: Los campos de dirección son obligatorios\n\nCampos faltantes:\n• ${missingFields.join('\n• ')}\n\nHaz clic en "Agregar dirección" para completar los datos.`);
       return;
     }
 
@@ -354,9 +345,14 @@ export default function Checkout({}: CheckoutProps) {
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
-          customerName: deliveryAddress.fullName,
-          customerEmail: `${deliveryAddress.fullName.toLowerCase().replace(' ', '.')}@email.com`,
-          deliveryAddress: deliveryAddress,
+          customerName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Cliente',
+          customerEmail: user.email,
+          deliveryAddress: {
+            address: deliveryAddress.address,
+            tower: deliveryAddress.tower,
+            contact: deliveryAddress.contact,
+            deliveryNotes: deliveryAddress.deliveryNotes
+          },
           paymentMethod: paymentMethod,
           orderNotes: orderNotes,
           cartItems: cartItems // Enviar los items reales del carrito
@@ -389,13 +385,14 @@ export default function Checkout({}: CheckoutProps) {
                   .from('user_addresses')
                   .insert({
                     user_id: user.id,
-                    full_name: deliveryAddress.fullName,
-                    phone: deliveryAddress.phone,
+                    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Cliente',
+                    phone: deliveryAddress.contact,
                     address: deliveryAddress.address,
-                    city: deliveryAddress.city,
-                    state: deliveryAddress.state,
-                    zip_code: deliveryAddress.zipCode || '',
-                    instructions: deliveryAddress.instructions || '',
+                    tower: deliveryAddress.tower || '',
+                    city: 'Santiago', // Por defecto
+                    state: 'RM', // Por defecto
+                    zip_code: '', // No requerido
+                    instructions: deliveryAddress.deliveryNotes || '',
                     is_default: true
                   });
                 
@@ -417,8 +414,8 @@ export default function Checkout({}: CheckoutProps) {
         const cartData = {
           items: cartItems,
           totalCents: cartItems.reduce((sum, item) => sum + (item.totalCents || 0), 0),
-          customerName: deliveryAddress.fullName,
-          customerEmail: `${deliveryAddress.fullName.toLowerCase().replace(' ', '.')}@email.com`
+          customerName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Cliente',
+          customerEmail: user.email
         };
         
         console.log('💾 Guardando datos del carrito:', cartData);
@@ -599,7 +596,7 @@ export default function Checkout({}: CheckoutProps) {
           />
 
           {/* Información de entrega */}
-          <DeliveryInfo
+          <SimpleDeliveryInfo
             address={deliveryAddress}
             onAddressChange={handleAddressChange}
             onSaveAddress={saveNewAddress}
