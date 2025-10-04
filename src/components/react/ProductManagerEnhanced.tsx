@@ -90,6 +90,13 @@ export default function ProductManagerEnhanced() {
 
       if (error) throw error;
 
+      console.log('📊 Productos cargados del servidor:', data?.map(p => ({
+        productId: p.product_id,
+        title: p.products.title,
+        active: p.active,
+        stock: p.stock
+      })));
+
       setSellerProducts(data || []);
       
       // Generar categorías dinámicas
@@ -303,14 +310,25 @@ export default function ProductManagerEnhanced() {
 
   const handleToggleActive = async (product: SellerProduct) => {
     try {
+      console.log('🔄 Cambiando estado de producto:', {
+        productId: product.product_id,
+        currentActive: product.active,
+        newActive: !product.active,
+        sellerId: product.seller_id
+      });
+
       const { error } = await supabase
         .from('seller_products')
         .update({ active: !product.active })
         .eq('seller_id', product.seller_id)
         .eq('product_id', product.product_id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error en la query:', error);
+        throw error;
+      }
 
+      console.log('✅ Estado actualizado correctamente');
       await loadData();
     } catch (error) {
       console.error('❌ Error actualizando estado:', error);
