@@ -36,17 +36,29 @@ const {
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json">
   
-  <!-- OneSignal Web Push SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <!-- OneSignal Web Push SDK - Carga asíncrona para no bloquear -->
   <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "270896d8-ba2e-40bc-8f3b-c1e6efd258a1",
-        allowLocalhostAsSecureOrigin: true,
-      });
-      
-      console.log('✅ OneSignal inicializado');
+    // Cargar OneSignal de forma asíncrona después de que la página cargue
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+        script.defer = true;
+        document.head.appendChild(script);
+        
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+          try {
+            await OneSignal.init({
+              appId: "270896d8-ba2e-40bc-8f3b-c1e6efd258a1",
+              allowLocalhostAsSecureOrigin: true,
+            });
+            console.log('✅ OneSignal inicializado');
+          } catch (error) {
+            console.log('⚠️ OneSignal no se pudo inicializar:', error);
+          }
+        });
+      }, 1000); // Esperar 1 segundo después de la carga
     });
   </script>
   
@@ -227,11 +239,11 @@ const {
   <!-- Notificaciones del carrito -->
   <CartNotification client:load />
 
-  <!-- Sistema de notificaciones -->
-  <NotificationSystem client:load />
+  <!-- Sistema de notificaciones - Carga diferida -->
+  <NotificationSystem client:visible />
 
-  <!-- Login Modal -->
-  <LoginModalWrapper client:load />
+  <!-- Login Modal - Carga diferida -->
+  <LoginModalWrapper client:visible />
 
   <!-- Footer -->
   <footer class="bg-bg-surface text-ink-base py-12">
@@ -276,58 +288,51 @@ const {
   <!-- Manejador global de inicio de sesión -->
   <GlobalLoginHandler client:load />
   
-  <!-- Suscriptor automático de OneSignal -->
-  <OneSignalSubscriber client:load />
+  <!-- Suscriptor automático de OneSignal - Carga diferida -->
+  <OneSignalSubscriber client:visible />
   
-  <!-- Modal de bienvenida de notificaciones (después de registrarse) -->
-  <NotificationWelcome client:load />
+  <!-- Modal de bienvenida de notificaciones - Carga diferida -->
+  <NotificationWelcome client:visible />
   
-  <!-- Botón flotante para activar notificaciones (siempre visible si no están activas) -->
-  <FloatingNotificationButton client:load />
+  <!-- Botón flotante para activar notificaciones - Carga diferida -->
+  <FloatingNotificationButton client:visible />
   
-  <!-- Script para sincronizar género desde Google -->
+  <!-- Script para sincronizar género desde Google - Optimizado -->
   <script>
-    import { supabase } from '../lib/supabase-browser';
-    
-    async function syncUserGender() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) return;
-        
-        // Si el usuario inició sesión con Google y tiene gender en metadata
-        const googleGender = user.user_metadata?.gender;
-        
-        if (googleGender) {
-          // Actualizar el perfil con el género de Google (solo si la columna existe)
-          try {
-            const { error } = await supabase
-              .from('profiles')
-              .update({ gender: googleGender })
-              .eq('id', user.id);
-            
-            if (!error) {
-              console.log('✅ Género sincronizado desde Google:', googleGender);
-            }
-          } catch (err) {
-            // La columna gender no existe aún, ignorar el error
-            console.log('⚠️ Columna gender no existe aún, se creará más tarde');
-          }
-        }
-      } catch (error) {
-        console.error('Error sincronizando género:', error);
-      }
-    }
-    
-    // Ejecutar al cargar la página
+    // Solo ejecutar si el usuario está autenticado
     if (typeof window !== 'undefined') {
-      window.addEventListener('DOMContentLoaded', syncUserGender);
-      
-      // También sincronizar cuando cambie el estado de autenticación
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          syncUserGender();
-        }
+      // Ejecutar después de que la página cargue completamente
+      window.addEventListener('load', function() {
+        setTimeout(async function() {
+          try {
+            const { supabase } = await import('../lib/supabase-browser');
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) return;
+            
+            // Solo sincronizar si el usuario tiene gender en metadata y no se ha sincronizado antes
+            const googleGender = user.user_metadata?.gender;
+            const lastSync = localStorage.getItem('gender_sync_' + user.id);
+            
+            if (googleGender && !lastSync) {
+              try {
+                const { error } = await supabase
+                  .from('profiles')
+                  .update({ gender: googleGender })
+                  .eq('id', user.id);
+                
+                if (!error) {
+                  localStorage.setItem('gender_sync_' + user.id, 'true');
+                  console.log('✅ Género sincronizado desde Google:', googleGender);
+                }
+              } catch (err) {
+                console.log('⚠️ Columna gender no existe aún');
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ Error sincronizando género:', error);
+          }
+        }, 2000); // Esperar 2 segundos después de la carga
       });
     }
   </script>

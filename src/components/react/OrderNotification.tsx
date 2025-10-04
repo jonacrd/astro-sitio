@@ -14,6 +14,44 @@ export default function OrderNotification({ sellerId }: OrderNotificationProps) 
   useEffect(() => {
     if (!sellerId) return;
 
+    // Solo verificar pedidos si el usuario está autenticado
+    const checkAuthAndOrders = async () => {
+      try {
+        const user = await getUser();
+        if (!user) {
+          console.log('🔍 OrderNotification: Usuario no autenticado, saltando verificación');
+          setLoading(false);
+          return;
+        }
+
+        // Solo verificar si el usuario es vendedor
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          console.log('🔍 OrderNotification: No hay sesión activa');
+          setLoading(false);
+          return;
+        }
+
+        // Verificar si el usuario es vendedor antes de hacer la query
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_seller')
+          .eq('id', user.id)
+          .single();
+
+        if (!profile?.is_seller) {
+          console.log('🔍 OrderNotification: Usuario no es vendedor');
+          setLoading(false);
+          return;
+        }
+
+        await checkNewOrders();
+      } catch (error) {
+        console.log('🔍 OrderNotification: Error verificando autenticación:', error);
+        setLoading(false);
+      }
+    };
+
     const checkNewOrders = async () => {
       try {
         const user = await getUser();
@@ -57,10 +95,10 @@ export default function OrderNotification({ sellerId }: OrderNotificationProps) 
       }
     };
 
-    checkNewOrders();
+    checkAuthAndOrders();
 
-    // Verificar cada 30 segundos
-    const interval = setInterval(checkNewOrders, 30000);
+    // Verificar cada 30 segundos solo si el usuario es vendedor
+    const interval = setInterval(checkAuthAndOrders, 30000);
     return () => clearInterval(interval);
   }, [sellerId]);
 
