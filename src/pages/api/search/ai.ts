@@ -41,15 +41,13 @@ export const GET: APIRoute = async ({ url }) => {
     // 1. Obtener todos los productos y categorías disponibles para contexto
     const { data: allProducts, error: productsError } = await supabase
       .from('products')
-      .select('id, title, description, category')
-      .limit(200);
+      .select('id, title, description, category');
 
     const { data: allSellers, error: sellersError } = await supabase
       .from('profiles')
       .select('id, name')
       .eq('is_seller', true)
-      .eq('is_active', true)
-      .limit(100);
+      .eq('is_active', true);
 
     if (productsError || sellersError) {
       console.error('Error obteniendo datos de contexto:', productsError || sellersError);
@@ -149,8 +147,7 @@ export const GET: APIRoute = async ({ url }) => {
         stock, 
         active
       `)
-      .eq('active', true)
-      .limit(150);
+      .eq('active', true);
 
     if (spError) {
       console.error('Error obteniendo seller_products:', spError);
@@ -280,8 +277,8 @@ export const GET: APIRoute = async ({ url }) => {
       }
     }
 
-    // Limitar a 50 resultados
-    filteredProducts = filteredProducts.slice(0, 50);
+    // Limitar a 100 resultados para mejor rendimiento
+    filteredProducts = filteredProducts.slice(0, 100);
 
     // 8. Crear lista de vendedores únicos
     const uniqueSellers = sellers?.map(seller => ({

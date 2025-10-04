@@ -31,8 +31,7 @@ export const GET: APIRoute = async ({ url }) => {
         stock, 
         active
       `)
-      .eq('active', true)
-      .limit(50);
+      .eq('active', true);
 
     if (spError) {
       console.error('Error obteniendo seller_products:', spError);
