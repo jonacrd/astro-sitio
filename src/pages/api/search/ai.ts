@@ -187,95 +187,109 @@ export const GET: APIRoute = async ({ url }) => {
       }
     }
 
-    // 4. Buscar productos activos SOLO de vendedores activos con stock
-    const { data: sellerProducts, error: spError } = await supabase
+    // 4. Usar EXACTAMENTE la misma consulta que el feed (con Service Role Key)
+    const supabaseService = createClient(supabaseUrl, import.meta.env.SUPABASE_SERVICE_ROLE_KEY);
+    
+    const { data: feedProducts, error: feedError } = await supabaseService
       .from('seller_products')
       .select(`
-        seller_id, 
-        product_id, 
-        price_cents, 
-        stock, 
-        active
+        seller_id,
+        product_id,
+        price_cents,
+        stock,
+        active,
+        product:products!inner(
+          id,
+          title,
+          description,
+          category,
+          image_url
+        ),
+        seller:profiles!seller_products_seller_id_fkey(
+          id,
+          name,
+          is_active
+        )
       `)
       .eq('active', true)
-      .gt('stock', 0); // Solo productos con stock disponible
+      .gt('stock', 0)
+      .eq('seller.is_active', true);
 
-    if (spError) {
-      console.error('Error obteniendo seller_products:', spError);
+    if (feedError) {
+      console.error('Error obteniendo productos del feed:', feedError);
       return new Response(JSON.stringify({
         success: false,
-        error: 'Error obteniendo seller_products: ' + spError.message
+        error: 'Error obteniendo productos: ' + feedError.message
       }), { 
         status: 500,
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    if (!sellerProducts || sellerProducts.length === 0) {
+    if (!feedProducts || feedProducts.length === 0) {
       return new Response(JSON.stringify({
         success: true,
         data: {
-          products: [],
+          results: [],
           sellers: [],
           relatedCategories: [],
           correctedQuery: processedQuery,
+          originalQuery: query,
+          localCorrection: correctedQuery,
+          searchIntent: searchIntent,
           total: 0,
-          message: 'No hay productos disponibles'
+          message: 'No hay productos activos de vendedores activos con stock.'
         }
       }), { 
         headers: { 'content-type': 'application/json' }
       });
     }
 
-    // 5. Obtener productos y vendedores
-    const productIds = sellerProducts.map(sp => sp.product_id);
-    const { data: products, error: pError } = await supabase
-      .from('products')
-      .select('id, title, description, category, image_url')
-      .in('id', productIds);
+    // 5. Formatear datos igual que el feed
+    const sellerProducts = feedProducts.map(item => ({
+      seller_id: item.seller_id,
+      product_id: item.product_id,
+      price_cents: item.price_cents,
+      stock: item.stock,
+      active: item.active
+    }));
 
-    const sellerIds = [...new Set(sellerProducts.map(sp => sp.seller_id))];
-    const { data: sellers, error: sError } = await supabase
-      .from('profiles')
-      .select('id, name, is_active, is_seller')
-      .in('id', sellerIds)
-      .eq('is_seller', true)
-      .eq('is_active', true);
+    const products = feedProducts.map(item => ({
+      id: item.product.id,
+      title: item.product.title,
+      description: item.product.description,
+      category: item.product.category,
+      image_url: item.product.image_url
+    }));
 
-    if (pError || sError) {
-      console.error('Error obteniendo datos:', pError || sError);
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Error obteniendo datos: ' + (pError?.message || sError?.message)
-      }), { 
-        status: 500,
-        headers: { 'content-type': 'application/json' }
-      });
-    }
+    const sellers = feedProducts.map(item => ({
+      id: item.seller.id,
+      name: item.seller.name,
+      is_active: item.seller.is_active,
+      is_seller: true
+    }));
 
     // 6. Búsqueda inteligente con múltiples criterios
     const searchTerms = processedQuery.toLowerCase().split(' ').filter(term => term.length > 1);
     
-    const combinedProducts = sellerProducts.map(sp => {
-      const product = products?.find(p => p.id === sp.product_id);
-      const seller = sellers?.find(s => s.id === sp.seller_id);
-      
-      if (!product || !seller) return null;
+    const combinedProducts = feedProducts.map(item => {
+      const product = item.product;
+      const seller = item.seller;
       
       return {
-        id: sp.product_id,
+        id: item.product_id,
         title: product.title,
         description: product.description,
         category: product.category,
         image: product.image_url || '/img/placeholders/product-placeholder.jpg',
-        price: sp.price_cents,
-        stock: sp.stock,
-        sellerId: sp.seller_id,
+        price: item.price_cents,
+        stock: item.stock,
+        sellerId: item.seller_id,
         sellerName: seller.name,
-        active: sp.active,
+        active: item.active,
         relevanceScore: calculateRelevanceScore(product, seller, searchTerms, processedQuery.toLowerCase(), relatedCategories)
       };
-    }).filter(Boolean);
+    });
 
     // 7. Búsqueda inteligente más estricta
     let filteredProducts = combinedProducts
@@ -329,12 +343,15 @@ export const GET: APIRoute = async ({ url }) => {
     filteredProducts = filteredProducts.slice(0, 100);
 
     // 8. Crear lista de vendedores únicos
-    const uniqueSellers = sellers?.map(seller => ({
-      id: seller.id,
-      name: seller.name,
-      isActive: seller.is_active,
-      productCount: sellerProducts.filter(sp => sp.seller_id === seller.id).length
-    })) || [];
+    const uniqueSellers = [...new Set(feedProducts.map(item => item.seller.id))].map(sellerId => {
+      const seller = feedProducts.find(item => item.seller.id === sellerId)?.seller;
+      return {
+        id: sellerId,
+        name: seller?.name || 'Vendedor',
+        isActive: seller?.is_active || false,
+        productCount: combinedProducts.filter(p => p.sellerId === sellerId).length
+      };
+    });
 
     // 9. Filtrar vendedores por búsqueda
     const filteredSellers = uniqueSellers.filter(seller =>
@@ -413,7 +430,7 @@ function calculateRelevanceScore(product: any, seller: any, searchTerms: string[
   
   // Coincidencia en descripción
   searchTerms.forEach(term => {
-    if (product.description.toLowerCase().includes(term)) {
+    if (product.description && product.description.toLowerCase().includes(term)) {
       score += 10;
     }
   });
