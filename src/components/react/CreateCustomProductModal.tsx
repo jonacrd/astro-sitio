@@ -113,7 +113,7 @@ export default function CreateCustomProductModal({ onClose, onSuccess }: CreateC
         const formData = new FormData();
         formData.append('file', imageFile);
 
-        const uploadResponse = await fetch('/api/seller/products/upload-image', {
+        const uploadResponse = await fetch('/api/seller/products/upload-image-fallback', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`
