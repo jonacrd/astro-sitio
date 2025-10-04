@@ -215,6 +215,13 @@ export default function ProductManagerEnhanced() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      console.log('💾 Guardando productos:', pendingProducts.map(p => ({
+        productId: p.product.id,
+        title: p.product.title,
+        price: p.price,
+        stock: p.stock
+      })));
+
       setLoading(true);
 
       // Verificar productos existentes antes de insertar
@@ -225,10 +232,16 @@ export default function ProductManagerEnhanced() {
         .eq('seller_id', user.id)
         .in('product_id', productIds);
 
-      if (checkError) throw checkError;
+      if (checkError) {
+        console.error('❌ Error verificando productos existentes:', checkError);
+        throw checkError;
+      }
 
       const existingProductIds = new Set(existingProducts?.map(p => p.product_id) || []);
       const newProducts = pendingProducts.filter(p => !existingProductIds.has(p.product.id));
+
+      console.log('📊 Productos existentes:', existingProductIds);
+      console.log('📊 Productos nuevos a insertar:', newProducts.length);
 
       if (newProducts.length === 0) {
         alert('Todos los productos ya están en tu tienda');
@@ -245,11 +258,18 @@ export default function ProductManagerEnhanced() {
         active: true
       }));
 
+      console.log('📝 Insertando en seller_products:', productsToInsert);
+
       const { error } = await supabase
         .from('seller_products')
         .insert(productsToInsert);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error insertando productos:', error);
+        throw error;
+      }
+
+      console.log('✅ Productos insertados correctamente');
 
       // Limpiar productos pendientes
       setPendingProducts([]);
