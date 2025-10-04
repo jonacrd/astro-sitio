@@ -89,13 +89,25 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
       }
 
       console.log(`✅ ${sellerProducts?.length || 0} productos encontrados`);
+      console.log('🔍 Productos encontrados:', sellerProducts?.map(p => ({
+        title: p.product.title,
+        active: p.active,
+        stock: p.stock,
+        seller: p.seller?.name
+      })));
 
       // Agrupar productos por categoría
       const grouped: Record<string, Product[]> = {};
+      let productosFiltrados = 0;
       
       sellerProducts?.forEach((item: any) => {
         // Filtrar productos con stock disponible (modo tradicional)
-        if (item.stock <= 0) return; // Saltar productos sin stock
+        if (item.stock <= 0) {
+          console.log(`❌ Producto sin stock: ${item.product.title} (stock: ${item.stock})`);
+          return; // Saltar productos sin stock
+        }
+        
+        productosFiltrados++;
 
         const category = item.product.category || 'otros';
         
@@ -123,8 +135,11 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
         });
       });
 
+      console.log(`📊 Productos filtrados: ${productosFiltrados}`);
+      console.log(`📊 Categorías con productos: ${Object.keys(grouped).length}`);
+      console.log('📊 Productos por categoría:', Object.entries(grouped).map(([cat, prods]) => `${cat}: ${prods.length}`));
+      
       setProductsByCategory(grouped);
-      console.log('📊 Productos por categoría:', Object.keys(grouped).map(cat => `${cat}: ${grouped[cat].length}`));
 
     } catch (err: any) {
       console.error('❌ Error cargando productos:', err);
