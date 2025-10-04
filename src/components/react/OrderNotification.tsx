@@ -17,16 +17,31 @@ export default function OrderNotification({ sellerId }: OrderNotificationProps) 
     const checkNewOrders = async () => {
       try {
         const user = await getUser();
-        if (!user) return;
+        if (!user) {
+          console.log('🔍 OrderNotification: Usuario no encontrado');
+          return;
+        }
 
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) return;
+        if (!session?.access_token) {
+          console.log('🔍 OrderNotification: No hay sesión activa');
+          return;
+        }
+
+        console.log('🔍 OrderNotification: Verificando pedidos para usuario:', user.id);
 
         const response = await fetch('/api/seller/orders', {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           }
         });
+
+        console.log('🔍 OrderNotification: Respuesta del servidor:', response.status);
+
+        if (!response.ok) {
+          console.error('❌ OrderNotification: Error en respuesta:', response.status, response.statusText);
+          return;
+        }
 
         const result = await response.json();
         

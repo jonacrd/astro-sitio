@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
+    console.log('🔍 /api/seller/orders: Iniciando request');
+    
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
@@ -21,7 +23,10 @@ export const GET: APIRoute = async ({ request }) => {
     
     // Obtener token de autorización
     const authHeader = request.headers.get('authorization');
+    console.log('🔍 /api/seller/orders: Auth header:', authHeader ? 'Presente' : 'Ausente');
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ /api/seller/orders: No hay token de autorización');
       return new Response(JSON.stringify({
         success: false,
         error: 'No autorizado'
@@ -37,6 +42,7 @@ export const GET: APIRoute = async ({ request }) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
+      console.log('❌ /api/seller/orders: Error de autenticación:', authError?.message);
       return new Response(JSON.stringify({
         success: false,
         error: 'Usuario no autenticado'
@@ -45,6 +51,8 @@ export const GET: APIRoute = async ({ request }) => {
         headers: { 'content-type': 'application/json' }
       });
     }
+
+    console.log('✅ /api/seller/orders: Usuario autenticado:', user.id);
 
     // Verificar que el usuario es vendedor
     const { data: profile, error: profileError } = await supabase
