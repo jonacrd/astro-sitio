@@ -713,7 +713,8 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Remover todo excepto números y puntos
+    
+    // Solo permitir números y puntos
     const cleanValue = value.replace(/[^\d.]/g, '');
     
     if (cleanValue === '' || cleanValue === '.') {
@@ -722,16 +723,18 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
       return;
     }
 
-    // Remover puntos para obtener el valor numérico real
-    const numericValue = cleanValue.replace(/\./g, '');
-    const priceValue = parseInt(numericValue) || 0;
-    setPrice(priceValue);
+    // El usuario puede escribir con o sin puntos
+    // Ejemplos:
+    // "150" -> 150 pesos
+    // "1500" o "1.500" -> 1.500 pesos (mil quinientos)
+    // "15000" o "15.000" -> 15.000 pesos (quince mil)
     
-    // Formatear con separadores de miles
-    setPriceDisplay(priceValue.toLocaleString('es-CL', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }));
+    // Remover TODOS los puntos para obtener solo los dígitos
+    const digitsOnly = cleanValue.replace(/\./g, '');
+    const priceValue = parseInt(digitsOnly) || 0;
+    
+    setPrice(priceValue);
+    setPriceDisplay(cleanValue); // Mantener lo que el usuario escribió
   };
 
   const handleSave = () => {
