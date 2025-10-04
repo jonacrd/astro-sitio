@@ -3,11 +3,9 @@ import CartNotification from '@components/react/CartNotification.tsx'
 import Header from '@components/react/Header.tsx'
 import BottomNavAuth from '@components/react/BottomNavAuth.tsx'
 import NotificationSystem from '@components/react/NotificationSystem.tsx'
-import GlobalLoginHandler from '@components/react/GlobalLoginHandler.tsx'
 import { AuthProvider } from '@components/react/AuthContext.tsx'
 import { HeaderWrapper } from '@components/ui/HeaderWrapper.tsx'
 import { BottomNavWrapper } from '@components/ui/BottomNavWrapper.tsx'
-import { LoginModalWrapper } from '@components/ui/LoginModalWrapper.tsx'
 import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
 import OneSignalSubscriber from '@components/react/OneSignalSubscriber.tsx'
 import NotificationWelcome from '@components/react/NotificationWelcome.tsx'
@@ -245,8 +243,6 @@ const {
   <!-- Sistema de notificaciones - Solo cargar cuando sea necesario -->
   <NotificationSystem client:idle />
 
-  <!-- Login Modal - Solo cargar cuando sea necesario -->
-  <LoginModalWrapper client:idle />
 
   <!-- Footer -->
   <footer class="bg-bg-surface text-ink-base py-12">
@@ -289,7 +285,6 @@ const {
   </footer>
 
   <!-- Manejador global de inicio de sesión -->
-  <GlobalLoginHandler client:load />
   
   <!-- Suscriptor automático de OneSignal - Solo cuando sea necesario -->
   <OneSignalSubscriber client:idle />
