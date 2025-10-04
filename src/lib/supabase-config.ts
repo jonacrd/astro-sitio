@@ -45,15 +45,26 @@ export const createSupabaseServerClient = () => {
 
 // Cliente por defecto (navegador) - Singleton mejorado
 let supabaseInstance: any = null;
+
 export const supabase = (() => {
-  if (!supabaseInstance && typeof window !== 'undefined') {
+  // Solo inicializar en el navegador
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  
+  if (!supabaseInstance) {
     console.log('🔧 Inicializando cliente Supabase...');
-    supabaseInstance = createSupabaseClient();
-    
-    // Marcar como inicializado globalmente
-    if (!(window as any).supabaseClientInitialized) {
-      (window as any).supabaseClientInitialized = true;
-      console.log('✅ Cliente Supabase inicializado correctamente');
+    try {
+      supabaseInstance = createSupabaseClient();
+      
+      // Marcar como inicializado globalmente
+      if (!(window as any).supabaseClientInitialized) {
+        (window as any).supabaseClientInitialized = true;
+        console.log('✅ Cliente Supabase inicializado correctamente');
+      }
+    } catch (error) {
+      console.error('❌ Error inicializando Supabase:', error);
+      return null;
     }
   }
   return supabaseInstance;
@@ -67,6 +78,20 @@ export const supabaseServer = (() => {
   }
   return supabaseServerInstance;
 })();
+
+// Función helper para verificar si Supabase está disponible
+export const isSupabaseAvailable = (): boolean => {
+  return supabase !== null && typeof window !== 'undefined';
+};
+
+// Función helper para obtener Supabase de forma segura
+export const getSupabase = () => {
+  if (!isSupabaseAvailable()) {
+    console.warn('⚠️ Supabase no está disponible');
+    return null;
+  }
+  return supabase;
+};
 
 // Verificar configuración solo una vez
 if (typeof window !== 'undefined' && !(window as any).supabaseInitialized) {

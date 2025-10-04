@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { getSupabase, isSupabaseAvailable } from '../../lib/supabase-config';
 import LoginForm from './LoginForm';
 import { getUserAvatar } from '../../lib/avatar-utils';
 import { getCachedAuth, setCachedAuth, clearAuthCache } from '../../lib/auth-cache';
@@ -17,6 +18,18 @@ export default function SimpleAuthButton() {
     
     const checkAuth = async () => {
       try {
+        // Verificar si Supabase está disponible
+        if (!isSupabaseAvailable()) {
+          console.warn('⚠️ Supabase no está disponible, saltando verificación de auth');
+          return;
+        }
+        
+        const supabaseClient = getSupabase();
+        if (!supabaseClient) {
+          console.warn('⚠️ No se pudo obtener cliente de Supabase');
+          return;
+        }
+        
         // Verificar cache primero
         const cached = getCachedAuth();
         if (cached && isMounted) {
@@ -28,7 +41,7 @@ export default function SimpleAuthButton() {
         }
         
         // Verificar si ya hay una sesión en cache
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         
         if (!isMounted) return; // Evitar actualizaciones si el componente se desmontó
         
@@ -38,7 +51,7 @@ export default function SimpleAuthButton() {
           setUserEmail(session.user.email || '');
           
           // Cargar perfil del usuario solo si no está en cache
-          const { data: profile } = await supabase
+          const { data: profile } = await supabaseClient
             .from('profiles')
             .select('is_seller')
             .eq('id', session.user.id)
@@ -91,7 +104,10 @@ export default function SimpleAuthButton() {
         
         // Cargar perfil del usuario solo si es necesario
         try {
-          const { data: profile } = await supabase
+          const supabaseClient = getSupabase();
+          if (!supabaseClient) return;
+          
+          const { data: profile } = await supabaseClient
             .from('profiles')
             .select('is_seller')
             .eq('id', event.detail.user.id)
@@ -112,7 +128,13 @@ export default function SimpleAuthButton() {
     window.addEventListener('auth-state-changed', handleAuthStateChanged as EventListener);
 
     // Escuchar cambios de autenticación (optimizado)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const supabaseClient = getSupabase();
+    if (!supabaseClient) {
+      console.warn('⚠️ No se puede configurar listener de auth state change');
+      return () => {};
+    }
+    
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
       
       console.log('🔄 Auth state changed:', event, session?.user?.email);
@@ -122,7 +144,7 @@ export default function SimpleAuthButton() {
         
         // Cargar perfil del usuario solo si es necesario
         try {
-          const { data: profile } = await supabase
+          const { data: profile } = await supabaseClient
             .from('profiles')
             .select('is_seller')
             .eq('id', session.user.id)
@@ -154,11 +176,18 @@ export default function SimpleAuthButton() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      const supabaseClient = getSupabase();
+      if (!supabaseClient) {
+        console.warn('⚠️ No se puede hacer logout, Supabase no disponible');
+        return;
+      }
+      
+      await supabaseClient.auth.signOut();
       setIsAuthenticated(false);
       setUserEmail('');
       setUserProfile(null);
       setIsOpen(false);
+      clearAuthCache();
     } catch (error) {
       console.error('Error logging out:', error);
     }

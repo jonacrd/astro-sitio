@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
+import { getSupabase, isSupabaseAvailable } from '../../lib/supabase-config';
 
 interface GlobalAuthModalProps {
   isOpen: boolean;
@@ -42,7 +43,14 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const supabaseClient = getSupabase();
+      if (!supabaseClient) {
+        setError('Error de configuración. Intenta recargar la página.');
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
       });
@@ -100,7 +108,14 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const supabaseClient = getSupabase();
+      if (!supabaseClient) {
+        setError('Error de configuración. Intenta recargar la página.');
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
       });
