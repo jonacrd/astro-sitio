@@ -69,12 +69,6 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           price_cents,
           stock,
           active,
-          inventory_mode,
-          available_today,
-          sold_out,
-          portion_limit,
-          portion_used,
-          prep_minutes,
           product:products!inner(
             id,
             title,
@@ -100,12 +94,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
       const grouped: Record<string, Product[]> = {};
       
       sellerProducts?.forEach((item: any) => {
-        // Filtrar productos según modo de inventario
-        const isAvailable = item.inventory_mode === 'count' 
-          ? item.stock > 0 
-          : (item.available_today && !item.sold_out);
-
-        if (!isAvailable) return; // Saltar productos no disponibles
+        // Filtrar productos con stock disponible (modo tradicional)
+        if (item.stock <= 0) return; // Saltar productos sin stock
 
         const category = item.product.category || 'otros';
         
@@ -124,12 +114,12 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           seller_name: item.seller?.name || 'Vendedor',
           seller_active: item.seller?.is_active !== false,
           stock: item.stock,
-          inventory_mode: item.inventory_mode || 'count',
-          available_today: item.available_today,
-          sold_out: item.sold_out,
-          portion_limit: item.portion_limit,
-          portion_used: item.portion_used,
-          prep_minutes: item.prep_minutes
+          inventory_mode: 'count', // Modo tradicional por defecto
+          available_today: true, // Siempre disponible en modo tradicional
+          sold_out: false, // No agotado en modo tradicional
+          portion_limit: null,
+          portion_used: 0,
+          prep_minutes: null
         });
       });
 
@@ -146,14 +136,6 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
 
   const handleAddToCart = (product: Product) => {
     try {
-      // Validar disponibilidad para productos de availability
-      if (product.inventory_mode === 'availability') {
-        if (!product.available_today || product.sold_out) {
-          alert('🚫 Este producto no está disponible hoy.');
-          return;
-        }
-      }
-
       // Advertir si el vendedor está inactivo
       if (!product.seller_active) {
         const confirmAdd = window.confirm(
@@ -336,39 +318,11 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                       {!product.seller_active && ' (Cerrado)'}
                     </a>
                     
-                    {/* Badges de disponibilidad/stock */}
+                    {/* Badges de stock bajo */}
                     <div className="absolute top-2 right-2 flex flex-col gap-1">
-                      {product.inventory_mode === 'availability' ? (
-                        <>
-                          {product.available_today && !product.sold_out && (
-                            <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                              ✨ Disponible hoy
-                            </div>
-                          )}
-                          {product.portion_limit && product.portion_used !== undefined && 
-                           (product.portion_limit - product.portion_used <= 3) && 
-                           !product.sold_out && (
-                            <div className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                              ⚠️ Quedan pocas
-                            </div>
-                          )}
-                          {(product.sold_out || !product.available_today) && (
-                            <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                              🚫 Agotado hoy
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        /* Modo count tradicional */
-                        product.stock < 5 && (
-                          <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                            ¡Últimos {product.stock}!
-                          </div>
-                        )
-                      )}
-                      {product.prep_minutes && product.inventory_mode === 'availability' && (
-                        <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                          ⏱️ {product.prep_minutes} min
+                      {product.stock < 5 && product.stock > 0 && (
+                        <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          ¡Últimos {product.stock}!
                         </div>
                       )}
                     </div>
