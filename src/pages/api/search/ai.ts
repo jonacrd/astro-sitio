@@ -291,60 +291,51 @@ export const GET: APIRoute = async ({ url }) => {
       };
     });
 
-    // 7. Búsqueda inteligente más flexible
+    // 7. Búsqueda simple y directa
+    const searchTerm = processedQuery.toLowerCase().trim();
+    const searchWords = searchTerm.split(' ').filter(word => word.length > 1);
+    
     let filteredProducts = combinedProducts
       .filter(product => {
-        const titleMatch = product.title.toLowerCase().includes(processedQuery.toLowerCase());
-        const descriptionMatch = product.description && product.description.toLowerCase().includes(processedQuery.toLowerCase());
-        const categoryMatch = product.category.toLowerCase().includes(processedQuery.toLowerCase());
-        const sellerMatch = product.sellerName.toLowerCase().includes(processedQuery.toLowerCase());
+        // Búsqueda simple: título, descripción, categoría, vendedor
+        const titleMatch = product.title.toLowerCase().includes(searchTerm);
+        const descriptionMatch = product.description && product.description.toLowerCase().includes(searchTerm);
+        const categoryMatch = product.category.toLowerCase().includes(searchTerm);
+        const sellerMatch = product.sellerName.toLowerCase().includes(searchTerm);
         
-        // Búsqueda por palabras clave (más flexible)
-        const keywordMatch = searchTerms.some(term => 
-          product.title.toLowerCase().includes(term) ||
-          (product.description && product.description.toLowerCase().includes(term)) ||
-          product.category.toLowerCase().includes(term)
+        // Búsqueda por palabras individuales
+        const wordMatch = searchWords.some(word => 
+          product.title.toLowerCase().includes(word) ||
+          (product.description && product.description.toLowerCase().includes(word)) ||
+          product.category.toLowerCase().includes(word) ||
+          product.sellerName.toLowerCase().includes(word)
         );
-        
-        // Búsqueda por categorías relacionadas (más flexible)
-        const relatedCategoryMatch = relatedCategories.some(cat => 
-          product.category.toLowerCase().includes(cat.toLowerCase())
-        );
-        
-        // Mostrar si hay cualquier coincidencia
-        return titleMatch || descriptionMatch || categoryMatch || sellerMatch || keywordMatch || relatedCategoryMatch;
-      })
-      .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-    // 8. Si no hay resultados, hacer búsqueda más amplia
-    if (filteredProducts.length === 0) {
-      console.log('🔍 No hay resultados específicos, haciendo búsqueda amplia...');
-      
-      // Búsqueda por categorías relacionadas
-      if (relatedCategories.length > 0) {
-        filteredProducts = combinedProducts
-          .filter(product => 
-            relatedCategories.some(cat => 
-              product.category.toLowerCase().includes(cat.toLowerCase())
-            )
-          )
-          .sort((a, b) => b.relevanceScore - a.relevanceScore);
-      }
-      
-      // Si aún no hay resultados, mostrar productos de categorías relacionadas
-      if (filteredProducts.length === 0) {
-        console.log('🔍 No hay resultados específicos, mostrando productos de categorías relacionadas...');
+        return titleMatch || descriptionMatch || categoryMatch || sellerMatch || wordMatch;
+      })
+      .sort((a, b) => {
+        // Ordenar por relevancia: título exacto primero, luego parcial
+        const aTitleExact = a.title.toLowerCase().includes(searchTerm);
+        const bTitleExact = b.title.toLowerCase().includes(searchTerm);
         
-        // Mostrar productos de categorías relacionadas
-        filteredProducts = combinedProducts
-          .filter(product => 
-            relatedCategories.some(cat => 
-              product.category.toLowerCase().includes(cat.toLowerCase())
-            )
+        if (aTitleExact && !bTitleExact) return -1;
+        if (!aTitleExact && bTitleExact) return 1;
+        
+        return a.title.localeCompare(b.title);
+      });
+
+    // 8. Si no hay resultados, mostrar productos de categorías relacionadas
+    if (filteredProducts.length === 0 && relatedCategories.length > 0) {
+      console.log('🔍 No hay resultados específicos, mostrando productos de categorías relacionadas...');
+      
+      filteredProducts = combinedProducts
+        .filter(product => 
+          relatedCategories.some(cat => 
+            product.category.toLowerCase().includes(cat.toLowerCase())
           )
-          .sort((a, b) => b.relevanceScore - a.relevanceScore)
-          .slice(0, 20); // Limitar a 20 productos
-      }
+        )
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .slice(0, 20); // Limitar a 20 productos
     }
 
     // Limitar a 100 resultados para mejor rendimiento
