@@ -4,6 +4,9 @@ import SellerPublicProfile from '../../components/react/SellerPublicProfile.tsx'
 
 // Usar rutas dinámicas en lugar de estáticas
 const { id: sellerId } = Astro.params
+
+// Debug: verificar que el ID llegue correctamente
+console.log('🔍 SellerId en [id].astro:', sellerId)
 ---
 
 <BaseLayout title="Perfil del Vendedor">

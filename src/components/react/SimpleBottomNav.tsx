@@ -16,6 +16,8 @@ export default function SimpleBottomNav({
   orders = 0, 
   rewards = 0 
 }: SimpleBottomNavProps) {
+  console.log('🔍 SimpleBottomNav renderizando...');
+  
   const [currentPath, setCurrentPath] = useState('/');
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [lastScrollY, setLastScrollY] = useState(0);

@@ -6,6 +6,8 @@ interface UiBottomNavProps {
 }
 
 export function UiBottomNav({ children, className = '' }: UiBottomNavProps) {
+  console.log('🔍 UiBottomNav renderizando...');
+  
   return (
     <nav 
       className={`ui-navbar-bottom bg-bg-app border-t border-white/10 ${className}`}
