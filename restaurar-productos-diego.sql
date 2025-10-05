@@ -49,3 +49,4 @@ WHERE sp.active = true AND sp.stock > 0
 ORDER BY pr.name, p.category, p.title;
 
 
+

@@ -45,3 +45,4 @@ WHERE sp.seller_id = '8f0a8848-8647-41e7-b9d0-323ee000d379';
 -- UPDATE profiles 
 -- SET is_seller = true 
 -- WHERE id = '8f0a8848-8647-41e7-b9d0-323ee000d379';
+

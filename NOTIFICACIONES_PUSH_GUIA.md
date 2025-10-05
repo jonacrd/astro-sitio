@@ -281,3 +281,4 @@ Este componente muestra:
 - **Permisos**: Una vez denegados, el usuario debe cambiarlos manualmente en configuración del navegador
 
 
+

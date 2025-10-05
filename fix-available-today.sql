@@ -65,3 +65,4 @@ WHERE sp.active = true
     (sp.inventory_mode = 'availability' AND sp.available_today = true AND sp.sold_out = false)
   )
 ORDER BY sp.product_id DESC;
+

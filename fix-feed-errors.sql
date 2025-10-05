@@ -27,3 +27,4 @@ FROM information_schema.columns
 WHERE table_name = 'seller_products' 
   AND column_name IN ('inventory_mode', 'available_today', 'sold_out', 'portion_limit', 'portion_used', 'prep_minutes')
 ORDER BY tabla, column_name;
+

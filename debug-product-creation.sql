@@ -65,3 +65,4 @@ LEFT JOIN products p ON sp.product_id = p.id
 WHERE pr.is_seller = true
 GROUP BY pr.id, pr.name
 ORDER BY total_products DESC;
+

@@ -67,3 +67,4 @@ export default function SimpleLoginModal({ isOpen, onClose }: SimpleLoginModalPr
   );
 }
 
+

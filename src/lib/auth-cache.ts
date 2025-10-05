@@ -42,3 +42,4 @@ export const isAuthCacheValid = (): boolean => {
   if (!authCache) return false;
   return Date.now() < authCache.expiresAt;
 };
+

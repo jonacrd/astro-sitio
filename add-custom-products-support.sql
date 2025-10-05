@@ -75,3 +75,4 @@ WHERE table_name = 'products' AND column_name = 'created_by';
 -- SCRIPT COMPLETADO
 -- =====================================================
 
+

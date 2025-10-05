@@ -27,3 +27,4 @@ SELECT
 FROM profiles p
 WHERE p.gender IS NULL OR p.gender = '';
 
+

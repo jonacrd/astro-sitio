@@ -81,3 +81,4 @@ LEFT JOIN profiles pr ON sp.seller_id = pr.id
 WHERE p.created_at >= NOW() - INTERVAL '7 days'
 GROUP BY p.category
 ORDER BY total_products DESC;
+

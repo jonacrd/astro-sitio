@@ -19,3 +19,4 @@ SELECT COUNT(*) as direcciones_restantes FROM user_addresses;
 SELECT '✅ Todas las direcciones han sido eliminadas' as resultado;
 
 
+

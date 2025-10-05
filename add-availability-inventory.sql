@@ -243,3 +243,4 @@ WHERE table_name = 'seller_products'
   )
 ORDER BY ordinal_position;
 
+

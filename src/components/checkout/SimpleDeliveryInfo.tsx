@@ -305,3 +305,4 @@ export default function SimpleDeliveryInfo({
     </div>
   );
 }
+
