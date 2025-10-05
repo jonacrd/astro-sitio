@@ -60,8 +60,10 @@ import QuestionsSystemWrapper from '../components/react/QuestionsSystemWrapper.t
     <QuickActions 
       client:load 
       onAskQuestion={() => {
+        console.log('🔘 Botón "Haz una pregunta" clickeado');
         // Abrir sistema de preguntas del vecindario
         window.dispatchEvent(new CustomEvent('open-questions-system'));
+        console.log('📡 Evento "open-questions-system" disparado');
       }}
       onPublishSale={() => {
         document.getElementById('sale-modal')?.click();
