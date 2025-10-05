@@ -9,8 +9,6 @@ import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
 import BannerSlider from '../components/react/BannerSlider.tsx'
 import QuickPushButton from '../components/react/QuickPushButton.tsx'
-import QuestionsSystemWrapper from '../components/react/QuestionsSystemWrapper.tsx'
-import { supabase } from '../lib/supabase-browser'
 ---
 
 <BaseLayout 
@@ -60,35 +58,9 @@ import { supabase } from '../lib/supabase-browser'
     <!-- Acciones Rápidas -->
     <QuickActions 
       client:load 
-      onAskQuestion={async () => {
-        console.log('🔘 Botón "Haz una pregunta" clickeado');
-        alert('Botón clickeado - revisa la consola');
-        
-        // Verificar si el usuario está autenticado
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          console.log('🔍 Sesión obtenida:', session);
-          if (session) {
-            console.log('✅ Usuario autenticado, abriendo sistema de preguntas');
-            // Abrir sistema de preguntas del vecindario
-            window.dispatchEvent(new CustomEvent('open-questions-system'));
-            console.log('📡 Evento "open-questions-system" disparado');
-          } else {
-            console.log('❌ Usuario no autenticado, abriendo modal de login');
-            // Abrir modal de login
-            window.dispatchEvent(new CustomEvent('show-login-modal', { 
-              detail: { mode: 'login' } 
-            }));
-            console.log('📡 Evento "show-login-modal" disparado');
-          }
-        } catch (error) {
-          console.error('Error verificando autenticación:', error);
-          // En caso de error, abrir modal de login
-          window.dispatchEvent(new CustomEvent('show-login-modal', { 
-            detail: { mode: 'login' } 
-          }));
-          console.log('📡 Evento "show-login-modal" disparado (error)');
-        }
+      onAskQuestion={() => {
+        // Este botón ya no se usa, el botón funcional está en el feed
+        console.log('Botón no funcional clickeado');
       }}
       onPublishSale={() => {
         document.getElementById('sale-modal')?.click();
@@ -180,5 +152,3 @@ import { supabase } from '../lib/supabase-browser'
 <!-- Botón flotante de notificaciones -->
 <QuickPushButton client:load />
 
-<!-- Sistema de Preguntas del Vecindario -->
-<QuestionsSystemWrapper client:load />
