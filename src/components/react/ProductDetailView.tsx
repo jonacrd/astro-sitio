@@ -35,7 +35,7 @@ export default function ProductDetailView({ productId }: ProductDetailViewProps)
       console.log('🔍 Cargando producto:', productId);
 
       // Cargar el producto principal
-      const { data: sellerProduct, error: productError } = await supabase
+      const { data: sellerProducts, error: productError } = await supabase
         .from('seller_products')
         .select(`
           seller_id,
@@ -58,9 +58,14 @@ export default function ProductDetailView({ productId }: ProductDetailViewProps)
         `)
         .eq('product_id', productId)
         .eq('active', true)
-        .single();
+        .limit(1);
 
-      if (productError) throw productError;
+      if (productError) {
+        console.error('Error en consulta Supabase:', productError);
+        throw productError;
+      }
+
+      const sellerProduct = sellerProducts?.[0];
 
       if (!sellerProduct) {
         setError('Producto no encontrado');

@@ -1,57 +1,27 @@
-/* CSS específico SOLO para el checkout - NO afectar otros elementos */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* SOLO aplicar al checkout */
+/* Checkout Styles */
 .checkout-container {
-  background-color: #0E1626 !important;
-  min-height: 100vh !important;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
-/* Cards del checkout */
-.checkout-card {
-  background-color: #1D2939 !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+.checkout-form {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Botones del checkout */
-.checkout-container .bg-yellow-400 {
-  background-color: #facc15 !important;
-  color: #000000 !important;
+.checkout-button {
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
 }
 
-.checkout-container .bg-blue-600 {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-}
-
-.checkout-container .bg-green-600 {
-  background-color: #16a34a !important;
-  color: #ffffff !important;
-}
-
-.checkout-container .bg-red-600 {
-  background-color: #dc2626 !important;
-  color: #ffffff !important;
-}
-
-/* Títulos del checkout */
-.checkout-container h1, 
-.checkout-container h2, 
-.checkout-container h3, 
-.checkout-container h4, 
-.checkout-container h5, 
-.checkout-container h6 {
-  color: white !important;
-  background-color: transparent !important;
-}
-
-/* Eliminar fondos blancos SOLO en checkout */
-.checkout-container .bg-white, 
-.checkout-container .bg-gray-50, 
-.checkout-container .bg-gray-100, 
-.checkout-container .bg-gray-200 {
-  background-color: #0E1626 !important;
+.checkout-button:hover {
+  background-color: #059669;
 }
