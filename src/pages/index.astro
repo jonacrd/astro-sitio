@@ -10,6 +10,7 @@ import SaleModal from '../components/react/SaleModal.tsx'
 import BannerSlider from '../components/react/BannerSlider.tsx'
 import QuickPushButton from '../components/react/QuickPushButton.tsx'
 import QuestionsSystemWrapper from '../components/react/QuestionsSystemWrapper.tsx'
+import { supabase } from '../lib/supabase-browser'
 ---
 
 <BaseLayout 
@@ -59,11 +60,31 @@ import QuestionsSystemWrapper from '../components/react/QuestionsSystemWrapper.t
     <!-- Acciones Rápidas -->
     <QuickActions 
       client:load 
-      onAskQuestion={() => {
+      onAskQuestion={async () => {
         console.log('🔘 Botón "Haz una pregunta" clickeado');
-        // Abrir sistema de preguntas del vecindario
-        window.dispatchEvent(new CustomEvent('open-questions-system'));
-        console.log('📡 Evento "open-questions-system" disparado');
+        
+        // Verificar si el usuario está autenticado
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            console.log('✅ Usuario autenticado, abriendo sistema de preguntas');
+            // Abrir sistema de preguntas del vecindario
+            window.dispatchEvent(new CustomEvent('open-questions-system'));
+            console.log('📡 Evento "open-questions-system" disparado');
+          } else {
+            console.log('❌ Usuario no autenticado, abriendo modal de login');
+            // Abrir modal de login
+            window.dispatchEvent(new CustomEvent('show-login-modal', { 
+              detail: { mode: 'login' } 
+            }));
+          }
+        } catch (error) {
+          console.error('Error verificando autenticación:', error);
+          // En caso de error, abrir modal de login
+          window.dispatchEvent(new CustomEvent('show-login-modal', { 
+            detail: { mode: 'login' } 
+          }));
+        }
       }}
       onPublishSale={() => {
         document.getElementById('sale-modal')?.click();
