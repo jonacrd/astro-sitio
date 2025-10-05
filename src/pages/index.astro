@@ -9,6 +9,7 @@ import QuestionModal from '../components/react/QuestionModal.tsx'
 import SaleModal from '../components/react/SaleModal.tsx'
 import BannerSlider from '../components/react/BannerSlider.tsx'
 import QuickPushButton from '../components/react/QuickPushButton.tsx'
+import QuestionsSystemWrapper from '../components/react/QuestionsSystemWrapper.tsx'
 ---
 
 <BaseLayout 
@@ -59,7 +60,8 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
     <QuickActions 
       client:load 
       onAskQuestion={() => {
-        document.getElementById('question-modal')?.click();
+        // Abrir sistema de preguntas del vecindario
+        window.dispatchEvent(new CustomEvent('open-questions-system'));
       }}
       onPublishSale={() => {
         document.getElementById('sale-modal')?.click();
@@ -150,3 +152,6 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
 
 <!-- Botón flotante de notificaciones -->
 <QuickPushButton client:load />
+
+<!-- Sistema de Preguntas del Vecindario -->
+<QuestionsSystemWrapper client:load />

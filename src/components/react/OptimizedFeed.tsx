@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { formatPrice } from '../../lib/money';
 import CartToast from './CartToast';
-import QuestionsSystem from './QuestionsSystem';
 
 interface Product {
   id: string;
@@ -50,7 +49,6 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
   const [hasMore, setHasMore] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastData, setToastData] = useState<{ productName: string; productImage: string } | null>(null);
-  const [showQuestions, setShowQuestions] = useState(false);
 
   const loadProducts = useCallback(async (page: number = 1, append: boolean = false) => {
     try {
@@ -210,17 +208,6 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
 
   return (
     <div className={`space-y-8 ${className}`}>
-      {/* Botón de Preguntas del Vecindario */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => setShowQuestions(true)}
-          className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all flex items-center gap-2 shadow-lg"
-        >
-          <span>🏘️</span>
-          Haz una Pregunta a la Comunidad
-        </button>
-      </div>
-
       {/* Categorías */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {CATEGORIES.map(category => {
@@ -341,11 +328,6 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
         />
       )}
 
-      {/* Sistema de Preguntas del Vecindario */}
-      <QuestionsSystem
-        isOpen={showQuestions}
-        onClose={() => setShowQuestions(false)}
-      />
     </div>
   );
 }
