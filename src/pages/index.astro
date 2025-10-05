@@ -58,10 +58,6 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
     <!-- Acciones Rápidas -->
     <QuickActions 
       client:load 
-      onAskQuestion={() => {
-        // Este botón ya no se usa, el botón funcional está en el feed
-        console.log('Botón no funcional clickeado');
-      }}
       onPublishSale={() => {
         document.getElementById('sale-modal')?.click();
       }}
