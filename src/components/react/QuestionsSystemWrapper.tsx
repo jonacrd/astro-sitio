@@ -5,8 +5,8 @@ export default function QuestionsSystemWrapper() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const handleOpenQuestions = () => {
-      console.log('🎯 QuestionsSystemWrapper: Evento recibido, abriendo modal');
+    const handleOpenQuestions = (event: any) => {
+      console.log('🎯 QuestionsSystemWrapper: Evento recibido, abriendo modal', event);
       setIsOpen(true);
     };
 
@@ -14,9 +14,16 @@ export default function QuestionsSystemWrapper() {
     // Escuchar el evento personalizado
     window.addEventListener('open-questions-system', handleOpenQuestions);
 
+    // También escuchar el evento show-login-modal para debug
+    const handleShowLogin = (event: any) => {
+      console.log('🔑 QuestionsSystemWrapper: Evento show-login-modal recibido', event);
+    };
+    window.addEventListener('show-login-modal', handleShowLogin);
+
     return () => {
-      console.log('🔇 QuestionsSystemWrapper: Removiendo listener');
+      console.log('🔇 QuestionsSystemWrapper: Removiendo listeners');
       window.removeEventListener('open-questions-system', handleOpenQuestions);
+      window.removeEventListener('show-login-modal', handleShowLogin);
     };
   }, []);
 

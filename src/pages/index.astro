@@ -62,10 +62,12 @@ import { supabase } from '../lib/supabase-browser'
       client:load 
       onAskQuestion={async () => {
         console.log('🔘 Botón "Haz una pregunta" clickeado');
+        alert('Botón clickeado - revisa la consola');
         
         // Verificar si el usuario está autenticado
         try {
           const { data: { session } } = await supabase.auth.getSession();
+          console.log('🔍 Sesión obtenida:', session);
           if (session) {
             console.log('✅ Usuario autenticado, abriendo sistema de preguntas');
             // Abrir sistema de preguntas del vecindario
@@ -77,6 +79,7 @@ import { supabase } from '../lib/supabase-browser'
             window.dispatchEvent(new CustomEvent('show-login-modal', { 
               detail: { mode: 'login' } 
             }));
+            console.log('📡 Evento "show-login-modal" disparado');
           }
         } catch (error) {
           console.error('Error verificando autenticación:', error);
@@ -84,6 +87,7 @@ import { supabase } from '../lib/supabase-browser'
           window.dispatchEvent(new CustomEvent('show-login-modal', { 
             detail: { mode: 'login' } 
           }));
+          console.log('📡 Evento "show-login-modal" disparado (error)');
         }
       }}
       onPublishSale={() => {

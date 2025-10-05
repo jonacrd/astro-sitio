@@ -249,7 +249,14 @@ export default function QuestionsSystem({ isOpen, onClose }: QuestionsSystemProp
     return date.toLocaleDateString();
   };
 
-  if (!isOpen) return null;
+  console.log('🎭 QuestionsSystem renderizando, isOpen:', isOpen);
+  
+  if (!isOpen) {
+    console.log('❌ QuestionsSystem: Modal cerrado, no renderizando');
+    return null;
+  }
+  
+  console.log('✅ QuestionsSystem: Modal abierto, renderizando');
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
@@ -543,3 +550,4 @@ export default function QuestionsSystem({ isOpen, onClose }: QuestionsSystemProp
     </div>
   );
 }
+
