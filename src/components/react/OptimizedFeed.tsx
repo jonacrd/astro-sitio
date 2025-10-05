@@ -210,6 +210,17 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
 
   return (
     <div className={`space-y-8 ${className}`}>
+      {/* Botón de Preguntas del Vecindario */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setShowQuestions(true)}
+          className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all flex items-center gap-2 shadow-lg"
+        >
+          <span>🏘️</span>
+          Haz una Pregunta a la Comunidad
+        </button>
+      </div>
+
       {/* Categorías */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {CATEGORIES.map(category => {
@@ -234,17 +245,6 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
             </button>
           );
         })}
-      </div>
-
-      {/* Botón de Preguntas del Vecindario */}
-      <div className="flex justify-center">
-        <button
-          onClick={() => setShowQuestions(true)}
-          className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all flex items-center gap-2 shadow-lg"
-        >
-          <span>🏘️</span>
-          Haz una Pregunta al Vecindario
-        </button>
       </div>
 
       {/* Productos organizados por categorías */}
