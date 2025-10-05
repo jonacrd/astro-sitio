@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SmartSearchBar from '../components/react/SmartSearchBar.tsx'
-import QuickActions from '../components/react/QuickActions.tsx'
 import RealGridBlocks from '../components/react/RealGridBlocks.tsx'
 import RealProductFeed from '../components/react/RealProductFeed.tsx'
 import OptimizedFeed from '../components/react/OptimizedFeed.tsx'
@@ -55,13 +54,6 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
       </div>
     </section>
 
-    <!-- Acciones Rápidas -->
-    <QuickActions 
-      client:load 
-      onPublishSale={() => {
-        document.getElementById('sale-modal')?.click();
-      }}
-    />
 
         <!-- Grid Dinámico de 4 Bloques - DATOS REALES -->
         <RealGridBlocks 
