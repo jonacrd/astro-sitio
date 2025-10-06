@@ -1,8 +1,8 @@
 // POST /api/couriers/:id/availability - Actualizar disponibilidad del courier
 import type { APIRoute } from 'astro';
-import { isDeliveryEnabled } from '../../../lib/delivery/getEnv';
-import { getDeliveryRepo } from '../../../lib/delivery/repos';
-import type { UpdateCourierAvailabilityRequest } from '../../../lib/delivery/types';
+import { isDeliveryEnabled } from '../../../../lib/delivery/getEnv';
+import { getDeliveryRepo } from '../../../../lib/delivery/repos';
+import type { UpdateCourierAvailabilityRequest } from '../../../../lib/delivery/types';
 
 export const POST: APIRoute = async ({ params, request }) => {
   try {

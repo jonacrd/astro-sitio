@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import { notifyOrderConfirmedToBuyer, notifyOrderDelivered, notifyOrderOnTheWay } from '../../../server/whatsapp';
+import { notifyOrderConfirmedToBuyer, notifyOrderDelivered, notifyOrderOnTheWay } from '../../../../server/whatsapp';
 
 export const POST: APIRoute = async ({ request }) => {
   try {

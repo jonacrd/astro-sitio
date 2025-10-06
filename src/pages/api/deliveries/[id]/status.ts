@@ -1,9 +1,9 @@
 // POST /api/deliveries/:id/status - Actualizar estado del delivery
 import type { APIRoute } from 'astro';
-import { isDeliveryEnabled } from '../../../lib/delivery/getEnv';
-import { getDeliveryRepo } from '../../../lib/delivery/repos';
-import { notifyCustomerStatusUpdate, notifyDeliveryCompleted } from '../../../lib/delivery/services/notify';
-import type { UpdateDeliveryStatusRequest, DeliveryStatus } from '../../../lib/delivery/types';
+import { isDeliveryEnabled } from '../../../../lib/delivery/getEnv';
+import { getDeliveryRepo } from '../../../../lib/delivery/repos';
+import { notifyCustomerStatusUpdate, notifyDeliveryCompleted } from '../../../../lib/delivery/services/notify';
+import type { UpdateDeliveryStatusRequest, DeliveryStatus } from '../../../../lib/delivery/types';
 
 const VALID_STATUS_TRANSITIONS: Record<DeliveryStatus, DeliveryStatus[]> = {
   pending: ['offer_sent', 'no_courier', 'cancelled'],
