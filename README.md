@@ -11,6 +11,8 @@ Ecommerce completo construido con **Astro**, **React**, **Tailwind CSS** y **Sup
 - ✅ **Dashboard de vendedores** para gestión de productos
 - ✅ **Búsqueda inteligente** con IA
 - ✅ **Feed social** con productos en tiempo real
+- ✅ **Sistema de delivery** con repartidores (opcional)
+- ✅ **Notificaciones WhatsApp** para pedidos
 - ✅ **Diseño responsive** con Tailwind CSS
 - ✅ **Componentes React** como islas de Astro
 - ✅ **API REST** para todas las operaciones
@@ -227,6 +229,51 @@ const { data: products } = await supabase.from('products').select('*')
 - `GET /api/search/working` - Búsqueda de productos
 - `GET /api/feed/real` - Feed de productos
 - `GET /api/debug/env` - Debug de variables de entorno
+
+## 🚚 Sistema de Delivery (Opcional)
+
+El sistema de delivery está implementado como módulo opcional con feature flag:
+
+### Activación
+```bash
+# En .env.local o Vercel
+DELIVERY_ENABLED=true
+```
+
+### Características
+- **PWA Repartidor**: `/delivery` - Panel para repartidores
+- **Asignación Automática**: Round-robin con expiración 60s
+- **API Completa**: Endpoints bajo `/api/delivery/*`
+- **Modo Mock**: Funciona sin Supabase para desarrollo
+- **Notificaciones**: Stubs para WhatsApp Cloud
+
+### Uso
+1. **Repartidor**: Va a `/delivery` → Login → Conectarse
+2. **Sistema**: `POST /api/delivery/create` → Asignación automática
+3. **Estados**: Recogí → En camino → Entregado
+
+Ver [DELIVERY_README.md](./DELIVERY_README.md) para documentación completa.
+
+## 📱 Notificaciones WhatsApp
+
+Sistema de notificaciones automáticas para pedidos:
+
+### Configuración
+```bash
+# Variables requeridas
+WHATSAPP_TOKEN=tu_token_meta
+WHATSAPP_PHONE_ID=tu_phone_id
+WHATSAPP_VERIFY_TOKEN=tu_verify_token
+APP_BASE_URL=https://tu-dominio.com
+```
+
+### Flujo
+- **Nuevo pedido** → Vendedor recibe WhatsApp
+- **Confirmado** → Cliente recibe WhatsApp  
+- **En camino** → Cliente recibe WhatsApp
+- **Entregado** → Cliente recibe WhatsApp
+
+Ver documentación en `supabase/sql/2025-setup-whatsapp.sql`.
 
 ## 🎨 Personalización
 
