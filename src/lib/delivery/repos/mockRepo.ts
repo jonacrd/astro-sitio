@@ -9,7 +9,13 @@ class MockDeliveryRepo {
 
   // Couriers
   async createCourier(courier: Omit<Courier, 'id' | 'updatedAt'>): Promise<OperationResult<Courier>> {
-    const id = `courier_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generar UUID válido
+    const id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    
     const newCourier: Courier = {
       ...courier,
       id,
@@ -50,7 +56,12 @@ class MockDeliveryRepo {
 
   // Deliveries
   async createDelivery(delivery: Omit<Delivery, 'id' | 'createdAt' | 'updatedAt'>): Promise<OperationResult<Delivery>> {
-    const id = `delivery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generar UUID válido
+    const id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
     const now = new Date();
     const newDelivery: Delivery = {
       ...delivery,
@@ -83,7 +94,12 @@ class MockDeliveryRepo {
 
   // Offers
   async createOffer(offer: Omit<DeliveryOffer, 'id' | 'createdAt'>): Promise<OperationResult<DeliveryOffer>> {
-    const id = `offer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generar UUID válido
+    const id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
     const newOffer: DeliveryOffer = {
       ...offer,
       id,
