@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test WhatsApp</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: #25D366; color: white; border: none; cursor: pointer; }
+        .result { margin: 20px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test WhatsApp</h1>
+        
+        <form id="whatsappForm">
+            <label>Número de teléfono:</label>
+            <input type="tel" id="phone" value="+56962614851" placeholder="+56962614851">
+            
+            <label>Mensaje:</label>
+            <textarea id="message" rows="4" placeholder="Escribe tu mensaje aquí...">🛒 NUEVO PEDIDO RECIBIDO
+
+ID: TEST_ORDER_001
+
+Ve a tu dashboard para confirmar el pedido.</textarea>
+            
+            <button type="submit">📱 Enviar WhatsApp</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('whatsappForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = '<div class="result">⏳ Enviando WhatsApp...</div>';
+                
+                const response = await fetch('/api/test-whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ phone, message })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ WhatsApp enviado exitosamente!<br>
+                            Message ID: ${result.messageId || 'N/A'}<br>
+                            ${result.message}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ Error enviando WhatsApp:<br>
+                            ${result.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Error de conexión:<br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
