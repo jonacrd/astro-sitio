@@ -59,7 +59,7 @@ export const GET: APIRoute = async ({ url }) => {
     const availableSellers = allSellers?.map(s => s.name) || [];
 
     // 3. Usar la query original sin correcciones por ahora
-    const processedQuery = query;
+    const correctedQuery = query;
     console.log(`🔤 Query original: "${query}"`);
     let relatedCategories: string[] = [];
     let searchIntent = 'product';
@@ -168,13 +168,13 @@ export const GET: APIRoute = async ({ url }) => {
           const aiData = await openaiResponse.json();
           const aiResult = JSON.parse(aiData.choices[0].message.content);
           
-          processedQuery = aiResult.correctedQuery || query;
+            const correctedQuery = aiResult.correctedQuery || query;
           relatedCategories = aiResult.relatedCategories || [];
           searchIntent = aiResult.searchIntent || 'product';
           
           console.log('🤖 IA procesó búsqueda:', {
             original: query,
-            corrected: processedQuery,
+            corrected: correctedQuery,
             intent: searchIntent,
             relatedCategories
           });
@@ -235,9 +235,9 @@ export const GET: APIRoute = async ({ url }) => {
           results: [],
           sellers: [],
           relatedCategories: [],
-          correctedQuery: processedQuery,
+          correctedQuery: correctedQuery,
           originalQuery: query,
-          localCorrection: processedQuery,
+          localCorrection: correctedQuery,
           searchIntent: searchIntent,
           total: 0,
           message: 'No hay productos activos de vendedores activos con stock.'
@@ -272,7 +272,7 @@ export const GET: APIRoute = async ({ url }) => {
     }));
 
     // 6. Búsqueda inteligente con múltiples criterios
-    const searchTerms = processedQuery.toLowerCase().split(' ').filter(term => term.length > 1);
+    const searchTerms = correctedQuery.toLowerCase().split(' ').filter(term => term.length > 1);
     
     const combinedProducts = feedProducts.map(item => {
       const product = item.product;
@@ -294,12 +294,12 @@ export const GET: APIRoute = async ({ url }) => {
         sold_out: item.sold_out || false,
         portion_limit: item.portion_limit,
         portion_used: item.portion_used || 0,
-        relevanceScore: calculateRelevanceScore(product, seller, searchTerms, processedQuery.toLowerCase(), relatedCategories)
+        relevanceScore: calculateRelevanceScore(product, seller, searchTerms, correctedQuery.toLowerCase(), relatedCategories)
       };
     });
 
     // 7. Búsqueda simple y directa
-    const searchTerm = processedQuery.toLowerCase().trim();
+    const searchTerm = correctedQuery.toLowerCase().trim();
     const searchWords = searchTerm.split(' ').filter(word => word.length > 1);
     
     let filteredProducts = combinedProducts
@@ -361,7 +361,7 @@ export const GET: APIRoute = async ({ url }) => {
 
     // 9. Filtrar vendedores por búsqueda
     const filteredSellers = uniqueSellers.filter(seller =>
-      seller.name.toLowerCase().includes(processedQuery.toLowerCase()) ||
+      seller.name.toLowerCase().includes(correctedQuery.toLowerCase()) ||
       searchTerms.some(term => seller.name.toLowerCase().includes(term))
     );
 
@@ -373,7 +373,7 @@ export const GET: APIRoute = async ({ url }) => {
         results: filteredProducts,
         sellers: filteredSellers,
         relatedCategories: relatedCategories,
-        correctedQuery: processedQuery,
+        correctedQuery: correctedQuery,
         originalQuery: query,
         searchIntent: searchIntent,
         total: filteredProducts.length,
