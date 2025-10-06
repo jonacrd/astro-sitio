@@ -37,13 +37,15 @@ export async function sendTemplateMessage({ to, template, components = [] }: Sen
   const phoneId = process.env.WHATSAPP_PHONE_ID;
   const url = `https://graph.facebook.com/v20.0/${phoneId}/messages`;
 
+  const languageCode = template === 'hello_world' ? 'en_US' : 'es';
+
   const body = {
     messaging_product: 'whatsapp',
     to,
     type: 'template',
     template: {
       name: template,
-      language: { code: 'es' },
+      language: { code: languageCode },
       components: components.length
         ? [{ type: 'body', parameters: components }]
         : undefined
