@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { notifyOrderCreatedToSeller } from '../../server/whatsapp';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -225,6 +226,35 @@ export const POST: APIRoute = async ({ request }) => {
     } catch (notifError) {
       console.error('Error enviando notificación al vendedor:', notifError);
       // No fallar el checkout si falla la notificación
+    }
+
+    // 📱 ENVIAR WHATSAPP AL VENDEDOR (seguro y no bloqueante)
+    try {
+      const appBaseUrl = process.env.APP_BASE_URL || 'https://astro-sitio.vercel.app';
+      const confirmUrl = `${appBaseUrl}/dashboard/pedidos`;
+
+      // Obtener teléfono y opt-in del vendedor
+      const { data: seller } = await supabase
+        .from('profiles')
+        .select('phone, opt_in_whatsapp')
+        .eq('id', sellerId)
+        .single();
+
+      if (seller?.phone && seller?.opt_in_whatsapp) {
+        await notifyOrderCreatedToSeller({ 
+          sellerPhone: seller.phone, 
+          orderId, 
+          confirmUrl 
+        });
+        console.log('📱 WhatsApp enviado al vendedor:', seller.phone);
+      } else {
+        console.log('⚠️ Vendedor sin teléfono o opt-in WhatsApp:', { 
+          phone: seller?.phone, 
+          opt_in: seller?.opt_in_whatsapp 
+        });
+      }
+    } catch (waErr) {
+      console.error('WhatsApp notify error (no bloquea):', waErr);
     }
 
     // Agregar puntos al usuario (opcional)
