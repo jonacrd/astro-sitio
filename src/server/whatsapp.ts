@@ -92,7 +92,7 @@ export async function sendTemplateMessage({ to, template, components = [] }: Sen
 export async function notifyOrderCreatedToSeller({ sellerPhone, orderId, confirmUrl }: { sellerPhone: string; orderId: string; confirmUrl: string; }) {
   return sendTemplateMessage({
     to: sellerPhone,
-    template: 'order_created',
+    template: 'order_management_1',
     components: [
       { type: 'text', text: orderId.substring(0, 8) },
       { type: 'text', text: confirmUrl }
