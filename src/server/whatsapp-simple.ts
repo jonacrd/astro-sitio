@@ -50,6 +50,12 @@ export async function notifyPickupConfirmed(sellerPhone: string, buyerPhone: str
   await sendSimpleWhatsApp(buyerPhone, buyerMessage);
 }
 
+// Notificar que el pedido va en camino
+export async function notifyDeliveryOnTheWay(buyerPhone: string, deliveryId: string): Promise<void> {
+  const message = `🚗 TU PEDIDO VA EN CAMINO\n\nID: ${deliveryId}\nEl repartidor está en camino a tu dirección.`;
+  await sendSimpleWhatsApp(buyerPhone, message);
+}
+
 // Notificar entrega completada
 export async function notifyDeliveryCompleted(sellerPhone: string, buyerPhone: string, deliveryId: string): Promise<void> {
   const sellerMessage = `✅ DELIVERY COMPLETADO\n\nID: ${deliveryId}\nEl pedido fue entregado exitosamente.`;
