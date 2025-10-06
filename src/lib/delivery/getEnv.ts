@@ -1,10 +1,20 @@
 // Feature flag para delivery
 export function isDeliveryEnabled(): boolean {
+  // En el cliente, usar import.meta.env
+  if (typeof window !== 'undefined') {
+    return import.meta.env.DELIVERY_ENABLED === 'true';
+  }
+  // En el servidor, usar process.env
   return process.env.DELIVERY_ENABLED === 'true';
 }
 
 // Verificar si estamos en modo mock (sin Supabase)
 export function isMockMode(): boolean {
+  // En el cliente, usar import.meta.env
+  if (typeof window !== 'undefined') {
+    return !import.meta.env.PUBLIC_SUPABASE_URL || !import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  }
+  // En el servidor, usar process.env
   return !process.env.PUBLIC_SUPABASE_URL || !process.env.PUBLIC_SUPABASE_ANON_KEY;
 }
 

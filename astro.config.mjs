@@ -10,6 +10,9 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [react(), tailwind()],
   vite: {
+    define: {
+      'import.meta.env.DELIVERY_ENABLED': JSON.stringify(process.env.DELIVERY_ENABLED || 'false'),
+    },
     resolve: {
       alias: {
         "@": path.resolve("./src"),
