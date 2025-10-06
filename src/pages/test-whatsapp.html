@@ -57,13 +57,19 @@ Ve a tu dashboard para confirmar el pedido.</textarea>
                 const result = await response.json();
                 
                 if (result.success) {
-                    resultDiv.innerHTML = `
+                    let resultHtml = `
                         <div class="result success">
-                            ✅ WhatsApp enviado exitosamente!<br>
+                            ✅ WhatsApp procesado exitosamente!<br>
                             Message ID: ${result.messageId || 'N/A'}<br>
                             ${result.message}
-                        </div>
                     `;
+                    
+                    if (result.whatsappUrl) {
+                        resultHtml += `<br><br><a href="${result.whatsappUrl}" target="_blank" style="background: #25D366; color: white; padding: 10px; text-decoration: none; border-radius: 5px; display: inline-block;">📱 Abrir WhatsApp Web</a>`;
+                    }
+                    
+                    resultHtml += `</div>`;
+                    resultDiv.innerHTML = resultHtml;
                 } else {
                     resultDiv.innerHTML = `
                         <div class="result error">

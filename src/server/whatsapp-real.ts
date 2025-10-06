@@ -16,8 +16,20 @@ export async function sendRealWhatsApp(to: string, message: string): Promise<{
     console.log(`📱 Enviando WhatsApp REAL a ${to}: ${message}`);
     
     if (!WHATSAPP_TOKEN || !WHATSAPP_PHONE_ID) {
-      console.warn('⚠️ WhatsApp Cloud API no configurada - usando modo simulado');
-      return { success: true, messageId: 'simulated' };
+      console.warn('⚠️ WhatsApp Cloud API no configurada - usando WhatsApp Web');
+      
+      // Crear URL de WhatsApp Web
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${to.replace('+', '')}?text=${encodedMessage}`;
+      
+      console.log('🔗 URL de WhatsApp Web:', whatsappUrl);
+      console.log('📱 Abre esta URL en tu navegador para enviar el mensaje');
+      
+      return { 
+        success: true, 
+        messageId: 'whatsapp-web',
+        whatsappUrl: whatsappUrl
+      };
     }
 
     const response = await fetch(WHATSAPP_API_URL, {
