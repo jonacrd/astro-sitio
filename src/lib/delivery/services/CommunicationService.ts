@@ -18,6 +18,7 @@ export class CommunicationService {
     
     try {
       this.supabase = createClient(supabaseUrl, supabaseKey);
+      console.log('✅ CommunicationService: Supabase client initialized');
     } catch (error) {
       console.warn('Failed to initialize Supabase client - using mock mode:', error);
       this.supabase = null;

@@ -1,14 +1,17 @@
 // Endpoint para actualizar disponibilidad de un repartidor
 import type { APIRoute } from 'astro';
-import { getDeliveryRepo } from '../../../../lib/delivery/repos';
+import { getDeliveryRepo } from '../../lib/delivery/repos';
 
-export const POST: APIRoute = async ({ params, request }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
     console.log('🔍 API availability endpoint called');
     
-    const { id } = params;
-    console.log('🔍 Params ID:', id);
+    const requestBody = await request.json();
+    console.log('🔍 Request body:', requestBody);
     
+    const { id, isAvailable, lat, lng } = requestBody;
+    console.log('🔍 Extracted values:', { id, isAvailable, lat, lng });
+
     if (!id) {
       console.log('❌ No ID provided');
       return new Response(JSON.stringify({ 
@@ -21,26 +24,6 @@ export const POST: APIRoute = async ({ params, request }) => {
         }
       });
     }
-
-    let requestBody;
-    try {
-      requestBody = await request.json();
-      console.log('🔍 Request body:', requestBody);
-    } catch (jsonError) {
-      console.log('❌ Error parsing JSON:', jsonError);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Invalid JSON in request body' 
-      }), { 
-        status: 400,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-    }
-
-    const { isAvailable, lat, lng } = requestBody;
-    console.log('🔍 Extracted values:', { isAvailable, lat, lng });
 
     const deliveryRepo = getDeliveryRepo();
     console.log('🔍 Delivery repo obtained:', !!deliveryRepo);

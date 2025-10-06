@@ -1,6 +1,7 @@
 // PWA principal para repartidores
 import React, { useState, useEffect } from 'react';
 import { isDeliveryEnabled } from '../../lib/delivery/getEnv';
+import { getDeliveryRepo } from '../../lib/delivery/repos';
 import { communicationService } from '../../lib/delivery/services/CommunicationService';
 import type { Courier, Delivery, DeliveryOffer } from '../../lib/delivery/types';
 
@@ -115,24 +116,30 @@ export default function DeliveryApp() {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      // Mock login - en producción esto vendría de Supabase Auth
-      const mockCourier: Courier = {
-        id: `courier_${Date.now()}`,
+      // Crear courier en el repositorio
+      const deliveryRepo = getDeliveryRepo();
+      const result = await deliveryRepo.createCourier({
         userId: email,
         name: email.split('@')[0],
         phone,
         isActive: true,
         isAvailable: false,
-        updatedAt: new Date(),
-      };
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Error creando courier');
+      }
+
+      console.log('Courier creado:', result.data);
 
       setState(prev => ({
         ...prev,
-        courier: mockCourier,
+        courier: result.data,
         isConnected: true,
         isLoading: false,
       }));
     } catch (error: any) {
+      console.error('Error en login:', error);
       setState(prev => ({
         ...prev,
         error: error.message,
@@ -141,38 +148,49 @@ export default function DeliveryApp() {
     }
   };
 
-  // Toggle disponibilidad
-  const toggleAvailability = async (isAvailable: boolean) => {
-    if (!state.courier) return;
+         // Toggle disponibilidad - DIRECTO AL REPOSITORIO
+         const toggleAvailability = async (isAvailable: boolean) => {
+           if (!state.courier) {
+             console.log('❌ No courier found for toggle');
+             return;
+           }
 
-    setState(prev => ({ ...prev, isLoading: true }));
+           console.log('🔍 toggleAvailability called with:', { isAvailable, courierId: state.courier.id });
+           setState(prev => ({ ...prev, isLoading: true }));
 
-    try {
-      const response = await fetch(`/api/couriers/${state.courier.id}/availability`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isAvailable }),
-      });
+           try {
+             // USAR EL REPOSITORIO DIRECTAMENTE - SIN ENDPOINT
+             const deliveryRepo = getDeliveryRepo();
+             console.log('🔍 Using delivery repo directly:', !!deliveryRepo);
 
-      const result = await response.json();
+             const result = await deliveryRepo.updateCourier(state.courier.id, {
+               isAvailable,
+               lastLat: undefined,
+               lastLng: undefined,
+             });
 
-      if (result.success) {
-        setState(prev => ({
-          ...prev,
-          courier: result.data,
-          isLoading: false,
-        }));
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error: any) {
-      setState(prev => ({
-        ...prev,
-        error: error.message,
-        isLoading: false,
-      }));
-    }
-  };
+             console.log('🔍 Direct update result:', result);
+
+             if (result.success) {
+               console.log('✅ Toggle successful:', result.data);
+               setState(prev => ({
+                 ...prev,
+                 courier: result.data,
+                 isLoading: false,
+               }));
+             } else {
+               console.log('❌ Toggle failed:', result.error);
+               throw new Error(result.error);
+             }
+           } catch (error: any) {
+             console.error('❌ Toggle error:', error);
+             setState(prev => ({
+               ...prev,
+               error: error.message,
+               isLoading: false,
+             }));
+           }
+         };
 
   // Aceptar oferta
   const acceptOffer = async (offerId: string) => {

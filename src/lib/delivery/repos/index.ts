@@ -4,8 +4,10 @@ import { mockRepo } from './mockRepo';
 import { supabaseRepo } from './supabaseRepo';
 
 export function getDeliveryRepo() {
-  // Por ahora siempre usar mock para evitar errores de BD
-  return mockRepo;
+  if (isMockMode()) {
+    return mockRepo;
+  }
+  return supabaseRepo;
 }
 
 export { mockRepo, supabaseRepo };

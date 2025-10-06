@@ -6,6 +6,9 @@ export function isDeliveryEnabled(): boolean {
 
 // Verificar si estamos en modo mock (sin Supabase)
 export function isMockMode(): boolean {
+  // FORZAR MODO MOCK TEMPORALMENTE PARA TESTING
+  return true;
+  
   // En el cliente, usar import.meta.env
   if (typeof window !== 'undefined') {
     return !import.meta.env.PUBLIC_SUPABASE_URL || !import.meta.env.PUBLIC_SUPABASE_ANON_KEY;

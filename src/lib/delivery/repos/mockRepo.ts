@@ -1,11 +1,22 @@
 // Repositorio en memoria para demo local
 import type { Courier, Delivery, DeliveryOffer, OperationResult } from '../types';
 
+// Singleton para mantener los datos entre requests
 class MockDeliveryRepo {
+  private static instance: MockDeliveryRepo;
   private couriers: Map<string, Courier> = new Map();
   private deliveries: Map<string, Delivery> = new Map();
   private offers: Map<string, DeliveryOffer> = new Map();
   private roundRobinIndex = 0;
+
+  private constructor() {}
+
+  static getInstance(): MockDeliveryRepo {
+    if (!MockDeliveryRepo.instance) {
+      MockDeliveryRepo.instance = new MockDeliveryRepo();
+    }
+    return MockDeliveryRepo.instance;
+  }
 
   // Couriers
   async createCourier(courier: Omit<Courier, 'id' | 'updatedAt'>): Promise<OperationResult<Courier>> {
@@ -16,12 +27,19 @@ class MockDeliveryRepo {
       return v.toString(16);
     });
     
+    console.log('🔍 createCourier called with:', courier);
+    console.log('🔍 Generated ID:', id);
+    
     const newCourier: Courier = {
       ...courier,
       id,
       updatedAt: new Date(),
     };
+    
     this.couriers.set(id, newCourier);
+    console.log('✅ Courier created and stored:', newCourier);
+    console.log('🔍 Total couriers now:', this.couriers.size);
+    
     return { success: true, data: newCourier };
   }
 
@@ -34,13 +52,19 @@ class MockDeliveryRepo {
   }
 
   async updateCourier(id: string, updates: Partial<Courier>): Promise<OperationResult<Courier>> {
+    console.log('🔍 updateCourier called with ID:', id);
+    console.log('🔍 Available couriers:', Array.from(this.couriers.keys()));
+    
     const courier = this.couriers.get(id);
     if (!courier) {
+      console.log('❌ Courier not found for ID:', id);
       return { success: false, error: 'Courier not found' };
     }
     
+    console.log('✅ Found courier:', courier);
     const updatedCourier = { ...courier, ...updates, updatedAt: new Date() };
     this.couriers.set(id, updatedCourier);
+    console.log('✅ Updated courier:', updatedCourier);
     return { success: true, data: updatedCourier };
   }
 
@@ -187,4 +211,4 @@ class MockDeliveryRepo {
 }
 
 // Singleton para mantener estado en memoria
-export const mockRepo = new MockDeliveryRepo();
+export const mockRepo = MockDeliveryRepo.getInstance();

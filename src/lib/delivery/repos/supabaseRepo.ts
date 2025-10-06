@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Courier, Delivery, DeliveryOffer, OperationResult } from '../types';
 
 class SupabaseDeliveryRepo {
-  private supabase;
+  private supabase: any = null;
 
   constructor() {
     // Usar variables públicas para el cliente
@@ -11,14 +11,40 @@ class SupabaseDeliveryRepo {
     const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Supabase credentials not configured');
+      console.warn('Supabase credentials not configured - using mock mode');
+      this.supabase = null;
+      return;
     }
     
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+    try {
+      this.supabase = createClient(supabaseUrl, supabaseKey);
+    } catch (error) {
+      console.warn('Failed to initialize Supabase client - using mock mode:', error);
+      this.supabase = null;
+    }
+  }
+
+  // Generar UUID válido
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   // Couriers
   async createCourier(courier: Omit<Courier, 'id' | 'updatedAt'>): Promise<OperationResult<Courier>> {
+    if (!this.supabase) {
+      // Modo mock
+      const mockCourier: Courier = {
+        id: this.generateUUID(),
+        ...courier,
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockCourier };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('couriers')
@@ -36,25 +62,40 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: Courier = {
-        id: data.id,
-        userId: data.user_id,
-        name: data.name,
-        phone: data.phone,
-        isActive: data.is_active,
-        isAvailable: data.is_available,
-        lastLat: data.last_lat,
-        lastLng: data.last_lng,
-        updatedAt: new Date(data.updated_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          userId: data.user_id,
+          name: data.name,
+          phone: data.phone,
+          isActive: data.is_active,
+          isAvailable: data.is_available,
+          lastLat: data.last_lat,
+          lastLng: data.last_lng,
+          updatedAt: new Date(data.updated_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async getCourier(id: string): Promise<OperationResult<Courier>> {
+    if (!this.supabase) {
+      // Modo mock - devolver courier simulado
+      const mockCourier: Courier = {
+        id,
+        userId: 'mock-user-id',
+        name: 'Repartidor Mock',
+        phone: '+56912345678',
+        isActive: true,
+        isAvailable: true,
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockCourier };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('couriers')
@@ -64,62 +105,100 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: Courier = {
-        id: data.id,
-        userId: data.user_id,
-        name: data.name,
-        phone: data.phone,
-        isActive: data.is_active,
-        isAvailable: data.is_available,
-        lastLat: data.last_lat,
-        lastLng: data.last_lng,
-        updatedAt: new Date(data.updated_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          userId: data.user_id,
+          name: data.name,
+          phone: data.phone,
+          isActive: data.is_active,
+          isAvailable: data.is_available,
+          lastLat: data.last_lat,
+          lastLng: data.last_lng,
+          updatedAt: new Date(data.updated_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async updateCourier(id: string, updates: Partial<Courier>): Promise<OperationResult<Courier>> {
-    try {
-      const updateData: any = {};
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.phone !== undefined) updateData.phone = updates.phone;
-      if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
-      if (updates.isAvailable !== undefined) updateData.is_available = updates.isAvailable;
-      if (updates.lastLat !== undefined) updateData.last_lat = updates.lastLat;
-      if (updates.lastLng !== undefined) updateData.last_lng = updates.lastLng;
+    if (!this.supabase) {
+      // Modo mock
+      const mockCourier: Courier = {
+        id,
+        userId: 'mock-user-id',
+        name: 'Repartidor Mock',
+        phone: '+56912345678',
+        isActive: updates.isActive ?? true,
+        isAvailable: updates.isAvailable ?? true,
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockCourier };
+    }
 
+    try {
       const { data, error } = await this.supabase
         .from('couriers')
-        .update(updateData)
+        .update({
+          is_active: updates.isActive,
+          is_available: updates.isAvailable,
+          last_lat: updates.lastLat,
+          last_lng: updates.lastLng,
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
-      const result: Courier = {
-        id: data.id,
-        userId: data.user_id,
-        name: data.name,
-        phone: data.phone,
-        isActive: data.is_active,
-        isAvailable: data.is_available,
-        lastLat: data.last_lat,
-        lastLng: data.last_lng,
-        updatedAt: new Date(data.updated_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          userId: data.user_id,
+          name: data.name,
+          phone: data.phone,
+          isActive: data.is_active,
+          isAvailable: data.is_available,
+          lastLat: data.last_lat,
+          lastLng: data.last_lng,
+          updatedAt: new Date(data.updated_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async getAvailableCouriers(): Promise<OperationResult<Courier[]>> {
+    if (!this.supabase) {
+      // Modo mock - devolver couriers simulados
+      const mockCouriers: Courier[] = [
+        {
+          id: this.generateUUID(),
+          userId: 'mock-user-1',
+          name: 'Repartidor 1',
+          phone: '+56912345678',
+          isActive: true,
+          isAvailable: true,
+          updatedAt: new Date(),
+        },
+        {
+          id: this.generateUUID(),
+          userId: 'mock-user-2',
+          name: 'Repartidor 2',
+          phone: '+56987654321',
+          isActive: true,
+          isAvailable: true,
+          updatedAt: new Date(),
+        }
+      ];
+      return { success: true, data: mockCouriers };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('couriers')
@@ -129,25 +208,29 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const results: Courier[] = data.map((row: any) => ({
-        id: row.id,
-        userId: row.user_id,
-        name: row.name,
-        phone: row.phone,
-        isActive: row.is_active,
-        isAvailable: row.is_available,
-        lastLat: row.last_lat,
-        lastLng: row.last_lng,
-        updatedAt: new Date(row.updated_at),
+      const couriers = data.map(c => ({
+        id: c.id,
+        userId: c.user_id,
+        name: c.name,
+        phone: c.phone,
+        isActive: c.is_active,
+        isAvailable: c.is_available,
+        lastLat: c.last_lat,
+        lastLng: c.last_lng,
+        updatedAt: new Date(c.updated_at),
       }));
 
-      return { success: true, data: results };
+      return { success: true, data: couriers };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async getCouriersCount(): Promise<number> {
+    if (!this.supabase) {
+      return 5; // Modo mock
+    }
+
     try {
       const { count, error } = await this.supabase
         .from('couriers')
@@ -162,6 +245,17 @@ class SupabaseDeliveryRepo {
 
   // Deliveries
   async createDelivery(delivery: Omit<Delivery, 'id' | 'createdAt' | 'updatedAt'>): Promise<OperationResult<Delivery>> {
+    if (!this.supabase) {
+      // Modo mock
+      const mockDelivery: Delivery = {
+        id: this.generateUUID(),
+        ...delivery,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockDelivery };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('deliveries')
@@ -182,33 +276,48 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: Delivery = {
-        id: data.id,
-        orderId: data.order_id,
-        sellerId: data.seller_id,
-        courierId: data.courier_id,
-        status: data.status,
-        pickup: {
-          address: data.pickup_address,
-          latlng: data.pickup_lat && data.pickup_lng ? 
-            { lat: data.pickup_lat, lng: data.pickup_lng } : undefined,
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          orderId: data.order_id,
+          sellerId: data.seller_id,
+          courierId: data.courier_id,
+          status: data.status,
+          pickup: { 
+            address: data.pickup_address, 
+            latlng: data.pickup_lat && data.pickup_lng ? { lat: data.pickup_lat, lng: data.pickup_lng } : undefined 
+          },
+          dropoff: { 
+            address: data.dropoff_address, 
+            latlng: data.dropoff_lat && data.dropoff_lng ? { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined 
+          },
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
         },
-        dropoff: {
-          address: data.dropoff_address,
-          latlng: data.dropoff_lat && data.dropoff_lng ? 
-            { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined,
-        },
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async getDelivery(id: string): Promise<OperationResult<Delivery>> {
+    if (!this.supabase) {
+      // Modo mock
+      const mockDelivery: Delivery = {
+        id,
+        orderId: 'mock-order-id',
+        sellerId: 'mock-seller-id',
+        courierId: 'mock-courier-id',
+        status: 'pending',
+        pickup: { address: 'Calle Test 123, Santiago' },
+        dropoff: { address: 'Av. Mock 456, Santiago' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockDelivery };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('deliveries')
@@ -218,68 +327,81 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: Delivery = {
-        id: data.id,
-        orderId: data.order_id,
-        sellerId: data.seller_id,
-        courierId: data.courier_id,
-        status: data.status,
-        pickup: {
-          address: data.pickup_address,
-          latlng: data.pickup_lat && data.pickup_lng ? 
-            { lat: data.pickup_lat, lng: data.pickup_lng } : undefined,
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          orderId: data.order_id,
+          sellerId: data.seller_id,
+          courierId: data.courier_id,
+          status: data.status,
+          pickup: { 
+            address: data.pickup_address, 
+            latlng: data.pickup_lat && data.pickup_lng ? { lat: data.pickup_lat, lng: data.pickup_lng } : undefined 
+          },
+          dropoff: { 
+            address: data.dropoff_address, 
+            latlng: data.dropoff_lat && data.dropoff_lng ? { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined 
+          },
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
         },
-        dropoff: {
-          address: data.dropoff_address,
-          latlng: data.dropoff_lat && data.dropoff_lng ? 
-            { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined,
-        },
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async updateDelivery(id: string, updates: Partial<Delivery>): Promise<OperationResult<Delivery>> {
-    try {
-      const updateData: any = {};
-      if (updates.status !== undefined) updateData.status = updates.status;
-      if (updates.courierId !== undefined) updateData.courier_id = updates.courierId;
+    if (!this.supabase) {
+      // Modo mock
+      const mockDelivery: Delivery = {
+        id,
+        orderId: 'mock-order-id',
+        sellerId: 'mock-seller-id',
+        courierId: 'mock-courier-id',
+        status: updates.status || 'pending',
+        pickup: { address: 'Calle Test 123, Santiago' },
+        dropoff: { address: 'Av. Mock 456, Santiago' },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return { success: true, data: mockDelivery };
+    }
 
+    try {
       const { data, error } = await this.supabase
         .from('deliveries')
-        .update(updateData)
+        .update({
+          courier_id: updates.courierId,
+          status: updates.status,
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
-      const result: Delivery = {
-        id: data.id,
-        orderId: data.order_id,
-        sellerId: data.seller_id,
-        courierId: data.courier_id,
-        status: data.status,
-        pickup: {
-          address: data.pickup_address,
-          latlng: data.pickup_lat && data.pickup_lng ? 
-            { lat: data.pickup_lat, lng: data.pickup_lng } : undefined,
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          orderId: data.order_id,
+          sellerId: data.seller_id,
+          courierId: data.courier_id,
+          status: data.status,
+          pickup: { 
+            address: data.pickup_address, 
+            latlng: data.pickup_lat && data.pickup_lng ? { lat: data.pickup_lat, lng: data.pickup_lng } : undefined 
+          },
+          dropoff: { 
+            address: data.dropoff_address, 
+            latlng: data.dropoff_lat && data.dropoff_lng ? { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined 
+          },
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at),
         },
-        dropoff: {
-          address: data.dropoff_address,
-          latlng: data.dropoff_lat && data.dropoff_lng ? 
-            { lat: data.dropoff_lat, lng: data.dropoff_lng } : undefined,
-        },
-        createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at),
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -287,6 +409,16 @@ class SupabaseDeliveryRepo {
 
   // Offers
   async createOffer(offer: Omit<DeliveryOffer, 'id' | 'createdAt'>): Promise<OperationResult<DeliveryOffer>> {
+    if (!this.supabase) {
+      // Modo mock
+      const mockOffer: DeliveryOffer = {
+        id: this.generateUUID(),
+        ...offer,
+        createdAt: new Date(),
+      };
+      return { success: true, data: mockOffer };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('delivery_offers')
@@ -301,22 +433,36 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: DeliveryOffer = {
-        id: data.id,
-        deliveryId: data.delivery_id,
-        courierId: data.courier_id,
-        status: data.status,
-        expiresAt: new Date(data.expires_at),
-        createdAt: new Date(data.created_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          deliveryId: data.delivery_id,
+          courierId: data.courier_id,
+          status: data.status,
+          expiresAt: new Date(data.expires_at),
+          createdAt: new Date(data.created_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async getOffer(id: string): Promise<OperationResult<DeliveryOffer>> {
+    if (!this.supabase) {
+      // Modo mock
+      const mockOffer: DeliveryOffer = {
+        id,
+        deliveryId: 'mock-delivery-id',
+        courierId: 'mock-courier-id',
+        status: 'offered',
+        expiresAt: new Date(Date.now() + 60000),
+        createdAt: new Date(),
+      };
+      return { success: true, data: mockOffer };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('delivery_offers')
@@ -326,69 +472,100 @@ class SupabaseDeliveryRepo {
 
       if (error) throw error;
 
-      const result: DeliveryOffer = {
-        id: data.id,
-        deliveryId: data.delivery_id,
-        courierId: data.courier_id,
-        status: data.status,
-        expiresAt: new Date(data.expires_at),
-        createdAt: new Date(data.created_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          deliveryId: data.delivery_id,
+          courierId: data.courier_id,
+          status: data.status,
+          expiresAt: new Date(data.expires_at),
+          createdAt: new Date(data.created_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
   async updateOffer(id: string, updates: Partial<DeliveryOffer>): Promise<OperationResult<DeliveryOffer>> {
-    try {
-      const updateData: any = {};
-      if (updates.status !== undefined) updateData.status = updates.status;
+    if (!this.supabase) {
+      // Modo mock
+      const mockOffer: DeliveryOffer = {
+        id,
+        deliveryId: 'mock-delivery-id',
+        courierId: 'mock-courier-id',
+        status: updates.status || 'offered',
+        expiresAt: new Date(Date.now() + 60000),
+        createdAt: new Date(),
+      };
+      return { success: true, data: mockOffer };
+    }
 
+    try {
       const { data, error } = await this.supabase
         .from('delivery_offers')
-        .update(updateData)
+        .update({
+          status: updates.status,
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
-      const result: DeliveryOffer = {
-        id: data.id,
-        deliveryId: data.delivery_id,
-        courierId: data.courier_id,
-        status: data.status,
-        expiresAt: new Date(data.expires_at),
-        createdAt: new Date(data.created_at),
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          deliveryId: data.delivery_id,
+          courierId: data.courier_id,
+          status: data.status,
+          expiresAt: new Date(data.expires_at),
+          createdAt: new Date(data.created_at),
+        },
       };
-
-      return { success: true, data: result };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
   }
 
-  async getOffersByDelivery(deliveryId: string): Promise<OperationResult<DeliveryOffer[]>> {
+  async getActiveOffersForCourier(courierId: string): Promise<OperationResult<DeliveryOffer[]>> {
+    if (!this.supabase) {
+      // Modo mock - devolver ofertas simuladas
+      const mockOffers: DeliveryOffer[] = [
+        {
+          id: this.generateUUID(),
+          deliveryId: 'mock-delivery-1',
+          courierId,
+          status: 'offered',
+          expiresAt: new Date(Date.now() + 60000),
+          createdAt: new Date(),
+        }
+      ];
+      return { success: true, data: mockOffers };
+    }
+
     try {
       const { data, error } = await this.supabase
         .from('delivery_offers')
         .select('*')
-        .eq('delivery_id', deliveryId);
+        .eq('courier_id', courierId)
+        .eq('status', 'offered')
+        .gt('expires_at', new Date().toISOString());
 
       if (error) throw error;
 
-      const results: DeliveryOffer[] = data.map((row: any) => ({
-        id: row.id,
-        deliveryId: row.delivery_id,
-        courierId: row.courier_id,
-        status: row.status,
-        expiresAt: new Date(row.expires_at),
-        createdAt: new Date(row.created_at),
+      const offers = data.map(o => ({
+        id: o.id,
+        deliveryId: o.delivery_id,
+        courierId: o.courier_id,
+        status: o.status,
+        expiresAt: new Date(o.expires_at),
+        createdAt: new Date(o.created_at),
       }));
 
-      return { success: true, data: results };
+      return { success: true, data: offers };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
