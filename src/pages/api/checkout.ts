@@ -240,15 +240,21 @@ export const POST: APIRoute = async ({ request }) => {
         .eq('id', sellerId)
         .single();
 
-      if (seller?.phone && seller?.opt_in_whatsapp) {
-        await notifySellerNewOrder(seller.phone, orderId);
-        console.log('📱 WhatsApp enviado al vendedor:', seller.phone);
-      } else {
-        console.log('⚠️ Vendedor sin teléfono o opt-in WhatsApp:', { 
-          phone: seller?.phone, 
-          opt_in: seller?.opt_in_whatsapp 
-        });
-      }
+      // FORZAR WHATSAPP PARA PRUEBAS - SIEMPRE ENVIAR
+      const testPhone = '+56962614851';
+      await notifySellerNewOrder(testPhone, orderId);
+      console.log('📱 WhatsApp enviado al vendedor (FORZADO):', testPhone);
+      
+      // Código original comentado para pruebas
+      // if (seller?.phone && seller?.opt_in_whatsapp) {
+      //   await notifySellerNewOrder(seller.phone, orderId);
+      //   console.log('📱 WhatsApp enviado al vendedor:', seller.phone);
+      // } else {
+      //   console.log('⚠️ Vendedor sin teléfono o opt-in WhatsApp:', { 
+      //     phone: seller?.phone, 
+      //     opt_in: seller?.opt_in_whatsapp 
+      //   });
+      // }
     } catch (waErr) {
       console.error('WhatsApp notify error (no bloquea):', waErr);
     }
