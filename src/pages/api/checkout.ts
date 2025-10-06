@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import { notifyOrderCreatedToSeller } from '../../server/whatsapp';
+import { notifySellerNewOrder } from '../../server/whatsapp-simple';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -241,11 +241,7 @@ export const POST: APIRoute = async ({ request }) => {
         .single();
 
       if (seller?.phone && seller?.opt_in_whatsapp) {
-        await notifyOrderCreatedToSeller({ 
-          sellerPhone: seller.phone, 
-          orderId, 
-          confirmUrl 
-        });
+        await notifySellerNewOrder(seller.phone, orderId);
         console.log('📱 WhatsApp enviado al vendedor:', seller.phone);
       } else {
         console.log('⚠️ Vendedor sin teléfono o opt-in WhatsApp:', { 

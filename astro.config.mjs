@@ -11,7 +11,7 @@ export default defineConfig({
   integrations: [react(), tailwind()],
   vite: {
     define: {
-      'import.meta.env.DELIVERY_ENABLED': JSON.stringify(process.env.DELIVERY_ENABLED || 'false'),
+      'import.meta.env.DELIVERY_ENABLED': JSON.stringify('true'),
     },
     resolve: {
       alias: {

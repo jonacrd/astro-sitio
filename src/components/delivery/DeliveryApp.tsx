@@ -1,6 +1,7 @@
 // PWA principal para repartidores
 import React, { useState, useEffect } from 'react';
 import { isDeliveryEnabled } from '../../lib/delivery/getEnv';
+import { communicationService } from '../../lib/delivery/services/CommunicationService';
 import type { Courier, Delivery, DeliveryOffer } from '../../lib/delivery/types';
 
 interface DeliveryAppState {
@@ -10,6 +11,13 @@ interface DeliveryAppState {
   isConnected: boolean;
   isLoading: boolean;
   error: string | null;
+  notifications: any[];
+  availability: {
+    total: number;
+    available: number;
+    busy: number;
+    offline: number;
+  };
 }
 
 export default function DeliveryApp() {
@@ -20,7 +28,71 @@ export default function DeliveryApp() {
     isConnected: false,
     isLoading: false,
     error: null,
+    notifications: [],
+    availability: { total: 0, available: 0, busy: 0, offline: 0 }
   });
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    if (state.isConnected && state.courier) {
+      loadNotifications();
+      loadAvailability();
+      loadActiveDeliveries();
+    }
+  }, [state.isConnected, state.courier]);
+
+  // Suscribirse a notificaciones en tiempo real
+  useEffect(() => {
+    if (!state.courier) return;
+
+    const unsubscribe = communicationService.subscribeToUserNotifications(
+      state.courier.userId,
+      (notification) => {
+        setState(prev => ({
+          ...prev,
+          notifications: [notification, ...prev.notifications]
+        }));
+      }
+    );
+
+    return unsubscribe;
+  }, [state.courier]);
+
+  // Cargar notificaciones
+  const loadNotifications = async () => {
+    if (!state.courier) return;
+    
+    try {
+      const notifications = await communicationService.getUserNotifications(state.courier.userId);
+      setState(prev => ({ ...prev, notifications }));
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  };
+
+  // Cargar disponibilidad
+  const loadAvailability = async () => {
+    try {
+      const availability = await communicationService.getCourierAvailability();
+      setState(prev => ({ ...prev, availability }));
+    } catch (error) {
+      console.error('Error loading availability:', error);
+    }
+  };
+
+  // Cargar deliveries activos
+  const loadActiveDeliveries = async () => {
+    if (!state.courier) return;
+    
+    try {
+      const deliveries = await communicationService.getCourierActiveDeliveries(state.courier.id);
+      if (deliveries.length > 0) {
+        setState(prev => ({ ...prev, currentDelivery: deliveries[0] }));
+      }
+    } catch (error) {
+      console.error('Error loading active deliveries:', error);
+    }
+  };
 
   // Verificar si delivery está habilitado
   if (!isDeliveryEnabled()) {
@@ -341,6 +413,57 @@ export default function DeliveryApp() {
           </div>
         )}
 
+        {/* Panel de estadísticas */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">📊 Estadísticas del Sistema</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{state.availability.total}</div>
+                <div className="text-sm text-gray-600">Total Repartidores</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{state.availability.available}</div>
+                <div className="text-sm text-gray-600">Disponibles</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">{state.availability.busy}</div>
+                <div className="text-sm text-gray-600">Ocupados</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{state.availability.offline}</div>
+                <div className="text-sm text-gray-600">Desconectados</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notificaciones */}
+        {state.notifications.length > 0 && (
+          <div className="mb-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold mb-4">🔔 Notificaciones</h2>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {state.notifications.slice(0, 5).map((notification, index) => (
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{notification.message}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(notification.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Estado de espera */}
         {!state.currentOffer && !state.currentDelivery && state.courier.isAvailable && (
           <div className="text-center py-12">
@@ -351,6 +474,9 @@ export default function DeliveryApp() {
             <p className="text-gray-600">
               Estás conectado y disponible. Las ofertas de delivery aparecerán aquí.
             </p>
+            <div className="mt-4 text-sm text-gray-500">
+              Sistema activo: {state.availability.available} repartidores disponibles
+            </div>
           </div>
         )}
       </main>
