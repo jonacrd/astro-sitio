@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { notifyOrderConfirmedToBuyer, notifyOrderDelivered, notifyOrderOnTheWay } from '../../../server/whatsapp';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -74,12 +75,11 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (notificationError) {
       console.log('⚠️ Error creando notificación (tabla puede no existir):', notificationError.message);
-      // Continuar sin notificación por ahora
     } else {
       console.log('🔔 Notificación creada para el comprador');
     }
 
-    // 📱 ENVIAR NOTIFICACIÓN PUSH AL CLIENTE con OneSignal
+    // OneSignal (push) - existente
     try {
       const onesignalAppId = '270896d8-ba2e-40bc-8f3b-c1e6efd258a1';
       const onesignalRestKey = process.env.ONESIGNAL_REST_API_KEY || '';
@@ -129,7 +129,36 @@ export const POST: APIRoute = async ({ request }) => {
       }
     } catch (pushError) {
       console.error('Error enviando notificación push:', pushError);
-      // No fallar el update si falla la notificación push
+    }
+
+    // WhatsApp auto (seguro y no bloqueante)
+    try {
+      const appBaseUrl = process.env.APP_BASE_URL || 'https://astro-sitio.vercel.app';
+
+      // Obtener teléfonos y opt-in
+      const [{ data: buyer }, { data: seller }] = await Promise.all([
+        supabase.from('profiles').select('id, phone, opt_in_whatsapp').eq('id', updatedOrder.user_id).single(),
+        supabase.from('profiles').select('id, phone, opt_in_whatsapp').eq('id', updatedOrder.seller_id).single()
+      ]);
+
+      const orderCode = String(orderId).substring(0, 8);
+      const trackingUrl = `${appBaseUrl}/pedidos/${orderId}`;
+      const confirmUrl = `${appBaseUrl}/dashboard/pedidos`;
+      const rateUrl = `${appBaseUrl}/pedidos/${orderId}/calificar`;
+      const pointsUrl = `${appBaseUrl}/perfil#puntos`;
+
+      if (status === 'confirmed' && buyer?.phone && buyer?.opt_in_whatsapp) {
+        await notifyOrderConfirmedToBuyer({ buyerPhone: buyer.phone, orderId, trackingUrl });
+      }
+      if ((status === 'in_transit' || status === 'on_the_way') && buyer?.phone && buyer?.opt_in_whatsapp) {
+        await notifyOrderOnTheWay({ buyerPhone: buyer.phone, orderId, trackingUrl });
+      }
+      if (status === 'delivered' && buyer?.phone && buyer?.opt_in_whatsapp) {
+        await notifyOrderDelivered({ buyerPhone: buyer.phone, orderId, rateUrl, pointsUrl });
+      }
+      // Nota: el aviso al vendedor en "nuevo pedido" se enviará desde el endpoint de creación de pedido
+    } catch (waErr) {
+      console.error('WhatsApp notify error (no bloquea):', waErr);
     }
 
     return new Response(JSON.stringify({
