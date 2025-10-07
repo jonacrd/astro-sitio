@@ -35,15 +35,17 @@ export default function EnhancedOrderCard({
   const [pointsInfo, setPointsInfo] = useState<any>(null);
   const [loadingPoints, setLoadingPoints] = useState(false);
   const [canRedeem, setCanRedeem] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log('🔍 EnhancedOrderCard - Estado de orden:', order.status);
     if (showPointsInfo) {
       loadPointsInfo();
     }
     if (showRedemption) {
       checkRedemptionEligibility();
     }
-  }, [order.id, showPointsInfo, showRedemption]);
+  }, [order.id, showPointsInfo, showRedemption, order.status]);
 
   const loadPointsInfo = async () => {
     try {
@@ -96,6 +98,14 @@ export default function EnhancedOrderCard({
 
       if (data.success) {
         console.log('✅ Estado de orden actualizado:', newStatus);
+        
+        // Recargar la página para ver el nuevo estado
+        if (onStatusChange) {
+          onStatusChange();
+        } else {
+          // Si no hay callback, recargar la página
+          window.location.reload();
+        }
         
         // Disparar evento de notificación
         window.dispatchEvent(new CustomEvent('order-status-updated', {
