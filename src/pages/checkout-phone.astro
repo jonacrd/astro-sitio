@@ -1,0 +1,85 @@
+---
+// Página para capturar número de teléfono en checkout
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Confirmar Pedido">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Confirmar Pedido</h1>
+    
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <form id="checkout-phone-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            📱 Número de WhatsApp (Obligatorio)
+          </label>
+          <input 
+            type="tel" 
+            id="phone" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="+56912345678"
+            pattern="^\+569[0-9]{8}$"
+            required
+          />
+          <p class="text-sm text-gray-500 mt-1">
+            Necesitamos tu número para enviarte notificaciones sobre tu pedido
+          </p>
+        </div>
+        
+        <div class="flex items-center">
+          <input 
+            type="checkbox" 
+            id="save-phone" 
+            class="mr-2"
+            checked
+          />
+          <label for="save-phone" class="text-sm text-gray-700">
+            Guardar este número para futuras compras
+          </label>
+        </div>
+        
+        <button 
+          type="submit" 
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          📱 Continuar con WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+document.getElementById('checkout-phone-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const phone = document.getElementById('phone').value;
+  const savePhone = document.getElementById('save-phone').checked;
+  
+  // Validar formato chileno
+  if (!phone.match(/^\+569[0-9]{8}$/)) {
+    alert('❌ Por favor ingresa un número válido (+56912345678)');
+    return;
+  }
+  
+  try {
+    // Guardar número en perfil del usuario
+    const response = await fetch('/api/user/update-phone', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, savePhone })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      // Continuar con el checkout
+      window.location.href = '/checkout?phone=' + encodeURIComponent(phone);
+    } else {
+      alert('❌ Error: ' + result.error);
+    }
+  } catch (error) {
+    alert('❌ Error de conexión');
+  }
+});
+</script>
