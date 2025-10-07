@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { notifyCustomerOrderConfirmed, notifyDeliveryStatus } from '../../../server/whatsapp-automation';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -56,6 +57,30 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     console.log('✅ Orden actualizada:', updatedOrder);
+
+    // 📱 ENVIAR WHATSAPP AL CLIENTE (AUTOMÁTICO)
+    if (userType === 'seller' && (newStatus === 'seller_confirmed' || newStatus === 'confirmed')) {
+      console.log('📱 AUTOMÁTICO: Enviando WhatsApp al cliente sobre confirmación');
+      console.log('📱 Order ID:', orderId);
+      console.log('📱 Customer ID:', updatedOrder.user_id);
+      
+      try {
+        await notifyCustomerOrderConfirmed(orderId, updatedOrder.user_id);
+        console.log('✅ AUTOMÁTICO: WhatsApp enviado al cliente exitosamente');
+      } catch (waError) {
+        console.error('❌ AUTOMÁTICO: Error enviando WhatsApp al cliente:', waError);
+      }
+    }
+
+    // 📱 ENVIAR WHATSAPP EN OTROS ESTADOS
+    if (newStatus === 'in_transit' || newStatus === 'delivered') {
+      try {
+        await notifyDeliveryStatus('delivery_' + orderId, newStatus, updatedOrder.seller_id, updatedOrder.user_id);
+        console.log('✅ AUTOMÁTICO: WhatsApp de delivery enviado');
+      } catch (waError) {
+        console.error('❌ AUTOMÁTICO: Error enviando WhatsApp de delivery:', waError);
+      }
+    }
 
     // Crear notificación para el usuario correspondiente
     const notificationData = {
