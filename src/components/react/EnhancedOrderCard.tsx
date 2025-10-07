@@ -98,25 +98,9 @@ export default function EnhancedOrderCard({
 
       if (data.success) {
         console.log('✅ Estado de orden actualizado:', newStatus);
+        console.log('🔄 Forzando recarga inmediata...');
         
-        // Recargar la página para ver el nuevo estado
-        if (onStatusChange) {
-          onStatusChange();
-        } else {
-          // Si no hay callback, recargar la página
-          window.location.reload();
-        }
-        
-        // Disparar evento de notificación
-        window.dispatchEvent(new CustomEvent('order-status-updated', {
-          detail: {
-            orderId: order.id,
-            newStatus: newStatus,
-            updatedAt: new Date().toISOString()
-          }
-        }));
-        
-        // Recargar la página para mostrar el nuevo estado
+        // SIEMPRE recargar la página inmediatamente
         window.location.reload();
       } else {
         console.error('❌ Error actualizando estado:', data.error);
