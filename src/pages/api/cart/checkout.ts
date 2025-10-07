@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from '@supabase/supabase-js';
+import { notifySellerNewOrder } from '../../../server/whatsapp-automation';
 
 export const POST: APIRoute = async (context) => {
   try {
@@ -249,6 +250,30 @@ export const POST: APIRoute = async (context) => {
 
     // Los items ya fueron creados por la función place_order, no necesitamos crearlos de nuevo
     console.log('✅ Items de la orden ya fueron creados por place_order');
+
+    // 📱 ACTUALIZAR TELÉFONO DEL CLIENTE (si proporcionó uno)
+    if (deliveryAddress?.contact) {
+      console.log('📱 Actualizando teléfono del cliente:', deliveryAddress.contact);
+      const { error: phoneError } = await supabase
+        .from('profiles')
+        .update({ phone: deliveryAddress.contact })
+        .eq('id', clientUuid);
+      
+      if (phoneError) {
+        console.error('⚠️ Error actualizando teléfono del cliente:', phoneError);
+      } else {
+        console.log('✅ Teléfono del cliente actualizado');
+      }
+    }
+
+    // 📱 ENVIAR WHATSAPP AL VENDEDOR (automático)
+    try {
+      console.log('📱 AUTOMÁTICO: Enviando WhatsApp al vendedor sobre pedido:', orderResult.orderId);
+      await notifySellerNewOrder(orderResult.orderId, sellerUuid);
+      console.log('✅ AUTOMÁTICO: WhatsApp enviado al vendedor');
+    } catch (waErr) {
+      console.error('❌ WhatsApp notify error (no bloquea):', waErr);
+    }
 
     // Crear notificación para el vendedor (usando la estructura existente si existe)
     const { error: notificationError } = await supabase
