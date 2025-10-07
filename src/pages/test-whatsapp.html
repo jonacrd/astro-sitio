@@ -3,33 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test WhatsApp</title>
+    <title>Test WhatsApp - Town</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
-        button { background: #25D366; color: white; border: none; cursor: pointer; }
-        .result { margin: 20px 0; padding: 10px; border-radius: 5px; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #25D366; text-align: center; }
+        .form-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button { 
+            background: #25D366; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover { background: #128C7E; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .result { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border-radius: 5px; 
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .loading { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .whatsapp-link { 
+            background: #25D366; 
+            color: white; 
+            padding: 10px 20px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            display: inline-block; 
+            margin-top: 10px;
+        }
+        .whatsapp-link:hover { background: #128C7E; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🧪 Test WhatsApp</h1>
+        <h1>📱 Test WhatsApp Automático</h1>
+        <p>Prueba el sistema de WhatsApp automático de Town</p>
         
         <form id="whatsappForm">
-            <label>Número de teléfono:</label>
-            <input type="tel" id="phone" value="+56962614851" placeholder="+56962614851">
+            <div class="form-group">
+                <label for="phone">Número de teléfono:</label>
+                <input type="tel" id="phone" value="+56962614851" placeholder="+56962614851" required>
+            </div>
             
-            <label>Mensaje:</label>
-            <textarea id="message" rows="4" placeholder="Escribe tu mensaje aquí...">🛒 NUEVO PEDIDO RECIBIDO
+            <div class="form-group">
+                <label for="message">Mensaje:</label>
+                <textarea id="message" rows="4" placeholder="Escribe tu mensaje aquí..." required>🛒 NUEVO PEDIDO RECIBIDO
 
 ID: TEST_ORDER_001
 
 Ve a tu dashboard para confirmar el pedido.</textarea>
+            </div>
             
-            <button type="submit">📱 Enviar WhatsApp</button>
+            <button type="submit" id="submitBtn">📱 Enviar WhatsApp</button>
         </form>
         
         <div id="result"></div>
@@ -41,11 +94,15 @@ Ve a tu dashboard para confirmar el pedido.</textarea>
             
             const phone = document.getElementById('phone').value;
             const message = document.getElementById('message').value;
+            const submitBtn = document.getElementById('submitBtn');
             const resultDiv = document.getElementById('result');
             
+            // Deshabilitar botón y mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Enviando...';
+            resultDiv.innerHTML = '<div class="result loading">⏳ Enviando WhatsApp...</div>';
+            
             try {
-                resultDiv.innerHTML = '<div class="result">⏳ Enviando WhatsApp...</div>';
-                
                 const response = await fetch('/api/test-whatsapp', {
                     method: 'POST',
                     headers: {
@@ -59,13 +116,13 @@ Ve a tu dashboard para confirmar el pedido.</textarea>
                 if (result.success) {
                     let resultHtml = `
                         <div class="result success">
-                            ✅ WhatsApp procesado exitosamente!<br>
+                            ✅ WhatsApp enviado exitosamente!<br>
                             Message ID: ${result.messageId || 'N/A'}<br>
                             ${result.message}
                     `;
                     
                     if (result.whatsappUrl) {
-                        resultHtml += `<br><br><a href="${result.whatsappUrl}" target="_blank" style="background: #25D366; color: white; padding: 10px; text-decoration: none; border-radius: 5px; display: inline-block;">📱 Abrir WhatsApp Web</a>`;
+                        resultHtml += `<br><br><a href="${result.whatsappUrl}" target="_blank" class="whatsapp-link">📱 Abrir WhatsApp Web</a>`;
                     }
                     
                     resultHtml += `</div>`;
@@ -85,6 +142,10 @@ Ve a tu dashboard para confirmar el pedido.</textarea>
                         ${error.message}
                     </div>
                 `;
+            } finally {
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = '📱 Enviar WhatsApp';
             }
         });
     </script>
