@@ -254,10 +254,16 @@ import React from 'react'
             
             ${order.status === 'seller_confirmed' ? `
               <button 
+                onclick="requestDelivery('${order.id}')"
+                class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+              >
+                🚚 Solicitar Delivery
+              </button>
+              <button 
                 onclick="updateOrderStatus('${order.id}', 'delivered')"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
-                🚚 Marcar como Entregado
+                📦 Marcar como Entregado
               </button>
             ` : ''}
             
@@ -363,6 +369,12 @@ import React from 'react'
     }
   }
 
+  // Solicitar delivery
+  function requestDelivery(orderId) {
+    console.log('🚚 Solicitando delivery para orden:', orderId);
+    window.location.href = `/seller/orders/${orderId}/delivery`;
+  }
+
   // Ver detalles de orden
   function viewOrderDetails(orderId) {
     console.log('👁️ Ver detalles de orden:', orderId);
@@ -372,6 +384,7 @@ import React from 'react'
   // Hacer funciones globales
   (window as any).updateOrderStatus = updateOrderStatus;
   (window as any).viewOrderDetails = viewOrderDetails;
+  (window as any).requestDelivery = requestDelivery;
 
   // Manejar filtros
   function setupFilters() {
