@@ -357,7 +357,7 @@ export default function EnhancedOrderCard({
           </button>
         )}
         
-        {(order.status === 'seller_confirmed' || order.status === 'confirmed') && (
+        {(order.status === 'seller_confirmed' || order.status === 'confirmed' || order.status === 'Confirmado') && (
           <>
             <button
               onClick={() => {
