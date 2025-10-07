@@ -230,32 +230,14 @@ export const POST: APIRoute = async ({ request }) => {
 
     // 📱 ENVIAR WHATSAPP AL VENDEDOR (seguro y no bloqueante)
     try {
-      const appBaseUrl = process.env.APP_BASE_URL || 'https://astro-sitio.vercel.app';
-      const confirmUrl = `${appBaseUrl}/dashboard/pedidos`;
-
-      // Obtener teléfono y opt-in del vendedor
-      const { data: seller } = await supabase
-        .from('profiles')
-        .select('phone, opt_in_whatsapp')
-        .eq('id', sellerId)
-        .single();
-
-      // WHATSAPP AUTOMÁTICO - ENVÍO REAL
-      if (seller?.phone && seller?.opt_in_whatsapp) {
-        await notifySellerNewOrder(seller.phone, orderId);
-        console.log('📱 WhatsApp AUTOMÁTICO enviado al vendedor:', seller.phone);
-      } else {
-        // Fallback: enviar a número de prueba si no hay configuración del vendedor
-        const fallbackPhone = '+56962614851';
-        await notifySellerNewOrder(fallbackPhone, orderId);
-        console.log('📱 WhatsApp AUTOMÁTICO enviado (fallback):', fallbackPhone);
-        console.log('⚠️ Vendedor sin teléfono/opt-in, usando fallback:', { 
-          phone: seller?.phone, 
-          opt_in: seller?.opt_in_whatsapp 
-        });
-      }
+      console.log('📱 AUTOMÁTICO: Enviando WhatsApp al vendedor sobre pedido:', orderId);
+      
+      // Llamar a la función automática de WhatsApp
+      await notifySellerNewOrder(orderId, sellerId);
+      
+      console.log('✅ AUTOMÁTICO: WhatsApp enviado al vendedor');
     } catch (waErr) {
-      console.error('WhatsApp notify error (no bloquea):', waErr);
+      console.error('❌ WhatsApp notify error (no bloquea):', waErr);
     }
 
     // Agregar puntos al usuario (opcional)
