@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin WhatsApp - Town</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2em; font-weight: bold; color: #25D366; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .messages { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .message-item { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .phone { font-weight: bold; color: #25D366; }
+        .status { padding: 5px 10px; border-radius: 15px; font-size: 0.8em; }
+        .status.pending { background: #fff3cd; color: #856404; }
+        .status.sent { background: #d4edda; color: #155724; }
+        .status.failed { background: #f8d7da; color: #721c24; }
+        .message-text { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .whatsapp-link { background: #25D366; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px; }
+        .whatsapp-link:hover { background: #128C7E; }
+        .process-btn { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 20px 0; }
+        .process-btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Administración de WhatsApp</h1>
+            <p>Gestiona los mensajes de WhatsApp automáticos del sistema</p>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalMessages">-</div>
+                <div class="stat-label">Total Mensajes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingMessages">-</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sentMessages">-</div>
+                <div class="stat-label">Enviados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="failedMessages">-</div>
+                <div class="stat-label">Fallidos</div>
+            </div>
+        </div>
+        
+        <div class="messages">
+            <h2>📋 Mensajes Recientes</h2>
+            <button class="process-btn" onclick="processMessages()">🔄 Procesar Mensajes Pendientes</button>
+            <div id="messagesList">
+                <p>Cargando mensajes...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/whatsapp-stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalMessages').textContent = data.stats.total;
+                    document.getElementById('pendingMessages').textContent = data.stats.pending;
+                    document.getElementById('sentMessages').textContent = data.stats.sent;
+                    document.getElementById('failedMessages').textContent = data.stats.failed;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+        
+        // Cargar mensajes
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/whatsapp-messages');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMessages(data.messages);
+                } else {
+                    document.getElementById('messagesList').innerHTML = '<p>Error cargando mensajes</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando mensajes:', error);
+                document.getElementById('messagesList').innerHTML = '<p>Error cargando mensajes</p>';
+            }
+        }
+        
+        // Mostrar mensajes
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesList');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p>No hay mensajes</p>';
+                return;
+            }
+            
+            container.innerHTML = messages.map(msg => `
+                <div class="message-item">
+                    <div class="message-header">
+                        <span class="phone">${msg.phone}</span>
+                        <span class="status ${msg.status}">${msg.status.toUpperCase()}</span>
+                    </div>
+                    <div class="message-text">${msg.message}</div>
+                    ${msg.url ? `<a href="${msg.url}" target="_blank" class="whatsapp-link">📱 Abrir WhatsApp</a>` : ''}
+                    <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+                        ${new Date(msg.created_at).toLocaleString()}
+                        ${msg.sent_at ? ` | Enviado: ${new Date(msg.sent_at).toLocaleString()}` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Procesar mensajes
+        async function processMessages() {
+            try {
+                const response = await fetch('/api/process-whatsapp', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.message}`);
+                    loadStats();
+                    loadMessages();
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error procesando mensajes:', error);
+                alert('❌ Error procesando mensajes');
+            }
+        }
+        
+        // Cargar datos iniciales
+        loadStats();
+        loadMessages();
+        
+        // Actualizar cada 30 segundos
+        setInterval(() => {
+            loadStats();
+            loadMessages();
+        }, 30000);
+    </script>
+</body>
+</html>
