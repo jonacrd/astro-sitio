@@ -342,6 +342,11 @@ export default function EnhancedOrderCard({
         </button>
 
         {/* Botones para cambiar estado (solo para vendedores) */}
+        {/* DEBUG: Mostrar estado actual */}
+        <div className="text-xs text-gray-500 mb-2">
+          Estado actual: <span className="font-bold">{order.status}</span>
+        </div>
+        
         {order.status === 'pending' && (
           <button
             onClick={() => handleStatusChange('seller_confirmed')}
@@ -352,10 +357,11 @@ export default function EnhancedOrderCard({
           </button>
         )}
         
-        {order.status === 'seller_confirmed' && (
+        {(order.status === 'seller_confirmed' || order.status === 'confirmed') && (
           <>
             <button
               onClick={() => {
+                console.log('🚚 Click en Solicitar Delivery');
                 // Redirigir a página de solicitar delivery
                 window.location.href = `/seller/orders/${order.id}/delivery`;
               }}
