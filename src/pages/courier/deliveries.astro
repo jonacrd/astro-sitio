@@ -1,0 +1,166 @@
+---
+// Página para que el courier vea y gestione sus deliveries
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Mis Deliveries">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Mis Deliveries</h1>
+    
+    <div class="space-y-4">
+      <!-- Delivery de ejemplo -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-lg font-semibold">Delivery #DELIVERY_001</h3>
+            <p class="text-gray-600">Pedido #TEST_ORDER_001</p>
+            <p class="text-sm text-gray-500">Estado: <span class="font-medium text-orange-600">Pendiente</span></p>
+          </div>
+          <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-sm">
+            Nueva Oferta
+          </span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h4 class="font-medium text-gray-700">📍 Recogida</h4>
+            <p class="text-sm text-gray-600">Calle Test 123, Santiago</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-gray-700">🎯 Entrega</h4>
+            <p class="text-sm text-gray-600">Av. Mock 456, Santiago</p>
+          </div>
+        </div>
+        
+        <div class="flex space-x-2">
+          <button 
+            onclick="acceptDelivery('DELIVERY_001', 'test-courier-001')"
+            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            ✅ Aceptar
+          </button>
+          <button 
+            onclick="rejectDelivery('DELIVERY_001')"
+            class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            ❌ Rechazar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Delivery aceptado -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-lg font-semibold">Delivery #DELIVERY_002</h3>
+            <p class="text-gray-600">Pedido #TEST_ORDER_002</p>
+            <p class="text-sm text-gray-500">Estado: <span class="font-medium text-blue-600">En camino</span></p>
+          </div>
+          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+            En Progreso
+          </span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h4 class="font-medium text-gray-700">📍 Recogida</h4>
+            <p class="text-sm text-gray-600">Calle Test 123, Santiago</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-gray-700">🎯 Entrega</h4>
+            <p class="text-sm text-gray-600">Av. Mock 456, Santiago</p>
+          </div>
+        </div>
+        
+        <div class="space-y-2">
+          <button 
+            onclick="updateStatus('DELIVERY_002', 'arrived_pickup')"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            📍 Llegué al local
+          </button>
+          <button 
+            onclick="updateStatus('DELIVERY_002', 'picked_up')"
+            class="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            📦 Recogí el pedido
+          </button>
+          <button 
+            onclick="updateStatus('DELIVERY_002', 'arrived_delivery')"
+            class="w-full bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            🚚 Llegué a destino
+          </button>
+          <button 
+            onclick="updateStatus('DELIVERY_002', 'delivered')"
+            class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            ✅ Entregado
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+async function acceptDelivery(deliveryId, courierId) {
+  try {
+    const response = await fetch('/api/courier/accept-delivery', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        deliveryId,
+        courierId,
+        orderId: 'TEST_ORDER_001',
+        sellerId: 'test_seller_id',
+        customerId: 'test_customer_id'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('✅ Delivery aceptado. Se han enviado notificaciones.');
+      location.reload();
+    } else {
+      alert('❌ Error: ' + result.error);
+    }
+  } catch (error) {
+    alert('❌ Error de conexión');
+  }
+}
+
+async function rejectDelivery(deliveryId) {
+  alert('❌ Delivery rechazado');
+  // TODO: Implementar rechazo
+}
+
+async function updateStatus(deliveryId, status) {
+  try {
+    const response = await fetch('/api/courier/update-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        deliveryId,
+        status,
+        orderId: 'TEST_ORDER_002',
+        sellerId: 'test_seller_id',
+        customerId: 'test_customer_id',
+        courierPhone: '+56962614851'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert(`✅ Status actualizado: ${status}`);
+      location.reload();
+    } else {
+      alert('❌ Error: ' + result.error);
+    }
+  } catch (error) {
+    alert('❌ Error de conexión');
+  }
+}
+</script>

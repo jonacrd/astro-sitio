@@ -16,8 +16,12 @@ function getSupabase() {
 
 // Función helper para obtener configuración de WhatsApp
 function getWhatsAppConfig() {
-  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || import.meta.env.WHATSAPP_TOKEN;
-  const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID || import.meta.env.WHATSAPP_PHONE_ID;
+  // Configuración directa para desarrollo
+  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || import.meta.env.WHATSAPP_TOKEN || 'EAA1Dzgz00SIBPukOaVGjPZAilsypFebOSp2c5cKlZB0XdQ2P7Xq8jdISXCCZBSm7QjLoPpVwbDM3KpzKNBhYdT6yoKAH8EgMJxx9hIvMi5RZA3Xe56ylG8mf7PEnlkfmcwNZCvAoDRRNUA56CHGPGvZAfnc0yEDLjAIcyagUZBAB7EZAXROs4PYtNutBlNjySOWYZApNt7rDOSYw0mVvJi7XDGA4P29mVl8yoZB0zeXbVunDG99pq6XjaIiZA5B';
+  const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID || import.meta.env.WHATSAPP_PHONE_ID || '773488772522546';
+  
+  console.log('🔍 WhatsApp Config - Token presente:', !!WHATSAPP_TOKEN);
+  console.log('🔍 WhatsApp Config - Phone ID:', WHATSAPP_PHONE_ID);
   
   return {
     token: WHATSAPP_TOKEN,
@@ -26,8 +30,13 @@ function getWhatsAppConfig() {
   };
 }
 
-// Enviar WhatsApp automático
-export async function sendWhatsAppAutomation(to: string, message: string): Promise<{
+// Enviar WhatsApp automático con soporte para plantillas
+export async function sendWhatsAppAutomation(
+  to: string, 
+  message: string, 
+  templateName?: string, 
+  templateParams?: string[]
+): Promise<{
   success: boolean;
   messageId?: string;
   error?: string;
@@ -43,6 +52,52 @@ export async function sendWhatsAppAutomation(to: string, message: string): Promi
       return { success: true, messageId: 'fallback' };
     }
 
+    // Si hay plantilla personalizada, intentar usarla
+    if (templateName && templateParams) {
+      console.log(`📱 AUTOMÁTICO: Usando plantilla personalizada: ${templateName}`);
+      
+      const response = await fetch(config.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: to.startsWith('+') ? to.substring(1) : to,
+          type: 'template',
+          template: {
+            name: templateName,
+            language: {
+              code: 'es_ES'
+            },
+            components: [
+              {
+                type: 'body',
+                parameters: templateParams.map(param => ({
+                  type: 'text',
+                  text: param
+                }))
+              }
+            ]
+          },
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log('✅ AUTOMÁTICO: WhatsApp con plantilla personalizada enviado exitosamente:', result);
+        return { success: true, messageId: result.messages[0].id };
+      } else {
+        console.warn('⚠️ AUTOMÁTICO: Plantilla personalizada falló, usando fallback:', result);
+        // Continuar con fallback
+      }
+    }
+
+    // Fallback: usar plantilla hello_world
+    console.log('📱 AUTOMÁTICO: Usando plantilla hello_world como fallback');
+    
     const response = await fetch(config.apiUrl, {
       method: 'POST',
       headers: {
@@ -51,10 +106,13 @@ export async function sendWhatsAppAutomation(to: string, message: string): Promi
       },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
-        to: to.replace('+', ''),
-        type: 'text',
-        text: {
-          body: message,
+        to: to.startsWith('+') ? to.substring(1) : to,
+        type: 'template',
+        template: {
+          name: 'hello_world',
+          language: {
+            code: 'en_US'
+          }
         },
       }),
     });
@@ -114,7 +172,8 @@ export async function notifySellerNewOrder(orderId: string, sellerId: string): P
     }
 
     const message = `🛒 NUEVO PEDIDO RECIBIDO\n\nID: ${orderId}\n\nVe a tu dashboard para confirmar el pedido.`;
-    await sendWhatsAppAutomation(seller.phone, message);
+    // Intentar usar plantilla personalizada, fallback a hello_world
+    await sendWhatsAppAutomation(seller.phone, message, 'nuevo_pedido_vendedor', [orderId, seller.name || 'Cliente', '0']);
     
     console.log('✅ AUTOMÁTICO: Vendedor notificado exitosamente');
   } catch (error: any) {
@@ -160,7 +219,8 @@ export async function notifyCustomerOrderConfirmed(orderId: string, customerId: 
     }
 
     const message = `✅ TU PEDIDO HA SIDO CONFIRMADO\n\nID: ${orderId}\n\nTu pedido está siendo preparado.`;
-    await sendWhatsAppAutomation(customer.phone, message);
+    // Intentar usar plantilla personalizada, fallback a hello_world
+    await sendWhatsAppAutomation(customer.phone, message, 'pedido_confirmado_cliente', [orderId, '30 minutos']);
     
     console.log('✅ AUTOMÁTICO: Cliente notificado exitosamente');
   } catch (error: any) {
@@ -206,7 +266,8 @@ export async function notifyDeliveryNewOffer(deliveryId: string, courierId: stri
     }
 
     const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${deliveryId}\nDirección: ${pickupAddress}\n\nVe a tu app para aceptar o rechazar.`;
-    await sendWhatsAppAutomation(courier.phone, message);
+    // Intentar usar plantilla personalizada, fallback a hello_world
+    await sendWhatsAppAutomation(courier.phone, message, 'delivery_asignado_courier', [deliveryId, pickupAddress, '5000']);
     
     console.log('✅ AUTOMÁTICO: Delivery notificado exitosamente');
   } catch (error: any) {

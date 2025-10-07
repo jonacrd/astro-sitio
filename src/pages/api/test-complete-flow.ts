@@ -11,7 +11,13 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     console.log('🧪 TESTING: Iniciando flujo completo de notificaciones WhatsApp');
     
-    const { testPhone = '+56962614851' } = await request.json();
+    let testPhone = '+56962614851';
+    try {
+      const body = await request.json();
+      testPhone = body.testPhone || testPhone;
+    } catch {
+      // Si no hay JSON, usar valor por defecto
+    }
     
     // 1. SIMULAR NUEVO PEDIDO - NOTIFICAR VENDEDOR
     console.log('🛒 PASO 1: Notificando vendedor sobre nuevo pedido');
