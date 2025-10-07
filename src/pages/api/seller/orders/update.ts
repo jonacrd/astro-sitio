@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
-import { notifyOrderConfirmedToBuyer, notifyOrderDelivered, notifyOrderOnTheWay } from '../../../../server/whatsapp';
+import { notifyCustomerOrderConfirmed, notifyDeliveryStatus } from '../../../../server/whatsapp-automation';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -147,14 +147,14 @@ export const POST: APIRoute = async ({ request }) => {
       const rateUrl = `${appBaseUrl}/pedidos/${orderId}/calificar`;
       const pointsUrl = `${appBaseUrl}/perfil#puntos`;
 
-      if (status === 'confirmed' && buyer?.phone && buyer?.opt_in_whatsapp) {
-        await notifyOrderConfirmedToBuyer({ buyerPhone: buyer.phone, orderId, trackingUrl });
+      // NOTIFICACIONES AUTOMÁTICAS WHATSAPP
+      if (status === 'confirmed') {
+        await notifyCustomerOrderConfirmed(orderId, updatedOrder.user_id);
       }
-      if ((status === 'in_transit' || status === 'on_the_way') && buyer?.phone && buyer?.opt_in_whatsapp) {
-        await notifyOrderOnTheWay({ buyerPhone: buyer.phone, orderId, trackingUrl });
-      }
-      if (status === 'delivered' && buyer?.phone && buyer?.opt_in_whatsapp) {
-        await notifyOrderDelivered({ buyerPhone: buyer.phone, orderId, rateUrl, pointsUrl });
+      
+      // Si hay delivery activo, notificar status
+      if (status === 'in_transit' || status === 'delivered') {
+        await notifyDeliveryStatus('delivery_' + orderId, status, updatedOrder.seller_id, updatedOrder.user_id);
       }
       // Nota: el aviso al vendedor en "nuevo pedido" se enviará desde el endpoint de creación de pedido
     } catch (waErr) {

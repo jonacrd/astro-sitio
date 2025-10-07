@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Flujo Completo WhatsApp - Town</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 { 
+            color: #25D366; 
+            text-align: center; 
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #25D366;
+        }
+        .step h3 {
+            color: #25D366;
+            margin-top: 0;
+        }
+        button {
+            background: linear-gradient(135deg, #25D366, #1DA851);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #25D366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-icon.pending { background: #ffc107; }
+        .status-icon.success { background: #28a745; }
+        .status-icon.error { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Flujo Completo WhatsApp</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Prueba el sistema completo de notificaciones automáticas de WhatsApp
+        </p>
+        
+        <div class="step">
+            <h3>📱 Configuración</h3>
+            <label for="testPhone">Número de Teléfono de Prueba:</label>
+            <input type="text" id="testPhone" value="+56962614851" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
+            <small>Este número recibirá todas las notificaciones de prueba</small>
+        </div>
+        
+        <div class="step">
+            <h3>🔄 Flujo Completo Automático</h3>
+            <p>Este test simula todo el flujo de notificaciones:</p>
+            <ul>
+                <li><strong>1.</strong> Cliente hace pedido → Vendedor recibe WhatsApp</li>
+                <li><strong>2.</strong> Vendedor confirma → Cliente recibe WhatsApp</li>
+                <li><strong>3.</strong> Vendedor activa delivery → Delivery recibe WhatsApp</li>
+                <li><strong>4.</strong> Delivery acepta → Vendedor y Cliente reciben WhatsApp</li>
+            </ul>
+            <button id="testCompleteFlow">🚀 Ejecutar Flujo Completo</button>
+        </div>
+        
+        <div class="step">
+            <h3>🔍 Tests Individuales</h3>
+            <button id="testNewOrder">🛒 Test: Nuevo Pedido (Vendedor)</button>
+            <button id="testOrderConfirmed">✅ Test: Pedido Confirmado (Cliente)</button>
+            <button id="testDeliveryOffer">🚚 Test: Oferta Delivery (Repartidor)</button>
+            <button id="testDeliveryStatus">📦 Test: Status Delivery (Todos)</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;">
+            <h3>📊 Resultados</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let isLoading = false;
+        
+        function setLoading(button, loading) {
+            isLoading = loading;
+            button.disabled = loading;
+            if (loading) {
+                button.innerHTML = '<span class="loading"></span> Procesando...';
+            }
+        }
+        
+        function showResult(content, isSuccess = true) {
+            const result = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            result.style.display = 'block';
+            result.className = `result ${isSuccess ? 'success' : 'error'}`;
+            resultContent.innerHTML = content;
+        }
+        
+        function addStatus(step, status, message) {
+            const statusIcon = status === 'success' ? '✅' : status === 'error' ? '❌' : '⏳';
+            return `<div class="status">
+                <span class="status-icon ${status}"></span>
+                <strong>${step}:</strong> ${message}
+            </div>`;
+        }
+        
+        async function testCompleteFlow() {
+            const button = document.getElementById('testCompleteFlow');
+            const testPhone = document.getElementById('testPhone').value;
+            
+            setLoading(button, true);
+            
+            try {
+                const response = await fetch('/api/test-complete-flow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testPhone })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    let content = `<h4>🎉 Flujo Completo Ejecutado</h4>`;
+                    content += addStatus('Nuevo Pedido', 'success', 'Vendedor notificado');
+                    content += addStatus('Pedido Confirmado', 'success', 'Cliente notificado');
+                    content += addStatus('Oferta Delivery', 'success', 'Repartidor notificado');
+                    content += addStatus('Status Delivery', 'success', 'Vendedor y Cliente notificados');
+                    content += `<p><strong>📱 Número de prueba:</strong> ${testPhone}</p>`;
+                    content += `<p><strong>📝 Nota:</strong> Revisa la consola del servidor para ver los logs de WhatsApp</p>`;
+                    
+                    showResult(content, true);
+                } else {
+                    showResult(`❌ Error: ${result.error}`, false);
+                }
+            } catch (error) {
+                showResult(`❌ Error de red: ${error.message}`, false);
+            } finally {
+                setLoading(button, false);
+                button.innerHTML = '🚀 Ejecutar Flujo Completo';
+            }
+        }
+        
+        async function testIndividual(type, name) {
+            const button = document.getElementById(`test${type}`);
+            const testPhone = document.getElementById('testPhone').value;
+            
+            setLoading(button, true);
+            
+            try {
+                const response = await fetch('/api/test-whatsapp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phone: testPhone, 
+                        message: `🧪 TEST ${name}\n\nEste es un mensaje de prueba para verificar que el sistema de notificaciones WhatsApp funciona correctamente.\n\nTipo: ${name}\nTimestamp: ${new Date().toLocaleString()}`
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`✅ ${name} enviado exitosamente a ${testPhone}`, true);
+                } else {
+                    showResult(`❌ Error enviando ${name}: ${result.error}`, false);
+                }
+            } catch (error) {
+                showResult(`❌ Error de red: ${error.message}`, false);
+            } finally {
+                setLoading(button, false);
+                button.innerHTML = button.innerHTML.replace('<span class="loading"></span> ', '');
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('testCompleteFlow').addEventListener('click', testCompleteFlow);
+        document.getElementById('testNewOrder').addEventListener('click', () => testIndividual('NewOrder', 'Nuevo Pedido'));
+        document.getElementById('testOrderConfirmed').addEventListener('click', () => testIndividual('OrderConfirmed', 'Pedido Confirmado'));
+        document.getElementById('testDeliveryOffer').addEventListener('click', () => testIndividual('DeliveryOffer', 'Oferta Delivery'));
+        document.getElementById('testDeliveryStatus').addEventListener('click', () => testIndividual('DeliveryStatus', 'Status Delivery'));
+    </script>
+</body>
+</html>

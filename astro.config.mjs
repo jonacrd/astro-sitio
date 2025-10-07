@@ -12,6 +12,9 @@ export default defineConfig({
   vite: {
     define: {
       'import.meta.env.DELIVERY_ENABLED': JSON.stringify('true'),
+      // Variables de WhatsApp para desarrollo
+      'import.meta.env.WHATSAPP_TOKEN': JSON.stringify(process.env.WHATSAPP_TOKEN || ''),
+      'import.meta.env.WHATSAPP_PHONE_ID': JSON.stringify(process.env.WHATSAPP_PHONE_ID || ''),
     },
     resolve: {
       alias: {
