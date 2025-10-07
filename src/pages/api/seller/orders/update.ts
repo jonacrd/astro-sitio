@@ -149,7 +149,9 @@ export const POST: APIRoute = async ({ request }) => {
 
       // NOTIFICACIONES AUTOMÁTICAS WHATSAPP
       if (status === 'confirmed') {
+        console.log('📱 AUTOMÁTICO: Enviando WhatsApp al cliente sobre confirmación:', orderId);
         await notifyCustomerOrderConfirmed(orderId, updatedOrder.user_id);
+        console.log('✅ AUTOMÁTICO: WhatsApp enviado al cliente');
       }
       
       // Si hay delivery activo, notificar status

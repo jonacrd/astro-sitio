@@ -343,13 +343,26 @@ export default function EnhancedOrderCard({
         )}
         
         {order.status === 'seller_confirmed' && (
-          <button
-            onClick={() => handleStatusChange('delivered')}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
-          >
-            {loading ? '⏳' : '🚚'} Marcar como Entregado
-          </button>
+          <>
+            <button
+              onClick={() => {
+                // Redirigir a página de solicitar delivery
+                window.location.href = `/seller/orders/${order.id}/delivery`;
+              }}
+              disabled={loading}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm disabled:opacity-50"
+            >
+              {loading ? '⏳' : '🚚'} Solicitar Delivery
+            </button>
+            
+            <button
+              onClick={() => handleStatusChange('delivered')}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+            >
+              {loading ? '⏳' : '📦'} Marcar como Entregado
+            </button>
+          </>
         )}
         
         {order.status === 'delivered' && (
