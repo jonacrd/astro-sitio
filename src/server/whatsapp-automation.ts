@@ -55,6 +55,9 @@ export async function sendWhatsAppAutomation(
     // Si hay plantilla personalizada, intentar usarla
     if (templateName && templateParams) {
       console.log(`📱 AUTOMÁTICO: Usando plantilla personalizada: ${templateName}`);
+      console.log(`📱 AUTOMÁTICO: Parámetros: ${JSON.stringify(templateParams)}`);
+      console.log(`📱 AUTOMÁTICO: URL: ${config.apiUrl}`);
+      console.log(`📱 AUTOMÁTICO: Token presente: ${!!config.token}`);
       
       const response = await fetch(config.apiUrl, {
         method: 'POST',
@@ -85,6 +88,8 @@ export async function sendWhatsAppAutomation(
       });
 
       const result = await response.json();
+      console.log(`📱 AUTOMÁTICO: Respuesta de Meta: ${JSON.stringify(result)}`);
+      console.log(`📱 AUTOMÁTICO: Status: ${response.status}`);
       
       if (response.ok) {
         console.log('✅ AUTOMÁTICO: WhatsApp con plantilla personalizada enviado exitosamente:', result);
@@ -95,8 +100,12 @@ export async function sendWhatsAppAutomation(
       }
     }
 
-    // Fallback: usar plantilla hello_world
-    console.log('📱 AUTOMÁTICO: Usando plantilla hello_world como fallback');
+    // Fallback: usar plantilla hello_world solo si no hay plantilla personalizada
+    if (!templateName) {
+      console.log('📱 AUTOMÁTICO: Usando plantilla hello_world como fallback');
+    } else {
+      console.log('📱 AUTOMÁTICO: Usando plantilla hello_world porque la plantilla personalizada falló');
+    }
     
     const response = await fetch(config.apiUrl, {
       method: 'POST',
