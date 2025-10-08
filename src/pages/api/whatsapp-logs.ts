@@ -1,38 +1,35 @@
-// Endpoint para ver logs de WhatsApp
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
   try {
-    // Simular logs de WhatsApp (en producción estos estarían en Vercel logs)
-    const logs = [
-      {
-        timestamp: new Date().toISOString(),
-        action: 'WhatsApp configurado',
-        status: 'success',
-        message: 'Sistema listo para enviar WhatsApp automáticamente'
-      },
-      {
-        timestamp: new Date(Date.now() - 60000).toISOString(),
-        action: 'Verificación de configuración',
-        status: 'success',
-        message: 'WHATSAPP_TOKEN y WHATSAPP_PHONE_ID configurados'
-      }
-    ];
+    // Simular prueba de plantilla para generar logs
+    const { sendWhatsAppAutomation } = await import('../../server/whatsapp-automation');
+    
+    console.log('🔍 LOGS: Iniciando prueba de plantilla para generar logs');
+    
+    // Probar una plantilla
+    const result = await sendWhatsAppAutomation(
+      '+56962614851',
+      'Test order_management_1',
+      'order_management_1',
+      ['Test Vendedor', 'nueva orden']
+    );
     
     return new Response(JSON.stringify({
       success: true,
-      logs,
-      note: 'En producción, revisa los logs de Vercel para ver los mensajes de WhatsApp'
-    }), { 
+      message: 'Logs generados en el servidor',
+      result: result
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
     
   } catch (error: any) {
+    console.error('🔍 LOGS: Error generando logs:', error);
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
-    }), { 
+      error: error.message || 'Error interno del servidor'
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

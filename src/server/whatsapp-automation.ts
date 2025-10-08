@@ -96,6 +96,8 @@ export async function sendWhatsAppAutomation(
         return { success: true, messageId: result.messages[0].id };
       } else {
         console.warn('⚠️ AUTOMÁTICO: Plantilla personalizada falló, usando fallback:', result);
+        console.warn('⚠️ AUTOMÁTICO: Error específico:', result.error?.message || 'Error desconocido');
+        console.warn('⚠️ AUTOMÁTICO: Código de error:', result.error?.code || 'Sin código');
         // Continuar con fallback
       }
     }
