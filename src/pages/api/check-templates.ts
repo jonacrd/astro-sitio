@@ -9,8 +9,25 @@ export const GET: APIRoute = async () => {
     console.log('🔍 CHECK: Token presente:', !!WHATSAPP_TOKEN);
     console.log('🔍 CHECK: Phone ID:', WHATSAPP_PHONE_ID);
     
-    // Verificar plantillas disponibles
-    const response = await fetch(`https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_ID}/message_templates`, {
+    // Verificar plantillas disponibles usando el endpoint correcto
+    // Primero obtener el business account ID
+    const businessResponse = await fetch(`https://graph.facebook.com/v18.0/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    const businessData = await businessResponse.json();
+    console.log('🔍 CHECK: Business data:', JSON.stringify(businessData, null, 2));
+    
+    if (!businessResponse.ok) {
+      throw new Error(`Error obteniendo business data: ${businessData.error?.message}`);
+    }
+    
+    // Ahora obtener las plantillas del business account
+    const response = await fetch(`https://graph.facebook.com/v18.0/${businessData.id}/message_templates?fields=name,status,language,components`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
