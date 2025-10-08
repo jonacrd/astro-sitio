@@ -1,5 +1,10 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+);
 import { notifyDeliveryStatus } from '../../../server/whatsapp-automation';
 
 export const POST: APIRoute = async ({ request }) => {
