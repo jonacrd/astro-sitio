@@ -86,18 +86,11 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    let html = '<div class="result success">✅ Plantillas verificadas</div>';
-                    html += `<div class="result">📊 Total de plantillas: ${data.totalTemplates}</div>`;
-                    html += `<div class="result">📋 Plantillas disponibles: ${data.availableTemplates.join(', ')}</div>`;
-                    html += `<div class="result">🎯 Nuestras plantillas: ${data.ourTemplates.join(', ')}</div>`;
+                    let html = '<div class="result success">✅ Plantillas probadas directamente</div>';
+                    html += `<div class="result">📊 Plantillas exitosas: ${data.successfulTemplates.join(', ')}</div>`;
+                    html += `<div class="result">❌ Plantillas fallidas: ${data.failedTemplates.join(', ')}</div>`;
                     
-                    if (data.missingTemplates.length > 0) {
-                        html += `<div class="result warning">⚠️ Plantillas faltantes: ${data.missingTemplates.join(', ')}</div>`;
-                    } else {
-                        html += `<div class="result success">✅ Todas nuestras plantillas están disponibles</div>`;
-                    }
-                    
-                    html += `<div class="result">📄 Detalles completos: ${JSON.stringify(data.allTemplates, null, 2)}</div>`;
+                    html += `<div class="result">📄 Resultados detallados: ${JSON.stringify(data.results, null, 2)}</div>`;
                     
                     resultDiv.innerHTML = html;
                 } else {
