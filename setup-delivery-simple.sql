@@ -57,4 +57,4 @@ UNION ALL
 SELECT 'orders' as tabla, COUNT(*) as count FROM orders;
 
 -- 7. Mostrar couriers existentes
-SELECT 'Couriers existentes:' as info, id, name, phone, status FROM couriers;
+SELECT 'Couriers existentes:' as info, id, name, phone FROM couriers;
