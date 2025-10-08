@@ -1,0 +1,110 @@
+---
+// Página para buscar WhatsApp Business Account
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar WhatsApp Business Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #25D366;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Buscar WhatsApp Business Account</h1>
+        
+        <button id="findBusiness">🚀 Buscar WhatsApp Business Account</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function findBusiness() {
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="result">🔄 Buscando WhatsApp Business Account...</div>';
+            
+            try {
+                const response = await fetch('/api/find-whatsapp-business');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<div class="result success">✅ Enfoques probados</div>';
+                    
+                    for (const [approach, result] of Object.entries(data.results)) {
+                        html += `<div class="result">🔍 Enfoque: ${approach}</div>`;
+                        html += `<div class="result">Descripción: ${result.description}</div>`;
+                        html += `<div class="result">Status: ${result.success ? '✅' : '❌'}</div>`;
+                        html += `<div class="result">Datos: ${JSON.stringify(result, null, 2)}</div>`;
+                        html += '<div class="result">---</div>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error de red: ${error.message}</div>`;
+            }
+        }
+
+        // Agregar event listener cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('findBusiness').addEventListener('click', findBusiness);
+        });
+    </script>
+</body>
+</html>
