@@ -50,18 +50,14 @@ export default function DeliveryDashboard() {
         throw new Error('No hay usuario autenticado');
       }
 
-      // Obtener ofertas de delivery para este courier (consulta simple)
+      // Obtener ofertas de delivery para este courier (solo columnas básicas)
       const { data, error } = await supabase
         .from('delivery_offers')
         .select(`
           id,
-          order_id,
           courier_id,
           status,
-          created_at,
-          pickup_address,
-          delivery_address,
-          notes
+          created_at
         `)
         .eq('courier_id', user.id)
         .order('created_at', { ascending: false });
@@ -70,15 +66,15 @@ export default function DeliveryDashboard() {
         throw error;
       }
 
-      // Formatear datos (sin relaciones complejas)
+      // Formatear datos (solo con columnas que existen)
       const formattedOffers = (data || []).map((offer: any) => ({
         id: offer.id,
-        order_id: offer.order_id,
+        order_id: offer.id, // Usar el ID de la oferta como order_id temporal
         courier_id: offer.courier_id,
         status: offer.status,
         created_at: offer.created_at,
         order: {
-          id: offer.order_id,
+          id: offer.id,
           total_cents: 150000, // Valor por defecto para testing
           status: 'delivery_requested',
           created_at: offer.created_at,
@@ -86,7 +82,7 @@ export default function DeliveryDashboard() {
           buyer_phone: '+56962614851',
           seller_name: 'Vendedor',
           seller_phone: '+56962614851',
-          delivery_address: offer.delivery_address || 'Dirección de entrega'
+          delivery_address: 'Dirección de entrega'
         }
       }));
 
