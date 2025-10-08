@@ -85,6 +85,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       });
 
       if (error) {
+        console.log('Usuario no existe, creando...');
+        
         // Si no existe, crear el usuario
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: email,
@@ -107,7 +109,37 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
             });
 
           if (profileError) {
-            console.error('Error creando perfil:', profileError);
+            console.error('Error creando perfil courier:', profileError);
+            // Continuar de todas formas
+          } else {
+            console.log('✅ Perfil courier creado exitosamente');
+          }
+        }
+      } else {
+        console.log('✅ Usuario existente, iniciando sesión...');
+        
+        // Verificar que existe el perfil courier
+        const { data: courier, error: courierError } = await supabase
+          .from('couriers')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .single();
+
+        if (courierError || !courier) {
+          console.log('Creando perfil courier faltante...');
+          
+          // Crear perfil si no existe
+          const { error: profileError } = await supabase
+            .from('couriers')
+            .insert({
+              user_id: data.user.id,
+              name: email.split('@')[0],
+              phone: phone,
+              status: 'active'
+            });
+
+          if (profileError) {
+            console.error('Error creando perfil courier:', profileError);
           }
         }
       }
