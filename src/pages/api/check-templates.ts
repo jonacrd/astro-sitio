@@ -9,68 +9,76 @@ export const GET: APIRoute = async () => {
     console.log('🔍 CHECK: Token presente:', !!WHATSAPP_TOKEN);
     console.log('🔍 CHECK: Phone ID:', WHATSAPP_PHONE_ID);
     
-    // Verificar plantillas disponibles usando el endpoint correcto
-    // Primero obtener el business account ID
-    const businessResponse = await fetch(`https://graph.facebook.com/v18.0/me`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-        'Content-Type': 'application/json',
+    // Probar directamente las plantillas enviando mensajes
+    const ourTemplates = ['order_management_1', 'order_confirmed', 'order_on_the_way', 'order_delivered'];
+    const results: any = {};
+    
+    console.log('🔍 CHECK: Probando plantillas directamente...');
+    
+    for (const templateName of ourTemplates) {
+      try {
+        console.log(`🔍 CHECK: Probando plantilla: ${templateName}`);
+        
+        const testResponse = await fetch(`https://graph.facebook.com/v18.0/${WHATSAPP_PHONE_ID}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: '56962614851',
+            type: 'template',
+            template: {
+              name: templateName,
+              language: {
+                code: 'es_ES'
+              },
+              components: [
+                {
+                  type: 'body',
+                  parameters: [
+                    { type: 'text', text: 'Test' },
+                    { type: 'text', text: 'Test' }
+                  ]
+                }
+              ]
+            }
+          })
+        });
+        
+        const testResult = await testResponse.json();
+        console.log(`🔍 CHECK: Resultado ${templateName}:`, JSON.stringify(testResult, null, 2));
+        
+        results[templateName] = {
+          success: testResponse.ok,
+          error: testResult.error?.message || null,
+          code: testResult.error?.code || null
+        };
+        
+      } catch (error: any) {
+        console.error(`🔍 CHECK: Error probando ${templateName}:`, error);
+        results[templateName] = {
+          success: false,
+          error: error.message,
+          code: 'NETWORK_ERROR'
+        };
       }
-    });
-    
-    const businessData = await businessResponse.json();
-    console.log('🔍 CHECK: Business data:', JSON.stringify(businessData, null, 2));
-    
-    if (!businessResponse.ok) {
-      throw new Error(`Error obteniendo business data: ${businessData.error?.message}`);
     }
     
-    // Ahora obtener las plantillas del business account
-    const response = await fetch(`https://graph.facebook.com/v18.0/${businessData.id}/message_templates?fields=name,status,language,components`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${WHATSAPP_TOKEN}`,
-        'Content-Type': 'application/json',
-      }
+    const successfulTemplates = Object.entries(results).filter(([_, result]: [string, any]) => result.success).map(([name, _]) => name);
+    const failedTemplates = Object.entries(results).filter(([_, result]: [string, any]) => !result.success).map(([name, _]) => name);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Plantillas probadas directamente',
+      successfulTemplates: successfulTemplates,
+      failedTemplates: failedTemplates,
+      results: results
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
-    
-    const result = await response.json();
-    console.log('🔍 CHECK: Respuesta de Meta:', JSON.stringify(result, null, 2));
-    
-    if (response.ok) {
-      const templates = result.data || [];
-      const templateNames = templates.map((t: any) => t.name);
-      
-      console.log('🔍 CHECK: Plantillas disponibles:', templateNames);
-      
-      // Verificar si nuestras plantillas existen
-      const ourTemplates = ['order_management_1', 'order_confirmed', 'order_on_the_way', 'order_delivered'];
-      const missingTemplates = ourTemplates.filter(name => !templateNames.includes(name));
-      
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'Plantillas verificadas',
-        totalTemplates: templates.length,
-        availableTemplates: templateNames,
-        ourTemplates: ourTemplates,
-        missingTemplates: missingTemplates,
-        allTemplates: templates
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      console.error('🔍 CHECK: Error verificando plantillas:', result);
-      return new Response(JSON.stringify({
-        success: false,
-        error: result.error?.message || 'Error verificando plantillas',
-        details: result
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
     
   } catch (error: any) {
     console.error('🔍 CHECK: Error verificando plantillas:', error);
