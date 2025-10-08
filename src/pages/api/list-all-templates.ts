@@ -14,7 +14,12 @@ export const GET: APIRoute = async () => {
       `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates`,
       `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language}`,
       `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language,components}`,
-      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language,components{type,text}}`
+      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language,components{type,text}}`,
+      // Endpoints específicos para WhatsApp Business
+      `https://graph.facebook.com/v18.0/me?fields=id,name,whatsapp_business_accounts`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,whatsapp_business_accounts{id,name,message_templates}`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,whatsapp_business_accounts{id,name,message_templates{name,status,language}}`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,whatsapp_business_accounts{id,name,message_templates{name,status,language,components}}`
     ];
     
     const results: any = {};
