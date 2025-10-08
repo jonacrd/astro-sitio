@@ -42,8 +42,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Obtener todos los couriers activos
-    const { data: couriers, error: couriersError } = await supabase
+    // Obtener couriers disponibles (status = 'active')
+    const { data: availableCouriers, error: couriersError } = await supabase
       .from('couriers')
       .select('*')
       .eq('status', 'active');
@@ -52,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
       throw couriersError;
     }
 
-    if (!couriers || couriers.length === 0) {
+    if (!availableCouriers || availableCouriers.length === 0) {
       return new Response(JSON.stringify({
         success: false,
         error: 'No hay repartidores disponibles'
@@ -62,20 +62,22 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Crear ofertas de delivery para todos los couriers
-    const deliveryOffers = couriers.map(courier => ({
-      order_id: orderId,
-      courier_id: courier.user_id,
-      status: 'pending',
-      pickup_address: pickupAddress,
-      delivery_address: deliveryAddress,
-      notes: notes,
-      created_at: new Date().toISOString()
-    }));
-
+    // Seleccionar courier aleatorio
+    const randomCourier = availableCouriers[Math.floor(Math.random() * availableCouriers.length)];
+    
+    // Crear oferta de delivery para el courier seleccionado
     const { error: insertError } = await supabase
       .from('delivery_offers')
-      .insert(deliveryOffers);
+      .insert({
+        order_id: orderId,
+        courier_id: randomCourier.user_id,
+        status: 'pending',
+        pickup_address: pickupAddress,
+        delivery_address: deliveryAddress,
+        notes: notes,
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 2 * 60 * 1000).toISOString() // 2 minutos
+      });
 
     if (insertError) {
       throw insertError;
@@ -94,26 +96,24 @@ export const POST: APIRoute = async ({ request }) => {
       throw updateError;
     }
 
-    // Enviar notificaciones WhatsApp a todos los couriers
+    // Enviar notificación WhatsApp solo al courier seleccionado
     try {
-      for (const courier of couriers) {
-        if (courier.phone) {
-          await notifyDeliveryNewOffer(
-            courier.phone,
-            orderId,
-            courier.name || 'Repartidor'
-          );
-        }
+      if (randomCourier.phone) {
+        await notifyDeliveryNewOffer(
+          randomCourier.phone,
+          orderId,
+          randomCourier.name || 'Repartidor'
+        );
       }
     } catch (whatsappError) {
-      console.error('Error enviando notificaciones WhatsApp:', whatsappError);
+      console.error('Error enviando notificación WhatsApp:', whatsappError);
       // No fallar la operación por errores de WhatsApp
     }
 
     return new Response(JSON.stringify({
       success: true,
-      message: `Delivery solicitado. ${couriers.length} repartidores notificados.`,
-      offersCreated: couriers.length
+      message: `Delivery solicitado. Courier ${randomCourier.name} notificado.`,
+      courierId: randomCourier.user_id
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

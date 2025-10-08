@@ -16,19 +16,15 @@ export default function DeliveryGuard({ children }: DeliveryGuardProps) {
 
   const checkAuth = async () => {
     try {
-      console.log('🔍 DeliveryGuard: Verificando autenticación...');
-      
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error('❌ Error verificando sesión:', error);
+        console.error('Error verificando sesión:', error);
         setLoading(false);
         return;
       }
 
       if (session?.user) {
-        console.log('✅ Usuario autenticado:', session.user.email);
-        
         // Verificar si el usuario es un courier
         const { data: courier, error: courierError } = await supabase
           .from('couriers')
@@ -36,23 +32,20 @@ export default function DeliveryGuard({ children }: DeliveryGuardProps) {
           .eq('user_id', session.user.id)
           .single();
 
-        console.log('🔍 Resultado verificación courier:', { courier, courierError });
-
         if (courierError || !courier) {
-          console.log('❌ Usuario no es courier, redirigiendo...');
+          console.log('Usuario no es courier, redirigiendo...');
           window.location.href = '/delivery';
           return;
         }
 
-        console.log('✅ Usuario es courier, permitiendo acceso');
         setUser(courier);
         setAuthenticated(true);
       } else {
-        console.log('❌ No hay sesión activa, redirigiendo...');
+        console.log('No hay sesión activa, redirigiendo...');
         window.location.href = '/delivery';
       }
     } catch (error) {
-      console.error('❌ Error en checkAuth:', error);
+      console.error('Error en checkAuth:', error);
       window.location.href = '/delivery';
     } finally {
       setLoading(false);
