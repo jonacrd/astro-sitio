@@ -65,6 +65,21 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 <script>
   import { supabase } from '../../lib/supabase-browser';
 
+  // Verificar si ya hay sesión activa
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        console.log('✅ Sesión activa encontrada, redirigiendo...');
+        window.location.href = '/delivery-dashboard';
+        return;
+      }
+    } catch (error) {
+      console.log('No hay sesión activa, mostrando login');
+    }
+  });
+
   document.getElementById('delivery-login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -145,6 +160,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       }
 
       // Redirigir al dashboard
+      console.log('✅ Login exitoso, redirigiendo al dashboard...');
       window.location.href = '/delivery-dashboard';
       
     } catch (error) {
