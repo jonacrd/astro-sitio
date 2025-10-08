@@ -172,8 +172,8 @@ export async function notifySellerNewOrder(orderId: string, sellerId: string): P
     }
 
     const message = `🛒 NUEVO PEDIDO RECIBIDO\n\nID: ${orderId}\n\nVe a tu dashboard para confirmar el pedido.`;
-    // Intentar usar plantilla personalizada, fallback a hello_world
-    await sendWhatsAppAutomation(seller.phone, message, 'nuevo_pedido_vendedor', [orderId, seller.name || 'Cliente', '0']);
+    // Usar plantilla order_management_1 para vendedor
+    await sendWhatsAppAutomation(seller.phone, message, 'order_management_1', [seller.name || 'Vendedor', 'nueva orden']);
     
     console.log('✅ AUTOMÁTICO: Vendedor notificado exitosamente');
   } catch (error: any) {
@@ -219,8 +219,8 @@ export async function notifyCustomerOrderConfirmed(orderId: string, customerId: 
     }
 
     const message = `✅ TU PEDIDO HA SIDO CONFIRMADO\n\nID: ${orderId}\n\nTu pedido está siendo preparado.`;
-    // Intentar usar plantilla personalizada, fallback a hello_world
-    await sendWhatsAppAutomation(customer.phone, message, 'pedido_confirmado_cliente', [orderId, '30 minutos']);
+    // Usar plantilla order_confirmed para comprador
+    await sendWhatsAppAutomation(customer.phone, message, 'order_confirmed', [customer.name || 'Cliente', orderId]);
     
     console.log('✅ AUTOMÁTICO: Cliente notificado exitosamente');
   } catch (error: any) {
@@ -229,45 +229,13 @@ export async function notifyCustomerOrderConfirmed(orderId: string, customerId: 
 }
 
 // 3. NOTIFICAR AL DELIVERY - NUEVA OFERTA
-export async function notifyDeliveryNewOffer(deliveryId: string, courierId: string, pickupAddress: string): Promise<void> {
+export async function notifyDeliveryNewOffer(phone: string, orderId: string, courierName: string): Promise<void> {
   try {
-    console.log(`🚚 AUTOMÁTICO: Notificando delivery ${courierId} sobre oferta ${deliveryId}`);
+    console.log(`🚚 AUTOMÁTICO: Notificando delivery ${courierName} sobre oferta ${orderId}`);
     
-    const supabase = getSupabase();
-    if (!supabase) {
-      console.warn('⚠️ AUTOMÁTICO: Supabase no configurado, usando fallback');
-      const fallbackPhone = '+56962614851';
-      const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${deliveryId}\nDirección: ${pickupAddress}\n\nVe a tu app para aceptar o rechazar.`;
-      await sendWhatsAppAutomation(fallbackPhone, message);
-      return;
-    }
-    
-    // Obtener datos del delivery
-    const { data: courier, error: courierError } = await supabase
-      .from('couriers')
-      .select('phone, name')
-      .eq('id', courierId)
-      .single();
-
-    if (courierError || !courier) {
-      console.error('❌ AUTOMÁTICO: Error obteniendo datos del delivery:', courierError);
-      const fallbackPhone = '+56962614851';
-      const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${deliveryId}\nDirección: ${pickupAddress}\n\nVe a tu app para aceptar o rechazar.`;
-      await sendWhatsAppAutomation(fallbackPhone, message);
-      return;
-    }
-
-    if (!courier.phone) {
-      console.warn('⚠️ AUTOMÁTICO: Delivery sin teléfono, usando fallback');
-      const fallbackPhone = '+56962614851';
-      const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${deliveryId}\nDirección: ${pickupAddress}\n\nVe a tu app para aceptar o rechazar.`;
-      await sendWhatsAppAutomation(fallbackPhone, message);
-      return;
-    }
-
-    const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${deliveryId}\nDirección: ${pickupAddress}\n\nVe a tu app para aceptar o rechazar.`;
-    // Intentar usar plantilla personalizada, fallback a hello_world
-    await sendWhatsAppAutomation(courier.phone, message, 'delivery_asignado_courier', [deliveryId, pickupAddress, '5000']);
+    const message = `🚚 NUEVA OFERTA DE DELIVERY\n\nID: ${orderId}\n\nVe a tu app para aceptar o rechazar.`;
+    // Usar hello_world para delivery (no hay plantilla específica)
+    await sendWhatsAppAutomation(phone, message, 'hello_world');
     
     console.log('✅ AUTOMÁTICO: Delivery notificado exitosamente');
   } catch (error: any) {
@@ -276,70 +244,82 @@ export async function notifyDeliveryNewOffer(deliveryId: string, courierId: stri
 }
 
 // 4. NOTIFICAR STATUS DE DELIVERY
-export async function notifyDeliveryStatus(deliveryId: string, status: string, sellerId: string, customerId: string): Promise<void> {
+export async function notifyDeliveryStatus(phone: string, status: string, orderId: string, userName: string): Promise<void> {
   try {
-    console.log(`📦 AUTOMÁTICO: Notificando status ${status} para delivery ${deliveryId}`);
+    console.log(`📦 AUTOMÁTICO: Notificando status ${status} para ${userName}`);
     
-    const supabase = getSupabase();
-    if (!supabase) {
-      console.warn('⚠️ AUTOMÁTICO: Supabase no configurado para notificaciones de status');
-      return;
-    }
-    
-    let sellerMessage = '';
-    let customerMessage = '';
+    let message = '';
+    let templateName = 'hello_world';
+    let templateParams: string[] = [];
     
     switch (status) {
-      case 'assigned':
-        sellerMessage = `🚚 DELIVERY ASIGNADO\n\nID: ${deliveryId}\nEl repartidor está en camino a tu local.`;
-        customerMessage = `📦 TU PEDIDO ESTÁ EN CAMINO\n\nID: ${deliveryId}\nEl repartidor va a recoger tu pedido.`;
+      case 'delivery_assigned':
+        message = `🚚 DELIVERY ASIGNADO\n\nID: ${orderId}\nEl repartidor está en camino a tu local.`;
+        templateName = 'order_management_1';
+        templateParams = [userName, 'delivery asignado'];
         break;
       case 'pickup_confirmed':
-        sellerMessage = `📦 REPARTIDOR EN TU LOCAL\n\nID: ${deliveryId}\nEl repartidor está recogiendo el pedido.`;
-        customerMessage = `🚗 TU PEDIDO VA EN CAMINO\n\nID: ${deliveryId}\nEl repartidor está en camino a tu dirección.`;
+        message = `📦 REPARTIDOR EN TU LOCAL\n\nID: ${orderId}\nEl repartidor está recogiendo el pedido.`;
+        templateName = 'order_management_1';
+        templateParams = [userName, 'repartidor en local'];
         break;
       case 'in_transit':
-        sellerMessage = '';
-        customerMessage = `🚗 TU PEDIDO VA EN CAMINO\n\nID: ${deliveryId}\nEl repartidor está en camino a tu dirección.`;
+        message = `🚗 TU PEDIDO VA EN CAMINO\n\nID: ${orderId}\nEl repartidor está en camino a tu dirección.`;
+        templateName = 'order_on_the_way';
+        templateParams = [orderId];
         break;
       case 'delivered':
-        sellerMessage = `✅ DELIVERY COMPLETADO\n\nID: ${deliveryId}\nEl pedido fue entregado exitosamente.`;
-        customerMessage = `🎉 ¡TU PEDIDO LLEGÓ!\n\nID: ${deliveryId}\nSal a recibir tu pedido.`;
+        message = `🎉 ¡TU PEDIDO LLEGÓ!\n\nID: ${orderId}\nSal a recibir tu pedido.`;
+        templateName = 'order_delivered';
+        templateParams = [userName];
         break;
+      default:
+        message = `📦 ACTUALIZACIÓN DE PEDIDO\n\nID: ${orderId}\nStatus: ${status}`;
+        templateName = 'hello_world';
     }
     
-    // Notificar vendedor
-    if (sellerMessage) {
-      const { data: seller } = await supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', sellerId)
-        .single();
-      
-      if (seller?.phone) {
-        await sendWhatsAppAutomation(seller.phone, sellerMessage);
-      } else {
-        console.warn('⚠️ AUTOMÁTICO: Vendedor sin teléfono para notificación de status');
-      }
-    }
-    
-    // Notificar cliente
-    if (customerMessage) {
-      const { data: customer } = await supabase
-        .from('profiles')
-        .select('phone')
-        .eq('id', customerId)
-        .single();
-      
-      if (customer?.phone) {
-        await sendWhatsAppAutomation(customer.phone, customerMessage);
-      } else {
-        console.warn('⚠️ AUTOMÁTICO: Cliente sin teléfono para notificación de status');
-      }
-    }
+    await sendWhatsAppAutomation(phone, message, templateName, templateParams);
     
     console.log('✅ AUTOMÁTICO: Status de delivery notificado exitosamente');
   } catch (error: any) {
     console.error('❌ AUTOMÁTICO: Error notificando status de delivery:', error);
+  }
+}
+
+// 5. NOTIFICAR AL COMPRADOR - STATUS DE DELIVERY
+export async function notifyBuyerDeliveryStatus(phone: string, status: string, orderId: string, buyerName: string): Promise<void> {
+  try {
+    console.log(`🛒 AUTOMÁTICO: Notificando comprador ${buyerName} sobre status ${status}`);
+    
+    let message = '';
+    let templateName = 'hello_world';
+    let templateParams: string[] = [];
+    
+    switch (status) {
+      case 'delivery_assigned':
+        message = `📦 TU PEDIDO ESTÁ EN CAMINO\n\nID: ${orderId}\nEl repartidor va a recoger tu pedido.`;
+        templateName = 'order_confirmed';
+        templateParams = [buyerName, orderId];
+        break;
+      case 'in_transit':
+        message = `🚗 TU PEDIDO VA EN CAMINO\n\nID: ${orderId}\nEl repartidor está en camino a tu dirección.`;
+        templateName = 'order_on_the_way';
+        templateParams = [orderId];
+        break;
+      case 'delivered':
+        message = `🎉 ¡TU PEDIDO LLEGÓ!\n\nID: ${orderId}\nSal a recibir tu pedido.`;
+        templateName = 'order_delivered';
+        templateParams = [buyerName];
+        break;
+      default:
+        message = `📦 ACTUALIZACIÓN DE PEDIDO\n\nID: ${orderId}\nStatus: ${status}`;
+        templateName = 'hello_world';
+    }
+    
+    await sendWhatsAppAutomation(phone, message, templateName, templateParams);
+    
+    console.log('✅ AUTOMÁTICO: Comprador notificado exitosamente');
+  } catch (error: any) {
+    console.error('❌ AUTOMÁTICO: Error notificando comprador:', error);
   }
 }

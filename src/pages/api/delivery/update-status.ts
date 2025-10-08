@@ -5,7 +5,7 @@ const supabase = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.SUPABASE_SERVICE_ROLE_KEY
 );
-import { notifyDeliveryStatus } from '../../../server/whatsapp-automation';
+import { notifyDeliveryStatus, notifyBuyerDeliveryStatus } from '../../../server/whatsapp-automation';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -111,7 +111,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Notificar al comprador
         if (offer.order.buyer?.phone) {
-          await notifyDeliveryStatus(
+          await notifyBuyerDeliveryStatus(
             offer.order.buyer.phone,
             whatsappStatus,
             offer.order_id,
