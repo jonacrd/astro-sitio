@@ -82,7 +82,7 @@
             <input type="text" id="phone" placeholder="+56962614851" value="+56962614851">
         </div>
         
-        <button onclick="testTemplates()">🚀 Probar Todas las Plantillas</button>
+        <button id="testButton">🚀 Probar Todas las Plantillas</button>
         
         <div id="result"></div>
     </div>
@@ -122,6 +122,11 @@
                 resultDiv.innerHTML = `<div class="result error">❌ Error de red: ${error.message}</div>`;
             }
         }
+
+        // Agregar event listener cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('testButton').addEventListener('click', testTemplates);
+        });
     </script>
 </body>
 </html>
