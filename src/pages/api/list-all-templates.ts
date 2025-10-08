@@ -9,9 +9,12 @@ export const GET: APIRoute = async () => {
     
     // Intentar diferentes endpoints para obtener plantillas
     const endpoints = [
-      `https://graph.facebook.com/v18.0/me/message_templates`,
-      `https://graph.facebook.com/v18.0/me/message_templates?fields=name,status,language`,
-      `https://graph.facebook.com/v18.0/me/message_templates?fields=name,status,language,components`
+      `https://graph.facebook.com/v18.0/me`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language}`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language,components}`,
+      `https://graph.facebook.com/v18.0/me?fields=id,name,message_templates{name,status,language,components{type,text}}`
     ];
     
     const results: any = {};
