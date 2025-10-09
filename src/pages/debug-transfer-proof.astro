@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Debug Transfer Proof">
+  <main class="min-h-screen bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-red-400 mb-6">🔍 Debug Transfer Proof</h1>
+      
+      <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-blue-400 mb-4">📋 Verificar Comprobantes en Base de Datos</h2>
+        <div id="transfer-proof-status" class="space-y-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p class="text-center text-gray-400">Cargando información...</p>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold text-green-400 mb-4">🧪 Test de Subida de Comprobante</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Selecciona una imagen:</label>
+            <input type="file" id="test-file" accept="image/*" class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+          </div>
+          <button id="test-upload" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            Test Subida de Comprobante
+          </button>
+          <div id="test-result" class="mt-4 p-4 bg-gray-700 rounded-lg hidden">
+            <h3 class="font-semibold text-white mb-2">Resultado del Test:</h3>
+            <pre id="test-output" class="text-sm text-gray-300 whitespace-pre-wrap"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Verificar comprobantes en la base de datos
+    async function checkTransferProofs() {
+      try {
+        const response = await fetch('/api/debug/check-transfer-proofs');
+        const result = await response.json();
+        
+        const statusDiv = document.getElementById('transfer-proof-status');
+        
+        if (result.success) {
+          statusDiv.innerHTML = `
+            <div class="space-y-3">
+              <div class="bg-green-900/20 border border-green-600/30 p-3 rounded-lg">
+                <h3 class="font-semibold text-green-400">✅ Conexión a DB exitosa</h3>
+                <p class="text-green-200 text-sm">Se encontraron ${result.data.ordersWithTransfer} órdenes con transferencia</p>
+              </div>
+              
+              ${result.data.ordersWithTransfer > 0 ? `
+                <div class="bg-blue-900/20 border border-blue-600/30 p-3 rounded-lg">
+                  <h3 class="font-semibold text-blue-400">📸 Comprobantes encontrados:</h3>
+                  <div class="mt-2 space-y-2">
+                    ${result.data.orders.map(order => `
+                      <div class="bg-gray-700 p-2 rounded">
+                        <p class="text-white text-sm"><strong>Orden:</strong> ${order.id.substring(0, 8)}</p>
+                        <p class="text-gray-300 text-sm"><strong>Método:</strong> ${order.payment_method}</p>
+                        <p class="text-gray-300 text-sm"><strong>Comprobante:</strong> ${order.transfer_proof ? '✅ Presente' : '❌ Ausente'}</p>
+                        <p class="text-gray-300 text-sm"><strong>Longitud:</strong> ${order.transfer_proof ? order.transfer_proof.length + ' caracteres' : '0'}</p>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : `
+                <div class="bg-yellow-900/20 border border-yellow-600/30 p-3 rounded-lg">
+                  <h3 class="font-semibold text-yellow-400">⚠️ No hay órdenes con transferencia</h3>
+                  <p class="text-yellow-200 text-sm">No se encontraron órdenes con método de pago 'transfer'</p>
+                </div>
+              `}
+            </div>
+          `;
+        } else {
+          statusDiv.innerHTML = `
+            <div class="bg-red-900/20 border border-red-600/30 p-3 rounded-lg">
+              <h3 class="font-semibold text-red-400">❌ Error</h3>
+              <p class="text-red-200 text-sm">${result.error}</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        const statusDiv = document.getElementById('transfer-proof-status');
+        statusDiv.innerHTML = `
+          <div class="bg-red-900/20 border border-red-600/30 p-3 rounded-lg">
+            <h3 class="font-semibold text-red-400">❌ Error de conexión</h3>
+            <p class="text-red-200 text-sm">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Test de subida de comprobante
+    document.getElementById('test-upload').addEventListener('click', async () => {
+      const fileInput = document.getElementById('test-file') as HTMLInputElement;
+      const resultDiv = document.getElementById('test-result');
+      const outputPre = document.getElementById('test-output');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        outputPre.textContent = 'Por favor selecciona una imagen primero';
+        resultDiv.classList.remove('hidden');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      
+      try {
+        // Convertir a base64
+        const reader = new FileReader();
+        const base64 = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result);
+          reader.readAsDataURL(file);
+        });
+
+        outputPre.textContent = `Archivo: ${file.name}
+Tamaño: ${file.size} bytes
+Tipo: ${file.type}
+Base64 length: ${base64.toString().length} caracteres
+Preview: ${base64.toString().substring(0, 100)}...`;
+
+        resultDiv.classList.remove('hidden');
+        
+      } catch (error) {
+        outputPre.textContent = `Error: ${error.message}`;
+        resultDiv.classList.remove('hidden');
+      }
+    });
+
+    // Cargar información al inicio
+    checkTransferProofs();
+  </script>
+</BaseLayout>

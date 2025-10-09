@@ -85,19 +85,30 @@ export const GET: APIRoute = async ({ request }) => {
     if (orderIds.length > 0) {
       const { data: items, error: itemsError } = await supabase
         .from('order_items')
-        .select('*')
+        .select(`
+          *,
+          product:products!order_items_product_id_fkey(
+            title,
+            price_cents
+          )
+        `)
         .in('order_id', orderIds);
 
       if (itemsError) {
         console.log('⚠️ Error obteniendo items (tabla puede no existir):', itemsError.message);
         // Continuar sin items por ahora
       } else {
-        // Agrupar items por order_id
+        // Agrupar items por order_id y agregar información del producto
         orderItems = items?.reduce((acc, item) => {
           if (!acc[item.order_id]) {
             acc[item.order_id] = [];
           }
-          acc[item.order_id].push(item);
+          // Agregar información del producto al item
+          acc[item.order_id].push({
+            ...item,
+            title: item.product?.title || 'Producto',
+            price_cents: item.product?.price_cents || item.price_cents || 0
+          });
           return acc;
         }, {} as Record<string, any[]>) || {};
       }

@@ -6,6 +6,13 @@ export const POST: APIRoute = async (context) => {
   try {
     const body = await context.request.json();
     const { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes, transferProof } = body;
+    
+    console.log('🔍 Debug transferProof recibido:', {
+      hasTransferProof: !!transferProof,
+      transferProofLength: transferProof ? transferProof.length : 0,
+      paymentMethod: paymentMethod,
+      transferProofPreview: transferProof ? transferProof.substring(0, 50) + '...' : 'null'
+    });
 
     console.log('🛒 Checkout recibido:', { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes, hasTransferProof: !!transferProof });
 
@@ -261,6 +268,9 @@ export const POST: APIRoute = async (context) => {
     // Guardar comprobante de transferencia si existe
     if (transferProof && paymentMethod === 'transfer') {
       console.log('📸 Guardando comprobante de transferencia para orden:', orderResult.orderId);
+      console.log('📸 Transfer proof data length:', transferProof.length);
+      console.log('📸 Transfer proof preview:', transferProof.substring(0, 100) + '...');
+      
       const { error: proofError } = await supabase
         .from('orders')
         .update({ transfer_proof: transferProof })
@@ -268,10 +278,34 @@ export const POST: APIRoute = async (context) => {
 
       if (proofError) {
         console.error('❌ Error guardando comprobante:', proofError);
+        console.error('❌ Detalles del error:', {
+          message: proofError.message,
+          details: proofError.details,
+          hint: proofError.hint
+        });
         // No fallar el checkout si no se puede guardar el comprobante
       } else {
-        console.log('✅ Comprobante de transferencia guardado');
+        console.log('✅ Comprobante de transferencia guardado exitosamente');
+        
+        // Verificar que se guardó correctamente
+        const { data: verifyData, error: verifyError } = await supabase
+          .from('orders')
+          .select('transfer_proof')
+          .eq('id', orderResult.orderId)
+          .single();
+          
+        if (verifyError) {
+          console.error('❌ Error verificando comprobante guardado:', verifyError);
+        } else {
+          console.log('✅ Comprobante verificado en DB:', !!verifyData.transfer_proof);
+        }
       }
+    } else {
+      console.log('⚠️ No se guardó comprobante:', {
+        hasTransferProof: !!transferProof,
+        paymentMethod: paymentMethod,
+        reason: !transferProof ? 'No hay comprobante' : 'Método no es transferencia'
+      });
     }
 
     // 📱 ACTUALIZAR TELÉFONO DEL CLIENTE (si proporcionó uno)
