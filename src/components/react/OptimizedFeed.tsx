@@ -113,14 +113,14 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
         title: product.title,
         price: product.price_cents / 100, // Convertir centavos a pesos
         image: product.image_url || '/images/placeholder.jpg',
-        seller_id: product.seller_id,
-        seller_name: product.seller_name,
+        sellerId: product.seller_id,
+        sellerName: product.seller_name,
         quantity: 1
       };
 
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
       const existingItemIndex = existingCart.findIndex((item: any) => 
-        item.id === cartItem.id && item.seller_id === cartItem.seller_id
+        item.id === cartItem.id && (item.sellerId === cartItem.sellerId || item.seller_id === cartItem.sellerId)
       );
 
       if (existingItemIndex >= 0) {

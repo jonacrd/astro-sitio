@@ -51,70 +51,82 @@ export default function CartSummary({
       
       <div className="space-y-3">
         {items.map((item) => (
-          <div key={item.id} className="flex items-center gap-3 py-3 border-b border-white/5 last:border-b-0">
-            {/* Miniatura */}
-            <div className="w-14 h-14 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
-              {item.image ? (
-                <img 
-                  src={item.image} 
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/50">
-                  📦
+          <div key={item.id} className="py-3 border-b border-white/5 last:border-b-0">
+            <div className="flex items-start gap-3">
+              {/* Miniatura */}
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-white/5 flex-shrink-0">
+                {item.image ? (
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white/50">
+                    📦
+                  </div>
+                )}
+              </div>
+              
+              {/* Detalles del producto */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-semibold text-base leading-tight mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-white/60 text-sm">
+                      {item.sellerName || 'Vendedor'}
+                    </p>
+                  </div>
+                  
+                  {/* Botón eliminar */}
+                  <button
+                    onClick={() => onRemoveItem(item.id)}
+                    className="w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0 shadow-sm"
+                    title="Eliminar producto"
+                  >
+                    ✕
+                  </button>
                 </div>
-              )}
+                
+                {/* Controles de cantidad y precio */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => onUpdateQuantity(item.id, Math.max(0, item.qty - 1))}
+                      className="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors"
+                      disabled={item.qty <= 1}
+                    >
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <span className="w-10 text-center font-bold text-gray-800 text-lg">
+                      {item.qty || 0}
+                    </span>
+                    <button
+                      onClick={() => onUpdateQuantity(item.id, (item.qty || 0) + 1)}
+                      className="w-9 h-9 bg-blue-100 hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors"
+                    >
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Precio total del item */}
+                  <div className="text-right">
+                    <p className="text-white font-bold text-lg">
+                      {formatPrice((item.priceCents || 0) * (item.qty || 0))}
+                    </p>
+                    <p className="text-white/60 text-xs">
+                      {formatPrice(item.priceCents || 0)} c/u
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            {/* Detalles del producto */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-white font-medium text-sm truncate">
-                {item.title}
-              </h3>
-              <p className="text-white/60 text-xs">
-                {item.sellerName}
-              </p>
-            </div>
-            
-            {/* Controles de cantidad */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onUpdateQuantity(item.id, Math.max(0, item.qty - 1))}
-                className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                disabled={item.qty <= 1}
-              >
-                −
-              </button>
-              <span className="text-white font-medium min-w-[2rem] text-center">
-                {item.qty || 0}
-              </span>
-              <button
-                onClick={() => onUpdateQuantity(item.id, (item.qty || 0) + 1)}
-                className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              >
-                +
-              </button>
-            </div>
-            
-            {/* Precio y cantidad */}
-            <div className="text-right">
-              <p className="text-white font-semibold">
-                {formatPrice((item.priceCents || 0) * (item.qty || 0))}
-              </p>
-              <p className="text-white/60 text-xs">
-                {item.qty || 0} producto{(item.qty || 0) !== 1 ? 's' : ''}
-              </p>
-            </div>
-            
-            {/* Botón eliminar */}
-            <button
-              onClick={() => onRemoveItem(item.id)}
-              className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center text-red-400 hover:bg-red-500/30 transition-colors"
-              title="Eliminar producto"
-            >
-              ✕
-            </button>
           </div>
         ))}
       </div>

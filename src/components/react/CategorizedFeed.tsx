@@ -179,8 +179,8 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
           price: product.price_cents / 100, // Convertir centavos a pesos para el carrito
           quantity: 1,
           image: product.image_url,
-          seller_id: product.seller_id,
-          seller_name: product.seller_name,
+          sellerId: product.seller_id,
+          sellerName: product.seller_name,
           seller_active: product.seller_active
         });
       }
