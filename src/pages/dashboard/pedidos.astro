@@ -190,7 +190,7 @@ import React from 'react'
         hour: '2-digit',
         minute: '2-digit'
       });
-      const price = (order.total_cents / 100).toFixed(2);
+      const price = order.total_cents.toFixed(2); // NO dividir por 100 - ya están en pesos
       const buyerName = profilesMap[order.user_id] || 'Cliente';
       
       let statusClass = '';
@@ -431,7 +431,7 @@ import React from 'react'
                 </div>
                 <div class="bg-gray-700 p-2 rounded">
                   <span class="text-gray-400">Total:</span>
-                  <span class="text-green-400 font-bold ml-2">$${((order.total_cents || 0) / 100).toFixed(2)}</span>
+                  <span class="text-green-400 font-bold ml-2">$${(order.total_cents || 0).toFixed(2)}</span>
                 </div>
                 <div class="bg-gray-700 p-2 rounded">
                   <span class="text-gray-400">Estado:</span>
@@ -476,16 +476,16 @@ import React from 'react'
                   <div class="flex-1">
                     <p class="font-medium text-white">${item.title || 'Producto'}</p>
                     <p class="text-sm text-gray-400">Cantidad: ${item.qty || item.quantity || 1}</p>
-                    <p class="text-xs text-gray-500">Precio unitario: $${((item.price_cents || 0) / 100).toFixed(2)}</p>
+                    <p class="text-xs text-gray-500">Precio unitario: $${(item.price_cents || 0).toFixed(2)}</p>
                   </div>
                   <div class="text-right">
-                    <p class="font-semibold text-green-400">$${(((item.price_cents || 0) * (item.qty || item.quantity || 1)) / 100).toFixed(2)}</p>
+                    <p class="font-semibold text-green-400">$${((item.price_cents || 0) * (item.qty || item.quantity || 1)).toFixed(2)}</p>
                   </div>
                 </div>
               `).join('') : `
                 <div class="bg-gray-700 p-4 rounded-lg border border-gray-600">
                   <p class="text-gray-400 text-center">No hay información detallada de productos disponible</p>
-                  <p class="text-gray-500 text-sm text-center mt-1">El total del pedido es: $${((order.total_cents || 0) / 100).toFixed(2)}</p>
+                  <p class="text-gray-500 text-sm text-center mt-1">El total del pedido es: $${(order.total_cents || 0).toFixed(2)}</p>
                 </div>
               `}
             </div>

@@ -80,7 +80,7 @@ export const GET: APIRoute = async () => {
         orders: orders?.map(order => ({
           id: order.id.substring(0, 8),
           total_cents: order.total_cents,
-          total_pesos: (order.total_cents / 100).toFixed(2),
+          total_pesos: order.total_cents.toFixed(2), // NO dividir por 100 - ya están en pesos
           payment_method: order.payment_method,
           created_at: order.created_at
         })) || [],
@@ -90,20 +90,20 @@ export const GET: APIRoute = async () => {
           product_id: item.product_id,
           title: item.title,
           price_cents: item.price_cents,
-          price_pesos: ((item.price_cents || 0) / 100).toFixed(2),
+          price_pesos: (item.price_cents || 0).toFixed(2), // NO dividir por 100 - ya están en pesos
           qty: item.qty || item.quantity || 1
         })),
         products: products.map(product => ({
           id: product.id,
           title: product.title,
           price_cents: product.price_cents,
-          price_pesos: ((product.price_cents || 0) / 100).toFixed(2)
+          price_pesos: (product.price_cents || 0).toFixed(2) // NO dividir por 100 - ya están en pesos
         })),
         sampleProducts: sampleProducts?.map(product => ({
           id: product.id,
           title: product.title,
           price_cents: product.price_cents,
-          price_pesos: ((product.price_cents || 0) / 100).toFixed(2)
+          price_pesos: (product.price_cents || 0).toFixed(2) // NO dividir por 100 - ya están en pesos
         })) || [],
         debug: {
           ordersCount: orders?.length || 0,
