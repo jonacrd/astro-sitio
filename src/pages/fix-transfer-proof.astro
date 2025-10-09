@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Fix Transfer Proof Column">
+  <main class="min-h-screen bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-red-900 border border-red-700 rounded-lg p-6 mb-6">
+        <h1 class="text-2xl font-bold text-red-200 mb-4">🚨 Error de Base de Datos</h1>
+        <p class="text-red-100">
+          La columna <code class="bg-red-800 px-2 py-1 rounded">transfer_proof</code> no existe en la tabla <code class="bg-red-800 px-2 py-1 rounded">orders</code>.
+        </p>
+      </div>
+
+      <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-blue-400 mb-4">🔧 Solución Rápida</h2>
+        
+        <div class="bg-gray-900 rounded-lg p-4 mb-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">1. Ve al Dashboard de Supabase</h3>
+          <p class="text-gray-300 mb-2">Abre: <a href="https://supabase.com/dashboard" target="_blank" class="text-blue-400 hover:underline">https://supabase.com/dashboard</a></p>
+        </div>
+
+        <div class="bg-gray-900 rounded-lg p-4 mb-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">2. Ve al SQL Editor</h3>
+          <p class="text-gray-300">En el menú lateral, selecciona "SQL Editor"</p>
+        </div>
+
+        <div class="bg-gray-900 rounded-lg p-4 mb-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">3. Ejecuta este SQL</h3>
+          <div class="bg-black rounded p-4 overflow-x-auto">
+            <pre class="text-green-400 text-sm"><code>-- Verificar si la columna existe
+SELECT column_name 
+FROM information_schema.columns 
+WHERE table_name = 'orders' 
+AND column_name = 'transfer_proof';
+
+-- Si no existe, agregarla:
+ALTER TABLE orders ADD COLUMN transfer_proof TEXT;
+
+-- Agregar comentario
+COMMENT ON COLUMN orders.transfer_proof IS 'Comprobante de transferencia bancaria en formato base64';</code></pre>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 rounded-lg p-4 mb-4">
+          <h3 class="text-lg font-semibold text-green-400 mb-2">4. Verificar</h3>
+          <p class="text-gray-300">Después de ejecutar el SQL, ve a: <a href="/dashboard/pedidos" class="text-blue-400 hover:underline">/dashboard/pedidos</a></p>
+        </div>
+      </div>
+
+      <div class="bg-blue-900 border border-blue-700 rounded-lg p-6">
+        <h2 class="text-xl font-bold text-blue-200 mb-4">ℹ️ ¿Qué hace esto?</h2>
+        <ul class="text-blue-100 space-y-2">
+          <li>• Agrega la columna <code class="bg-blue-800 px-2 py-1 rounded">transfer_proof</code> a la tabla <code class="bg-blue-800 px-2 py-1 rounded">orders</code></li>
+          <li>• Esta columna almacenará el comprobante de transferencia bancaria</li>
+          <li>• Permitirá que los vendedores vean y descarguen los comprobantes</li>
+          <li>• Es necesario para el sistema de pagos por transferencia</li>
+        </ul>
+      </div>
+
+      <div class="mt-6 text-center">
+        <a href="/dashboard/pedidos" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+          Ir a Dashboard de Pedidos
+        </a>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
