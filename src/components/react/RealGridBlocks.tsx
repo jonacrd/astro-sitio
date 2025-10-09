@@ -41,7 +41,7 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
           const mapped = data.data.products.slice(0, 4).map((p: any) => ({
             id: p.id,
             title: p.title,
-            price_cents: p.price,
+            price_cents: p.priceCents || p.price, // Usar priceCents del API
             image_url: p.image || '/img/placeholders/tecnologia.jpg',
             seller_name: p.sellerName || 'Vendedor',
             seller_id: p.sellerId,

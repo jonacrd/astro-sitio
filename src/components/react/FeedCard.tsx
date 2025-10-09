@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatPrice } from '../../lib/money';
 
 export default function FeedCard({ item }: { item: any }) {
   if (item.type === 'banner') {
@@ -24,7 +25,7 @@ export default function FeedCard({ item }: { item: any }) {
       </div>
       <div className="p-3">
         <div className="text-sm font-medium line-clamp-2">{item.title}</div>
-        <div className="text-sm font-semibold mt-1">${Math.round(item.priceCents/100)}</div>
+        <div className="text-sm font-semibold mt-1">{formatPrice(item.priceCents)}</div>
         <button className="mt-2 w-full text-sm py-1.5 rounded bg-blue-600 text-white">Añadir</button>
       </div>
     </div>

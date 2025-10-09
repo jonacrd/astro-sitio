@@ -17,6 +17,7 @@ interface CartItem {
   sellerId: string;
   sellerName: string;
   totalCents: number;
+  image?: string;
 }
 
 interface CheckoutProps {}
@@ -228,6 +229,8 @@ export default function Checkout({}: CheckoutProps) {
           price: item.price,
           quantity: item.quantity,
           vendor: item.vendor,
+          sellerName: item.sellerName,
+          sellerId: item.sellerId,
           image: item.image
         });
       });
@@ -250,10 +253,11 @@ export default function Checkout({}: CheckoutProps) {
           productId: item.id,
           title: item.title,
           priceCents: pesosToCents(price), // Convertir pesos a centavos
-          quantity: quantity, // Cambiar qty por quantity para el backend
-          sellerId: 'seller_1', // UUID fijo para evitar errores
-          sellerName: item.vendor || 'Vendedor',
-          totalCents: pesosToCents(price * quantity) // Convertir total a centavos
+          qty: quantity, // Usar qty como espera la interfaz
+          sellerId: item.sellerId || 'seller_1', // Usar sellerId del item si existe
+          sellerName: item.sellerName || item.vendor || 'Vendedor', // Usar sellerName primero
+          totalCents: pesosToCents(price * quantity), // Convertir total a centavos
+          image: item.image || '/placeholder-product.jpg' // Incluir imagen del producto
         };
       });
 
@@ -261,14 +265,17 @@ export default function Checkout({}: CheckoutProps) {
       
       // Debug: verificar valores de cada item
       formattedItems.forEach((item, index) => {
-        console.log(`🛒 Item ${index}:`, {
+        console.log(`🛒 Item ${index} formateado:`, {
           id: item.id,
           title: item.title,
           priceCents: item.priceCents,
-          quantity: item.quantity,
+          qty: item.qty,
+          sellerName: item.sellerName,
+          sellerId: item.sellerId,
           totalCents: item.totalCents,
+          image: item.image,
           isPriceNaN: isNaN(item.priceCents),
-          isQtyNaN: isNaN(item.quantity),
+          isQtyNaN: isNaN(item.qty),
           isTotalNaN: isNaN(item.totalCents)
         });
       });

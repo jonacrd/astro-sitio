@@ -1,7 +1,8 @@
 import React from 'react';
+import { formatPrice } from '../../lib/money';
 
 export default function FeedTileSmall({ item }: { item: any }) {
-  const price = item.priceCents != null ? `$${Math.round(item.priceCents/100)}` : '';
+  const price = item.priceCents != null ? formatPrice(item.priceCents) : '';
   return (
     <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
       <div className="aspect-[4/5] relative">

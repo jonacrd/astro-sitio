@@ -176,7 +176,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
         cart.push({
           id: product.id,
           title: product.title,
-          price: product.price_cents / 100,
+          price: product.price_cents / 100, // Convertir centavos a pesos para el carrito
           quantity: 1,
           image: product.image_url,
           seller_id: product.seller_id,
