@@ -182,23 +182,23 @@ export default function SimpleDeliveryInfo({
 
       {/* Selector de direcciones guardadas */}
       {showAddressSelector && savedAddresses.length > 0 && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Direcciones guardadas:</h4>
+        <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <h4 className="font-medium text-white mb-2">Direcciones guardadas:</h4>
           <div className="space-y-2">
             {savedAddresses.map((savedAddr) => (
               <button
                 key={savedAddr.id}
                 onClick={() => handleSelectSavedAddress(savedAddr)}
-                className="w-full text-left p-2 bg-white rounded border hover:bg-blue-50"
+                className="w-full text-left p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors"
               >
-                <div className="font-medium">{formatAddress(savedAddr)}</div>
-                <div className="text-sm text-gray-600">{savedAddr.contact}</div>
+                <div className="font-medium text-white">{formatAddress(savedAddr)}</div>
+                <div className="text-sm text-gray-300">{savedAddr.contact}</div>
               </button>
             ))}
           </div>
           <button
             onClick={() => setShowAddressSelector(false)}
-            className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+            className="mt-2 text-sm text-blue-400 hover:text-blue-300"
           >
             Usar nueva dirección
           </button>

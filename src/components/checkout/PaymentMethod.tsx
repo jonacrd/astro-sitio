@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TransferProofUpload from './TransferProofUpload';
 
 interface PaymentMethodProps {
@@ -14,12 +14,17 @@ export default function PaymentMethod({
   onProofUpload,
   uploadedProof
 }: PaymentMethodProps) {
-  const [showTransferDetails, setShowTransferDetails] = useState(false);
+  const [showTransferDetails, setShowTransferDetails] = useState(selectedMethod === 'transfer');
 
   const handleMethodChange = (method: string) => {
     onMethodChange(method);
     setShowTransferDetails(method === 'transfer');
   };
+
+  // Actualizar showTransferDetails cuando cambie selectedMethod desde afuera
+  useEffect(() => {
+    setShowTransferDetails(selectedMethod === 'transfer');
+  }, [selectedMethod]);
 
   return (
     <div className="checkout-card rounded-2xl bg-[#1D2939] ring-1 ring-white/10 shadow-lg p-4">
