@@ -161,22 +161,12 @@ export default function SimpleDeliveryInfo({
         <h3 className="text-lg font-semibold text-white">
           📍 Información de Entrega
         </h3>
-        <div className="flex gap-2">
-          {address.address && savedAddresses.length > 0 && (
-            <button
-              onClick={() => setShowAddressSelector(true)}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-            >
-              📋 Elegir otra
-            </button>
-          )}
-          <button
-            onClick={() => setShowChangeModal(true)}
-            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-          >
-            {address.address ? '✏️ Cambiar' : '➕ Agregar'}
-          </button>
-        </div>
+        <button
+          onClick={() => setShowChangeModal(true)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+        >
+          {address.address ? 'Usar otra dirección' : 'Agregar dirección'}
+        </button>
       </div>
 
       {/* Dirección actual */}

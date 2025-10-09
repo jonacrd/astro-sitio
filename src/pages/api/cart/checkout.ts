@@ -227,8 +227,7 @@ export const POST: APIRoute = async (context) => {
         p_seller_id: sellerUuid,
         p_payment_method: paymentMethod || 'cash',
         p_delivery_address: deliveryAddress || {},
-        p_delivery_notes: orderNotes || '',
-        p_transfer_proof: transferProof || null
+        p_delivery_notes: orderNotes || ''
       });
 
     if (orderError) {
@@ -258,6 +257,22 @@ export const POST: APIRoute = async (context) => {
 
     // Los items ya fueron creados por la función place_order, no necesitamos crearlos de nuevo
     console.log('✅ Items de la orden ya fueron creados por place_order');
+
+    // Guardar comprobante de transferencia si existe
+    if (transferProof && paymentMethod === 'transfer') {
+      console.log('📸 Guardando comprobante de transferencia para orden:', orderResult.orderId);
+      const { error: proofError } = await supabase
+        .from('orders')
+        .update({ transfer_proof: transferProof })
+        .eq('id', orderResult.orderId);
+
+      if (proofError) {
+        console.error('❌ Error guardando comprobante:', proofError);
+        // No fallar el checkout si no se puede guardar el comprobante
+      } else {
+        console.log('✅ Comprobante de transferencia guardado');
+      }
+    }
 
     // 📱 ACTUALIZAR TELÉFONO DEL CLIENTE (si proporcionó uno)
     if (deliveryAddress?.contact) {
