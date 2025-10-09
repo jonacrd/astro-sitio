@@ -45,3 +45,4 @@ SELECT
   'courier' as role
 FROM couriers 
 WHERE phone = '+56962614851';
+

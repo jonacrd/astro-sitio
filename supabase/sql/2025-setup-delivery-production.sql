@@ -66,3 +66,4 @@ SELECT 'profiles (buyers)' as table_name, count(*) as count FROM public.profiles
 SELECT 'COURIERS' as info, id, name, phone, is_active, is_available FROM public.couriers;
 SELECT 'DELIVERIES' as info, id, order_id, seller_id, courier_id, status FROM public.deliveries;
 SELECT 'PROFILES' as info, id, name, phone, is_seller, opt_in_whatsapp FROM public.profiles WHERE phone = '+56962614851';
+

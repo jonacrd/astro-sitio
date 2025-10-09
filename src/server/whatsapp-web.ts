@@ -22,3 +22,4 @@ export async function sendWhatsAppWeb(to: string, message: string): Promise<{
     return { success: false, error: error.message };
   }
 }
+

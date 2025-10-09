@@ -206,3 +206,4 @@ CREATE TRIGGER auto_assign_delivery
   AFTER INSERT ON public.deliveries
   FOR EACH ROW
   EXECUTE FUNCTION assign_delivery_automatically();
+

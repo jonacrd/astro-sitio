@@ -31,3 +31,4 @@ SET phone = '+56962614851';
 SELECT 'profiles' as tabla, id, name, phone FROM profiles WHERE phone = '+56962614851'
 UNION ALL
 SELECT 'couriers' as tabla, id, name, phone FROM couriers WHERE phone = '+56962614851';
+

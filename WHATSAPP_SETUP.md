@@ -35,3 +35,4 @@ Una vez configurado:
 2. **Sistema envía WhatsApp** → Automáticamente al vendedor
 3. **Vendedor recibe** → Notificación en WhatsApp
 4. **Sin intervención manual** → Todo automático
+

@@ -89,3 +89,4 @@ export interface OperationResult<T = any> {
   data?: T;
   error?: string;
 }
+

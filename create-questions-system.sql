@@ -191,3 +191,4 @@ SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' A
 SELECT 'Categorías insertadas:' as status;
 SELECT * FROM question_categories ORDER BY name;
 
+

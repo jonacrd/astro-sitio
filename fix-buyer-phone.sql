@@ -13,3 +13,4 @@ SELECT id, name, phone FROM profiles WHERE phone = '+56962614851';
 
 -- 4. Ver estructura de la tabla orders para saber qué user_id usar
 SELECT id, user_id, seller_id, status FROM orders ORDER BY created_at DESC LIMIT 5;
+

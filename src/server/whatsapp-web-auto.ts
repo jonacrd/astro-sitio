@@ -111,3 +111,4 @@ export async function notifyDeliveryCompleted(sellerPhone: string, buyerPhone: s
   await sendWhatsAppWebAuto(sellerPhone, sellerMessage);
   await sendWhatsAppWebAuto(buyerPhone, buyerMessage);
 }
+

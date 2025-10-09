@@ -362,6 +362,7 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     <>
       {/* Botón del carrito */}
       <button
+        id="cart-button"
         onClick={openCart}
         className={`
           flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-100 

@@ -112,3 +112,4 @@ JOIN profiles pr ON sp.seller_id = pr.id
 WHERE p.category IN ('Comida Rápida', 'Bebidas', 'Servicios')
 ORDER BY p.category, p.title;
 
+

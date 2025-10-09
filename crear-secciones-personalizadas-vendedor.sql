@@ -87,3 +87,4 @@ WHERE is_seller = true
 ON CONFLICT DO NOTHING;
 */
 
+

@@ -127,3 +127,4 @@ CREATE TRIGGER update_couriers_updated_at BEFORE UPDATE ON public.couriers
 
 CREATE TRIGGER update_deliveries_updated_at BEFORE UPDATE ON public.deliveries
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+

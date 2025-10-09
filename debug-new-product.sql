@@ -82,3 +82,4 @@ WHERE p.created_at >= NOW() - INTERVAL '7 days'
 GROUP BY p.category
 ORDER BY total_products DESC;
 
+

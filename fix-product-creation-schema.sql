@@ -132,3 +132,4 @@ FROM information_schema.columns
 WHERE table_name = 'seller_products'
 ORDER BY table_name, column_name;
 
+

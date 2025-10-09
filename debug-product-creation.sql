@@ -66,3 +66,4 @@ WHERE pr.is_seller = true
 GROUP BY pr.id, pr.name
 ORDER BY total_products DESC;
 
+

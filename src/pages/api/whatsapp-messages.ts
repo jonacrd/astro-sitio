@@ -48,3 +48,4 @@ export const GET: APIRoute = async ({ url }) => {
     }), { status: 500 });
   }
 };
+

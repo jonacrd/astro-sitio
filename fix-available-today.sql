@@ -66,3 +66,4 @@ WHERE sp.active = true
   )
 ORDER BY sp.product_id DESC;
 
+

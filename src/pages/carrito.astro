@@ -1,81 +1,147 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import CartTable from '@components/react/CartTable.tsx'
-import CheckoutButton from '@components/react/CheckoutButton.tsx'
+import CartWidget from '@components/react/CartWidget.tsx'
 ---
 
 <BaseLayout 
-  title="Carrito de compras - Tienda Online"
+  title="Carrito de compras - Town"
   description="Revisa y confirma tu pedido"
 >
-  <!-- Header del carrito -->
-  <section class="bg-white py-6 sm:py-8 border-b">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-3 sm:gap-4">
-        <a 
-          href="/catalogo" 
-          class="text-blue-600 hover:text-blue-700 transition-colors text-sm sm:text-base"
-        >
-          ← Volver al catálogo
-        </a>
-        <div class="h-4 sm:h-6 w-px bg-gray-300"></div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
-          Tu carrito de compras
-        </h1>
+  <div class="min-h-screen bg-gray-50">
+    <!-- Header del carrito -->
+    <section class="bg-white py-6 sm:py-8 border-b">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <a 
+            href="/" 
+            class="text-blue-600 hover:text-blue-700 transition-colors text-sm sm:text-base"
+          >
+            ← Volver al feed
+          </a>
+          <div class="h-4 sm:h-6 w-px bg-gray-300"></div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
+            Tu carrito de compras
+          </h1>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Contenido del carrito -->
-  <section class="py-8 sm:py-12">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        <!-- Tabla del carrito -->
-        <div class="lg:col-span-2">
-          <CartTable client:load />
+    <!-- Contenido principal -->
+    <section class="py-8 sm:py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Mensaje informativo -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-blue-800">
+                Carrito integrado en el feed
+              </h3>
+              <div class="mt-2 text-sm text-blue-700">
+                <p>
+                  Para una mejor experiencia de compra, tu carrito está disponible directamente en el feed principal. 
+                  Haz clic en el ícono del carrito en la barra de navegación superior para ver y gestionar tus productos.
+                </p>
+              </div>
+              <div class="mt-4">
+                <div class="-mx-2 -my-1.5 flex">
+                  <button
+                    onclick="document.getElementById('cart-button').click()"
+                    class="bg-blue-100 px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-50 focus:ring-blue-600"
+                  >
+                    Abrir carrito
+                  </button>
+                  <a
+                    href="/"
+                    class="ml-3 bg-blue-100 px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-50 focus:ring-blue-600"
+                  >
+                    Continuar comprando
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Panel de checkout -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 sticky top-20 sm:top-24">
-            <h3 class="text-base sm:text-lg font-bold mb-3 sm:mb-4">Resumen del pedido</h3>
-            
-            <!-- El botón de checkout manejará internamente la obtención del total -->
-            <CheckoutButton client:idle />
-            
-            <div class="mt-4 text-xs sm:text-sm text-gray-500 space-y-2">
-              <p>✓ Envío gratuito en pedidos superiores a $50</p>
-              <p>✓ Garantía de devolución de 30 días</p>
-              <p>✓ Soporte técnico incluido</p>
+        <!-- Widget del carrito para visualización -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            Tu carrito de compras
+          </h2>
+          
+          <!-- Aquí se mostrará el contenido del carrito usando el widget -->
+          <CartWidget client:load className="w-full" />
+          
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a
+                href="/"
+                class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg text-center hover:bg-gray-200 transition-colors"
+              >
+                Continuar comprando
+              </a>
+              <button
+                onclick="document.getElementById('cart-button').click()"
+                class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Ver carrito completo
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Productos recomendados -->
-  <section class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">
-          También te podría interesar
-        </h2>
-        <p class="text-gray-600">
-          Otros productos que nuestros clientes han comprado
-        </p>
+    <!-- Información adicional -->
+    <section class="py-12 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            Beneficios de comprar con Town
+          </h2>
+          <p class="text-gray-600">
+            Tu plataforma de comercio local confiable
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white rounded-lg p-6 text-center">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Envío rápido</h3>
+            <p class="text-gray-600 text-sm">Productos locales con entrega rápida en tu zona</p>
+          </div>
+          
+          <div class="bg-white rounded-lg p-6 text-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Compra segura</h3>
+            <p class="text-gray-600 text-sm">Protegemos tus datos y pagos con tecnología avanzada</p>
+          </div>
+          
+          <div class="bg-white rounded-lg p-6 text-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Soporte local</h3>
+            <p class="text-gray-600 text-sm">Atención personalizada de vendedores de tu comunidad</p>
+          </div>
+        </div>
       </div>
-      
-      <div class="text-center">
-        <a 
-          href="/catalogo" 
-          class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Ver más productos
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </BaseLayout>
 
 

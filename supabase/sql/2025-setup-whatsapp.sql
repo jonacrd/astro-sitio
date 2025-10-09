@@ -15,3 +15,4 @@ alter table if exists public.profiles add column if not exists phone text;
 alter table if exists public.profiles add column if not exists opt_in_whatsapp boolean default false;
 
 comment on table public.whatsapp_logs is 'Outbound/inbound WhatsApp messages and webhook logs';
+
