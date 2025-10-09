@@ -27,8 +27,9 @@ export default function Checkout({}: CheckoutProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<string>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<string>('transfer');
   const [processing, setProcessing] = useState(false);
+  const [transferProof, setTransferProof] = useState<File | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState({
     address: '',
     tower: '',
@@ -43,10 +44,41 @@ export default function Checkout({}: CheckoutProps) {
     setDeliveryAddress(newAddress);
   };
 
+  // Función para manejar subida de comprobante
+  const handleProofUpload = (file: File | null) => {
+    console.log('📸 Comprobante de transferencia:', file);
+    setTransferProof(file);
+    
+    // Guardar en localStorage para persistencia
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const proofData = {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: e.target?.result
+        };
+        localStorage.setItem('transferProof', JSON.stringify(proofData));
+      };
+      reader.readAsDataURL(file);
+    } else {
+      localStorage.removeItem('transferProof');
+    }
+  };
+
   // Monitorear cambios en deliveryAddress
   useEffect(() => {
     console.log('📍 Estado actual de deliveryAddress:', deliveryAddress);
+    // Guardar en localStorage para persistencia
+    localStorage.setItem('checkoutDeliveryAddress', JSON.stringify(deliveryAddress));
   }, [deliveryAddress]);
+
+  // Monitorear cambios en paymentMethod
+  useEffect(() => {
+    // Guardar en localStorage para persistencia
+    localStorage.setItem('checkoutPaymentMethod', paymentMethod);
+  }, [paymentMethod]);
   
   // Estados para direcciones guardadas
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
@@ -78,7 +110,39 @@ export default function Checkout({}: CheckoutProps) {
       fetchCartItems();
       loadUserProfile();
     }
+    // Cargar datos persistentes siempre, incluso sin usuario
+    loadPersistentCheckoutData();
   }, [user]);
+
+  // Cargar datos persistentes del checkout
+  const loadPersistentCheckoutData = () => {
+    try {
+      // Cargar método de pago
+      const savedPaymentMethod = localStorage.getItem('checkoutPaymentMethod');
+      if (savedPaymentMethod) {
+        setPaymentMethod(savedPaymentMethod);
+      }
+
+      // Cargar dirección de entrega
+      const savedDeliveryAddress = localStorage.getItem('checkoutDeliveryAddress');
+      if (savedDeliveryAddress) {
+        setDeliveryAddress(JSON.parse(savedDeliveryAddress));
+      }
+
+      // Cargar comprobante de transferencia
+      const savedProof = localStorage.getItem('transferProof');
+      if (savedProof) {
+        const proofData = JSON.parse(savedProof);
+        // Crear un objeto File simulado para mantener compatibilidad
+        const file = new File([], proofData.name, { type: proofData.type });
+        setTransferProof(file);
+      }
+
+      console.log('🔄 Datos persistentes del checkout cargados');
+    } catch (error) {
+      console.error('❌ Error cargando datos persistentes:', error);
+    }
+  };
 
   // Cargar perfil del usuario y direcciones guardadas
   const loadUserProfile = async () => {
@@ -614,6 +678,8 @@ export default function Checkout({}: CheckoutProps) {
           <PaymentMethod
             selectedMethod={paymentMethod}
             onMethodChange={setPaymentMethod}
+            onProofUpload={handleProofUpload}
+            uploadedProof={transferProof}
           />
 
           {/* Notas del pedido */}

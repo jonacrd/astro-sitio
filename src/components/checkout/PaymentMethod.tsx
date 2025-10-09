@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import TransferProofUpload from './TransferProofUpload';
 
 interface PaymentMethodProps {
   selectedMethod: string;
   onMethodChange: (method: string) => void;
+  onProofUpload?: (file: File | null) => void;
+  uploadedProof?: File | null;
 }
 
 export default function PaymentMethod({ 
   selectedMethod, 
-  onMethodChange 
+  onMethodChange,
+  onProofUpload,
+  uploadedProof
 }: PaymentMethodProps) {
   const [showTransferDetails, setShowTransferDetails] = useState(false);
 
@@ -21,6 +26,29 @@ export default function PaymentMethod({
       <h2 className="text-white text-lg font-semibold mb-4">Método de Pago</h2>
       
       <div className="space-y-3">
+        {/* Transferencia (primera opción por defecto) */}
+        <label className="flex items-center gap-3 p-4 bg-white/10 rounded-lg border border-white/10 cursor-pointer hover:bg-white/15 transition-colors">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="transfer"
+            checked={selectedMethod === 'transfer'}
+            onChange={(e) => handleMethodChange(e.target.value)}
+            className="w-5 h-5 text-blue-600 bg-white/5 border-white/10 focus:ring-blue-500"
+          />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-medium">Transferencia bancaria</p>
+              <p className="text-white/60 text-sm">Transfiere y envía comprobante</p>
+            </div>
+          </div>
+        </label>
+
         {/* Efectivo */}
         <label className="flex items-center gap-3 p-4 bg-white/10 rounded-lg border border-white/10 cursor-pointer hover:bg-white/15 transition-colors">
           <input
@@ -40,29 +68,6 @@ export default function PaymentMethod({
             <div>
               <p className="text-white font-medium">Pago en efectivo</p>
               <p className="text-white/60 text-sm">Paga cuando recibas tu pedido</p>
-            </div>
-          </div>
-        </label>
-
-        {/* Transferencia */}
-        <label className="flex items-center gap-3 p-4 bg-white/10 rounded-lg border border-white/10 cursor-pointer hover:bg-white/15 transition-colors">
-          <input
-            type="radio"
-            name="paymentMethod"
-            value="transfer"
-            checked={selectedMethod === 'transfer'}
-            onChange={(e) => handleMethodChange(e.target.value)}
-            className="w-5 h-5 text-blue-600 bg-white/5 border-white/10 focus:ring-blue-500"
-          />
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-white font-medium">Transferencia bancaria</p>
-              <p className="text-white/60 text-sm">Transfiere y envía comprobante</p>
             </div>
           </div>
         </label>
@@ -105,10 +110,18 @@ export default function PaymentMethod({
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-yellow-200 text-sm">
                   <strong>Importante:</strong> Después de realizar la transferencia, 
-                  deberás enviar el comprobante en el siguiente paso para confirmar tu pedido.
+                  deberás enviar el comprobante para confirmar tu pedido.
                 </p>
               </div>
             </div>
+            
+            {/* Componente de subida de comprobante */}
+            {onProofUpload && (
+              <TransferProofUpload
+                onProofUpload={onProofUpload}
+                uploadedFile={uploadedProof || null}
+              />
+            )}
           </div>
         )}
       </div>

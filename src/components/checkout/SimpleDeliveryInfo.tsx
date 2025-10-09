@@ -28,7 +28,10 @@ const TOWER_OPTIONS = [
   'Torre A',
   'Torre B',
   'Torre C',
-  'Torre D'
+  'Torre D',
+  'Rengo',
+  'Teno',
+  'Maule'
 ];
 
 export default function SimpleDeliveryInfo({ 
