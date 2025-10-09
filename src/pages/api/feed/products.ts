@@ -2,11 +2,18 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
 export const GET: APIRoute = async ({ url }) => {
+  console.log('🚀 API /api/feed/products iniciada');
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
     
+    console.log('🔧 Variables de entorno:', {
+      url: supabaseUrl ? '✅ Configurada' : '❌ No configurada',
+      serviceKey: supabaseServiceKey ? '✅ Configurada' : '❌ No configurada'
+    });
+    
     if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('❌ Variables de entorno no configuradas');
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,7 +23,9 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
+    console.log('🔌 Creando cliente Supabase...');
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('✅ Cliente Supabase creado');
     
     // Parámetros de paginación
     const page = parseInt(url.searchParams.get('page') || '1');

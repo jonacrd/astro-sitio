@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout 
+  title="Debug Feed - Town"
+  description="Diagnóstico de problemas con el feed"
+>
+  <div class="min-h-screen bg-dark-primary p-8">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-6">🔍 Diagnóstico del Feed</h1>
+      
+      <div class="bg-yellow-900/30 border border-yellow-700/40 rounded-lg p-4 mb-6">
+        <p class="text-yellow-400 font-semibold">⚠️ Problema Detectado</p>
+        <p class="text-gray-300 text-sm mt-1">El feed no carga productos en desarrollo pero sí en producción</p>
+      </div>
+
+      <button 
+        id="runTests"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors mb-6"
+      >
+        🧪 Ejecutar Diagnóstico
+      </button>
+
+      <div id="results" class="space-y-4">
+        <!-- Los resultados aparecerán aquí -->
+      </div>
+
+      <div class="mt-8 bg-gray-800/50 rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-white mb-4">📋 Posibles Soluciones</h2>
+        <div class="space-y-3 text-sm text-gray-300">
+          <div class="flex items-start gap-2">
+            <span class="text-blue-400 font-bold">1.</span>
+            <div>
+              <p class="font-semibold text-white">Reiniciar el servidor de desarrollo</p>
+              <p class="text-gray-400">Presiona Ctrl+C y ejecuta <code class="bg-gray-700 px-2 py-0.5 rounded">npm run dev</code> de nuevo</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-400 font-bold">2.</span>
+            <div>
+              <p class="font-semibold text-white">Verificar versión de Node.js</p>
+              <p class="text-gray-400">Node.js 18+ incluye fetch nativo. Versiones anteriores pueden tener problemas</p>
+              <p class="text-gray-400 mt-1">Ejecuta: <code class="bg-gray-700 px-2 py-0.5 rounded">node --version</code></p>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-400 font-bold">3.</span>
+            <div>
+              <p class="font-semibold text-white">Limpiar caché y reinstalar dependencias</p>
+              <code class="bg-gray-700 px-2 py-1 rounded block mt-1">rm -rf node_modules package-lock.json<br>npm install</code>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-blue-400 font-bold">4.</span>
+            <div>
+              <p class="font-semibold text-white">Verificar firewall/antivirus</p>
+              <p class="text-gray-400">Algunos firewall bloquean conexiones del servidor de desarrollo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const runButton = document.getElementById('runTests');
+    const resultsDiv = document.getElementById('results');
+
+    async function runDiagnostics() {
+      if (runButton) {
+        runButton.textContent = '⏳ Ejecutando pruebas...';
+        (runButton as HTMLButtonElement).disabled = true;
+      }
+
+      if (resultsDiv) {
+        resultsDiv.innerHTML = '<div class="text-center text-gray-400">Ejecutando diagnósticos...</div>';
+      }
+
+      try {
+        const response = await fetch('/api/debug/test-connection');
+        const data = await response.json();
+
+        let html = '';
+
+        // Variables de entorno
+        html += `
+          <div class="bg-gray-800/50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">🔧 Variables de Entorno</h3>
+            <div class="space-y-2">
+              ${Object.entries(data.env).map(([key, value]) => `
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-400">${key}:</span>
+                  <span class="text-white font-mono">${value}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        // Tests
+        data.tests.forEach((test: any, index: number) => {
+          const statusColor = test.status === 'passed' ? 'green' : test.status === 'failed' ? 'red' : 'yellow';
+          const statusEmoji = test.status === 'passed' ? '✅' : test.status === 'failed' ? '❌' : '⏳';
+          
+          html += `
+            <div class="bg-gray-800/50 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-white mb-3">
+                ${statusEmoji} ${test.name}
+              </h3>
+              <div class="text-sm">
+                <div class="mb-2">
+                  <span class="text-gray-400">Estado:</span>
+                  <span class="text-${statusColor}-400 font-semibold ml-2">${test.status}</span>
+                </div>
+                ${test.message ? `<p class="text-gray-300 mb-2">${test.message}</p>` : ''}
+                ${test.error ? `
+                  <div class="bg-red-900/20 border border-red-700/30 rounded p-3 mt-2">
+                    <p class="text-red-400 font-semibold">Error:</p>
+                    <p class="text-red-300 text-xs mt-1">${test.error}</p>
+                    ${test.type ? `<p class="text-red-400 text-xs mt-1">Tipo: ${test.type}</p>` : ''}
+                  </div>
+                ` : ''}
+                ${test.sample ? `
+                  <details class="mt-2">
+                    <summary class="text-blue-400 cursor-pointer">Ver datos de muestra</summary>
+                    <pre class="bg-gray-900 rounded p-2 mt-2 text-xs overflow-auto">${JSON.stringify(test.sample, null, 2)}</pre>
+                  </details>
+                ` : ''}
+                ${test.stack ? `
+                  <details class="mt-2">
+                    <summary class="text-red-400 cursor-pointer">Ver stack trace</summary>
+                    <pre class="bg-gray-900 rounded p-2 mt-2 text-xs overflow-auto">${test.stack}</pre>
+                  </details>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        // Resumen
+        if (data.summary) {
+          const bgColor = data.summary.success ? 'green' : 'red';
+          html += `
+            <div class="bg-${bgColor}-900/30 border border-${bgColor}-700/40 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-${bgColor}-400 mb-3">
+                ${data.summary.success ? '✅ Diagnóstico Completado' : '❌ Se encontraron problemas'}
+              </h3>
+              <div class="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p class="text-2xl font-bold text-white">${data.summary.total}</p>
+                  <p class="text-gray-400 text-sm">Total pruebas</p>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold text-green-400">${data.summary.passed}</p>
+                  <p class="text-gray-400 text-sm">Exitosas</p>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold text-red-400">${data.summary.failed}</p>
+                  <p class="text-gray-400 text-sm">Fallidas</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        if (data.criticalError) {
+          html += `
+            <div class="bg-red-900/30 border border-red-700/40 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-red-400 mb-3">💥 Error Crítico</h3>
+              <p class="text-red-300 mb-2">${data.criticalError.message}</p>
+              <p class="text-red-400 text-sm">Tipo: ${data.criticalError.type}</p>
+              <details class="mt-2">
+                <summary class="text-red-400 cursor-pointer text-sm">Ver detalles completos</summary>
+                <pre class="bg-gray-900 rounded p-2 mt-2 text-xs overflow-auto">${data.criticalError.stack}</pre>
+              </details>
+            </div>
+          `;
+        }
+
+        if (resultsDiv) {
+          resultsDiv.innerHTML = html;
+        }
+
+      } catch (error: any) {
+        if (resultsDiv) {
+          resultsDiv.innerHTML = `
+            <div class="bg-red-900/30 border border-red-700/40 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-red-400 mb-3">❌ Error ejecutando diagnóstico</h3>
+              <p class="text-gray-300">${error.message}</p>
+              <p class="text-gray-400 text-sm mt-2">Este error puede indicar que el servidor no está respondiendo correctamente.</p>
+            </div>
+          `;
+        }
+      } finally {
+        if (runButton) {
+          runButton.textContent = '🧪 Ejecutar Diagnóstico';
+          (runButton as HTMLButtonElement).disabled = false;
+        }
+      }
+    }
+
+    runButton?.addEventListener('click', runDiagnostics);
+
+    // Ejecutar automáticamente al cargar
+    runDiagnostics();
+  </script>
+</BaseLayout>
+

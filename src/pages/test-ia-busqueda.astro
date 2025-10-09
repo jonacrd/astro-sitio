@@ -1,0 +1,250 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout 
+  title="Test IA de Búsqueda - Town"
+  description="Prueba si la IA está funcionando en la búsqueda"
+>
+  <div class="min-h-screen bg-dark-primary p-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-6">🤖 Test de IA en Búsqueda</h1>
+      
+      <div id="status" class="mb-8 p-4 rounded-lg">
+        <p class="text-gray-300">Verificando configuración...</p>
+      </div>
+
+      <div class="bg-gray-800/50 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Probar Búsqueda con IA</h2>
+        <div class="space-y-4">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Escribe algo mal (ej: peeros, piza, cerbesa)"
+            class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
+          />
+          <button 
+            id="testButton"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            Probar Búsqueda
+          </button>
+        </div>
+      </div>
+
+      <div id="results" class="space-y-4">
+        <!-- Los resultados aparecerán aquí -->
+      </div>
+
+      <div class="bg-gray-800/50 rounded-lg p-6 mt-8">
+        <h2 class="text-xl font-semibold text-white mb-4">📋 Registro de Consola</h2>
+        <div id="console" class="bg-gray-900 rounded p-4 font-mono text-sm text-gray-300 max-h-96 overflow-y-auto">
+          <p>Esperando pruebas...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const statusDiv = document.getElementById('status');
+    const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+    const testButton = document.getElementById('testButton');
+    const resultsDiv = document.getElementById('results');
+    const consoleDiv = document.getElementById('console');
+
+    let logs: string[] = [];
+
+    function addLog(message: string, type: 'info' | 'success' | 'error' = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : '📝';
+      logs.push(`[${timestamp}] ${emoji} ${message}`);
+      if (consoleDiv) {
+        consoleDiv.innerHTML = logs.join('<br>');
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+      }
+    }
+
+    // Verificar si la IA está disponible al cargar
+    async function checkAIStatus() {
+      try {
+        addLog('Verificando si la IA está configurada...');
+        
+        // Hacer una búsqueda de prueba
+        const response = await fetch('/api/search/ai?q=test');
+        const data = await response.json();
+        
+        addLog(`Respuesta recibida: ${JSON.stringify(data).substring(0, 100)}...`, 'info');
+
+        if (data.success) {
+          if (statusDiv) {
+            statusDiv.className = 'mb-8 p-4 rounded-lg bg-green-900/30 border border-green-700/40';
+            statusDiv.innerHTML = `
+              <p class="text-green-400 font-semibold">✅ Búsqueda funcionando</p>
+              <p class="text-gray-300 text-sm mt-2">El endpoint está activo. Prueba una búsqueda para ver si la IA está procesando.</p>
+            `;
+          }
+          addLog('Búsqueda funcionando correctamente', 'success');
+        } else {
+          throw new Error(data.error || 'Error desconocido');
+        }
+      } catch (error: any) {
+        if (statusDiv) {
+          statusDiv.className = 'mb-8 p-4 rounded-lg bg-red-900/30 border border-red-700/40';
+          statusDiv.innerHTML = `
+            <p class="text-red-400 font-semibold">❌ Error en la búsqueda</p>
+            <p class="text-gray-300 text-sm mt-2">${error.message}</p>
+          `;
+        }
+        addLog(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Probar búsqueda
+    async function testSearch() {
+      if (!searchInput.value.trim()) {
+        addLog('Por favor escribe algo para buscar', 'error');
+        return;
+      }
+
+      const query = searchInput.value;
+      addLog(`Buscando: "${query}"`);
+
+      if (testButton) {
+        testButton.textContent = '🔍 Buscando...';
+        (testButton as HTMLButtonElement).disabled = true;
+      }
+
+      try {
+        const startTime = Date.now();
+        const response = await fetch(`/api/search/ai?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+
+        addLog(`Búsqueda completada en ${duration}ms`, 'success');
+
+        if (data.success && data.data) {
+          const searchData = data.data;
+          
+          // Verificar si la IA hizo correcciones
+          const hasCorrection = searchData.correctedQuery !== query;
+          const hasCategories = searchData.relatedCategories && searchData.relatedCategories.length > 0;
+          const hasIntent = searchData.searchIntent && searchData.searchIntent !== 'product';
+
+          addLog(`Query original: "${query}"`);
+          addLog(`Query corregida: "${searchData.correctedQuery}"`);
+          addLog(`Intención: ${searchData.searchIntent || 'N/A'}`);
+          addLog(`Categorías relacionadas: ${searchData.relatedCategories?.join(', ') || 'ninguna'}`);
+          addLog(`Productos encontrados: ${searchData.results?.length || 0}`);
+          addLog(`Vendedores encontrados: ${searchData.sellers?.length || 0}`);
+
+          let aiStatus = '';
+          if (hasCorrection || hasCategories || hasIntent) {
+            aiStatus = '<div class="bg-green-900/30 border border-green-700/40 rounded p-3 mb-4"><p class="text-green-400 font-semibold">✅ IA está ACTIVA y procesando</p></div>';
+            addLog('✨ La IA está funcionando correctamente', 'success');
+          } else {
+            aiStatus = '<div class="bg-yellow-900/30 border border-yellow-700/40 rounded p-3 mb-4"><p class="text-yellow-400 font-semibold">⚠️ Búsqueda básica (sin IA avanzada)</p><p class="text-gray-300 text-sm mt-1">Configura OPENAI_API_KEY para activar correcciones inteligentes</p></div>';
+            addLog('⚠️ Búsqueda básica - IA no detectada', 'info');
+          }
+
+          if (resultsDiv) {
+            resultsDiv.innerHTML = `
+              ${aiStatus}
+              
+              <div class="bg-gray-800/50 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-white mb-3">📊 Resultados</h3>
+                
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Query original:</span>
+                    <span class="text-white font-mono">"${query}"</span>
+                  </div>
+                  
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Query corregida:</span>
+                    <span class="text-white font-mono">"${searchData.correctedQuery}"</span>
+                  </div>
+                  
+                  ${hasCorrection ? '<div class="text-green-400 text-xs mt-1">✓ IA corrigió la búsqueda</div>' : '<div class="text-gray-500 text-xs mt-1">Sin correcciones</div>'}
+                  
+                  <div class="flex justify-between mt-3">
+                    <span class="text-gray-400">Intención:</span>
+                    <span class="text-blue-400">${searchData.searchIntent || 'N/A'}</span>
+                  </div>
+                  
+                  <div class="mt-3">
+                    <span class="text-gray-400">Categorías relacionadas:</span>
+                    <div class="mt-1 flex flex-wrap gap-1">
+                      ${searchData.relatedCategories?.map((cat: string) => 
+                        `<span class="px-2 py-1 bg-blue-800/40 text-blue-300 rounded text-xs">${cat}</span>`
+                      ).join('') || '<span class="text-gray-500 text-xs">Ninguna</span>'}
+                    </div>
+                    ${hasCategories ? '<div class="text-green-400 text-xs mt-1">✓ IA sugirió categorías</div>' : ''}
+                  </div>
+                  
+                  <div class="flex justify-between mt-3">
+                    <span class="text-gray-400">Productos:</span>
+                    <span class="text-white">${searchData.results?.length || 0}</span>
+                  </div>
+                  
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Vendedores:</span>
+                    <span class="text-white">${searchData.sellers?.length || 0}</span>
+                  </div>
+                  
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Tiempo:</span>
+                    <span class="text-white">${duration}ms</span>
+                  </div>
+                </div>
+
+                ${searchData.results && searchData.results.length > 0 ? `
+                  <div class="mt-4 pt-4 border-t border-gray-700">
+                    <h4 class="text-white font-semibold mb-2">Primeros 3 productos:</h4>
+                    <div class="space-y-2">
+                      ${searchData.results.slice(0, 3).map((product: any) => `
+                        <div class="bg-gray-700/50 rounded p-2">
+                          <p class="text-white text-sm">${product.title}</p>
+                          <p class="text-gray-400 text-xs">${product.category} • $${(product.price / 100).toFixed(2)}</p>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }
+        } else {
+          throw new Error(data.error || 'Error desconocido');
+        }
+      } catch (error: any) {
+        addLog(`Error en búsqueda: ${error.message}`, 'error');
+        if (resultsDiv) {
+          resultsDiv.innerHTML = `
+            <div class="bg-red-900/30 border border-red-700/40 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-red-400 mb-3">❌ Error</h3>
+              <p class="text-gray-300">${error.message}</p>
+            </div>
+          `;
+        }
+      } finally {
+        if (testButton) {
+          testButton.textContent = 'Probar Búsqueda';
+          (testButton as HTMLButtonElement).disabled = false;
+        }
+      }
+    }
+
+    // Event listeners
+    testButton?.addEventListener('click', testSearch);
+    searchInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        testSearch();
+      }
+    });
+
+    // Verificar al cargar
+    checkAIStatus();
+  </script>
+</BaseLayout>
+

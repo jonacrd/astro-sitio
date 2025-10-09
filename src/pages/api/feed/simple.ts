@@ -2,11 +2,18 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
 export const GET: APIRoute = async ({ url }) => {
+  console.log('🚀 API /api/feed/simple iniciada');
   try {
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
     
+    console.log('🔧 Variables de entorno:', {
+      url: supabaseUrl ? '✅ Configurada' : '❌ No configurada',
+      key: supabaseAnonKey ? '✅ Configurada' : '❌ No configurada'
+    });
+    
     if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('❌ Variables de entorno no configuradas');
       return new Response(JSON.stringify({
         success: false,
         error: 'Variables de entorno no configuradas'
@@ -16,7 +23,9 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
+    console.log('🔌 Creando cliente Supabase...');
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    console.log('✅ Cliente Supabase creado');
     
     console.log('🔍 Obteniendo productos del feed...');
 
