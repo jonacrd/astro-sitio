@@ -43,6 +43,7 @@ export default function SimpleDeliveryInfo({
   const [showAddressSelector, setShowAddressSelector] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showTowerSuggestions, setShowTowerSuggestions] = useState(false);
 
   // Cargar direcciones guardadas al montar el componente
   useEffect(() => {
@@ -80,6 +81,27 @@ export default function SimpleDeliveryInfo({
   const selectSuggestion = (suggestion: string) => {
     setTempAddress({ ...tempAddress, address: suggestion });
     setShowSuggestions(false);
+  };
+
+  // Manejar cambios en el campo de torre con autocompletado
+  const handleTowerInput = (value: string) => {
+    setTempAddress({ ...tempAddress, tower: value });
+    
+    // Mostrar sugerencias si coincide con opciones de torre
+    if (value.length > 0) {
+      const suggestions = TOWER_OPTIONS.filter(tower => 
+        tower.toLowerCase().includes(value.toLowerCase())
+      );
+      setShowTowerSuggestions(suggestions.length > 0);
+    } else {
+      setShowTowerSuggestions(false);
+    }
+  };
+
+  // Seleccionar sugerencia de torre
+  const selectTowerSuggestion = (suggestion: string) => {
+    setTempAddress({ ...tempAddress, tower: suggestion });
+    setShowTowerSuggestions(false);
   };
 
   const handleSave = () => {
@@ -185,7 +207,7 @@ export default function SimpleDeliveryInfo({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">📍 Agregar Dirección</h3>
+              <h3 className="text-lg font-semibold text-gray-900">📍 Agregar Dirección</h3>
               <button
                 onClick={() => setShowChangeModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -225,22 +247,34 @@ export default function SimpleDeliveryInfo({
               </div>
 
               {/* 2. Torre/Edificio */}
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-900 mb-1">
                   Torre/Edificio
                 </label>
-                <select
+                <input
+                  type="text"
                   value={tempAddress.tower}
-                  onChange={(e) => setTempAddress({ ...tempAddress, tower: e.target.value })}
+                  onChange={(e) => handleTowerInput(e.target.value)}
+                  placeholder="Ej: Torre A, Torre B, Edificio Central"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                >
-                  <option value="">Seleccionar torre</option>
-                  {TOWER_OPTIONS.map((tower) => (
-                    <option key={tower} value={tower}>
-                      {tower}
-                    </option>
-                  ))}
-                </select>
+                />
+                
+                {/* Sugerencias de torre */}
+                {showTowerSuggestions && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    {TOWER_OPTIONS.filter(tower => 
+                      tower.toLowerCase().includes(tempAddress.tower.toLowerCase())
+                    ).map((tower, index) => (
+                      <button
+                        key={index}
+                        onClick={() => selectTowerSuggestion(tower)}
+                        className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 text-gray-900"
+                      >
+                        {tower}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* 3. Número de departamento */}
