@@ -3,7 +3,7 @@ import React from 'react';
 interface CartItem {
   id: string;
   title: string;
-  priceCents: number;
+  priceCents: number; // Precio unitario en pesos (no en centavos)
   qty: number;
   image?: string;
   sellerName: string;
@@ -32,19 +32,12 @@ export default function CartSummary({
       return '$0';
     }
     
-    // Si el precio es muy grande, probablemente ya está en pesos, no centavos
-    if (price > 1000) {
-      return new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-        minimumFractionDigits: 0
-      }).format(price);
-    }
+    // El precio siempre viene en pesos desde el carrito, no en centavos
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
       minimumFractionDigits: 0
-    }).format(price / 100);
+    }).format(price);
   };
 
   return (

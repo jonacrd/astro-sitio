@@ -111,7 +111,7 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
       const cartItem = {
         id: product.id,
         title: product.title,
-        price: product.price_cents,
+        price: product.price_cents / 100, // Convertir centavos a pesos
         image: product.image_url || '/images/placeholder.jpg',
         seller_id: product.seller_id,
         seller_name: product.seller_name,

@@ -252,11 +252,11 @@ export default function Checkout({}: CheckoutProps) {
           cartId: user?.id || 'local',
           productId: item.id,
           title: item.title,
-          priceCents: pesosToCents(price), // Convertir pesos a centavos
+          priceCents: price, // Precio unitario en pesos (para mostrar en UI)
           qty: quantity, // Usar qty como espera la interfaz
           sellerId: item.sellerId || 'seller_1', // Usar sellerId del item si existe
           sellerName: item.sellerName || item.vendor || 'Vendedor', // Usar sellerName primero
-          totalCents: pesosToCents(price * quantity), // Convertir total a centavos
+          totalCents: pesosToCents(price * quantity), // Total en centavos (para cálculos internos)
           image: item.image || '/placeholder-product.jpg' // Incluir imagen del producto
         };
       });
@@ -598,8 +598,8 @@ export default function Checkout({}: CheckoutProps) {
                 }));
               }
             }}
-            subtotal={totalCents}
-            total={totalCents}
+            subtotal={totalCents / 100}
+            total={totalCents / 100}
           />
 
           {/* Información de entrega */}
@@ -624,7 +624,7 @@ export default function Checkout({}: CheckoutProps) {
 
         {/* Barra de confirmación */}
         <ConfirmBar
-          total={totalCents}
+          total={totalCents / 100}
           onCheckout={handleCheckout}
           processing={processing}
         />

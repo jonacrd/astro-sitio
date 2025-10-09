@@ -170,7 +170,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
       const cartItem = {
         id: product.product_id,
         title: product.product.title,
-        price: product.price_cents,
+        price: product.price_cents / 100, // Convertir centavos a pesos
         image: product.product.image_url || '/images/placeholder.jpg',
         seller_id: product.seller_id,
         seller_name: seller?.name || 'Vendedor',
