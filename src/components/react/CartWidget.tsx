@@ -203,13 +203,34 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
     };
   }, [isOpen]);
 
+  // Efecto para manejar la tecla Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        console.log('⌨️ Escape key pressed - closing cart');
+        closeCart();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   const openCart = () => {
-    console.log('Opening cart, current items:', cartData.items.length);
+    console.log('🛒 Opening cart, current items:', cartData.items.length);
+    console.log('🔄 Estado antes de abrir:', isOpen);
     setIsOpen(true);
+    console.log('✅ Cart opened - Estado después:', true);
   };
   const closeCart = () => {
-    console.log('Closing cart');
+    console.log('🔄 Closing cart - Estado actual:', isOpen);
     setIsOpen(false);
+    console.log('✅ Cart closed - Estado después:', false);
   };
 
   const removeFromCart = async (cartItemId: string) => {
@@ -419,11 +440,17 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
 
       {/* Drawer/Modal del carrito */}
       {isOpen && (
-        <div className="fixed inset-0 z-[60] pointer-events-auto">
+        <div 
+          className="fixed inset-0 z-[60] pointer-events-auto"
+          style={{ zIndex: 60 }}
+        >
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 transition-opacity opacity-100"
-            onClick={closeCart}
+            onClick={(e) => {
+              console.log('🖱️ Backdrop clicked');
+              closeCart();
+            }}
           />
 
           {/* Panel del carrito */}
@@ -459,11 +486,17 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
               )}
               {/* Botón para cerrar */}
               <button
-                onClick={closeCart}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                onClick={(e) => {
+                  console.log('❌ Close button clicked');
+                  e.stopPropagation();
+                  closeCart();
+                }}
+                className="p-3 rounded-lg hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors border border-red-200 hover:border-red-300"
+                title="Cerrar carrito"
+                aria-label="Cerrar carrito"
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

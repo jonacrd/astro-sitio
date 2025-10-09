@@ -103,7 +103,9 @@ export default function Header() {
 
   const handleCartClose = () => {
     console.log('🛒 Cerrando carrito...');
+    console.log('🔄 Estado antes de cerrar:', { cartOpen, cartCount });
     setCartOpen(false);
+    console.log('✅ Carrito cerrado - Estado después:', { cartOpen: false, cartCount });
   };
 
   const handleProceedToCheckout = async () => {
