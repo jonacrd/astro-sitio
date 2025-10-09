@@ -62,3 +62,4 @@ WHERE is_seller = true
 ORDER BY name;
 
 
+

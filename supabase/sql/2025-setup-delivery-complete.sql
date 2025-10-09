@@ -207,3 +207,4 @@ CREATE TRIGGER auto_assign_delivery
   FOR EACH ROW
   EXECUTE FUNCTION assign_delivery_automatically();
 
+

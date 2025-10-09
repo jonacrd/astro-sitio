@@ -33,3 +33,4 @@ SELECT 'profiles' as tabla, id, name, phone, role FROM profiles WHERE phone = '+
 UNION ALL
 SELECT 'couriers' as tabla, id, name, phone, 'courier' as role FROM couriers WHERE phone = '+56962614851';
 
+

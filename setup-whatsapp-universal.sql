@@ -30,3 +30,4 @@ SET phone = '+56962614851';
 -- PASO 7: Verificar couriers
 SELECT id, name, phone FROM couriers WHERE phone = '+56962614851';
 
+

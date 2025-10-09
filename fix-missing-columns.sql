@@ -100,3 +100,4 @@ WHERE table_name = 'seller_custom_sections'
 ORDER BY column_name;
 
 
+

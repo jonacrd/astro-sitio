@@ -105,3 +105,4 @@ create trigger update_couriers_updated_at before update on public.couriers
 create trigger update_deliveries_updated_at before update on public.deliveries
   for each row execute function update_updated_at_column();
 
+

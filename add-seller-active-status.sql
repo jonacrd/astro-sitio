@@ -24,3 +24,4 @@ SELECT id, name, is_seller, is_active FROM profiles WHERE is_seller = TRUE;
 
 
 
+

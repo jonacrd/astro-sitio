@@ -113,3 +113,4 @@ WHERE p.category IN ('Comida Rápida', 'Bebidas', 'Servicios')
 ORDER BY p.category, p.title;
 
 
+

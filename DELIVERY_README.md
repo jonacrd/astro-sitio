@@ -228,3 +228,4 @@ DELIVERY_ENABLED=true
 - **PWA simple**: Sin dependencias pesadas
 - **Código limpio**: Módulo completamente desacoplado
 
+

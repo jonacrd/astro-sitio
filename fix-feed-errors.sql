@@ -29,3 +29,4 @@ WHERE table_name = 'seller_products'
 ORDER BY tabla, column_name;
 
 
+

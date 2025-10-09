@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 interface SimpleDeliveryAddress {
   address: string;
   tower: string;
+  apartment: string;
   contact: string;
   deliveryNotes: string;
 }
@@ -22,12 +23,12 @@ const COMMON_ADDRESSES = [
   'Rivas Vicuña 1214'
 ];
 
-// Opciones de torre comunes
+// Opciones de torre comunes (simplificadas)
 const TOWER_OPTIONS = [
-  'A', 'B', 'C', 'D', 'E', 'F',
-  '1', '2', '3', '4', '5', '6',
-  'Torre Norte', 'Torre Sur', 'Torre Este', 'Torre Oeste',
-  'Torre Central', 'Torre Principal'
+  'Torre A',
+  'Torre B',
+  'Torre C',
+  'Torre D'
 ];
 
 export default function SimpleDeliveryInfo({ 
@@ -115,19 +116,20 @@ export default function SimpleDeliveryInfo({
 
   const formatAddress = (addr: SimpleDeliveryAddress) => {
     if (!addr.address) return 'Agregar dirección';
-    const tower = addr.tower ? `, Torre ${addr.tower}` : '';
-    return `${addr.address}${tower}`;
+    const tower = addr.tower ? `, ${addr.tower}` : '';
+    const apartment = addr.apartment ? `, Depto ${addr.apartment}` : '';
+    return `${addr.address}${tower}${apartment}`;
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border">
+    <div className="bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-700">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-white">
           📍 Información de Entrega
         </h3>
         <button
           onClick={() => setShowChangeModal(true)}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
         >
           {address.address ? 'Cambiar' : 'Agregar'}
         </button>
@@ -136,19 +138,19 @@ export default function SimpleDeliveryInfo({
       {/* Dirección actual */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-gray-600">📍 Dirección:</span>
-          <span className="font-medium">{formatAddress(address)}</span>
+          <span className="text-gray-400">📍 Dirección:</span>
+          <span className="font-medium text-white">{formatAddress(address)}</span>
         </div>
         {address.contact && (
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">📞 Contacto:</span>
-            <span className="font-medium">{address.contact}</span>
+            <span className="text-gray-400">📞 Contacto:</span>
+            <span className="font-medium text-white">{address.contact}</span>
           </div>
         )}
         {address.deliveryNotes && (
           <div className="flex items-center gap-2">
-            <span className="text-gray-600">📝 Notas:</span>
-            <span className="font-medium">{address.deliveryNotes}</span>
+            <span className="text-gray-400">📝 Notas:</span>
+            <span className="font-medium text-white">{address.deliveryNotes}</span>
           </div>
         )}
       </div>
@@ -193,9 +195,9 @@ export default function SimpleDeliveryInfo({
             </div>
 
             <div className="space-y-4">
-              {/* Dirección con autocompletado */}
+              {/* 1. Dirección con autocompletado */}
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Dirección *
                 </label>
                 <input
@@ -203,7 +205,7 @@ export default function SimpleDeliveryInfo({
                   value={tempAddress.address}
                   onChange={(e) => handleAddressInput(e.target.value)}
                   placeholder="Ej: Rivas Vicuña 1130"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
                 
                 {/* Sugerencias de autocompletado */}
@@ -213,7 +215,7 @@ export default function SimpleDeliveryInfo({
                       <button
                         key={index}
                         onClick={() => selectSuggestion(suggestion)}
-                        className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                        className="w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 text-gray-900"
                       >
                         {suggestion}
                       </button>
@@ -222,15 +224,15 @@ export default function SimpleDeliveryInfo({
                 )}
               </div>
 
-              {/* Torre */}
+              {/* 2. Torre/Edificio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Torre/Edificio
                 </label>
                 <select
                   value={tempAddress.tower}
                   onChange={(e) => setTempAddress({ ...tempAddress, tower: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 >
                   <option value="">Seleccionar torre</option>
                   {TOWER_OPTIONS.map((tower) => (
@@ -241,9 +243,23 @@ export default function SimpleDeliveryInfo({
                 </select>
               </div>
 
-              {/* Número de contacto */}
+              {/* 3. Número de departamento */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
+                  Número de departamento
+                </label>
+                <input
+                  type="text"
+                  value={tempAddress.apartment || ''}
+                  onChange={(e) => setTempAddress({ ...tempAddress, apartment: e.target.value })}
+                  placeholder="Ej: 101, 205, A3"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                />
+              </div>
+
+              {/* 4. Número de contacto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Número de contacto *
                 </label>
                 <input
@@ -251,13 +267,13 @@ export default function SimpleDeliveryInfo({
                   value={tempAddress.contact}
                   onChange={(e) => setTempAddress({ ...tempAddress, contact: e.target.value })}
                   placeholder="Ej: +56 9 1234 5678"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
               </div>
 
-              {/* Notas de entrega */}
+              {/* 5. Notas para la entrega */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-900 mb-1">
                   Notas para la entrega
                 </label>
                 <textarea
@@ -265,7 +281,7 @@ export default function SimpleDeliveryInfo({
                   onChange={(e) => setTempAddress({ ...tempAddress, deliveryNotes: e.target.value })}
                   placeholder="Ej: Timbre 2, dejar en portería, etc."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 />
               </div>
 
@@ -276,9 +292,9 @@ export default function SimpleDeliveryInfo({
                   id="saveAsDefault"
                   checked={saveAsDefault}
                   onChange={(e) => setSaveAsDefault(e.target.checked)}
-                  className="mr-2"
+                  className="mr-2 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="saveAsDefault" className="text-sm text-gray-700">
+                <label htmlFor="saveAsDefault" className="text-sm text-gray-900">
                   Guardar como dirección predeterminada
                 </label>
               </div>

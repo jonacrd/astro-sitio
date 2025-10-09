@@ -83,3 +83,4 @@ GROUP BY p.category
 ORDER BY total_products DESC;
 
 
+

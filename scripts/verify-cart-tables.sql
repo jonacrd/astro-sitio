@@ -98,3 +98,4 @@ SELECT 'cart_items' as table_name, COUNT(*) as count FROM cart_items;
 
 
 
+

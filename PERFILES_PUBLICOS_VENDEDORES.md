@@ -293,3 +293,4 @@ SET product_ids = array_remove(product_ids, 'product-id-inexistente');
 El sistema permite a los vendedores crear perfiles públicos atractivos y organizados, mientras que los compradores pueden explorar fácilmente el catálogo completo de cada tienda y realizar compras directas.
 
 
+

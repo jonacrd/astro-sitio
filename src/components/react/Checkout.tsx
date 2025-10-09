@@ -32,6 +32,7 @@ export default function Checkout({}: CheckoutProps) {
   const [deliveryAddress, setDeliveryAddress] = useState({
     address: '',
     tower: '',
+    apartment: '',
     contact: '',
     deliveryNotes: ''
   });

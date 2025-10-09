@@ -102,7 +102,7 @@ export default function CartSummary({
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                       </svg>
                     </button>
-                    <span className="w-10 text-center font-bold text-gray-800 text-lg">
+                    <span className="w-10 text-center font-bold text-white text-lg bg-gray-700 rounded px-1">
                       {item.qty || 0}
                     </span>
                     <button

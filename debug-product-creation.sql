@@ -67,3 +67,4 @@ GROUP BY pr.id, pr.name
 ORDER BY total_products DESC;
 
 
+

@@ -30,3 +30,4 @@ SELECT 'profiles' as tabla, id, name, phone FROM profiles WHERE phone = '+569626
 UNION ALL
 SELECT 'couriers' as tabla, id, name, phone FROM couriers WHERE phone = '+56962614851';
 
+

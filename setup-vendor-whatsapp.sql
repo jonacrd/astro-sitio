@@ -26,3 +26,4 @@ SET phone = '+56962614851';
 -- 6. Verificar resultado
 SELECT id, name, email, phone FROM profiles WHERE phone = '+56962614851';
 
+

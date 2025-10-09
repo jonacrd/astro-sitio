@@ -116,3 +116,4 @@ SELECT 'Productos activos:' as info, COUNT(*) as count FROM seller_products WHER
 
 
 
+

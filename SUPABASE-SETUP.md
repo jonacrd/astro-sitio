@@ -124,3 +124,4 @@ Puedes verificar en Supabase Dashboard:
 
 
 
+

@@ -36,3 +36,4 @@ Una vez configurado:
 3. **Vendedor recibe** → Notificación en WhatsApp
 4. **Sin intervención manual** → Todo automático
 
+

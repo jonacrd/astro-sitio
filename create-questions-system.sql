@@ -192,3 +192,4 @@ SELECT 'Categorías insertadas:' as status;
 SELECT * FROM question_categories ORDER BY name;
 
 
+
