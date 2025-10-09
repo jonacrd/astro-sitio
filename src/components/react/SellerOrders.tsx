@@ -2,6 +2,94 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { getUser } from '../../lib/session';
 
+// Componente para mostrar comprobante de transferencia
+const TransferProofViewer = ({ transferProof, orderId }: { transferProof: string, orderId: string }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  const downloadProof = () => {
+    const link = document.createElement('a');
+    link.href = transferProof;
+    link.download = `comprobante_${orderId.substring(0, 8)}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <>
+      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-blue-900">Comprobante de Transferencia</p>
+              <p className="text-xs text-blue-700">Click para ver o descargar</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Ver
+            </button>
+            <button
+              onClick={downloadProof}
+              className="px-3 py-1 bg-green-600 text-white text-xs rounded-md hover:bg-green-700 transition-colors"
+            >
+              Descargar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal para ver comprobante */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold">Comprobante de Transferencia</h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <img
+                src={transferProof}
+                alt="Comprobante de transferencia"
+                className="w-full h-auto rounded-lg shadow-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-3 p-4 border-t">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={downloadProof}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Descargar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 interface OrderItem {
   id: string;
   title: string;
@@ -14,6 +102,7 @@ interface Order {
   user_id: string;
   total_cents: number;
   payment_method: string;
+  transfer_proof?: string;
   status: string;
   delivery_cents?: number;
   created_at: string;
@@ -238,6 +327,14 @@ export default function SellerOrders() {
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                     {getStatusText(order.status)}
                   </span>
+                  {/* Indicador de método de pago */}
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    order.payment_method === 'transfer' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {order.payment_method === 'transfer' ? '💳 Transferencia' : '💰 Efectivo'}
+                  </span>
                   <span className="text-lg font-bold text-blue-600">
                     {formatPrice(order.total_cents)}
                   </span>
@@ -278,6 +375,14 @@ export default function SellerOrders() {
                 </div>
               </div>
 
+              {/* Comprobante de transferencia */}
+              {order.payment_method === 'transfer' && order.transfer_proof && (
+                <TransferProofViewer 
+                  transferProof={order.transfer_proof} 
+                  orderId={order.id} 
+                />
+              )}
+
               {/* Acciones */}
               <div className="flex gap-3">
                 {order.status === 'pending' && (
@@ -285,7 +390,7 @@ export default function SellerOrders() {
                     onClick={() => updateOrderStatus(order.id, 'confirmed')}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    Confirmar Pedido
+                    {order.payment_method === 'transfer' ? '✅ Confirmar Transferencia' : 'Confirmar Pedido'}
                   </button>
                 )}
                 {order.status === 'confirmed' && (
