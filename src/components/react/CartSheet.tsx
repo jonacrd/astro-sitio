@@ -19,20 +19,12 @@ export default function CartSheet({
   onRemoveItem, 
   onClearCart 
 }: CartSheetProps) {
-  console.log('🎭 CartSheet render - isOpen:', isOpen, 'items:', items?.length || 0);
-  
-  if (!isOpen) {
-    console.log('🚫 CartSheet no se renderiza - isOpen es false');
-    return null;
-  }
-  
-  console.log('✅ CartSheet se renderiza - modal visible');
+  if (!isOpen) return null;
 
   // Efecto para manejar la tecla Escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        console.log('⌨️ Escape key pressed - closing cart sheet');
+      if (e.key === 'Escape') {
         onClose();
       }
     };
@@ -72,19 +64,20 @@ export default function CartSheet({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-[65]
+                   sm:inset-0
+                   max-sm:top-[60px] max-sm:bottom-[80px] max-sm:left-0 max-sm:right-0">
       {/* Backdrop clickable */}
       <div 
-        className="absolute inset-0"
-        onClick={(e) => {
-          console.log('🖱️ Backdrop clicked - closing cart sheet');
-          onClose();
-        }}
+        className="absolute inset-0 cursor-pointer"
+        onClick={onClose}
       />
       
       {/* Modal content */}
       <div 
-        className="bg-white h-full w-full max-w-md shadow-xl transform transition-transform duration-300 ease-in-out relative z-10"
+        className="bg-white h-full w-full max-w-md shadow-xl transform transition-transform duration-300 ease-in-out relative z-10
+                   sm:h-full sm:max-w-md
+                   max-sm:h-[calc(100vh-140px)] max-sm:mt-[60px] max-sm:mb-[80px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -93,14 +86,17 @@ export default function CartSheet({
             Carrito ({getTotalItems()})
           </h2>
           <button
-            onClick={(e) => {
-              console.log('❌ Close button clicked - closing cart sheet');
-              e.stopPropagation();
-              onClose();
-            }}
-            className="p-2 rounded-lg hover:bg-red-100 text-red-600 hover:text-red-700 transition-colors border border-red-200 hover:border-red-300"
+            onClick={onClose}
+            className="p-3 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800 transition-colors"
             title="Cerrar carrito"
             aria-label="Cerrar carrito"
+            style={{ 
+              minWidth: '44px', 
+              minHeight: '44px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />

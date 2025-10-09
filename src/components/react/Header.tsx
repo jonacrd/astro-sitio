@@ -96,9 +96,14 @@ export default function Header() {
 
   const handleCartClick = () => {
     console.log('🛒 Click en carrito - Estado actual:', { cartOpen, cartCount });
-    console.log('🛒 Abriendo carrito...');
-    setCartOpen(true);
-    console.log('🛒 Estado después de setCartOpen:', { cartOpen: true });
+    if (cartOpen) {
+      console.log('🛒 Cerrando carrito (toggle)...');
+      setCartOpen(false);
+    } else {
+      console.log('🛒 Abriendo carrito (toggle)...');
+      setCartOpen(true);
+    }
+    console.log('🛒 Estado después del toggle:', { cartOpen: !cartOpen, cartCount });
   };
 
   const handleCartClose = () => {
