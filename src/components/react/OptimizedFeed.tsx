@@ -345,7 +345,15 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
           productImage={toastData.productImage}
           onClose={() => setShowToast(false)}
           onClick={() => {
-            window.location.href = '/carrito';
+            // Abrir el modal del carrito haciendo click en el botón del carrito
+            console.log('🍞 Toast clicked - buscando botón del carrito...');
+            const cartButton = document.getElementById('cart-button');
+            if (cartButton) {
+              console.log('✅ Botón del carrito encontrado, haciendo click...');
+              cartButton.click();
+            } else {
+              console.log('❌ Botón del carrito no encontrado');
+            }
           }}
         />
       )}
