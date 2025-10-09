@@ -83,9 +83,9 @@ export const POST: APIRoute = async (context) => {
     // Calcular total con validación
     const totalCents = cartItems.reduce((sum, item) => {
       const price = Number(item.priceCents) || 0;
-      const quantity = Number(item.quantity) || 0;
+      const quantity = Number(item.quantity || item.qty) || 0; // Manejar tanto quantity como qty
       const itemTotal = price * quantity;
-      console.log(`💰 Item: ${item.title}, Precio: ${price}, Cantidad: ${quantity}, Subtotal: ${itemTotal}`);
+      console.log(`💰 Item: ${item.title}, Precio: ${price}, Cantidad: ${quantity} (qty: ${item.qty}, quantity: ${item.quantity}), Subtotal: ${itemTotal}`);
       return sum + itemTotal;
     }, 0);
     
@@ -93,6 +93,13 @@ export const POST: APIRoute = async (context) => {
 
     console.log('📦 Creando orden:', { orderCode, totalCents, cartItems });
     console.log('💰 Total calculado:', totalCents);
+    console.log('🔍 Debug cartItems:', cartItems.map(item => ({
+      title: item.title,
+      priceCents: item.priceCents,
+      quantity: item.quantity,
+      qty: item.qty,
+      calculatedTotal: (Number(item.priceCents) || 0) * (Number(item.quantity || item.qty) || 0)
+    })));
     
     // Validar que el total sea válido
     if (!totalCents || totalCents <= 0) {

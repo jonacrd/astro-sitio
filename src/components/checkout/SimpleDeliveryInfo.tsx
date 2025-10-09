@@ -55,9 +55,18 @@ export default function SimpleDeliveryInfo({
       setSavedAddresses(addresses);
       console.log('🏠 Direcciones guardadas cargadas:', addresses);
       
-      // Si hay direcciones guardadas y no hay dirección actual, mostrar selector
+      // Si hay direcciones guardadas y no hay dirección actual
       if (addresses.length > 0 && (!address.address || !address.contact)) {
-        setShowAddressSelector(true);
+        // Auto-seleccionar la dirección predeterminada (primera dirección)
+        const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+        if (defaultAddress) {
+          console.log('🏠 Auto-seleccionando dirección predeterminada:', defaultAddress);
+          onAddressChange(defaultAddress);
+          setShowAddressSelector(false); // Ocultar selector ya que ya está seleccionada
+        } else {
+          // Si no hay dirección predeterminada, mostrar selector
+          setShowAddressSelector(true);
+        }
       }
     };
     
@@ -152,56 +161,104 @@ export default function SimpleDeliveryInfo({
         <h3 className="text-lg font-semibold text-white">
           📍 Información de Entrega
         </h3>
-        <button
-          onClick={() => setShowChangeModal(true)}
-          className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-        >
-          {address.address ? 'Cambiar' : 'Agregar'}
-        </button>
+        <div className="flex gap-2">
+          {address.address && savedAddresses.length > 0 && (
+            <button
+              onClick={() => setShowAddressSelector(true)}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+            >
+              📋 Elegir otra
+            </button>
+          )}
+          <button
+            onClick={() => setShowChangeModal(true)}
+            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+          >
+            {address.address ? '✏️ Cambiar' : '➕ Agregar'}
+          </button>
+        </div>
       </div>
 
       {/* Dirección actual */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">📍 Dirección:</span>
-          <span className="font-medium text-white">{formatAddress(address)}</span>
+      {address.address ? (
+        <div className="space-y-3">
+          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-green-400">✅</span>
+              <span className="text-green-400 font-medium text-sm">Dirección seleccionada</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400">📍 Dirección:</span>
+                <span className="font-medium text-white">{formatAddress(address)}</span>
+              </div>
+              {address.contact && (
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400">📞 Contacto:</span>
+                  <span className="font-medium text-white">{address.contact}</span>
+                </div>
+              )}
+              {address.deliveryNotes && (
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400">📝 Notas:</span>
+                  <span className="font-medium text-white">{address.deliveryNotes}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        {address.contact && (
+      ) : (
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-gray-400">📞 Contacto:</span>
-            <span className="font-medium text-white">{address.contact}</span>
+            <span className="text-gray-400">📍 Dirección:</span>
+            <span className="font-medium text-white">{formatAddress(address)}</span>
           </div>
-        )}
-        {address.deliveryNotes && (
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400">📝 Notas:</span>
-            <span className="font-medium text-white">{address.deliveryNotes}</span>
-          </div>
-        )}
-      </div>
+          {address.contact && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">📞 Contacto:</span>
+              <span className="font-medium text-white">{address.contact}</span>
+            </div>
+          )}
+          {address.deliveryNotes && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">📝 Notas:</span>
+              <span className="font-medium text-white">{address.deliveryNotes}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Selector de direcciones guardadas */}
       {showAddressSelector && savedAddresses.length > 0 && (
         <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <h4 className="font-medium text-white mb-2">Direcciones guardadas:</h4>
-          <div className="space-y-2">
+          <h4 className="font-medium text-white mb-3">📍 Elige una dirección guardada:</h4>
+          <div className="space-y-3">
             {savedAddresses.map((savedAddr) => (
               <button
                 key={savedAddr.id}
                 onClick={() => handleSelectSavedAddress(savedAddr)}
-                className="w-full text-left p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors"
+                className="w-full text-left p-3 bg-gray-800 border border-gray-700 rounded-lg hover:bg-blue-500/20 hover:border-blue-500/50 transition-all duration-200 group"
               >
-                <div className="font-medium text-white">{formatAddress(savedAddr)}</div>
-                <div className="text-sm text-gray-300">{savedAddr.contact}</div>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-white group-hover:text-blue-200">{formatAddress(savedAddr)}</div>
+                    <div className="text-sm text-gray-300 group-hover:text-blue-300">{savedAddr.contact}</div>
+                  </div>
+                  <div className="ml-3">
+                    <div className="w-5 h-5 border-2 border-gray-500 rounded-full group-hover:border-blue-400 transition-colors"></div>
+                  </div>
+                </div>
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setShowAddressSelector(false)}
-            className="mt-2 text-sm text-blue-400 hover:text-blue-300"
-          >
-            Usar nueva dirección
-          </button>
+          <div className="mt-4 pt-3 border-t border-gray-700/50">
+            <button
+              onClick={() => setShowAddressSelector(false)}
+              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+            >
+              ✏️ Usar nueva dirección
+            </button>
+          </div>
         </div>
       )}
 

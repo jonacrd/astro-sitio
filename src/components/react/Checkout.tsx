@@ -397,12 +397,20 @@ export default function Checkout({}: CheckoutProps) {
     try {
       console.log('🛒 Procesando checkout con flujo existente...');
       console.log('📦 Items del carrito:', cartItems);
+      console.log('🔍 Debug cartItems para API:', cartItems.map(item => ({
+        id: item.id,
+        title: item.title,
+        priceCents: item.priceCents,
+        qty: item.qty,
+        sellerId: item.sellerId,
+        sellerName: item.sellerName
+      })));
       console.log('📍 Dirección de entrega:', deliveryAddress);
       
       // Debug: verificar total antes de enviar
       const calculatedTotal = cartItems.reduce((sum, item) => {
         const price = Number(item.priceCents) || 0;
-        const quantity = Number(item.quantity) || 0;
+        const quantity = Number(item.qty) || 0; // Usar qty que es la propiedad correcta
         return sum + (price * quantity);
       }, 0);
       console.log('💰 Total calculado en frontend:', calculatedTotal);
