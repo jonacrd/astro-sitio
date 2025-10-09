@@ -1,0 +1,155 @@
+---
+// Página de ayuda para agregar WhatsApp como producto
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar WhatsApp como Producto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #25D366;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .step-number {
+            background: #25D366;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            border: 1px solid #dee2e6;
+        }
+        .button {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #128C7E;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Agregar WhatsApp como Producto</h1>
+        
+        <div class="warning">
+            <strong>⚠️ PROBLEMA IDENTIFICADO:</strong> Tu app "Town" no tiene WhatsApp configurado como producto, por eso no aparece en el menú izquierdo.
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">1</span>Ir a Meta for Developers</h3>
+            <p>Ve a <a href="https://developers.facebook.com/" target="_blank" class="button">Meta for Developers</a></p>
+            <p>Selecciona tu app "Town" (ID: 3733726956933410)</p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">2</span>Buscar "Agregar Producto"</h3>
+            <p>En la página principal de tu app, busca:</p>
+            <ul>
+                <li><strong>"Agregar producto"</strong> o <strong>"Add Product"</strong></li>
+                <li><strong>"Productos"</strong> en el menú izquierdo</li>
+                <li><strong>"Configurar productos"</strong> en el panel principal</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">3</span>Seleccionar WhatsApp Business API</h3>
+            <p>De la lista de productos disponibles, selecciona:</p>
+            <div class="code">WhatsApp Business API</div>
+            <p>Haz clic en <strong>"Configurar"</strong> o <strong>"Set Up"</strong></p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">4</span>Configurar WhatsApp Business</h3>
+            <p>Una vez agregado, aparecerá:</p>
+            <ul>
+                <li><strong>"WhatsApp"</strong> en el menú izquierdo</li>
+                <li><strong>"API Setup"</strong> en la sección de WhatsApp</li>
+                <li><strong>"Token de acceso"</strong> permanente</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">5</span>Obtener Token Permanente</h3>
+            <p>En la sección de WhatsApp > API Setup:</p>
+            <ul>
+                <li>Copia el <strong>Token de acceso</strong> permanente</li>
+                <li>Copia el <strong>Phone Number ID</strong></li>
+                <li>Configura las plantillas personalizadas</li>
+            </ul>
+        </div>
+        
+        <div class="success">
+            <strong>✅ RESULTADO ESPERADO:</strong> Una vez configurado, tendrás acceso completo a la API de WhatsApp con tokens permanentes y plantillas personalizadas.
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">6</span>Probar la Configuración</h3>
+            <p>Una vez que tengas el token permanente:</p>
+            <ul>
+                <li>Ve a <a href="/diagnose-whatsapp-status" class="button">Diagnosticar Estado</a></li>
+                <li>Configura el token en <a href="/configure-permanent-token" class="button">Configurar Token</a></li>
+                <li>Prueba las plantillas en <a href="/test-whatsapp-templates" class="button">Probar Plantillas</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

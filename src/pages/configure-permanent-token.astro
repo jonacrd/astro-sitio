@@ -1,0 +1,162 @@
+---
+// Página para configurar token permanente
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Token Permanente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #25D366;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Configurar Token Permanente</h1>
+        
+        <div class="result warning">
+            <strong>⚠️ IMPORTANTE:</strong> Para usar plantillas personalizadas necesitas un token permanente.
+            <br><br>
+            <strong>Pasos para obtener token permanente:</strong>
+            <br>1. Ve a <a href="https://developers.facebook.com/" target="_blank">Meta for Developers</a>
+            <br>2. Selecciona tu app de WhatsApp Business
+            <br>3. Ve a App Review > Permissions and Features
+            <br>4. Solicita permisos para whatsapp_business_messaging
+            <br>5. Completa el proceso de revisión de Meta
+            <br>6. Una vez aprobado, genera el token permanente
+        </div>
+        
+        <div class="form-group">
+            <label for="token">Token Permanente:</label>
+            <input type="text" id="token" placeholder="EAA1Dzgz00SIBPukOaVGjPZAilsypFebOSp2c5cKlZB0XdQ2P7Xq8jdISXCCZBSm7QjLoPpVwbDM3KpzKNBhYdT6yoKAH8EgMJxx9hIvMi5RZA3Xe56ylG8mf7PEnlkfmcwNZCvAoDRRNUA56CHGPGvZAfnc0yEDLjAIcyagUZBAB7EZAXROs4PYtNutBlNjySOWYZApNt7rDOSYw0mVvJi7XDGA4P29mVl8yoZB0zeXbVunDG99pq6XjaIiZA5B">
+        </div>
+        
+        <div class="form-group">
+            <label for="phoneId">Phone Number ID:</label>
+            <input type="text" id="phoneId" placeholder="773488772522546">
+        </div>
+        
+        <button id="configurePermanent">🚀 Configurar Token Permanente</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function configurePermanent() {
+            const token = document.getElementById('token').value;
+            const phoneId = document.getElementById('phoneId').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!token || !phoneId) {
+                resultDiv.innerHTML = '<div class="result error">❌ Por favor completa todos los campos</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="result">🔄 Configurando token permanente...</div>';
+            
+            try {
+                const response = await fetch('/api/configure-permanent-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token, phoneId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<div class="result success">✅ Token permanente configurado correctamente</div>';
+                    html += `<div class="result">📊 Plantillas exitosas: ${data.successfulTemplates.join(', ')}</div>`;
+                    html += `<div class="result">❌ Plantillas fallidas: ${data.failedTemplates.join(', ')}</div>`;
+                    html += `<div class="result">📄 Resultados detallados: ${JSON.stringify(data.results, null, 2)}</div>`;
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error de red: ${error.message}</div>`;
+            }
+        }
+
+        // Agregar event listener cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('configurePermanent').addEventListener('click', configurePermanent);
+        });
+    </script>
+</body>
+</html>

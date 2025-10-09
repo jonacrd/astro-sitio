@@ -1,0 +1,177 @@
+---
+// Página de ayuda para configurar la API de WhatsApp
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar API de WhatsApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #25D366;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .step-number {
+            background: #25D366;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            border: 1px solid #dee2e6;
+        }
+        .button {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #128C7E;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #ffc107;
+        }
+        .section {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Configurar API de WhatsApp</h1>
+        
+        <div class="success">
+            <strong>✅ ¡PERFECTO!</strong> Ya tienes WhatsApp Business configurado como producto. Ahora puedes acceder a la API y obtener tokens permanentes.
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">1</span>Empezar a usar la API</h3>
+            <p>En la sección "Configuración de la API":</p>
+            <div class="highlight">
+                <strong>🔍 BUSCA:</strong> El botón azul grande <strong>"Empezar a usar la API"</strong>
+            </div>
+            <p>Haz clic en <strong>"Empezar a usar la API"</strong></p>
+            <p>Sigue las instrucciones para configurar la API</p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">2</span>Administrar plantillas</h3>
+            <p>En la sección "WhatsApp Business":</p>
+            <div class="highlight">
+                <strong>🔍 BUSCA:</strong> "Plantillas de mensajes" con el enlace <strong>"Administrar plantillas de mensajes"</strong>
+            </div>
+            <p>Haz clic en <strong>"Administrar plantillas de mensajes"</strong></p>
+            <p>Verifica que tus plantillas estén aprobadas</p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">3</span>Gestionar números</h3>
+            <p>En la sección "WhatsApp Business":</p>
+            <div class="highlight">
+                <strong>🔍 BUSCA:</strong> "Números de teléfono" con el enlace <strong>"Administrar números de teléfono"</strong>
+            </div>
+            <p>Haz clic en <strong>"Administrar números de teléfono"</strong></p>
+            <p>Verifica que tu número esté configurado y obtén el Phone Number ID</p>
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">4</span>Obtener token permanente</h3>
+            <p>Una vez configurada la API:</p>
+            <ul>
+                <li>Ve a la sección de <strong>"Configuración de la API"</strong></li>
+                <li>Busca el <strong>"Token de acceso"</strong> permanente</li>
+                <li>Copia el token y el Phone Number ID</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h3>📋 Información que necesitas:</h3>
+            <ul>
+                <li><strong>Token de acceso:</strong> EAA1Dzgz00SIBPukOaVGjPZAilsypFebOSp2c5cKlZB0XdQ2P7Xq8jdISXCCZBSm7QjLoPpVwbDM3KpzKNBhYdT6yoKAH8EgMJxx9hIvMi5RZA3Xe56ylG8mf7PEnlkfmcwNZCvAoDRRNUA56CHGPGvZAfnc0yEDLjAIcyagUZBAB7EZAXROs4PYtNutBlNjySOWYZApNt7rDOSYw0mVvJi7XDGA4P29mVl8yoZB0zeXbVunDG99pq6XjaIiZA5B</li>
+                <li><strong>Phone Number ID:</strong> 773488772522546</li>
+                <li><strong>Plantillas aprobadas:</strong> order_management_1, order_confirmed, order_on_the_way, order_delivered</li>
+            </ul>
+        </div>
+        
+        <div class="success">
+            <strong>✅ RESULTADO ESPERADO:</strong> Una vez configurada la API, tendrás acceso completo a WhatsApp Business con tokens permanentes y plantillas personalizadas.
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">5</span>Probar la Configuración</h3>
+            <p>Una vez que tengas el token permanente:</p>
+            <ul>
+                <li>Ve a <a href="/diagnose-whatsapp-status" class="button">Diagnosticar Estado</a></li>
+                <li>Configura el token en <a href="/configure-permanent-token" class="button">Configurar Token</a></li>
+                <li>Prueba las plantillas en <a href="/test-whatsapp-templates" class="button">Probar Plantillas</a></li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <strong>💡 CONSEJO:</strong> Si no encuentras el token permanente, es posible que necesites completar la configuración de la API primero. Sigue las instrucciones del botón "Empezar a usar la API".
+        </div>
+    </div>
+</body>
+</html>

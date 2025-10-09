@@ -1,0 +1,149 @@
+---
+// Página para diagnosticar estado de WhatsApp
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnosticar Estado de WhatsApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #128C7E;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #25D366;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnosticar Estado de WhatsApp</h1>
+        
+        <div class="section">
+            <h3>📋 Instrucciones:</h3>
+            <p>Esta herramienta te ayudará a diagnosticar el estado actual de tu configuración de WhatsApp y determinar qué necesitas hacer para obtener un token permanente.</p>
+        </div>
+        
+        <button id="diagnoseButton">🚀 Ejecutar Diagnóstico</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function diagnoseWhatsApp() {
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="result">🔄 Ejecutando diagnóstico...</div>';
+            
+            try {
+                const response = await fetch('/api/diagnose-whatsapp-status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = '<div class="result success">✅ Diagnóstico completado</div>';
+                    
+                    // Información del token
+                    html += `<div class="result info"><strong>🔑 Información del Token:</strong><br>`;
+                    html += `Tipo: ${data.tokenType}<br>`;
+                    html += `Presente: ${data.tokenPresent ? 'Sí' : 'No'}<br>`;
+                    html += `Phone ID: ${data.phoneId}</div>`;
+                    
+                    // Resultados de las pruebas
+                    html += '<div class="result"><strong>📊 Resultados de las Pruebas:</strong></div>';
+                    
+                    for (const [name, result] of Object.entries(data.results)) {
+                        const status = result.success ? '✅' : '❌';
+                        const className = result.success ? 'success' : 'error';
+                        
+                        html += `<div class="result ${className}">${status} ${name}: ${result.success ? 'Éxito' : result.error || 'Error'}</div>`;
+                        
+                        if (result.data && typeof result.data === 'object') {
+                            html += `<div class="result">📄 Datos: ${JSON.stringify(result.data, null, 2)}</div>`;
+                        }
+                    }
+                    
+                    // Recomendaciones
+                    html += '<div class="result warning"><strong>💡 Recomendaciones:</strong></div>';
+                    for (const recommendation of data.recommendations) {
+                        html += `<div class="result">• ${recommendation}</div>`;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = `<div class="result error">❌ Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="result error">❌ Error de red: ${error.message}</div>`;
+            }
+        }
+
+        // Agregar event listener cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('diagnoseButton').addEventListener('click', diagnoseWhatsApp);
+        });
+    </script>
+</body>
+</html>

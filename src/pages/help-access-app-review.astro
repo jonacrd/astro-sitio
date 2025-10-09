@@ -1,0 +1,200 @@
+---
+// Página de ayuda para acceder a App Review
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceder a App Review</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #25D366;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #25D366;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .step-number {
+            background: #25D366;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            border: 1px solid #dee2e6;
+        }
+        .button {
+            background: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #128C7E;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #ffc107;
+        }
+        .section {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .current-step {
+            background: #d1ecf1;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #17a2b8;
+            margin: 20px 0;
+        }
+        .method {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Acceder a App Review</h1>
+        
+        <div class="error">
+            <strong>❌ PROBLEMA IDENTIFICADO:</strong> No aparece "App Review" en el menú porque tu app está en modo básico. Para acceder a "App Review" necesitas convertirte en <strong>proveedor de tecnología</strong> o usar la URL directa.
+        </div>
+        
+        <div class="current-step">
+            <h3>🎯 PASO ACTUAL: Usar URL directa (Más rápido)</h3>
+            <p>Para acceder a App Review sin convertirte en proveedor de tecnología:</p>
+            <div class="highlight">
+                <strong>🔍 BUSCA:</strong> https://developers.facebook.com/apps/3733726956933410/app-review/
+            </div>
+            <p>Ve a esta URL directamente</p>
+        </div>
+        
+        <div class="method">
+            <h3>🚀 Método 1: URL directa (Recomendado)</h3>
+            <p>Para acceder a App Review sin convertirte en proveedor de tecnología:</p>
+            <div class="code">https://developers.facebook.com/apps/3733726956933410/app-review/</div>
+            <p>Ve a esta URL directamente</p>
+            <p>Debería aparecer la página de App Review</p>
+            <p>Busca "Permissions and Features"</p>
+            <p>Solicita permisos de WhatsApp Business</p>
+        </div>
+        
+        <div class="method">
+            <h3>🔧 Método 2: Convertirte en proveedor de tecnología</h3>
+            <p>En la pantalla que me mostraste:</p>
+            <ul>
+                <li>Haz clic en <strong>"Conviértete en un proveedor de tecnología"</strong> (en la parte inferior)</li>
+                <li>Completa el proceso de verificación</li>
+                <li>Espera la aprobación (puede tomar días)</li>
+                <li>Una vez aprobado, tendrás acceso a App Review</li>
+            </ul>
+        </div>
+        
+        <div class="method">
+            <h3>🔧 Método 3: Usar Meta Business Manager</h3>
+            <p>Alternativa usando Business Manager:</p>
+            <ul>
+                <li>Ve a <a href="https://business.facebook.com/" target="_blank" class="button">Meta Business Manager</a></li>
+                <li>Selecciona tu Business Account</li>
+                <li>Ve a <strong>Business Settings > Apps</strong></li>
+                <li>Busca tu app "Town"</li>
+                <li>Solicita permisos desde ahí</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h3>📋 Permisos necesarios para WhatsApp:</h3>
+            <ul>
+                <li><strong>whatsapp_business_messaging</strong> - Para enviar mensajes</li>
+                <li><strong>whatsapp_business_management</strong> - Para gestionar cuentas</li>
+                <li><strong>whatsapp_business_manage_events</strong> - Para eventos</li>
+            </ul>
+        </div>
+        
+        <div class="success">
+            <strong>✅ RESULTADO ESPERADO:</strong> Una vez que accedas a App Review y solicites los permisos, podrás usar WhatsApp Business API en modo producción y enviar mensajes a cualquier número.
+        </div>
+        
+        <div class="step">
+            <h3><span class="step-number">4</span>Probar la Configuración</h3>
+            <p>Una vez que obtengas la aprobación:</p>
+            <ul>
+                <li>Ve a <a href="/test-permanent-token" class="button">Probar Token Permanente</a></li>
+                <li>Verifica que las plantillas funcionen</li>
+                <li>Prueba el flujo completo de notificaciones</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <strong>💡 CONSEJO:</strong> El método de URL directa es más rápido. El proceso de convertirse en proveedor de tecnología puede tomar varios días.
+        </div>
+    </div>
+</body>
+</html>

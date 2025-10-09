@@ -16,12 +16,13 @@ function getSupabase() {
 
 // Función helper para obtener configuración de WhatsApp
 function getWhatsAppConfig() {
-  // Configuración directa para desarrollo
-  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || import.meta.env.WHATSAPP_TOKEN || 'EAA1Dzgz00SIBPoF0a7b4z6UO3QTisGPYRatPPFs4TPAI94wNieiwCaJZCDRyGkz2344JCZBSj1PhQUUZAuaxwMYa1x2vg39gDolOLiNgzYdysPfqZC5FyQlvQRqcM8wXtGdZB0pckDg7vO2Ta20yDitbwlhCZAybU8zpb0uKOZAdWvGufFLfwu5d6r85OIPscH3nWx4PaptKLKuHATVjvPJWY6rIa0zMXVhVSN4GAy0GstvJKZBtCzSZADGoZD';
-  const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID || import.meta.env.WHATSAPP_PHONE_ID || '773488772522546';
+  // Configuración para producción con token permanente
+  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN || import.meta.env.WHATSAPP_TOKEN || 'EAA1Dzgz00SIBPrZCcsXmdnlzR2df9qqGSpZBUPO4kLCvZA6857w6zm7HoagzQe0zdh6QR5ZAbq8HqpAHsTHyFOayYUF2IhROTReW8FPMuN8ZC2EO7NgZC9ixddoLNHPB3x5XVhUrWSmRZAXq2MU1lBSSBbv4NpIgDjCzWNH7ZCZBRM6gO4zJJEf05QYKh2Niw8AZDZD';
+  const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID || import.meta.env.WHATSAPP_PHONE_ID || '741455765727385';
   
   console.log('🔍 WhatsApp Config - Token presente:', !!WHATSAPP_TOKEN);
   console.log('🔍 WhatsApp Config - Phone ID:', WHATSAPP_PHONE_ID);
+  console.log('🔍 WhatsApp Config - Tipo de token:', WHATSAPP_TOKEN.includes('EAA') ? 'Permanente' : 'Temporal');
   
   return {
     token: WHATSAPP_TOKEN,
