@@ -110,7 +110,7 @@ import React from 'react'
         throw new Error('No hay sesión activa');
       }
       
-      const response = await fetch('/api/seller/orders-simple', {
+      const response = await fetch('/api/seller/orders', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
@@ -150,6 +150,9 @@ import React from 'react'
     if (!container) return;
 
     console.log(`🎨 Renderizando ${orders.length} pedidos`);
+    
+    // Guardar órdenes en variable global para acceso desde modal
+    (window as any).currentOrders = orders;
 
     if (orders.length === 0) {
       container.innerHTML = `
@@ -237,6 +240,7 @@ import React from 'react'
                 </svg>
               </div>
               <span class="text-white text-sm">Pedido de ${buyerName}</span>
+              ${order.payment_method === 'transfer' ? '<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">💳 Transferencia</span>' : '<span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">💰 Efectivo</span>'}
             </div>
             <span class="text-blue-500 font-semibold">$${price}</span>
           </div>
@@ -248,7 +252,7 @@ import React from 'react'
                 onclick="updateOrderStatus('${order.id}', 'seller_confirmed')"
                 class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
               >
-                ✅ Confirmar Pedido
+                ${order.payment_method === 'transfer' ? '✅ Confirmar Transferencia' : '✅ Confirmar Pedido'}
               </button>
             ` : ''}
             
@@ -378,13 +382,100 @@ import React from 'react'
   // Ver detalles de orden
   function viewOrderDetails(orderId) {
     console.log('👁️ Ver detalles de orden:', orderId);
-    alert('Funcionalidad de ver detalles - próximamente');
+    
+    // Buscar la orden en la lista actual
+    const currentOrders = (window as any).currentOrders || [];
+    const order = currentOrders.find((o: any) => o.id === orderId);
+    
+    if (!order) {
+      alert('No se pudo encontrar la orden');
+      return;
+    }
+    
+    // Crear modal de detalles
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg max-w-2xl max-h-[90vh] overflow-hidden w-full">
+        <div class="flex justify-between items-center p-4 border-b">
+          <h3 class="text-lg font-semibold">Detalles del Pedido #${orderId.substring(0, 8)}</h3>
+          <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-y-auto max-h-[70vh]">
+          <div class="space-y-4">
+            <!-- Información básica -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <h4 class="font-semibold mb-2">Información del Pedido</h4>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div><strong>ID:</strong> ${orderId.substring(0, 8)}</div>
+                <div><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleDateString('es-ES')}</div>
+                <div><strong>Cliente:</strong> ${order.buyer?.name || 'N/A'}</div>
+                <div><strong>Total:</strong> $${(order.total_cents / 100).toFixed(2)}</div>
+                <div><strong>Estado:</strong> <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${order.status}</span></div>
+                <div><strong>Método:</strong> <span class="px-2 py-1 ${order.payment_method === 'transfer' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'} rounded text-xs">${order.payment_method === 'transfer' ? '💳 Transferencia' : '💰 Efectivo'}</span></div>
+              </div>
+            </div>
+            
+            <!-- Comprobante de transferencia -->
+            ${order.payment_method === 'transfer' && order.transfer_proof ? `
+              <div class="bg-blue-50 p-3 rounded-lg">
+                <h4 class="font-semibold mb-2">📸 Comprobante de Transferencia</h4>
+                <div class="space-y-2">
+                  <img src="${order.transfer_proof}" alt="Comprobante" class="w-full max-w-sm rounded border" style="max-height: 300px; object-fit: contain;">
+                  <div class="flex gap-2">
+                    <button onclick="downloadProof('${orderId}', '${order.transfer_proof}')" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+                      ⬇️ Descargar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+            
+            <!-- Productos -->
+            <div class="bg-gray-50 p-3 rounded-lg">
+              <h4 class="font-semibold mb-2">Productos</h4>
+              ${order.items ? order.items.map(item => `
+                <div class="flex justify-between items-center p-2 bg-white rounded border">
+                  <div>
+                    <p class="font-medium">${item.title}</p>
+                    <p class="text-sm text-gray-500">Cantidad: ${item.qty}</p>
+                  </div>
+                  <p class="font-semibold">$${((item.price_cents * item.qty) / 100).toFixed(2)}</p>
+                </div>
+              `).join('') : '<p class="text-gray-500">No hay información de productos disponible</p>'}
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 p-4 border-t">
+          <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  }
+  
+  // Descargar comprobante
+  function downloadProof(orderId, proofUrl) {
+    const link = document.createElement('a');
+    link.href = proofUrl;
+    link.download = `comprobante_${orderId.substring(0, 8)}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   // Hacer funciones globales
   (window as any).updateOrderStatus = updateOrderStatus;
   (window as any).viewOrderDetails = viewOrderDetails;
   (window as any).requestDelivery = requestDelivery;
+  (window as any).downloadProof = downloadProof;
 
   // Manejar filtros
   function setupFilters() {

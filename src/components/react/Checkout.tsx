@@ -415,6 +415,17 @@ export default function Checkout({}: CheckoutProps) {
       }, 0);
       console.log('💰 Total calculado en frontend:', calculatedTotal);
 
+      // Convertir precios a centavos para el backend
+      const cartItemsWithCents = cartItems.map(item => ({
+        ...item,
+        priceCents: Math.round(item.priceCents * 100) // Convertir pesos a centavos
+      }));
+      console.log('🔄 Precios convertidos a centavos:', cartItemsWithCents.map(item => ({
+        title: item.title,
+        originalPrice: item.priceCents / 100,
+        priceCents: item.priceCents
+      })));
+
       // Obtener token de sesión
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
@@ -453,7 +464,7 @@ export default function Checkout({}: CheckoutProps) {
           paymentMethod: paymentMethod,
           orderNotes: orderNotes,
           transferProof: transferProofData,
-          cartItems: cartItems // Enviar los items reales del carrito
+          cartItems: cartItemsWithCents // Usar items con precios en centavos
         })
       });
 

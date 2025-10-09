@@ -54,6 +54,7 @@ export const GET: APIRoute = async ({ request }) => {
         user_id,
         total_cents,
         payment_method,
+        transfer_proof,
         status,
         delivery_cents,
         created_at,
