@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Debug Prices">
+  <main class="min-h-screen bg-gray-900 text-white p-8">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-2xl font-bold text-red-400 mb-6">💰 Debug Precios</h1>
+      
+      <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <button id="refresh-data" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mb-4">
+          🔄 Actualizar Datos
+        </button>
+        <div id="debug-data" class="space-y-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p class="text-center text-gray-400">Cargando información...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadDebugData() {
+      try {
+        const response = await fetch('/api/debug/check-prices');
+        const result = await response.json();
+        
+        if (result.success) {
+          const { orders, orderItems, products, sampleProducts, debug } = result.data;
+          
+          const debugDataElement = document.getElementById('debug-data');
+          if (debugDataElement) {
+            debugDataElement.innerHTML = `
+            <div class="space-y-6">
+              <!-- Órdenes -->
+              <div class="bg-gray-700 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-blue-400 mb-3">📋 Órdenes Recientes</h2>
+                ${orders.length > 0 ? orders.map(order => `
+                  <div class="bg-gray-600 p-3 rounded mb-2">
+                    <p class="text-white"><strong>ID:</strong> ${order.id}</p>
+                    <p class="text-gray-300"><strong>Total (centavos):</strong> ${order.total_cents}</p>
+                    <p class="text-green-400"><strong>Total (pesos):</strong> $${order.total_pesos}</p>
+                    <p class="text-gray-300"><strong>Método:</strong> ${order.payment_method}</p>
+                    <p class="text-gray-300"><strong>Fecha:</strong> ${order.created_at}</p>
+                  </div>
+                `).join('') : '<p class="text-red-400">No hay órdenes</p>'}
+              </div>
+
+              <!-- Order Items -->
+              <div class="bg-gray-700 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-green-400 mb-3">📦 Order Items</h2>
+                ${orderItems.length > 0 ? orderItems.map(item => `
+                  <div class="bg-gray-600 p-3 rounded mb-2">
+                    <p class="text-white"><strong>ID:</strong> ${item.id}</p>
+                    <p class="text-gray-300"><strong>Order ID:</strong> ${item.order_id}</p>
+                    <p class="text-gray-300"><strong>Product ID:</strong> ${item.product_id}</p>
+                    <p class="text-white"><strong>Título:</strong> ${item.title}</p>
+                    <p class="text-yellow-400"><strong>Precio (centavos):</strong> ${item.price_cents}</p>
+                    <p class="text-green-400"><strong>Precio (pesos):</strong> $${item.price_pesos}</p>
+                    <p class="text-gray-300"><strong>Cantidad:</strong> ${item.qty}</p>
+                  </div>
+                `).join('') : '<p class="text-red-400">No hay order items</p>'}
+              </div>
+
+              <!-- Products -->
+              <div class="bg-gray-700 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-yellow-400 mb-3">🛍️ Products (de order items)</h2>
+                ${products.length > 0 ? products.map(product => `
+                  <div class="bg-gray-600 p-3 rounded mb-2">
+                    <p class="text-white"><strong>ID:</strong> ${product.id}</p>
+                    <p class="text-white"><strong>Título:</strong> ${product.title}</p>
+                    <p class="text-yellow-400"><strong>Precio (centavos):</strong> ${product.price_cents}</p>
+                    <p class="text-green-400"><strong>Precio (pesos):</strong> $${product.price_pesos}</p>
+                  </div>
+                `).join('') : '<p class="text-red-400">No hay productos</p>'}
+              </div>
+
+              <!-- Sample Products -->
+              <div class="bg-gray-700 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-purple-400 mb-3">🛍️ Sample Products (directos de DB)</h2>
+                ${sampleProducts.length > 0 ? sampleProducts.map(product => `
+                  <div class="bg-gray-600 p-3 rounded mb-2">
+                    <p class="text-white"><strong>ID:</strong> ${product.id}</p>
+                    <p class="text-white"><strong>Título:</strong> ${product.title}</p>
+                    <p class="text-yellow-400"><strong>Precio (centavos):</strong> ${product.price_cents}</p>
+                    <p class="text-green-400"><strong>Precio (pesos):</strong> $${product.price_pesos}</p>
+                  </div>
+                `).join('') : '<p class="text-red-400">No hay productos de muestra</p>'}
+              </div>
+
+              <!-- Debug Info -->
+              <div class="bg-gray-700 rounded-lg p-4">
+                <h2 class="text-xl font-bold text-orange-400 mb-3">🔍 Debug Info</h2>
+                <div class="bg-gray-600 p-3 rounded">
+                  <p class="text-white"><strong>Órdenes:</strong> ${debug.ordersCount}</p>
+                  <p class="text-white"><strong>Order Items:</strong> ${debug.orderItemsCount}</p>
+                  <p class="text-white"><strong>Products:</strong> ${debug.productsCount}</p>
+                  <p class="text-white"><strong>Sample Products:</strong> ${debug.sampleProductsCount}</p>
+                </div>
+              </div>
+            </div>
+          `;
+          }
+        } else {
+          const debugDataElement = document.getElementById('debug-data');
+          if (debugDataElement) {
+            debugDataElement.innerHTML = `
+            <div class="bg-red-900/20 border border-red-600/30 p-3 rounded-lg">
+              <h3 class="font-semibold text-red-400">❌ Error</h3>
+              <p class="text-red-200 text-sm">${result.error}</p>
+            </div>
+          `;
+          }
+        }
+      } catch (error) {
+        const debugDataElement = document.getElementById('debug-data');
+        if (debugDataElement) {
+          debugDataElement.innerHTML = `
+          <div class="bg-red-900/20 border border-red-600/30 p-3 rounded-lg">
+            <h3 class="font-semibold text-red-400">❌ Error de conexión</h3>
+            <p class="text-red-200 text-sm">${error.message}</p>
+          </div>
+        `;
+        }
+      }
+    }
+
+    // Cargar datos al inicio
+    loadDebugData();
+
+    // Botón de actualizar
+    const refreshButton = document.getElementById('refresh-data');
+    if (refreshButton) {
+      refreshButton.addEventListener('click', loadDebugData);
+    }
+  </script>
+</BaseLayout>
