@@ -83,6 +83,7 @@ export const GET: APIRoute = async ({ request }) => {
     let orderItems = {};
     
     if (orderIds.length > 0) {
+      // Primero intentar con JOIN
       const { data: items, error: itemsError } = await supabase
         .from('order_items')
         .select(`
@@ -95,18 +96,63 @@ export const GET: APIRoute = async ({ request }) => {
         .in('order_id', orderIds);
 
       if (itemsError) {
-        console.log('⚠️ Error obteniendo items (tabla puede no existir):', itemsError.message);
-        // Continuar sin items por ahora
+        console.log('⚠️ Error con JOIN, intentando método alternativo:', itemsError.message);
+        
+        // Método alternativo: obtener items y productos por separado
+        const { data: itemsOnly, error: itemsOnlyError } = await supabase
+          .from('order_items')
+          .select('*')
+          .in('order_id', orderIds);
+
+        if (itemsOnlyError) {
+          console.log('⚠️ Error obteniendo items (tabla puede no existir):', itemsOnlyError.message);
+          orderItems = {};
+        } else {
+          // Obtener todos los product_ids únicos
+          const productIds = [...new Set(itemsOnly?.map(item => item.product_id).filter(Boolean))];
+          
+          // Obtener información de productos
+          let productsMap = {};
+          if (productIds.length > 0) {
+            const { data: products, error: productsError } = await supabase
+              .from('products')
+              .select('id, title, price_cents')
+              .in('id', productIds);
+
+            if (productsError) {
+              console.log('⚠️ Error obteniendo productos:', productsError.message);
+            } else {
+              productsMap = products?.reduce((acc, product) => {
+                acc[product.id] = product;
+                return acc;
+              }, {} as Record<string, any>) || {};
+            }
+          }
+
+          // Combinar items con información de productos
+          orderItems = itemsOnly?.reduce((acc, item) => {
+            if (!acc[item.order_id]) {
+              acc[item.order_id] = [];
+            }
+            
+            const product = productsMap[item.product_id];
+            acc[item.order_id].push({
+              ...item,
+              title: product?.title || item.title || 'Producto',
+              price_cents: product?.price_cents || item.price_cents || 0
+            });
+            return acc;
+          }, {} as Record<string, any[]>) || {};
+        }
       } else {
-        // Agrupar items por order_id y agregar información del producto
+        // JOIN funcionó correctamente
         orderItems = items?.reduce((acc, item) => {
           if (!acc[item.order_id]) {
             acc[item.order_id] = [];
           }
-          // Agregar información del producto al item
           acc[item.order_id].push({
             ...item,
-            title: item.product?.title || 'Producto',
+            title: item.product?.title || item.title || 'Producto',
             price_cents: item.product?.price_cents || item.price_cents || 0
           });
           return acc;
@@ -124,6 +170,13 @@ export const GET: APIRoute = async ({ request }) => {
     console.log('📋 Pedidos encontrados:', formattedOrders.length);
     formattedOrders.forEach((order, index) => {
       console.log(`  ${index + 1}. ID: ${order.id}, Total: $${order.total_cents}, Estado: ${order.status}`);
+      if (order.items && order.items.length > 0) {
+        console.log(`    Items:`, order.items.map(item => ({
+          title: item.title,
+          price_cents: item.price_cents,
+          qty: item.qty || item.quantity
+        })));
+      }
     });
 
     return new Response(JSON.stringify({
