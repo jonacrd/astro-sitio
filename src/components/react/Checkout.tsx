@@ -386,6 +386,12 @@ export default function Checkout({}: CheckoutProps) {
       return;
     }
 
+    // Validar comprobante si es transferencia
+    if (paymentMethod === 'transfer' && !transferProof) {
+      alert('Por favor sube el comprobante de transferencia antes de continuar');
+      return;
+    }
+
     setProcessing(true);
 
     try {
@@ -409,6 +415,17 @@ export default function Checkout({}: CheckoutProps) {
         return;
       }
 
+      // Preparar comprobante de transferencia si existe
+      let transferProofData = null;
+      if (paymentMethod === 'transfer' && transferProof) {
+        // Leer el archivo como base64
+        const reader = new FileReader();
+        transferProofData = await new Promise<string>((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.readAsDataURL(transferProof);
+        });
+      }
+
       // Usar el flujo de checkout existente que ya funciona
       const response = await fetch('/api/cart/checkout', {
         method: 'POST',
@@ -427,6 +444,7 @@ export default function Checkout({}: CheckoutProps) {
           },
           paymentMethod: paymentMethod,
           orderNotes: orderNotes,
+          transferProof: transferProofData,
           cartItems: cartItems // Enviar los items reales del carrito
         })
       });

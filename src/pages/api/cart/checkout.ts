@@ -5,9 +5,9 @@ import { notifySellerNewOrder } from '../../../server/whatsapp-automation';
 export const POST: APIRoute = async (context) => {
   try {
     const body = await context.request.json();
-    const { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes } = body;
+    const { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes, transferProof } = body;
 
-    console.log('🛒 Checkout recibido:', { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes });
+    console.log('🛒 Checkout recibido:', { customerName, customerEmail, deliveryAddress, paymentMethod, orderNotes, hasTransferProof: !!transferProof });
 
     if (!customerName || !customerEmail) {
       return new Response(
@@ -220,7 +220,8 @@ export const POST: APIRoute = async (context) => {
         p_seller_id: sellerUuid,
         p_payment_method: paymentMethod || 'cash',
         p_delivery_address: deliveryAddress || {},
-        p_delivery_notes: orderNotes || ''
+        p_delivery_notes: orderNotes || '',
+        p_transfer_proof: transferProof || null
       });
 
     if (orderError) {
