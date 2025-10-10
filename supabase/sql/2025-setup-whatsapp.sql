@@ -17,3 +17,4 @@ alter table if exists public.profiles add column if not exists opt_in_whatsapp b
 comment on table public.whatsapp_logs is 'Outbound/inbound WhatsApp messages and webhook logs';
 
 
+

@@ -31,3 +31,4 @@ SET phone = '+56962614851';
 SELECT id, name, phone FROM couriers WHERE phone = '+56962614851';
 
 
+

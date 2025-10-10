@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Página no encontrada">
+  <div class="min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] flex items-center justify-center px-4">
+    <div class="max-w-md mx-auto text-center">
+      <!-- Towny para página 404 -->
+      <div class="towny-container towny--large">
+        <div class="towny-image towny--confused"></div>
+        <h1 class="towny-title">¡Ups! Página no encontrada</h1>
+        <p class="towny-message">
+          Parece que te has perdido. La página que buscas no existe o ha sido movida.
+        </p>
+        <div class="towny-actions">
+          <a href="/" class="towny-btn towny-btn--primary">
+            Volver al inicio
+          </a>
+          <button onclick="history.back()" class="towny-btn towny-btn--secondary">
+            Página anterior
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+

@@ -68,3 +68,4 @@ SELECT 'DELIVERIES' as info, id, order_id, seller_id, courier_id, status FROM pu
 SELECT 'PROFILES' as info, id, name, phone, is_seller, opt_in_whatsapp FROM public.profiles WHERE phone = '+56962614851';
 
 
+

@@ -83,6 +83,66 @@ export default function CategoryCards() {
     }
   ];
 
+  // Mapeo de categorías a imágenes de ejemplo
+  const categoryImages = {
+    restaurantes: [
+      '/images/products/comida/pizza-de-peperoni.webp',
+      '/images/products/comida/emapanadas-24h.jpeg',
+      '/images/products/comida/perros-calientes-noct.jpeg',
+      '/images/products/comida/pizza-carne-mechada.webp',
+      '/images/products/comida/salchipapa-superEspecial.jpeg'
+    ],
+    minimarkets: [
+      '/images/products/minimarket/arroz-1kg.jpg',
+      '/images/products/minimarket/aceite-girasol-900ml.jpg',
+      '/images/products/minimarket/azucar-1kg.jpg',
+      '/images/products/minimarket/leche-entera-1lt.jpg',
+      '/images/products/minimarket/pan-integral.jpg'
+    ],
+    medicinas: [
+      '/images/products/Belleza y Cuidado Personal/barberia.jpg',
+      '/images/products/Belleza y Cuidado Personal/peluqueria.jpg',
+      '/images/products/Belleza y Cuidado Personal/manicure.webp',
+      '/images/products/Belleza y Cuidado Personal/pedicure-2.jpg',
+      '/images/products/Belleza y Cuidado Personal/limpiezaprofunda_hidratacion.webp'
+    ],
+    postres: [
+      '/images/products/postres/torta-chocolate-chispas.png',
+      '/images/products/postres/torta-tres-leches-especial.png',
+      '/images/products/postres/donas.webp',
+      '/images/products/postres/quesillo.jpeg',
+      '/images/products/postres/arroz-con-leche.jpeg'
+    ],
+    carniceria: [
+      '/images/products/minimarket/pollo-entero-1kg.jpg',
+      '/images/products/minimarket/carne-molida-500g.jpg',
+      '/images/products/minimarket/chuleta-cerdo-1kg.jpg',
+      '/images/products/minimarket/salchichas-paquete.jpg',
+      '/images/products/minimarket/jamon-cocido-200g.jpg'
+    ],
+    servicios: [
+      '/images/products/servicios/FLETES.jpeg',
+      '/images/products/servicios/impresiones.jpeg',
+      '/images/products/servicios/masajes.jpg',
+      '/images/products/servicios/mallas.png',
+      '/images/products/Belleza y Cuidado Personal/barberia.jpg'
+    ],
+    mascotas: [
+      '/images/products/minimarket/comida-perro-1kg.jpg',
+      '/images/products/minimarket/arena-gato-5kg.jpg',
+      '/images/products/minimarket/juguete-perro.jpg',
+      '/images/products/minimarket/snacks-perro.jpg',
+      '/images/products/minimarket/collar-perro.jpg'
+    ],
+    ninos: [
+      '/images/products/minimarket/leche-formula-400g.jpg',
+      '/images/products/minimarket/pañales-talla-3.jpg',
+      '/images/products/minimarket/juguete-bebe.jpg',
+      '/images/products/minimarket/biberon-250ml.jpg',
+      '/images/products/minimarket/chupete-bebe.jpg'
+    ]
+  };
+
   // Cargar productos por categoría
   useEffect(() => {
     const loadCategoryProducts = async () => {
@@ -96,13 +156,13 @@ export default function CategoryCards() {
               const response = await fetch(`/api/feed/products?category=${config.id}&limit=6`);
               const data = await response.json();
               
-              if (data.success && data.products) {
+              if (data.success && data.products && data.products.length > 0) {
                 return {
                   ...config,
                   products: data.products.map((product: any) => ({
                     id: product.id,
                     title: product.title,
-                    image_url: product.image_url || '/placeholder-product.jpg',
+                    image_url: product.image_url || '/images/placeholder-product.jpg',
                     price_cents: product.price_cents,
                     seller_name: product.seller_name || 'Vendedor',
                     seller_id: product.seller_id,
@@ -114,38 +174,19 @@ export default function CategoryCards() {
               console.error(`Error cargando productos para ${config.name}:`, error);
             }
             
-            // Fallback con productos de ejemplo si no hay datos
+            // Fallback con imágenes de ejemplo de la categoría
+            const exampleImages = categoryImages[config.id as keyof typeof categoryImages] || [];
             return {
               ...config,
-              products: [
-                {
-                  id: `${config.id}-1`,
-                  title: `Producto ${config.name} 1`,
-                  image_url: '/placeholder-product.jpg',
-                  price_cents: 1000,
-                  seller_name: 'Vendedor',
-                  seller_id: 'seller-1',
-                  category: config.id
-                },
-                {
-                  id: `${config.id}-2`,
-                  title: `Producto ${config.name} 2`,
-                  image_url: '/placeholder-product.jpg',
-                  price_cents: 1500,
-                  seller_name: 'Vendedor',
-                  seller_id: 'seller-2',
-                  category: config.id
-                },
-                {
-                  id: `${config.id}-3`,
-                  title: `Producto ${config.name} 3`,
-                  image_url: '/placeholder-product.jpg',
-                  price_cents: 2000,
-                  seller_name: 'Vendedor',
-                  seller_id: 'seller-3',
-                  category: config.id
-                }
-              ]
+              products: exampleImages.slice(0, 6).map((imageUrl, index) => ({
+                id: `${config.id}-example-${index + 1}`,
+                title: `Producto ${config.name} ${index + 1}`,
+                image_url: imageUrl,
+                price_cents: 1000 + (index * 500),
+                seller_name: 'Vendedor',
+                seller_id: 'seller-example',
+                category: config.id
+              }))
             };
           })
         );
@@ -321,7 +362,7 @@ function CategoryCard({ category, size, isFirst = false }: CategoryCardProps) {
               alt={product.title}
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = '/placeholder-product.jpg';
+                e.currentTarget.src = '/images/placeholder-product.jpg';
               }}
             />
             {/* Overlay dinámico según el tamaño */}

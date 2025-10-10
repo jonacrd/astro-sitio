@@ -22,3 +22,4 @@ END $$;
 
 -- Crear comentario para documentar la columna
 COMMENT ON COLUMN orders.transfer_proof IS 'Comprobante de transferencia bancaria en formato base64 (para pagos por transferencia)';
+

@@ -229,3 +229,4 @@ DELIVERY_ENABLED=true
 - **Código limpio**: Módulo completamente desacoplado
 
 
+

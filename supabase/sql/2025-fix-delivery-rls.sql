@@ -40,3 +40,4 @@ UNION ALL
 SELECT 'delivery_notifications' as table_name, count(*) as count FROM public.delivery_notifications;
 
 
+

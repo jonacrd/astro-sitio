@@ -208,3 +208,4 @@ CREATE TRIGGER auto_assign_delivery
   EXECUTE FUNCTION assign_delivery_automatically();
 
 
+

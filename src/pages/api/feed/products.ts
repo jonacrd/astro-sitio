@@ -27,15 +27,16 @@ export const GET: APIRoute = async ({ url }) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     console.log('✅ Cliente Supabase creado');
     
-    // Parámetros de paginación
+    // Parámetros de paginación y filtros
     const page = parseInt(url.searchParams.get('page') || '1');
     const limit = parseInt(url.searchParams.get('limit') || '20');
+    const category = url.searchParams.get('category');
     const offset = (page - 1) * limit;
     
-    console.log(`🔍 Cargando feed - página ${page}, límite ${limit}`);
+    console.log(`🔍 Cargando feed - página ${page}, límite ${limit}${category ? `, categoría: ${category}` : ''}`);
 
     // Query optimizada con índices específicos - Soporte para ambos modos de inventario
-    const { data: sellerProducts, error: productsError } = await supabase
+    let query = supabase
       .from('seller_products')
       .select(`
         seller_id,
@@ -62,7 +63,14 @@ export const GET: APIRoute = async ({ url }) => {
       `)
       .eq('active', true)
       .eq('seller.is_active', true) // Solo vendedores activos
-      .or('and(inventory_mode.eq.count,stock.gt.0),and(inventory_mode.eq.availability,available_today.eq.true,sold_out.eq.false)') // Productos con stock O disponibles hoy
+      .or('and(inventory_mode.eq.count,stock.gt.0),and(inventory_mode.eq.availability,available_today.eq.true,sold_out.eq.false)'); // Productos con stock O disponibles hoy
+
+    // Filtrar por categoría si se especifica
+    if (category) {
+      query = query.eq('product.category', category);
+    }
+
+    const { data: sellerProducts, error: productsError } = await query
       .order('product_id', { ascending: false }) // Ordenar por ID de producto
       .range(offset, offset + limit - 1);
 

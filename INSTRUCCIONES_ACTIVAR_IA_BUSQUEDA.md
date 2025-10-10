@@ -79,3 +79,4 @@ El sistema seguirá funcionando con búsqueda básica + corrección local.
 No mostrará errores, solo funcionalidad reducida.
 
 
+

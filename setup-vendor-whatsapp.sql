@@ -27,3 +27,4 @@ SET phone = '+56962614851';
 SELECT id, name, email, phone FROM profiles WHERE phone = '+56962614851';
 
 
+

@@ -22,3 +22,4 @@ WHERE table_name = 'orders'
 ORDER BY ordinal_position;
 
 
+

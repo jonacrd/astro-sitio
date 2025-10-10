@@ -1,0 +1,135 @@
+/* src/styles/towny-system.css */
+
+/* Sistema de Towny para errores, checkout y otras situaciones */
+@layer components {
+
+  /* Contenedor base de Towny */
+  .towny-container {
+    @apply flex flex-col items-center justify-center p-6 text-center;
+  }
+
+  .towny-image {
+    @apply w-32 h-32 md:w-40 md:h-40 mb-4;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .towny-title {
+    @apply text-xl md:text-2xl font-bold text-gray-800 dark:text-white mb-2;
+  }
+
+  .towny-message {
+    @apply text-base md:text-lg text-gray-600 dark:text-gray-300 mb-4 max-w-md;
+  }
+
+  .towny-actions {
+    @apply flex flex-col sm:flex-row gap-3 justify-center;
+  }
+
+  .towny-btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors;
+  }
+
+  .towny-btn--primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .towny-btn--secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600;
+  }
+
+  /* Estados específicos de Towny */
+  .towny--error {
+    background-image: url('/towny/towny_algo_salio_mal.png');
+  }
+
+  .towny--warning {
+    background-image: url('/towny/towny_advertencia.png');
+  }
+
+  .towny--success {
+    background-image: url('/towny/towny_operacion_exitosa.png');
+  }
+
+  .towny--loading {
+    background-image: url('/towny/towny_estatico.png');
+  }
+
+  .towny--checkout {
+    background-image: url('/towny/towny_cara.png');
+  }
+
+  .towny--confused {
+    background-image: url('/towny/towny_preocupado.png');
+  }
+
+  .towny--happy {
+    background-image: url('/towny/towny_brazos_extendidos_feliz.png');
+  }
+
+  .towny--thumbs-up {
+    background-image: url('/towny/towny_pulgar_arriba.png');
+  }
+
+  .towny--sad {
+    background-image: url('/towny/towny_afligido.png');
+  }
+
+  .towny--angry {
+    background-image: url('/towny/towny_molestro.png');
+  }
+
+  .towny--goodbye {
+    background-image: url('/towny/towny_despedida.png');
+  }
+
+  /* Variantes de tamaño */
+  .towny--small .towny-image {
+    @apply w-20 h-20 md:w-24 md:h-24;
+  }
+
+  .towny--large .towny-image {
+    @apply w-48 h-48 md:w-56 md:h-56;
+  }
+
+  /* Para páginas de error completas */
+  .towny-error-page {
+    @apply min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900;
+  }
+
+  .towny-error-content {
+    @apply max-w-md mx-auto text-center;
+  }
+
+  /* Para modales con Towny */
+  .towny-modal {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+  }
+
+  .towny-modal__overlay {
+    @apply absolute inset-0 bg-black/50 backdrop-blur-sm;
+  }
+
+  .towny-modal__content {
+    @apply relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4;
+  }
+
+  /* Para checkout con Towny */
+  .towny-checkout {
+    @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6;
+  }
+
+  .towny-checkout .towny-image {
+    @apply w-16 h-16 mb-3;
+  }
+
+  .towny-checkout .towny-title {
+    @apply text-lg font-semibold text-blue-800 dark:text-blue-200 mb-1;
+  }
+
+  .towny-checkout .towny-message {
+    @apply text-sm text-blue-600 dark:text-blue-300;
+  }
+}
+

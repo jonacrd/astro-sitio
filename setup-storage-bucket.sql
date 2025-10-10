@@ -43,3 +43,4 @@ WHERE id = 'product-images';
 
 
 
+

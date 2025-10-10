@@ -295,6 +295,23 @@ const {
   <!-- Botón flotante para activar notificaciones - Solo cuando sea necesario -->
   <FloatingNotificationButton client:idle />
   
+  <!-- Tour de Onboarding - Solo cuando sea necesario -->
+  <script>
+    // Inicializar tour de onboarding
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', function() {
+        setTimeout(async function() {
+          try {
+            const { initTour } = await import('../lib/tour/TourManager');
+            initTour();
+          } catch (error) {
+            console.log('⚠️ Error inicializando tour:', error);
+          }
+        }, 500); // Esperar 500ms después de la carga
+      });
+    }
+  </script>
+  
   <!-- Script para sincronizar género desde Google - Optimizado -->
   <script>
     // Solo ejecutar si el usuario está autenticado

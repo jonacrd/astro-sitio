@@ -1,0 +1,133 @@
+/* src/styles/tour.css */
+
+/* Tailwind layer para encapsular estilos del tour */
+@layer components {
+
+  /* Contenedor raíz del tour (no colisionar con nada) */
+  .town-tour {
+    @apply fixed inset-0 z-[9999];
+    pointer-events: none; /* el panel tendrá pointer-events:auto */
+  }
+
+  /* Overlay oscuro con blur (glassmorphism) */
+  .town-tour__overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm;
+    pointer-events: auto;
+    transition: opacity 200ms ease;
+    opacity: 1;
+  }
+
+  /* Spotlight: usamos mask para "agujero de luz" */
+  .town-tour__mask {
+    @apply fixed inset-0;
+    --spotlight-x: 50%;
+    --spotlight-y: 50%;
+    --spotlight-r: 160px;
+    /* Fondo base oscuro */
+    background: rgba(0,0,0,0.6);
+    /* Máscara radial para recortar el agujero */
+    -webkit-mask: radial-gradient(
+      circle var(--spotlight-r) at var(--spotlight-x) var(--spotlight-y),
+      transparent 0,
+      transparent 98%,
+      black 100%
+    );
+            mask: radial-gradient(
+      circle var(--spotlight-r) at var(--spotlight-x) var(--spotlight-y),
+      transparent 0,
+      transparent 98%,
+      black 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Panel de paso (burbuja) */
+  .town-tour__panel {
+    @apply absolute max-w-[92vw] md:max-w-lg bg-white/90 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100
+           shadow-2xl rounded-2xl p-4 md:p-5 border border-white/20 dark:border-slate-700/40
+           backdrop-blur-lg;
+    pointer-events: auto;
+  }
+
+  .town-tour__title {
+    @apply text-lg md:text-xl font-semibold mb-1;
+  }
+
+  .town-tour__content {
+    @apply text-sm md:text-base leading-relaxed mb-3;
+  }
+
+  .town-tour__actions {
+    @apply flex gap-2 justify-end mt-2;
+  }
+
+  .town-tour__btn {
+    @apply inline-flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium
+           bg-fuchsia-600 text-white hover:bg-fuchsia-700 active:scale-[.98]
+           transition;
+  }
+
+  .town-tour__btn--ghost {
+    @apply bg-transparent text-slate-200 hover:text-white hover:bg-white/10;
+  }
+
+  /* Slot para el muñequito: luego se asigna background-image en cada paso */
+  .towny-slot {
+    @apply absolute w-24 h-24 md:w-[120px] md:h-[120px];
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+  }
+
+  /* Posiciones comunes del muñequito (puedes combinarlas por paso) */
+  .towny--bl { @apply left-3 bottom-3; }
+  .towny--br { @apply right-3 bottom-3; }
+  .towny--tl { @apply left-3 top-3; }
+  .towny--tr { @apply right-3 top-3; }
+
+  /* Imágenes reales de Towny para cada paso del tour */
+  .towny-slot--welcome {
+    background-image: url('/towny/towny_saludando.png');
+  }
+  
+  .towny-slot--search {
+    background-image: url('/towny/towny_consigue_objetivo.png');
+  }
+  
+  .towny-slot--categories {
+    background-image: url('/towny/towny_brazos_extendidos_feliz.png');
+  }
+  
+  .towny-slot--product {
+    background-image: url('/towny/towny_pulgar_arriba.png');
+  }
+  
+  .towny-slot--add {
+    background-image: url('/towny/towny_operacion_exitosa.png');
+  }
+  
+  .towny-slot--carticon {
+    background-image: url('/towny/towny_logrado.png');
+  }
+  
+  .towny-slot--cart {
+    background-image: url('/towny/towny_estatico.png');
+  }
+  
+  .towny-slot--checkout {
+    background-image: url('/towny/towny_cara.png');
+  }
+  
+  .towny-slot--address {
+    background-image: url('/towny/towny_preocupado.png');
+  }
+  
+  .towny-slot--pay {
+    background-image: url('/towny/towny_operacion_exitosa.png');
+  }
+  
+  .towny-slot--profile {
+    background-image: url('/towny/towny_despedida.png');
+  }
+}

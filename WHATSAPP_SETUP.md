@@ -37,3 +37,4 @@ Una vez configurado:
 4. **Sin intervención manual** → Todo automático
 
 
+

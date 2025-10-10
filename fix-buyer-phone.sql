@@ -15,3 +15,4 @@ SELECT id, name, phone FROM profiles WHERE phone = '+56962614851';
 SELECT id, user_id, seller_id, status FROM orders ORDER BY created_at DESC LIMIT 5;
 
 
+
