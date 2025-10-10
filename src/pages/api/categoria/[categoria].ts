@@ -24,23 +24,15 @@ export const GET: APIRoute = async ({ params }) => {
 
     const supabase = createClient(supabaseUrl, supabaseAnon);
     
-    // Buscar productos de la categoría con información del vendedor
-    // SOLO productos con stock > 0 y vendedores activos
+    // Primero obtener productos de la categoría con stock
     const { data: products, error } = await supabase
       .from('products')
-      .select(`
-        id,title,price_cents,image_url,stock,seller_id,category,created_at,
-        profiles!inner(id,name,phone,is_active)
-      `)
+      .select('id,title,price_cents,image_url,stock,seller_id,category,created_at')
       .eq('category', categoria)
       .gt('stock', 0) // Solo productos con stock
-      .eq('profiles.is_active', true) // Solo vendedores activos
       .order('created_at', { ascending: false });
 
-    console.log(`🔍 Consulta para categoría "${categoria}":`, { 
-      productsFound: products?.length || 0, 
-      error: error?.message 
-    });
+    console.log(`🔍 Productos encontrados para "${categoria}":`, products?.length || 0);
 
     if (error) {
       console.error('Error cargando productos:', error);
@@ -50,26 +42,51 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
-    // Agrupar productos por vendedor (ya tenemos la info del vendedor en el JOIN)
+    // Obtener información de vendedores activos
+    const sellerIds = Array.from(new Set((products || []).map(p => p.seller_id).filter(Boolean)));
+    let profilesMap: Record<string, { name: string; phone: string; is_active: boolean }> = {};
+    
+    if (sellerIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id,name,phone,is_active')
+        .in('id', sellerIds)
+        .eq('is_active', true); // Solo vendedores activos
+
+      console.log(`👥 Vendedores activos encontrados:`, profiles?.length || 0);
+
+      if (!profilesError && profiles) {
+        profilesMap = profiles.reduce((acc, p) => {
+          acc[p.id] = { name: p.name || 'Vendedor', phone: p.phone || '', is_active: !!p.is_active };
+          return acc;
+        }, {} as Record<string, any>);
+      }
+    }
+
+    // Filtrar productos solo de vendedores activos
+    const activeProducts = (products || []).filter(product => 
+      profilesMap[product.seller_id]?.is_active === true
+    );
+
+    console.log(`✅ Productos de vendedores activos:`, activeProducts.length);
+
+    // Agrupar productos por vendedor
     const vendorsMap = new Map();
-    (products || []).forEach(product => {
+    activeProducts.forEach(product => {
       const sellerId = product.seller_id;
-      const sellerProfile = product.profiles; // Info del vendedor desde el JOIN
+      const sellerProfile = profilesMap[sellerId];
       
       if (!vendorsMap.has(sellerId)) {
         vendorsMap.set(sellerId, {
           id: sellerId,
-          name: sellerProfile.name || 'Vendedor',
-          phone: sellerProfile.phone || '',
-          isActive: sellerProfile.is_active || false,
+          name: sellerProfile?.name || 'Vendedor',
+          phone: sellerProfile?.phone || '',
+          isActive: sellerProfile?.is_active || false,
           products: []
         });
       }
       
-      // Agregar producto sin la info del vendedor (ya está en el vendedor)
-      const productWithoutProfile = { ...product };
-      delete productWithoutProfile.profiles;
-      vendorsMap.get(sellerId).products.push(productWithoutProfile);
+      vendorsMap.get(sellerId).products.push(product);
     });
 
     const vendors = Array.from(vendorsMap.values());
@@ -78,8 +95,8 @@ export const GET: APIRoute = async ({ params }) => {
     const stats = {
       totalVendors: vendors.length,
       activeVendors: vendors.filter(v => v.isActive).length,
-      totalProducts: products?.length || 0,
-      hasProducts: (products?.length || 0) > 0
+      totalProducts: activeProducts.length,
+      hasProducts: activeProducts.length > 0
     };
 
     return new Response(JSON.stringify({
@@ -87,7 +104,7 @@ export const GET: APIRoute = async ({ params }) => {
       categoria,
       stats,
       vendors,
-      products: products || [],
+      products: activeProducts,
       message: stats.hasProducts 
         ? `Encontrados ${stats.totalProducts} productos de ${stats.activeVendors} vendedores activos`
         : `No hay productos disponibles en la categoría "${categoria}" en este momento.`
@@ -104,4 +121,5 @@ export const GET: APIRoute = async ({ params }) => {
     });
   }
 };
+
 
