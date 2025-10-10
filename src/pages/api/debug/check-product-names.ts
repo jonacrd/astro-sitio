@@ -41,7 +41,7 @@ export const GET: APIRoute = async () => {
     const orderIds = orders?.map(order => order.id) || [];
     console.log('📋 IDs de pedidos:', orderIds);
 
-    // 2. Intentar JOIN con productos
+    // 2. Intentar JOIN con productos (sin price_cents que no existe)
     console.log('🔄 Intentando JOIN con productos...');
     const { data: itemsWithJoin, error: joinError } = await supabase
       .from('order_items')
@@ -49,8 +49,7 @@ export const GET: APIRoute = async () => {
         *,
         product:products!order_items_product_id_fkey(
           id,
-          title,
-          price_cents
+          title
         )
       `)
       .in('order_id', orderIds);
@@ -60,12 +59,12 @@ export const GET: APIRoute = async () => {
     console.log('  - Items encontrados:', itemsWithJoin?.length || 0);
     
     if (itemsWithJoin && itemsWithJoin.length > 0) {
-      console.log('  - Primer item:', {
-        order_id: itemsWithJoin[0].order_id,
-        product_id: itemsWithJoin[0].product_id,
-        title_from_join: itemsWithJoin[0].product?.title,
-        price_from_join: itemsWithJoin[0].product?.price_cents
-      });
+        console.log('  - Primer item:', {
+          order_id: itemsWithJoin[0].order_id,
+          product_id: itemsWithJoin[0].product_id,
+          title_from_join: itemsWithJoin[0].product?.title,
+          price_from_item: itemsWithJoin[0].price_cents
+        });
     }
 
     // 3. Método alternativo - obtener items sin JOIN
@@ -83,12 +82,12 @@ export const GET: APIRoute = async () => {
       const productIds = [...new Set(itemsOnly.map(item => item.product_id).filter(Boolean))];
       console.log('  - Product IDs únicos:', productIds);
 
-      // 4. Obtener productos por separado
-      if (productIds.length > 0) {
-        const { data: products, error: productsError } = await supabase
-          .from('products')
-          .select('id, title, price_cents')
-          .in('id', productIds);
+        // 4. Obtener productos por separado
+        if (productIds.length > 0) {
+          const { data: products, error: productsError } = await supabase
+            .from('products')
+            .select('id, title')
+            .in('id', productIds);
 
         console.log('🏷️ Productos encontrados:');
         console.log('  - Error:', productsError?.message || 'Ninguno');
@@ -97,8 +96,7 @@ export const GET: APIRoute = async () => {
         if (products && products.length > 0) {
           console.log('  - Primer producto:', {
             id: products[0].id,
-            title: products[0].title,
-            price_cents: products[0].price_cents
+            title: products[0].title
           });
         }
       }
@@ -134,7 +132,7 @@ export const GET: APIRoute = async () => {
             order_id: itemsWithJoin[0].order_id?.substring(0, 8),
             product_id: itemsWithJoin[0].product_id,
             title_from_join: itemsWithJoin[0].product?.title,
-            price_from_join: itemsWithJoin[0].product?.price_cents
+            price_from_item: itemsWithJoin[0].price_cents
           } : null
         },
         alternativeResult: {

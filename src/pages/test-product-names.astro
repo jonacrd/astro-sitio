@@ -1,0 +1,256 @@
+---
+// Página de prueba específica para verificar nombres de productos
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Nombres de Productos</title>
+    <style>
+        body { 
+            background-color: #111827; 
+            color: white; 
+            min-height: 100vh; 
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        h1 { 
+            font-size: 1.875rem; 
+            font-weight: bold; 
+            margin-bottom: 2rem; 
+            text-align: center; 
+        }
+        .test-section { 
+            background-color: #1f2937; 
+            padding: 1.5rem; 
+            border-radius: 0.5rem; 
+            margin: 1rem 0;
+            border-left: 4px solid #3b82f6;
+        }
+        .success { 
+            border-left-color: #10b981;
+        }
+        .error { 
+            border-left-color: #ef4444;
+        }
+        .product-item {
+            background-color: #374151;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin: 0.5rem 0;
+        }
+        .product-title {
+            font-weight: bold;
+            color: #10b981;
+            font-size: 1.1rem;
+        }
+        .product-details {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        button { 
+            background-color: #2563eb; 
+            color: white; 
+            padding: 0.5rem 1rem; 
+            border-radius: 0.5rem; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 500;
+            margin: 0.5rem;
+        }
+        button:hover { 
+            background-color: #1d4ed8; 
+        }
+        .loading {
+            text-align: center;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-card {
+            background-color: #374151;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .stat-label {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Nombres de Productos en Pedidos</h1>
+        
+        <div>
+            <button onclick="testEmergencyEndpoint()">Probar Endpoint de Emergencia</button>
+            <button onclick="testProductNamesDebug()">Probar Debug de Nombres</button>
+            <button onclick="clearResults()">Limpiar</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function addSection(title, content, isError = false) {
+            const results = document.getElementById('results');
+            if (!results) return;
+            
+            const section = document.createElement('div');
+            section.className = `test-section ${isError ? 'error' : 'success'}`;
+            section.innerHTML = `
+                <h2>${title}</h2>
+                ${content}
+            `;
+            results.appendChild(section);
+        }
+
+        function showStats(orders) {
+            const totalOrders = orders.length;
+            const totalItems = orders.reduce((sum, order) => sum + (order.items?.length || 0), 0);
+            const itemsWithRealNames = orders.reduce((sum, order) => {
+                return sum + (order.items?.filter(item => item.title && item.title !== 'Producto').length || 0);
+            }, 0);
+            const itemsWithGenericNames = totalItems - itemsWithRealNames;
+
+            return `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${totalOrders}</div>
+                        <div class="stat-label">Pedidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalItems}</div>
+                        <div class="stat-label">Items Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #10b981">${itemsWithRealNames}</div>
+                        <div class="stat-label">Con Nombres Reales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #ef4444">${itemsWithGenericNames}</div>
+                        <div class="stat-label">Con "Producto"</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOrders(orders) {
+            if (!orders || orders.length === 0) {
+                return '<p>No se encontraron pedidos.</p>';
+            }
+
+            return orders.map(order => `
+                <div class="product-item">
+                    <div class="product-title">Pedido ${order.id.substring(0, 8)} - $${order.total_cents}</div>
+                    <div class="product-details">
+                        Estado: ${order.status} | Fecha: ${new Date(order.created_at).toLocaleString()}
+                    </div>
+                    ${order.items && order.items.length > 0 ? `
+                        <div style="margin-top: 1rem;">
+                            <strong>Productos:</strong>
+                            ${order.items.map(item => `
+                                <div style="margin: 0.5rem 0; padding: 0.5rem; background-color: #4b5563; border-radius: 0.25rem;">
+                                    <div style="color: ${item.title === 'Producto' ? '#ef4444' : '#10b981'}; font-weight: bold;">
+                                        ${item.title}
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: #9ca3af;">
+                                        ID: ${item.product_id} | Precio: $${item.price_cents} | Cantidad: ${item.qty || item.quantity || 1}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p style="color: #9ca3af;">No hay items en este pedido.</p>'}
+                </div>
+            `).join('');
+        }
+
+        async function testEmergencyEndpoint() {
+            try {
+                addSection('🔄 Probando Endpoint de Emergencia...', '<div class="loading">Cargando...</div>');
+                
+                const response = await fetch('/api/seller/orders-emergency', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('sb-access-token')}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const content = showStats(result.data.orders) + renderOrders(result.data.orders);
+                    addSection('✅ Endpoint de Emergencia', content);
+                } else {
+                    addSection('❌ Error en Endpoint de Emergencia', `<pre>${JSON.stringify(result, null, 2)}</pre>`, true);
+                }
+            } catch (error) {
+                addSection('❌ Error de Conexión', `<pre>${error.message}</pre>`, true);
+            }
+        }
+
+        async function testProductNamesDebug() {
+            try {
+                addSection('🔄 Probando Debug de Nombres...', '<div class="loading">Cargando...</div>');
+                
+                const response = await fetch('/api/debug/check-product-names');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const content = `
+                        <h3>🔗 Resultado del JOIN:</h3>
+                        <p><strong>Estado:</strong> ${result.data.joinResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                        <p><strong>Error:</strong> ${result.data.joinResult.error || 'Ninguno'}</p>
+                        <p><strong>Items encontrados:</strong> ${result.data.joinResult.itemsCount}</p>
+                        
+                        <h3>🔄 Método Alternativo:</h3>
+                        <p><strong>Estado:</strong> ${result.data.alternativeResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                        <p><strong>Error:</strong> ${result.data.alternativeResult.error || 'Ninguno'}</p>
+                        <p><strong>Items encontrados:</strong> ${result.data.alternativeResult.itemsCount}</p>
+                        <p><strong>Product IDs únicos:</strong> ${result.data.alternativeResult.productIds.length}</p>
+                        
+                        <h3>📊 Estructura de Tablas:</h3>
+                        <p><strong>order_items:</strong> ${result.data.tablesStructure.order_items_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                        <p><strong>products:</strong> ${result.data.tablesStructure.products_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                    `;
+                    addSection('✅ Debug de Nombres', content);
+                } else {
+                    addSection('❌ Error en Debug de Nombres', `<pre>${JSON.stringify(result, null, 2)}</pre>`, true);
+                }
+            } catch (error) {
+                addSection('❌ Error de Conexión', `<pre>${error.message}</pre>`, true);
+            }
+        }
+
+        function clearResults() {
+            const results = document.getElementById('results');
+            if (results) {
+                results.innerHTML = '';
+            }
+        }
+
+        // Cargar automáticamente al inicio
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página de test cargada');
+            testProductNamesDebug();
+        });
+    </script>
+</body>
+</html>
