@@ -200,13 +200,15 @@ export const POST: APIRoute = async (context) => {
         priceCents: item.priceCents
       });
       
+      // IMPORTANTE: item.priceCents ya viene en pesos (ej: 1500 = $1500 pesos)
+      // NO convertir a centavos, guardar directamente
       const { error: itemError } = await supabase
         .from('cart_items')
         .insert({
           cart_id: cart.id,
           product_id: item.id || item.productId, // Usar id o productId
           title: item.title,
-          price_cents: item.priceCents,
+          price_cents: item.priceCents, // Ya está en pesos, NO dividir ni multiplicar
           qty: item.quantity || item.qty || 1 // Usar quantity o qty
         });
 

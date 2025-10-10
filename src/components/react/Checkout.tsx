@@ -129,13 +129,34 @@ export default function Checkout({}: CheckoutProps) {
         setDeliveryAddress(JSON.parse(savedDeliveryAddress));
       }
 
-      // Cargar comprobante de transferencia
-      const savedProof = localStorage.getItem('transferProof');
-      if (savedProof) {
-        const proofData = JSON.parse(savedProof);
-        // Crear un objeto File simulado para mantener compatibilidad
-        const file = new File([], proofData.name, { type: proofData.type });
-        setTransferProof(file);
+      // NO cargar comprobante de transferencia automáticamente
+      // El comprobante debe ser específico para cada compra
+      // Solo cargarlo si hay un checkout activo (mismo session)
+      const checkoutSession = localStorage.getItem('checkoutSession');
+      const currentSession = Date.now().toString();
+      
+      if (checkoutSession) {
+        // Si hay una sesión activa de checkout (menos de 1 hora), cargar el comprobante
+        const sessionTime = parseInt(checkoutSession);
+        const oneHour = 60 * 60 * 1000; // 1 hora en milisegundos
+        
+        if (Date.now() - sessionTime < oneHour) {
+          const savedProof = localStorage.getItem('transferProof');
+          if (savedProof) {
+            const proofData = JSON.parse(savedProof);
+            // Crear un objeto File simulado para mantener compatibilidad
+            const file = new File([], proofData.name, { type: proofData.type });
+            setTransferProof(file);
+          }
+        } else {
+          // Limpiar comprobante si la sesión expiró
+          localStorage.removeItem('transferProof');
+          localStorage.removeItem('checkoutSession');
+        }
+      } else {
+        // Nueva sesión de checkout - limpiar comprobante anterior
+        localStorage.removeItem('transferProof');
+        localStorage.setItem('checkoutSession', currentSession);
       }
 
       console.log('🔄 Datos persistentes del checkout cargados');
@@ -415,15 +436,15 @@ export default function Checkout({}: CheckoutProps) {
       }, 0);
       console.log('💰 Total calculado en frontend:', calculatedTotal);
 
-      // Convertir precios a centavos para el backend
+      // IMPORTANTE: Los precios ya vienen en pesos (ej: 1500 = $1500 pesos)
+      // NO convertir a centavos, enviar tal cual están
       const cartItemsWithCents = cartItems.map(item => ({
         ...item,
-        priceCents: Math.round(item.priceCents * 100) // Convertir pesos a centavos
+        priceCents: item.priceCents // Ya está en pesos, NO multiplicar
       }));
-      console.log('🔄 Precios convertidos a centavos:', cartItemsWithCents.map(item => ({
+      console.log('🔄 Precios enviados al backend (en pesos):', cartItemsWithCents.map(item => ({
         title: item.title,
-        originalPrice: item.priceCents / 100,
-        priceCents: item.priceCents
+        priceInPesos: item.priceCents
       })));
 
       // Obtener token de sesión
@@ -538,8 +559,12 @@ export default function Checkout({}: CheckoutProps) {
         const savedData = sessionStorage.getItem('orderData');
         console.log('✅ Datos guardados en sessionStorage:', savedData);
         
-        // Limpiar carrito
+        // Limpiar carrito y datos de checkout
         localStorage.removeItem('cart');
+        localStorage.removeItem('transferProof');
+        localStorage.removeItem('checkoutSession');
+        localStorage.removeItem('checkoutPaymentMethod');
+        localStorage.removeItem('checkoutDeliveryAddress');
         window.dispatchEvent(new CustomEvent('cart-updated', { detail: { cart: [] } }));
         
         // Redirigir a página de confirmación
