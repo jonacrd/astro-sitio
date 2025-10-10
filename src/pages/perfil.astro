@@ -100,18 +100,24 @@ import { getUser, getUserProfile } from '../lib/session'
             </svg>
           </a>
 
-          <a href="/dashboard" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
+          <a id="dashboard-link" href="/dashboard" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors relative">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+              <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <span class="text-white font-medium">Ventas Express</span>
+              <div class="flex flex-col">
+                <span class="text-white font-medium">Dashboard Principal</span>
+                <span id="low-stock-alert" class="hidden text-xs text-red-400">⚠️ Productos con stock bajo</span>
+              </div>
             </div>
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+            <div class="flex items-center gap-2">
+              <span id="low-stock-badge" class="hidden px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full"></span>
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
           </a>
 
           <a href="/dashboard/recompensas" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
@@ -268,7 +274,7 @@ import { getUser, getUserProfile } from '../lib/session'
 
         if (!todayError && todayOrders) {
           const todaySales = todayOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
-          document.getElementById('daily-sales').textContent = `$${(todaySales / 100).toFixed(0)}`;
+          document.getElementById('daily-sales').textContent = `$${todaySales.toFixed(0)}`;
         }
 
         // Total de órdenes
@@ -285,6 +291,31 @@ import { getUser, getUserProfile } from '../lib/session'
           
           document.getElementById('pending-orders').textContent = pending.toString();
           document.getElementById('completed-orders').textContent = completed.toString();
+        }
+
+        // Verificar productos con stock bajo (menos de 5 unidades)
+        const { data: lowStockProducts, error: stockError } = await supabase
+          .from('products')
+          .select('id, title, stock')
+          .eq('seller_id', sellerId)
+          .lt('stock', 5)
+          .gt('stock', 0);
+
+        if (!stockError && lowStockProducts && lowStockProducts.length > 0) {
+          // Mostrar alerta de stock bajo
+          const alertElement = document.getElementById('low-stock-alert');
+          const badgeElement = document.getElementById('low-stock-badge');
+          
+          if (alertElement) {
+            alertElement.classList.remove('hidden');
+          }
+          
+          if (badgeElement) {
+            badgeElement.textContent = lowStockProducts.length.toString();
+            badgeElement.classList.remove('hidden');
+          }
+          
+          console.log('⚠️ Productos con stock bajo:', lowStockProducts);
         }
 
       } catch (error) {

@@ -197,6 +197,8 @@ import BaseLayout from '../layouts/BaseLayout.astro'
   </div>
 
   <script>
+    import { supabase } from '../lib/supabase-browser';
+
     // ===== CARGAR DATOS DEL DASHBOARD =====
     async function loadDashboardData() {
       try {
@@ -204,8 +206,11 @@ import BaseLayout from '../layouts/BaseLayout.astro'
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.error('❌ No hay usuario autenticado');
+          window.location.href = '/';
           return;
         }
+
+        console.log('✅ Usuario autenticado:', user.email);
 
         // Cargar estadísticas principales
         await loadMainStats(user.id);
@@ -238,7 +243,8 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 
         if (!todayError && todayOrders) {
           const todaySales = todayOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
-          document.getElementById('today-sales').textContent = `$${(todaySales / 100).toFixed(0)}`;
+          // IMPORTANTE: total_cents ya está en pesos, NO dividir por 100
+          document.getElementById('today-sales').textContent = `$${todaySales.toFixed(0)}`;
         }
 
         // Pedidos pendientes
@@ -252,20 +258,22 @@ import BaseLayout from '../layouts/BaseLayout.astro'
           document.getElementById('pending-orders').textContent = pendingOrders.length.toString();
         }
 
-        // Stock bajo
+        // Stock bajo (productos con menos de 5 unidades)
         const { data: lowStockProducts, error: lowStockError } = await supabase
-          .from('seller_products')
-          .select('id, stock')
+          .from('products')
+          .select('id, title, stock')
           .eq('seller_id', sellerId)
-          .lt('stock', 5);
+          .lt('stock', 5)
+          .gt('stock', 0);
 
         if (!lowStockError && lowStockProducts) {
           document.getElementById('low-stock').textContent = lowStockProducts.length.toString();
+          console.log('⚠️ Productos con stock bajo:', lowStockProducts);
         }
 
         // Total productos
         const { data: totalProducts, error: totalError } = await supabase
-          .from('seller_products')
+          .from('products')
           .select('id')
           .eq('seller_id', sellerId);
 
@@ -281,12 +289,9 @@ import BaseLayout from '../layouts/BaseLayout.astro'
     // ===== INVENTARIO POR CATEGORÍA =====
     async function loadInventoryCategories(sellerId) {
       try {
-        const { data: sellerProducts, error } = await supabase
-          .from('seller_products')
-          .select(`
-            stock,
-            products (title, category)
-          `)
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('id, title, category, stock')
           .eq('seller_id', sellerId);
 
         if (error) {
@@ -294,14 +299,16 @@ import BaseLayout from '../layouts/BaseLayout.astro'
           return;
         }
 
+        console.log('📦 Productos encontrados:', products);
+
         // Agrupar por categoría
         const categories = {};
-        (sellerProducts || []).forEach(sp => {
-          if (sp.products?.category) {
-            if (!categories[sp.products.category]) {
-              categories[sp.products.category] = 0;
+        (products || []).forEach(product => {
+          if (product.category) {
+            if (!categories[product.category]) {
+              categories[product.category] = 0;
             }
-            categories[sp.products.category]++;
+            categories[product.category]++;
           }
         });
 
@@ -413,7 +420,7 @@ import BaseLayout from '../layouts/BaseLayout.astro'
                   <p class="text-gray-400 text-sm">Estado: <span class="${statusColors[order.status] || 'text-gray-400'}">${statusLabels[order.status] || order.status}</span></p>
                 </div>
               </div>
-              <span class="text-gray-400 text-sm">$${((order.total_cents || 0) / 100).toFixed(0)}</span>
+              <span class="text-gray-400 text-sm">$${(order.total_cents || 0).toFixed(0)}</span>
             </div>
           `).join('');
         }
@@ -438,7 +445,8 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 
         if (!error && weekOrders) {
           const weekSales = weekOrders.reduce((sum, order) => sum + (order.total_cents || 0), 0);
-          document.getElementById('week-sales').textContent = `$${(weekSales / 100).toFixed(0)}`;
+          // IMPORTANTE: total_cents ya está en pesos, NO dividir por 100
+          document.getElementById('week-sales').textContent = `$${weekSales.toFixed(0)}`;
         }
 
       } catch (error) {
