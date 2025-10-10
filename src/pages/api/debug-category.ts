@@ -1,34 +1,55 @@
 import type { APIRoute } from 'astro';
-import { createSupabaseServerClient } from '../../lib/supabase-config';
+import { createClient } from '@supabase/supabase-js';
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async () => {
   try {
-    const supabase = createSupabaseServerClient();
-    
-    // Verificar conexión
-    const { data: testData, error: testError } = await supabase
-      .from('products')
-      .select('count')
-      .limit(1);
+    // Usar el mismo patrón que otros endpoints estables
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseAnon = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-    if (testError) {
+    if (!supabaseUrl || !supabaseAnon) {
       return new Response(JSON.stringify({ 
-        error: 'Error de conexión a Supabase',
-        details: testError.message 
+        error: 'Variables de entorno de Supabase faltantes',
+        details: 'PUBLIC_SUPABASE_URL o PUBLIC_SUPABASE_ANON_KEY no configuradas'
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Verificar productos por categoría
+    const supabase = createClient(supabaseUrl, supabaseAnon);
+    
+    // Verificar conexión básica
+    const { data: testProducts, error: testError } = await supabase
+      .from('products')
+      .select('id, title, category')
+      .limit(5);
+
+    if (testError) {
+      return new Response(JSON.stringify({ 
+        error: 'Error de conexión a Supabase',
+        details: testError.message,
+        code: testError.code
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Verificar vendedores
+    const { data: vendors, error: vendorsError } = await supabase
+      .from('profiles')
+      .select('id, name, is_active')
+      .limit(10);
+
+    // Contar productos por categoría
     const categories = ['postres', 'minimarkets', 'medicinas', 'carniceria', 'servicios', 'mascotas', 'ninos'];
     const categoryStats = {};
 
     for (const category of categories) {
       const { data: products, error } = await supabase
         .from('products')
-        .select('id, title, category')
+        .select('id')
         .eq('category', category);
 
       categoryStats[category] = {
@@ -36,11 +57,6 @@ export const GET: APIRoute = async ({ params, request }) => {
         error: error?.message || null
       };
     }
-
-    // Verificar vendedores
-    const { data: vendors, error: vendorsError } = await supabase
-      .from('profiles')
-      .select('id, name, is_active');
 
     return new Response(JSON.stringify({
       success: true,
@@ -51,10 +67,7 @@ export const GET: APIRoute = async ({ params, request }) => {
         error: vendorsError?.message || null
       },
       categories: categoryStats,
-      sampleProducts: await supabase
-        .from('products')
-        .select('id, title, category, price_cents')
-        .limit(5)
+      sampleProducts: testProducts || []
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }

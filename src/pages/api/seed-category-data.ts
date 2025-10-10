@@ -1,9 +1,23 @@
 import type { APIRoute } from 'astro';
-import { createSupabaseServerClient } from '../../lib/supabase-config';
+import { createClient } from '@supabase/supabase-js';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async () => {
   try {
-    const supabase = createSupabaseServerClient();
+    // Usar service role key para insertar datos
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return new Response(JSON.stringify({ 
+        error: 'Variables de entorno faltantes',
+        details: 'PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY no configuradas'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Datos de ejemplo para cada categoría
     const sampleProducts = [

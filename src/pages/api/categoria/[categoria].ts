@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
-import { createSupabaseServerClient } from '../../../lib/supabase-config';
+import { createClient } from '@supabase/supabase-js';
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params }) => {
   try {
     const { categoria } = params;
     
@@ -11,29 +11,24 @@ export const GET: APIRoute = async ({ params, request }) => {
         headers: { 'Content-Type': 'application/json' }
       });
     }
+    // Cliente de solo lectura (igual que otros endpoints estables)
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseAnon = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-    const supabase = createSupabaseServerClient();
+    if (!supabaseUrl || !supabaseAnon) {
+      return new Response(JSON.stringify({ error: 'Variables de entorno de Supabase faltantes' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnon);
     
     // Buscar productos de la categoría con información del vendedor
     const { data: products, error } = await supabase
       .from('products')
-      .select(`
-        id,
-        title,
-        price_cents,
-        image_url,
-        stock,
-        seller_id,
-        category,
-        created_at,
-        profiles!products_seller_id_fkey (
-          name,
-          phone,
-          is_active
-        )
-      `)
+      .select('id,title,price_cents,image_url,stock,seller_id,category,created_at')
       .eq('category', categoria)
-      .eq('profiles.is_active', true)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -44,17 +39,34 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
 
+    // Obtener perfiles de vendedores en una segunda consulta
+    const sellerIds = Array.from(new Set((products || []).map(p => p.seller_id).filter(Boolean)));
+    let profilesMap: Record<string, { name: string; phone: string; is_active: boolean }> = {};
+    if (sellerIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id,name,phone,is_active')
+        .in('id', sellerIds);
+
+      if (!profilesError && profiles) {
+        profilesMap = profiles.reduce((acc, p) => {
+          acc[p.id] = { name: p.name || 'Vendedor', phone: p.phone || '', is_active: !!p.is_active };
+          return acc;
+        }, {} as Record<string, any>);
+      }
+    }
+
     // Agrupar productos por vendedor
     const vendorsMap = new Map();
-    
-    products?.forEach(product => {
+    (products || []).forEach(product => {
       const sellerId = product.seller_id;
       if (!vendorsMap.has(sellerId)) {
+        const prof = profilesMap[sellerId] || { name: 'Vendedor', phone: '', is_active: false };
         vendorsMap.set(sellerId, {
           id: sellerId,
-          name: product.profiles?.name || 'Vendedor',
-          phone: product.profiles?.phone || '',
-          isActive: product.profiles?.is_active || false,
+          name: prof.name,
+          phone: prof.phone,
+          isActive: prof.is_active,
           products: []
         });
       }
@@ -89,3 +101,4 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   }
 };
+
