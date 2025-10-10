@@ -15,7 +15,7 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'search',
-    selector: '[data-test="search-bar"], input[type="search"], .search-input, [placeholder*="buscar"], [placeholder*="¿Qué"]',
+    selector: 'input[type="text"], input[placeholder*="necesitas"], input[placeholder*="buscar"], .search-input, input[placeholder*="¿Qué"]',
     title: 'Busca lo que quieras',
     content: 'Aquí puedes buscar productos, tiendas o servicios de tu comunidad 🔍',
     townySlotClass: 'towny-slot--search'
@@ -29,21 +29,21 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'product-card',
-    selector: '[data-test="product-card"]:first-child, .product-card:first-of-type, [class*="product"]:first-of-type, [class*="feed"] [class*="card"]:first-of-type',
+    selector: '[class*="FeedTile"], [class*="product-card"], [class*="ProductCard"], .feed-item:first-child, [class*="card"]:first-of-type',
     title: 'Elige un producto',
     content: 'Toca un producto para ver detalles o usa el carrito para agregarlo 🛒',
     townySlotClass: 'towny-slot--product'
   },
   {
     id: 'add-to-cart',
-    selector: '[data-test="add-to-cart"], .btn-add-to-cart, [aria-label*="Agregar"], [aria-label*="carrito"], button:has(> span:contains("Agregar"))',
+    selector: '[data-test="add-to-cart"], .btn-add-to-cart, [aria-label*="Agregar"], [aria-label*="carrito"], button[class*="add-to-cart"]',
     title: 'Agrega al carrito',
     content: 'Pulsa aquí para agregar tu primer producto. Puedes ajustar cantidad después.',
     townySlotClass: 'towny-slot--add'
   },
   {
     id: 'cart-icon',
-    selector: '[data-test="cart-icon"], .nav-cart, [aria-label*="Carrito"], [id="cart-button"], [class*="cart"] [class*="icon"]',
+    selector: '[id="cart-button"], [class*="cart"], [aria-label*="Carrito"], button[class*="cart"], .cart-icon',
     title: 'Abre tu carrito',
     content: 'Cuando tengas productos, revisa tu carrito desde aquí.',
     townySlotClass: 'towny-slot--carticon'
@@ -57,7 +57,7 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'checkout',
-    selector: '[data-test="checkout-button"], button:has(> span:contains("Pagar")), .btn-checkout, [href*="checkout"], [class*="checkout"]',
+    selector: '[data-test="checkout-button"], .btn-checkout, [href*="checkout"], [class*="checkout"], button[class*="checkout"]',
     title: 'Ir al checkout',
     content: 'Cuando estés listo, continúa al pago 💳',
     townySlotClass: 'towny-slot--checkout'
@@ -71,7 +71,7 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'pay-now',
-    selector: '[data-test="pay-now"], .btn-pay, button:has(> span:contains("Pagar ahora")), button:has(> span:contains("Confirmar"))',
+    selector: '[data-test="pay-now"], .btn-pay, button[class*="pay"], button[class*="confirm"]',
     title: 'Confirma tu compra',
     content: 'Revisa todo y confirma tu pago para finalizar 🏁',
     townySlotClass: 'towny-slot--pay'
@@ -153,20 +153,115 @@ class TourManager {
     
     const modal = document.createElement('div');
     modal.className = 'town-tour-welcome-modal';
-    console.log('📦 Modal creado con clase:', modal.className);
+    
+    // ESTILOS INLINE FORZADOS
+    modal.style.cssText = `
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 10000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 1rem !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      backdrop-filter: blur(8px) !important;
+    `;
+    
+    console.log('📦 Modal creado con estilos inline');
     
     modal.innerHTML = `
-      <div class="town-tour-welcome-content">
-        <div class="town-tour-welcome-header">
-          <div class="towny-slot towny-slot--welcome"></div>
-          <h2>¡Bienvenido a Town! 🛍️</h2>
+      <!-- Towny FUERA del modal, como personaje que habla -->
+      <div class="towny-character" style="
+        position: absolute !important;
+        bottom: 20px !important;
+        right: 20px !important;
+        width: 120px !important;
+        height: 120px !important;
+        background-image: url('/towny/towny_saludando.png') !important;
+        background-size: contain !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        z-index: 10001 !important;
+        pointer-events: none !important;
+        filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) !important;
+      "></div>
+      
+      <!-- Burbuja de diálogo de Towny -->
+      <div class="towny-speech-bubble" style="
+        position: absolute !important;
+        bottom: 150px !important;
+        right: 20px !important;
+        background: rgba(59, 130, 246, 0.9) !important;
+        color: white !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: 1rem 1rem 0.5rem 1rem !important;
+        max-width: 250px !important;
+        font-size: 0.9rem !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        z-index: 10001 !important;
+        pointer-events: none !important;
+      ">
+        ¡Hola! Soy Towny 🛍️<br>
+        Te guiaré por tu primera compra
+      </div>
+      
+      <!-- Modal principal con tema oscuro -->
+      <div class="town-tour-welcome-content" style="
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        border-radius: 1rem !important;
+        padding: 2rem !important;
+        max-width: 28rem !important;
+        width: 100% !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(16px) !important;
+      ">
+        <div class="town-tour-welcome-header" style="
+          text-align: center !important;
+          margin-bottom: 1.5rem !important;
+        ">
+          <h2 style="
+            font-size: 1.875rem !important;
+            font-weight: bold !important;
+            color: #f1f5f9 !important;
+            margin-bottom: 0.5rem !important;
+          ">¡Bienvenido a Town!</h2>
+          <p style="
+            font-size: 1.125rem !important;
+            color: #cbd5e1 !important;
+            margin: 0 !important;
+          ">¿Te gustaría ver una guía rápida para tu primera compra?</p>
         </div>
-        <p>¿Te gustaría ver una guía rápida para tu primera compra?</p>
-        <div class="town-tour-welcome-actions">
-          <button class="town-tour-btn town-tour-btn--primary" data-action="start">
-            ¡Sí, guíame!
+        
+        <div class="town-tour-welcome-actions" style="
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 0.75rem !important;
+        ">
+          <button class="town-tour-btn town-tour-btn--primary" data-action="start" style="
+            padding: 1rem 1.5rem !important;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+          ">
+            🚀 ¡Sí, guíame!
           </button>
-          <button class="town-tour-btn town-tour-btn--secondary" data-action="skip">
+          <button class="town-tour-btn town-tour-btn--secondary" data-action="skip" style="
+            padding: 0.75rem 1.5rem !important;
+            background: rgba(71, 85, 105, 0.8) !important;
+            color: #e2e8f0 !important;
+            border: 1px solid rgba(148, 163, 184, 0.3) !important;
+            border-radius: 0.75rem !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            transition: all 0.2s !important;
+          ">
             No, gracias
           </button>
         </div>

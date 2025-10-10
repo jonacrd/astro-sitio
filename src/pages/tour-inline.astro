@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Tour con Estilos Inline">
+  <div class="min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+      <h1 class="text-white text-3xl font-bold mb-4">🎬 Tour con Estilos Inline</h1>
+      <p class="text-white/70 mb-8">Este tour usa estilos CSS inline para garantizar que funcione</p>
+      
+      <button
+        id="start-inline-tour"
+        style="
+          padding: 1rem 2rem;
+          background: linear-gradient(to right, #3b82f6, #8b5cf6);
+          color: white;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          font-size: 1.125rem;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+        "
+      >
+        Iniciar Tour con Estilos Inline
+      </button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('start-inline-tour')?.addEventListener('click', () => {
+      console.log('🎬 Creando tour con estilos inline...');
+      
+      // Crear modal con estilos inline
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+      `;
+      
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 28rem;
+        width: 100%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      `;
+      
+      content.innerHTML = `
+        <div style="text-align: center;">
+          <div style="
+            width: 10rem;
+            height: 10rem;
+            margin: 0 auto 1rem;
+            background-image: url('/towny/towny_saludando.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+          "></div>
+          <h2 style="
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+          ">¡Bienvenido a Town! 🛍️</h2>
+          <p style="
+            font-size: 1.125rem;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+          ">¿Te gustaría ver una guía rápida para tu primera compra?</p>
+          <div style="
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+          ">
+            <button 
+              onclick="this.closest('div[style*=fixed]').remove(); startFullTour()"
+              style="
+                padding: 0.75rem 1.5rem;
+                background: #3b82f6;
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                cursor: pointer;
+              "
+            >¡Sí, guíame!</button>
+            <button 
+              onclick="this.closest('div[style*=fixed]').remove()"
+              style="
+                padding: 0.75rem 1.5rem;
+                background: #e5e7eb;
+                color: #1f2937;
+                border: none;
+                border-radius: 0.5rem;
+                font-weight: 600;
+                cursor: pointer;
+              "
+            >No, gracias</button>
+          </div>
+        </div>
+      `;
+      
+      modal.appendChild(content);
+      document.body.appendChild(modal);
+      
+      console.log('✅ Modal con estilos inline creado');
+    });
+    
+    // Función para iniciar el tour completo
+    (window as any).startFullTour = async function() {
+      try {
+        console.log('🚀 Iniciando tour completo...');
+        localStorage.removeItem('town_tour_v1_done');
+        
+        const { startTour } = await import('../lib/tour/TourManager');
+        startTour();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error iniciando tour: ' + error.message);
+      }
+    };
+  </script>
+</BaseLayout>

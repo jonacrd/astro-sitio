@@ -1,0 +1,242 @@
+/* tour-plain.css - Estilos SIN @apply de Tailwind */
+
+/* Modal de Bienvenida */
+.town-tour-welcome-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 300ms ease;
+}
+
+.town-tour-welcome-content {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 28rem;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideUp 400ms ease;
+}
+
+.town-tour-welcome-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.town-tour-welcome-header h2 {
+  font-size: 1.875rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.town-tour-welcome-header .towny-slot {
+  margin-bottom: 1rem;
+  width: 8rem;
+  height: 8rem;
+}
+
+.town-tour-welcome-content p {
+  font-size: 1.125rem;
+  color: #374151;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.town-tour-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .town-tour-welcome-actions {
+    flex-direction: row;
+  }
+  
+  .town-tour-welcome-header .towny-slot {
+    width: 10rem;
+    height: 10rem;
+  }
+}
+
+.town-tour-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 200ms;
+  border: none;
+  cursor: pointer;
+}
+
+.town-tour-btn--primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.town-tour-btn--primary:hover {
+  background: #2563eb;
+}
+
+.town-tour-btn--secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.town-tour-btn--secondary:hover {
+  background: #d1d5db;
+}
+
+/* Towny Slot */
+.towny-slot {
+  position: absolute;
+  width: 6rem;
+  height: 6rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .towny-slot {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+}
+
+.towny-slot--welcome {
+  background-image: url('/towny/towny_saludando.png');
+}
+
+/* Tour Container */
+.town-tour {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.town-tour__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  transition: opacity 200ms ease;
+  opacity: 1;
+}
+
+.town-tour__mask {
+  position: fixed;
+  inset: 0;
+  --spotlight-x: 50%;
+  --spotlight-y: 50%;
+  --spotlight-r: 160px;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-mask: radial-gradient(
+    circle var(--spotlight-r) at var(--spotlight-x) var(--spotlight-y),
+    transparent 0,
+    transparent 98%,
+    black 100%
+  );
+  mask: radial-gradient(
+    circle var(--spotlight-r) at var(--spotlight-x) var(--spotlight-y),
+    transparent 0,
+    transparent 98%,
+    black 100%
+  );
+  pointer-events: none;
+}
+
+.town-tour__panel {
+  position: absolute;
+  max-width: 92vw;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f2937;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  .town-tour__panel {
+    max-width: 32rem;
+  }
+}
+
+.town-tour__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .town-tour__title {
+    font-size: 1.5rem;
+  }
+}
+
+.town-tour__content {
+  font-size: 0.875rem;
+  line-height: 1.625;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .town-tour__content {
+    font-size: 1rem;
+  }
+}
+
+.town-tour__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.town-tour__btn--ghost {
+  background: transparent;
+  color: #9ca3af;
+}
+
+.town-tour__btn--ghost:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

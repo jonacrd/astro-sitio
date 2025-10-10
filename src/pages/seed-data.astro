@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Insertar Datos de Ejemplo - Town">
+  <main class="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div class="max-w-md mx-auto p-6">
+      <div class="bg-gray-800 rounded-xl p-8 text-center">
+        <h1 class="text-2xl font-bold text-white mb-4">Insertar Datos de Ejemplo</h1>
+        <p class="text-gray-400 mb-6">
+          Esto insertará vendedores y productos de ejemplo para todas las categorías
+        </p>
+        
+        <button 
+          id="insert-data-btn"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+        >
+          Insertar Datos
+        </button>
+        
+        <div id="result" class="mt-4 hidden">
+          <!-- Resultado aparecerá aquí -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('insert-data-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('insert-data-btn');
+      const result = document.getElementById('result');
+      
+      btn.disabled = true;
+      btn.textContent = 'Insertando...';
+      
+      try {
+        const response = await fetch('/api/seed-category-data', {
+          method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          result.innerHTML = `
+            <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
+              <div class="text-green-400 font-medium">✅ Datos insertados correctamente</div>
+              <div class="text-gray-300 text-sm mt-2">
+                Vendedores: ${data.vendors}<br>
+                Productos: ${data.products}
+              </div>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `
+            <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+              <div class="text-red-400 font-medium">❌ Error</div>
+              <div class="text-gray-300 text-sm mt-2">${data.error}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        result.innerHTML = `
+          <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+            <div class="text-red-400 font-medium">❌ Error de conexión</div>
+            <div class="text-gray-300 text-sm mt-2">${error.message}</div>
+          </div>
+        `;
+      }
+      
+      result.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Insertar Datos';
+    });
+  </script>
+</BaseLayout>

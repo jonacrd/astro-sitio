@@ -15,6 +15,7 @@
 
 /* Importar estilos del tour */
 @import './tour.css';
+@import './tour-plain.css';
 
 /* Importar sistema de Towny */
 @import './towny-system.css';
