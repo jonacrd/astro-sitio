@@ -3,19 +3,30 @@ import { createClient } from '@supabase/supabase-js';
 
 export const GET: APIRoute = async ({ params }) => {
   try {
+    console.log('🚀 Iniciando API de categoría...');
+    
     const { categoria } = params;
+    console.log('📝 Categoría solicitada:', categoria);
     
     if (!categoria) {
+      console.log('❌ Categoría no especificada');
       return new Response(JSON.stringify({ error: 'Categoría no especificada' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
+    
     // Cliente de solo lectura (igual que otros endpoints estables)
     const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
     const supabaseAnon = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
+    console.log('🔑 Variables de entorno:', {
+      url: supabaseUrl ? '✅ Presente' : '❌ Faltante',
+      anon: supabaseAnon ? '✅ Presente' : '❌ Faltante'
+    });
+
     if (!supabaseUrl || !supabaseAnon) {
+      console.log('❌ Variables de entorno faltantes');
       return new Response(JSON.stringify({ error: 'Variables de entorno de Supabase faltantes' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -23,8 +34,11 @@ export const GET: APIRoute = async ({ params }) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnon);
+    console.log('✅ Cliente Supabase creado');
     
     // Primero obtener productos de la categoría con stock
+    console.log('🔍 Buscando productos para categoría:', categoria);
+    
     const { data: products, error } = await supabase
       .from('products')
       .select('id,title,price_cents,image_url,stock,seller_id,category,created_at')
@@ -32,11 +46,19 @@ export const GET: APIRoute = async ({ params }) => {
       .gt('stock', 0) // Solo productos con stock
       .order('created_at', { ascending: false });
 
-    console.log(`🔍 Productos encontrados para "${categoria}":`, products?.length || 0);
+    console.log(`🔍 Resultado de consulta productos:`, {
+      productsFound: products?.length || 0,
+      error: error?.message || null,
+      errorCode: error?.code || null
+    });
 
     if (error) {
-      console.error('Error cargando productos:', error);
-      return new Response(JSON.stringify({ error: 'Error cargando productos' }), {
+      console.error('❌ Error cargando productos:', error);
+      return new Response(JSON.stringify({ 
+        error: 'Error cargando productos',
+        details: error.message,
+        code: error.code
+      }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -44,22 +66,43 @@ export const GET: APIRoute = async ({ params }) => {
 
     // Obtener información de vendedores activos
     const sellerIds = Array.from(new Set((products || []).map(p => p.seller_id).filter(Boolean)));
+    console.log('👥 IDs de vendedores encontrados:', sellerIds);
+    
     let profilesMap: Record<string, { name: string; phone: string; is_active: boolean }> = {};
     
     if (sellerIds.length > 0) {
+      console.log('🔍 Buscando perfiles de vendedores...');
+      
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id,name,phone,is_active')
         .in('id', sellerIds)
         .eq('is_active', true); // Solo vendedores activos
 
-      console.log(`👥 Vendedores activos encontrados:`, profiles?.length || 0);
+      console.log(`👥 Resultado de consulta perfiles:`, {
+        profilesFound: profiles?.length || 0,
+        error: profilesError?.message || null,
+        errorCode: profilesError?.code || null
+      });
 
-      if (!profilesError && profiles) {
+      if (profilesError) {
+        console.error('❌ Error cargando perfiles:', profilesError);
+        return new Response(JSON.stringify({ 
+          error: 'Error cargando perfiles de vendedores',
+          details: profilesError.message,
+          code: profilesError.code
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (profiles) {
         profilesMap = profiles.reduce((acc, p) => {
           acc[p.id] = { name: p.name || 'Vendedor', phone: p.phone || '', is_active: !!p.is_active };
           return acc;
         }, {} as Record<string, any>);
+        console.log('✅ Perfiles mapeados:', Object.keys(profilesMap));
       }
     }
 
