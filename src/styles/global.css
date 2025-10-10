@@ -18,6 +18,16 @@
   @apply bg-surface/80 border border-white/5 backdrop-blur-md rounded-2xl shadow-card;
 }
 
+/* Utilidad para ocultar scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .shadow-card {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }

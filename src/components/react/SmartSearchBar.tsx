@@ -171,39 +171,6 @@ export default function SmartSearchBar({
         </button>
       </form>
 
-      {/* Filtros de búsqueda */}
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => setSearchMode('all')}
-          className={`px-3 py-1 rounded-full text-sm transition-colors ${
-            searchMode === 'all' 
-              ? 'bg-blue-500/80 text-white' 
-              : 'bg-gray-800/40 text-gray-300 hover:bg-gray-700/60 border border-gray-700/30'
-          }`}
-        >
-          Todo ({results.length + sellers.length})
-        </button>
-        <button
-          onClick={() => setSearchMode('products')}
-          className={`px-3 py-1 rounded-full text-sm transition-colors ${
-            searchMode === 'products' 
-              ? 'bg-blue-500/80 text-white' 
-              : 'bg-gray-800/40 text-gray-300 hover:bg-gray-700/60 border border-gray-700/30'
-          }`}
-        >
-          Productos ({results.length})
-        </button>
-        <button
-          onClick={() => setSearchMode('sellers')}
-          className={`px-3 py-1 rounded-full text-sm transition-colors ${
-            searchMode === 'sellers' 
-              ? 'bg-blue-500/80 text-white' 
-              : 'bg-gray-800/40 text-gray-300 hover:bg-gray-700/60 border border-gray-700/30'
-          }`}
-        >
-          Vendedores ({sellers.length})
-        </button>
-      </div>
 
       {/* Resultados de búsqueda */}
       {showResults && (
@@ -355,23 +322,28 @@ export default function SmartSearchBar({
         </div>
       )}
 
-      {/* Sugerencias rápidas */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        {['🌭 Perros calientes', '🥟 Empanadas', '🍚 Arroz', '🥤 Bebidas', '🍔 Hamburguesas', '🍕 Pizza', '🍗 Pollo', '🥪 Sándwiches'].map((suggestion) => (
-          <button
-            key={suggestion}
-            onClick={() => {
-              // Extraer solo el texto sin el emoji para la búsqueda
-              const searchText = suggestion.replace(/^[\u{1F300}-\u{1F9FF}]\s*/u, '').trim();
-              setQuery(searchText);
-              handleSearch(searchText);
-              onCategoryClick?.(searchText);
-            }}
-            className="px-3 py-1.5 bg-gray-800/40 text-gray-300 rounded-full text-sm hover:bg-blue-500/80 hover:text-white border border-gray-700/30 transition-all duration-200"
-          >
-            {suggestion}
-          </button>
-        ))}
+      {/* Sugerencias rápidas - Slider horizontal */}
+      <div className="mt-4 relative">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {['🌭 Perros calientes', '🥟 Empanadas', '🍚 Arroz', '🥤 Bebidas', '🍔 Hamburguesas', '🍕 Pizza', '🍗 Pollo', '🥪 Sándwiches'].map((suggestion) => (
+            <button
+              key={suggestion}
+              onClick={() => {
+                // Extraer solo el texto sin el emoji para la búsqueda
+                const searchText = suggestion.replace(/^[\u{1F300}-\u{1F9FF}]\s*/u, '').trim();
+                setQuery(searchText);
+                handleSearch(searchText);
+                onCategoryClick?.(searchText);
+              }}
+              className="px-3 py-1.5 bg-gray-800/40 text-gray-300 rounded-full text-sm hover:bg-blue-500/80 hover:text-white border border-gray-700/30 transition-all duration-200 whitespace-nowrap flex-shrink-0"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+        {/* Indicador de scroll (flechas laterales) */}
+        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-6 h-8 bg-gradient-to-r from-gray-900 to-transparent pointer-events-none opacity-50"></div>
+        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-6 h-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none opacity-50"></div>
       </div>
     </div>
   );

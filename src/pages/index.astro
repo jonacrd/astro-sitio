@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import SmartSearchBar from '../components/react/SmartSearchBar.tsx'
+import CategoryCards from '../components/react/CategoryCards.tsx'
 import RealGridBlocks from '../components/react/RealGridBlocks.tsx'
 import RealProductFeed from '../components/react/RealProductFeed.tsx'
 import OptimizedFeed from '../components/react/OptimizedFeed.tsx'
@@ -54,6 +55,12 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
       </div>
     </section>
 
+    <!-- Categorías con Cards Visuales -->
+    <section class="px-4 pb-6">
+      <div class="max-w-7xl mx-auto">
+        <CategoryCards client:load />
+      </div>
+    </section>
 
         <!-- Grid Dinámico de 4 Bloques - DATOS REALES -->
         <RealGridBlocks 
@@ -117,7 +124,7 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
     }
     
     // Escuchar eventos de actualización del carrito
-    window.addEventListener('cart-updated', (event) => {
+    window.addEventListener('cart-updated', (event: any) => {
       console.log('🛒 Carrito actualizado:', event.detail);
       
       // Actualizar contador en el header
@@ -128,7 +135,7 @@ import QuickPushButton from '../components/react/QuickPushButton.tsx'
       const cartCountElements = document.querySelectorAll('[data-cart-count], .cart-count, .cart-badge');
       cartCountElements.forEach(element => {
         element.textContent = totalItems.toString();
-        element.style.display = totalItems > 0 ? 'block' : 'none';
+        (element as HTMLElement).style.display = totalItems > 0 ? 'block' : 'none';
       });
       
       console.log(`📊 Carrito actual: ${totalItems} items total`);

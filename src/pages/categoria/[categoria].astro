@@ -1,0 +1,316 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+
+export async function getStaticPaths() {
+  const categories = [
+    'minimarkets',
+    'medicinas', 
+    'postres',
+    'carniceria',
+    'servicios',
+    'mascotas',
+    'ninos'
+  ];
+
+  return categories.map(categoria => ({
+    params: { categoria }
+  }));
+}
+
+const { categoria } = Astro.params;
+
+// Configuración de categorías
+const categoryConfig = {
+  minimarkets: {
+    name: 'Minimarkets',
+    icon: '🏪',
+    color: 'from-blue-500 to-cyan-500',
+    description: 'Todo lo que necesitas para tu hogar en un solo lugar'
+  },
+  medicinas: {
+    name: 'Medicinas',
+    icon: '💊',
+    color: 'from-green-500 to-emerald-500',
+    description: 'Farmacias y productos de salud'
+  },
+  postres: {
+    name: 'Postres',
+    icon: '🍰',
+    color: 'from-pink-500 to-rose-500',
+    description: 'Dulces y postres para endulzar tu día'
+  },
+  carniceria: {
+    name: 'Carnicería',
+    icon: '🥩',
+    color: 'from-red-600 to-red-800',
+    description: 'Carnes frescas y productos cárnicos'
+  },
+  servicios: {
+    name: 'Servicios',
+    icon: '🔧',
+    color: 'from-purple-500 to-indigo-500',
+    description: 'Servicios profesionales para tu hogar y negocio'
+  },
+  mascotas: {
+    name: 'Mascotas',
+    icon: '🐕',
+    color: 'from-yellow-500 to-orange-500',
+    description: 'Todo para el cuidado de tus mascotas'
+  },
+  ninos: {
+    name: 'Niños',
+    icon: '🧸',
+    color: 'from-cyan-500 to-blue-500',
+    description: 'Productos y servicios para los más pequeños'
+  }
+};
+
+const config = categoryConfig[categoria] || {
+  name: 'Categoría',
+  icon: '📦',
+  color: 'from-gray-500 to-gray-600',
+  description: 'Productos y servicios de esta categoría'
+};
+---
+
+<BaseLayout title={`${config.name} - Town`}>
+  <main class="min-h-screen bg-gray-900 pb-20">
+    <!-- Header de la categoría -->
+    <div class={`bg-gradient-to-r ${config.color} px-4 py-8`}>
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <span class="text-4xl">{config.icon}</span>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">{config.name}</h1>
+            <p class="text-white/80">{config.description}</p>
+          </div>
+        </div>
+        
+        <!-- Filtros rápidos -->
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+          <button class="px-4 py-2 bg-white/20 text-white rounded-full text-sm whitespace-nowrap backdrop-blur-sm hover:bg-white/30 transition-colors">
+            Todo
+          </button>
+          <button class="px-4 py-2 bg-white/20 text-white rounded-full text-sm whitespace-nowrap backdrop-blur-sm hover:bg-white/30 transition-colors">
+            Destacados
+          </button>
+          <button class="px-4 py-2 bg-white/20 text-white rounded-full text-sm whitespace-nowrap backdrop-blur-sm hover:bg-white/30 transition-colors">
+            Más Vendidos
+          </button>
+          <button class="px-4 py-2 bg-white/20 text-white rounded-full text-sm whitespace-nowrap backdrop-blur-sm hover:bg-white/30 transition-colors">
+            Precio Bajo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      <!-- Estadísticas rápidas -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-800 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-blue-400" id="total-vendors">0</div>
+          <div class="text-gray-400 text-sm">Vendedores</div>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-green-400" id="active-vendors">0</div>
+          <div class="text-gray-400 text-sm">Activos</div>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 text-center">
+          <div class="text-2xl font-bold text-purple-400" id="total-products">0</div>
+          <div class="text-gray-400 text-sm">Productos</div>
+        </div>
+      </div>
+
+      <!-- Lista de vendedores -->
+      <div class="space-y-4" id="vendors-list">
+        <!-- Los vendedores se cargarán aquí dinámicamente -->
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p class="text-gray-400">Cargando vendedores...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script define:vars={{ categoria, config }}>
+    import { supabase } from '../../lib/supabase-browser';
+
+    // Cargar vendedores y productos de la categoría
+    async function loadCategoryData() {
+      try {
+        // Buscar productos de la categoría
+        const { data: products, error } = await supabase
+          .from('products')
+          .select(`
+            id,
+            title,
+            price_cents,
+            image_url,
+            stock,
+            seller_id,
+            category,
+            created_at,
+            profiles!products_seller_id_fkey (
+              name,
+              phone,
+              is_active
+            )
+          `)
+          .eq('category', categoria)
+          .eq('profiles.is_active', true)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error cargando productos:', error);
+          return;
+        }
+
+        console.log(`📦 Productos de ${categoria}:`, products);
+
+        // Agrupar productos por vendedor
+        const vendorsMap = new Map();
+        
+        products?.forEach(product => {
+          const sellerId = product.seller_id;
+          if (!vendorsMap.has(sellerId)) {
+            vendorsMap.set(sellerId, {
+              id: sellerId,
+              name: product.profiles?.name || 'Vendedor',
+              phone: product.profiles?.phone || '',
+              isActive: product.profiles?.is_active || false,
+              products: []
+            });
+          }
+          vendorsMap.get(sellerId).products.push(product);
+        });
+
+        const vendors = Array.from(vendorsMap.values());
+
+        // Actualizar estadísticas
+        document.getElementById('total-vendors').textContent = vendors.length.toString();
+        document.getElementById('active-vendors').textContent = vendors.filter(v => v.isActive).length.toString();
+        document.getElementById('total-products').textContent = products?.length.toString() || '0';
+
+        // Renderizar vendedores
+        renderVendors(vendors);
+
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+      }
+    }
+
+    function renderVendors(vendors) {
+      const container = document.getElementById('vendors-list');
+      
+      if (!vendors || vendors.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">${config.icon}</div>
+            <h3 class="text-xl font-semibold text-white mb-2">No hay vendedores disponibles</h3>
+            <p class="text-gray-400">Pronto tendremos vendedores en esta categoría</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = vendors.map(vendor => `
+        <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors">
+          <div class="flex items-start gap-4">
+            <!-- Avatar del vendedor -->
+            <div class="w-16 h-16 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="text-2xl">${config.icon}</span>
+            </div>
+            
+            <!-- Información del vendedor -->
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="text-xl font-semibold text-white">${vendor.name}</h3>
+                <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
+                  ${vendor.isActive ? '🟢 Activo' : '🔴 Inactivo'}
+                </span>
+              </div>
+              
+              <p class="text-gray-400 text-sm mb-3">
+                ${vendor.products.length} productos disponibles
+              </p>
+              
+              <!-- Productos destacados -->
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                ${vendor.products.slice(0, 6).map(product => `
+                  <div class="bg-gray-700 rounded-lg p-3 hover:bg-gray-600 transition-colors cursor-pointer" onclick="viewProduct('${product.id}')">
+                    <img 
+                      src="${product.image_url || '/placeholder-product.jpg'}" 
+                      alt="${product.title}"
+                      class="w-full h-20 object-cover rounded-lg mb-2"
+                      onerror="this.src='/placeholder-product.jpg'"
+                    />
+                    <h4 class="text-white font-medium text-sm mb-1 truncate">${product.title}</h4>
+                    <p class="text-blue-400 font-semibold text-sm">$${product.price_cents.toFixed(0)}</p>
+                    ${product.stock > 0 ? 
+                      `<span class="text-green-400 text-xs">Stock: ${product.stock}</span>` : 
+                      `<span class="text-red-400 text-xs">Sin stock</span>`
+                    }
+                  </div>
+                `).join('')}
+              </div>
+              
+              ${vendor.products.length > 6 ? `
+                <button 
+                  class="mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium"
+                  onclick="viewAllProducts('${vendor.id}')"
+                >
+                  Ver todos los productos (${vendor.products.length})
+                </button>
+              ` : ''}
+            </div>
+            
+            <!-- Botón de contacto -->
+            <div class="flex flex-col gap-2">
+              <button 
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                onclick="contactVendor('${vendor.id}', '${vendor.phone}')"
+              >
+                Contactar
+              </button>
+              <button 
+                class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                onclick="viewVendor('${vendor.id}')"
+              >
+                Ver Perfil
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Funciones de interacción
+    window.viewProduct = function(productId) {
+      console.log('Ver producto:', productId);
+      // window.location.href = `/producto/${productId}`;
+    };
+
+    window.viewAllProducts = function(sellerId) {
+      console.log('Ver todos los productos de:', sellerId);
+      window.location.href = `/vendedor/${sellerId}`;
+    };
+
+    window.contactVendor = function(sellerId, phone) {
+      if (phone) {
+        window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank');
+      } else {
+        alert('Número de teléfono no disponible');
+      }
+    };
+
+    window.viewVendor = function(sellerId) {
+      window.location.href = `/vendedor/${sellerId}`;
+    };
+
+    // Cargar datos al montar la página
+    document.addEventListener('DOMContentLoaded', loadCategoryData);
+  </script>
+</BaseLayout>
