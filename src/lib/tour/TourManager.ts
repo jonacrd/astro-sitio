@@ -4,29 +4,36 @@ import type { TourStep, TourCallbacks } from './types';
 const TOUR_STORAGE_KEY = 'town_tour_v1_done';
 
 // Definir pasos del tour
-const tourSteps: TourStep[] = [
-  {
-    id: 'welcome',
-    selector: 'body',
-    title: '¡Bienvenido a Town!',
-    content: 'Soy Towny 🛍️. Te guiaré por tu primera compra. ¡Vamos juntos!',
-    townySlotClass: 'towny-slot--welcome',
-    position: 'center'
-  },
-  {
-    id: 'search',
-    selector: 'input[type="text"], input[placeholder*="necesitas"], input[placeholder*="buscar"], .search-input, input[placeholder*="¿Qué"]',
-    title: 'Busca lo que quieras',
-    content: 'Aquí puedes buscar productos, tiendas o servicios de tu comunidad 🔍',
-    townySlotClass: 'towny-slot--search'
-  },
-  {
-    id: 'categories',
-    selector: '[data-test="category-chips"], .category-chips, .chips, .CategoryCards, [class*="category"]',
-    title: 'Explora por categorías',
-    content: 'Toca una categoría para descubrir opciones cercanas 🍔🛠️🐶',
-    townySlotClass: 'towny-slot--categories'
-  },
+    const tourSteps: TourStep[] = [
+      {
+        id: 'welcome',
+        selector: 'body',
+        title: '¡Bienvenido a Town!',
+        content: 'Soy Towny 🛍️. Te guiaré por tu primera compra. ¡Vamos juntos!',
+        townySlotClass: 'towny-slot--welcome',
+        position: 'center'
+      },
+      {
+        id: 'home',
+        selector: 'body',
+        title: '¡Genial, ya estás en el inicio!',
+        content: 'Aquí encontrarás las mejores ofertas de los vendedores en tu comunidad. Descubre productos frescos, servicios locales y mucho más.',
+        townySlotClass: 'towny-slot--home'
+      },
+      {
+        id: 'search',
+        selector: 'input[type="text"], input[placeholder*="necesitas"], input[placeholder*="buscar"], .search-input, input[placeholder*="¿Qué"]',
+        title: 'Busca lo que necesites',
+        content: 'Usa la barra de búsqueda para encontrar exactamente lo que buscas: desde comida hasta servicios de tu comunidad.',
+        townySlotClass: 'towny-slot--search'
+      },
+      {
+        id: 'categories',
+        selector: '[data-test="category-chips"], .category-chips, .chips, .CategoryCards, [class*="category"]',
+        title: 'Explora por categorías',
+        content: 'Toca una categoría para descubrir opciones cercanas 🍔🛠️🐶',
+        townySlotClass: 'towny-slot--categories'
+      },
   {
     id: 'product-card',
     selector: '[class*="FeedTile"], [class*="product-card"], [class*="ProductCard"], .feed-item:first-child, [class*="card"]:first-of-type',
@@ -43,7 +50,7 @@ const tourSteps: TourStep[] = [
   },
   {
     id: 'cart-icon',
-    selector: '[id="cart-button"], [class*="cart"], [aria-label*="Carrito"], button[class*="cart"], .cart-icon',
+    selector: '#cart-button, [id="cart-button"], button[id="cart-button"], [class*="cart"], [aria-label*="Carrito"], button[class*="cart"], .cart-icon',
     title: 'Abre tu carrito',
     content: 'Cuando tengas productos, revisa tu carrito desde aquí.',
     townySlotClass: 'towny-slot--carticon'
@@ -191,8 +198,8 @@ class TourManager {
         position: absolute !important;
         bottom: 150px !important;
         right: 20px !important;
-        background: rgba(59, 130, 246, 0.9) !important;
-        color: white !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        color: #1f2937 !important;
         padding: 1rem 1.5rem !important;
         border-radius: 1rem 1rem 0.5rem 1rem !important;
         max-width: 250px !important;
@@ -202,16 +209,16 @@ class TourManager {
         pointer-events: none !important;
       ">
         ¡Hola! Soy Towny 🛍️<br>
-        Te guiaré por tu primera compra
+        Te acompañaré en tu primera compra. ¡Vamos juntos!
       </div>
       
       <!-- Modal principal con tema oscuro -->
       <div class="town-tour-welcome-content" style="
-        background: rgba(15, 23, 42, 0.95) !important;
-        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 1rem !important;
         padding: 2rem !important;
-        max-width: 28rem !important;
+        max-width: 24rem !important;
         width: 100% !important;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
         backdrop-filter: blur(16px) !important;
@@ -221,14 +228,14 @@ class TourManager {
           margin-bottom: 1.5rem !important;
         ">
           <h2 style="
-            font-size: 1.875rem !important;
-            font-weight: bold !important;
-            color: #f1f5f9 !important;
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            color: #1f2937 !important;
             margin-bottom: 0.5rem !important;
           ">¡Bienvenido a Town!</h2>
           <p style="
-            font-size: 1.125rem !important;
-            color: #cbd5e1 !important;
+            font-size: 1rem !important;
+            color: #6b7280 !important;
             margin: 0 !important;
           ">¿Te gustaría ver una guía rápida para tu primera compra?</p>
         </div>
@@ -240,7 +247,7 @@ class TourManager {
         ">
           <button class="town-tour-btn town-tour-btn--primary" data-action="start" style="
             padding: 1rem 1.5rem !important;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+            background: linear-gradient(135deg, #ec4899, #be185d) !important;
             color: white !important;
             border: none !important;
             border-radius: 0.75rem !important;
@@ -248,15 +255,15 @@ class TourManager {
             font-size: 1rem !important;
             cursor: pointer !important;
             transition: all 0.2s !important;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3) !important;
           ">
             🚀 ¡Sí, guíame!
           </button>
           <button class="town-tour-btn town-tour-btn--secondary" data-action="skip" style="
             padding: 0.75rem 1.5rem !important;
-            background: rgba(71, 85, 105, 0.8) !important;
-            color: #e2e8f0 !important;
-            border: 1px solid rgba(148, 163, 184, 0.3) !important;
+            background: rgba(107, 114, 128, 0.1) !important;
+            color: #6b7280 !important;
+            border: 1px solid rgba(107, 114, 128, 0.2) !important;
             border-radius: 0.75rem !important;
             font-weight: 500 !important;
             cursor: pointer !important;

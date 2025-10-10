@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Debug Simple - Town">
+  <main class="min-h-screen bg-gray-900 p-6">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold text-white mb-6">Debug Simple</h1>
+      
+      <div class="bg-gray-800 rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Test Endpoint Simple</h2>
+        <button 
+          id="test-simple-btn"
+          class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Probar Endpoint Simple
+        </button>
+        <div id="simple-result" class="mt-4"></div>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6 mb-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Test Supabase Directo</h2>
+        <button 
+          id="test-supabase-btn"
+          class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Probar Supabase Directo
+        </button>
+        <div id="supabase-result" class="mt-4"></div>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Test Categoría</h2>
+        <button 
+          id="test-category-btn"
+          class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          Probar Categoría Postres
+        </button>
+        <div id="category-result" class="mt-4"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Test endpoint simple
+    document.getElementById('test-simple-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('test-simple-btn');
+      const result = document.getElementById('simple-result');
+      
+      btn.disabled = true;
+      btn.textContent = 'Probando...';
+      
+      try {
+        const response = await fetch('/api/debug-simple');
+        const data = await response.json();
+        
+        if (data.success) {
+          result.innerHTML = `
+            <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
+              <div class="text-green-400 font-medium">✅ Endpoint Simple OK</div>
+              <div class="text-gray-300 text-sm mt-2">
+                <strong>Variables de entorno:</strong><br>
+                • SUPABASE_URL: ${data.env.hasSupabaseUrl ? '✅' : '❌'} (${data.env.supabaseUrlLength} chars)<br>
+                • SUPABASE_ANON: ${data.env.hasSupabaseAnon ? '✅' : '❌'} (${data.env.supabaseAnonLength} chars)<br>
+                • SUPABASE_SERVICE: ${data.env.hasSupabaseService ? '✅' : '❌'} (${data.env.supabaseServiceLength} chars)
+              </div>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `
+            <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+              <div class="text-red-400 font-medium">❌ Error</div>
+              <div class="text-gray-300 text-sm mt-2">${data.error}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        result.innerHTML = `
+          <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+            <div class="text-red-400 font-medium">❌ Error de conexión</div>
+            <div class="text-gray-300 text-sm mt-2">${error.message}</div>
+          </div>
+        `;
+      }
+      
+      btn.disabled = false;
+      btn.textContent = 'Probar Endpoint Simple';
+    });
+
+    // Test Supabase directo
+    document.getElementById('test-supabase-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('test-supabase-btn');
+      const result = document.getElementById('supabase-result');
+      
+      btn.disabled = true;
+      btn.textContent = 'Probando Supabase...';
+      
+      try {
+        const response = await fetch('/api/test-supabase-server');
+        const data = await response.json();
+        
+        if (data.success) {
+          result.innerHTML = `
+            <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
+              <div class="text-green-400 font-medium">✅ Supabase Server OK</div>
+              <div class="text-gray-300 text-sm mt-2">
+                Productos encontrados: ${data.count}<br>
+                ${data.products?.map(p => `• ${p.title} (${p.category})`).join('<br>') || 'Ninguno'}
+              </div>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `
+            <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+              <div class="text-red-400 font-medium">❌ Error Supabase</div>
+              <div class="text-gray-300 text-sm mt-2">${data.error}<br>${data.details || ''}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        result.innerHTML = `
+          <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+            <div class="text-red-400 font-medium">❌ Error de conexión</div>
+            <div class="text-gray-300 text-sm mt-2">${error.message}</div>
+          </div>
+        `;
+      }
+      
+      btn.disabled = false;
+      btn.textContent = 'Probar Supabase Directo';
+    });
+
+    // Test categoría
+    document.getElementById('test-category-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('test-category-btn');
+      const result = document.getElementById('category-result');
+      
+      btn.disabled = true;
+      btn.textContent = 'Probando categoría...';
+      
+      try {
+        const response = await fetch('/api/categoria-simple?categoria=postres');
+        const data = await response.json();
+        
+        if (data.success) {
+          result.innerHTML = `
+            <div class="bg-green-500/20 border border-green-500/30 rounded-lg p-4">
+              <div class="text-green-400 font-medium">✅ Categoría Postres OK</div>
+              <div class="text-gray-300 text-sm mt-2">
+                Vendedores: ${data.stats.totalVendors}<br>
+                Activos: ${data.stats.activeVendors}<br>
+                Productos: ${data.stats.totalProducts}
+              </div>
+            </div>
+          `;
+        } else {
+          result.innerHTML = `
+            <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+              <div class="text-red-400 font-medium">❌ Error en categoría</div>
+              <div class="text-gray-300 text-sm mt-2">${data.error}</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        result.innerHTML = `
+          <div class="bg-red-500/20 border border-red-500/30 rounded-lg p-4">
+            <div class="text-red-400 font-medium">❌ Error de conexión</div>
+            <div class="text-gray-300 text-sm mt-2">${error.message}</div>
+          </div>
+        `;
+      }
+      
+      btn.disabled = false;
+      btn.textContent = 'Probar Categoría Postres';
+    });
+  </script>
+</BaseLayout>

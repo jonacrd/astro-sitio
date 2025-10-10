@@ -141,7 +141,7 @@ const config = categoryConfig[categoria] || {
       try {
         console.log(`🔍 Cargando datos para categoría: ${categoria}`);
         
-        const response = await fetch(`/api/categoria/${categoria}`);
+        const response = await fetch(`/api/categoria-simple?categoria=${categoria}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -156,6 +156,12 @@ const config = categoryConfig[categoria] || {
         document.getElementById('total-vendors').textContent = data.stats.totalVendors.toString();
         document.getElementById('active-vendors').textContent = data.stats.activeVendors.toString();
         document.getElementById('total-products').textContent = data.stats.totalProducts.toString();
+
+        // Mostrar mensaje de la API si no hay productos
+        if (!data.stats.hasProducts) {
+          showNoProductsMessage(data.message);
+          return;
+        }
 
         // Renderizar vendedores
         renderVendors(data.vendors);
@@ -183,6 +189,32 @@ const config = categoryConfig[categoria] || {
       `;
     }
 
+    function showNoProductsMessage(message) {
+      const container = document.getElementById('vendors-list');
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <div class="text-6xl mb-4">${config.icon}</div>
+          <h3 class="text-xl font-semibold text-white mb-2">No hay productos disponibles</h3>
+          <p class="text-gray-400 mb-4">${message}</p>
+          <p class="text-gray-500 text-sm mb-6">Solo mostramos productos de vendedores activos con stock disponible.</p>
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button 
+              onclick="window.location.href='/'" 
+              class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Volver al inicio
+            </button>
+            <button 
+              onclick="loadCategoryData()" 
+              class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Actualizar
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
     function renderVendors(vendors) {
       const container = document.getElementById('vendors-list');
       
@@ -190,8 +222,15 @@ const config = categoryConfig[categoria] || {
         container.innerHTML = `
           <div class="text-center py-12">
             <div class="text-6xl mb-4">${config.icon}</div>
-            <h3 class="text-xl font-semibold text-white mb-2">No hay vendedores disponibles</h3>
-            <p class="text-gray-400">Pronto tendremos vendedores en esta categoría</p>
+            <h3 class="text-xl font-semibold text-white mb-2">No hay productos disponibles</h3>
+            <p class="text-gray-400 mb-4">No hay productos disponibles en la categoría "${config.name}" en este momento.</p>
+            <p class="text-gray-500 text-sm">Solo mostramos productos de vendedores activos con stock disponible.</p>
+            <button 
+              onclick="window.location.href='/'" 
+              class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Volver al inicio
+            </button>
           </div>
         `;
         return;
