@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Test Tour">
+  <div class="min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] flex items-center justify-center p-4">
+    <div class="max-w-md w-full space-y-4">
+      <h1 class="text-white text-2xl font-bold text-center mb-8">🧪 Test del Tour</h1>
+      
+      <button
+        id="test-modal"
+        class="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg"
+      >
+        Probar Modal de Bienvenida
+      </button>
+      
+      <button
+        id="test-tour-direct"
+        class="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg"
+      >
+        Iniciar Tour Directamente
+      </button>
+      
+      <button
+        id="clear-storage"
+        class="w-full px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium text-lg"
+      >
+        Limpiar LocalStorage y Recargar
+      </button>
+
+      <div id="status" class="bg-white/10 rounded-lg p-4 text-white text-sm font-mono"></div>
+    </div>
+  </div>
+
+  <script>
+    const status = document.getElementById('status');
+
+    function log(msg: string) {
+      if (status) {
+        status.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${msg}</div>`;
+      }
+      console.log(msg);
+    }
+
+    // Test modal simple
+    document.getElementById('test-modal')?.addEventListener('click', () => {
+      log('Creando modal de prueba...');
+      
+      const modal = document.createElement('div');
+      modal.className = 'town-tour-welcome-modal';
+      modal.innerHTML = `
+        <div class="town-tour-welcome-content">
+          <div class="town-tour-welcome-header">
+            <div class="towny-slot towny-slot--welcome"></div>
+            <h2>¡Bienvenido a Town! 🛍️</h2>
+          </div>
+          <p>¿Te gustaría ver una guía rápida para tu primera compra?</p>
+          <div class="town-tour-welcome-actions">
+            <button class="town-tour-btn town-tour-btn--primary" onclick="this.closest('.town-tour-welcome-modal').remove()">
+              ¡Sí, guíame!
+            </button>
+            <button class="town-tour-btn town-tour-btn--secondary" onclick="this.closest('.town-tour-welcome-modal').remove()">
+              No, gracias
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      log('✅ Modal creado');
+    });
+
+    // Test tour directo
+    document.getElementById('test-tour-direct')?.addEventListener('click', async () => {
+      log('Cargando TourManager...');
+      
+      try {
+        const { startTour } = await import('../lib/tour/TourManager');
+        log('✅ TourManager cargado');
+        
+        startTour();
+        log('✅ Tour iniciado');
+      } catch (error) {
+        log('❌ Error: ' + error);
+        console.error(error);
+      }
+    });
+
+    // Clear storage
+    document.getElementById('clear-storage')?.addEventListener('click', () => {
+      localStorage.clear();
+      log('✅ LocalStorage limpiado. Recargando...');
+      setTimeout(() => location.reload(), 1000);
+    });
+
+    // Check initial state
+    log('Estado inicial:');
+    log('- LocalStorage keys: ' + Object.keys(localStorage).join(', '));
+    log('- Tour completado: ' + (localStorage.getItem('town_tour_v1_done') || 'No'));
+    log('- URL: ' + window.location.pathname);
+  </script>
+</BaseLayout>

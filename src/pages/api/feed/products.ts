@@ -67,7 +67,7 @@ export const GET: APIRoute = async ({ url }) => {
 
     // Filtrar por categoría si se especifica
     if (category) {
-      query = query.eq('product.category', category);
+      query = query.eq('products.category', category);
     }
 
     const { data: sellerProducts, error: productsError } = await query

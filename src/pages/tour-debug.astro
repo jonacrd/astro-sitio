@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Debug del Tour">
+  <div class="min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] py-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-white text-3xl font-bold text-center mb-8">🔧 Diagnóstico del Tour</h1>
+      
+      <div class="bg-white/10 rounded-xl p-6 mb-6">
+        <h2 class="text-white text-xl font-semibold mb-4">Estado Actual</h2>
+        <div id="tour-status" class="space-y-2 text-white/80">
+          <p>Cargando estado...</p>
+        </div>
+      </div>
+
+      <div class="bg-white/10 rounded-xl p-6 mb-6">
+        <h2 class="text-white text-xl font-semibold mb-4">Acciones</h2>
+        <div class="space-y-3">
+          <button
+            id="reset-tour"
+            class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            🔄 Resetear Tour (Borrar localStorage)
+          </button>
+          
+          <button
+            id="start-tour-now"
+            class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+          >
+            ▶️ Iniciar Tour Ahora
+          </button>
+          
+          <button
+            id="test-styles"
+            class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+          >
+            🎨 Probar Estilos del Tour
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white/10 rounded-xl p-6">
+        <h2 class="text-white text-xl font-semibold mb-4">Logs</h2>
+        <div id="logs" class="space-y-1 text-sm text-white/70 font-mono max-h-96 overflow-y-auto">
+          <p>Esperando acciones...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function log(message: string, type: 'info' | 'success' | 'error' = 'info') {
+      const logsDiv = document.getElementById('logs');
+      if (!logsDiv) return;
+      
+      const colors = {
+        info: 'text-blue-400',
+        success: 'text-green-400',
+        error: 'text-red-400'
+      };
+      
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = document.createElement('p');
+      logEntry.className = colors[type];
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      
+      logsDiv.appendChild(logEntry);
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    function checkTourStatus() {
+      const statusDiv = document.getElementById('tour-status');
+      if (!statusDiv) return;
+
+      const tourCompleted = localStorage.getItem('town_tour_v1_done');
+      const currentPath = window.location.pathname;
+      
+      statusDiv.innerHTML = `
+        <p><strong>Ruta actual:</strong> ${currentPath}</p>
+        <p><strong>Tour completado:</strong> ${tourCompleted || 'No'}</p>
+        <p><strong>LocalStorage keys:</strong> ${Object.keys(localStorage).join(', ') || 'Ninguna'}</p>
+        <p><strong>Estilos cargados:</strong> ${document.querySelector('link[href*="tour.css"]') ? 'Sí' : 'Via global.css'}</p>
+        <p><strong>TourManager disponible:</strong> Verificando...</p>
+      `;
+
+      log('Estado del tour verificado', 'info');
+    }
+
+    // Reset tour
+    document.getElementById('reset-tour')?.addEventListener('click', () => {
+      localStorage.removeItem('town_tour_v1_done');
+      log('✅ Tour reseteado. localStorage limpio.', 'success');
+      checkTourStatus();
+      
+      setTimeout(() => {
+        log('🔄 Redirigiendo a la página principal...', 'info');
+        window.location.href = '/';
+      }, 1500);
+    });
+
+    // Start tour
+    document.getElementById('start-tour-now')?.addEventListener('click', async () => {
+      try {
+        log('⏳ Cargando TourManager...', 'info');
+        
+        const { startTour } = await import('../lib/tour/TourManager');
+        
+        log('✅ TourManager cargado', 'success');
+        log('▶️ Iniciando tour...', 'info');
+        
+        startTour();
+        
+        log('✅ Tour iniciado correctamente', 'success');
+      } catch (error) {
+        log(`❌ Error: ${error}`, 'error');
+        console.error('Error completo:', error);
+      }
+    });
+
+    // Test styles
+    document.getElementById('test-styles')?.addEventListener('click', () => {
+      log('🎨 Creando modal de prueba...', 'info');
+      
+      const testModal = document.createElement('div');
+      testModal.className = 'town-tour-welcome-modal';
+      testModal.innerHTML = `
+        <div class="town-tour-welcome-content">
+          <div class="town-tour-welcome-header">
+            <div class="towny-slot towny-slot--welcome"></div>
+            <h2>Modal de Prueba</h2>
+          </div>
+          <p>Si puedes ver esto con Towny saludando, los estilos funcionan correctamente.</p>
+          <div class="town-tour-welcome-actions">
+            <button class="town-tour-btn town-tour-btn--primary" onclick="this.closest('.town-tour-welcome-modal').remove()">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(testModal);
+      log('✅ Modal de prueba creado', 'success');
+    });
+
+    // Check status on load
+    checkTourStatus();
+  </script>
+</BaseLayout>

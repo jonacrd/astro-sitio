@@ -93,11 +93,11 @@ export default function CategoryCards() {
       '/images/products/comida/salchipapa-superEspecial.jpeg'
     ],
     minimarkets: [
-      '/images/products/minimarket/arroz-1kg.jpg',
-      '/images/products/minimarket/aceite-girasol-900ml.jpg',
-      '/images/products/minimarket/azucar-1kg.jpg',
-      '/images/products/minimarket/leche-entera-1lt.jpg',
-      '/images/products/minimarket/pan-integral.jpg'
+      '/images/products/minimarket/Arroz-GRADO2-elmarquez.jpg',
+      '/images/products/minimarket/ACEITE_VEGETAL_1LITRO_MIRAFLORES.png',
+      '/images/products/minimarket/azucar-amelia-1kg.png',
+      '/images/products/minimarket/leche-liquida-soprole-1lt.png',
+      '/images/products/minimarket/pan-lactal-ideal.webp'
     ],
     medicinas: [
       '/images/products/Belleza y Cuidado Personal/barberia.jpg',
@@ -114,11 +114,11 @@ export default function CategoryCards() {
       '/images/products/postres/arroz-con-leche.jpeg'
     ],
     carniceria: [
-      '/images/products/minimarket/pollo-entero-1kg.jpg',
-      '/images/products/minimarket/carne-molida-500g.jpg',
-      '/images/products/minimarket/chuleta-cerdo-1kg.jpg',
-      '/images/products/minimarket/salchichas-paquete.jpg',
-      '/images/products/minimarket/jamon-cocido-200g.jpg'
+      '/images/products/minimarket/pechuga-pollo.jpeg',
+      '/images/products/minimarket/carne-molida.jpg',
+      '/images/products/minimarket/chuleta-ahumada.png',
+      '/images/products/minimarket/salchicas-la-española.jpg',
+      '/images/products/minimarket/jamon-laminado.jpg'
     ],
     servicios: [
       '/images/products/servicios/FLETES.jpeg',
@@ -128,18 +128,18 @@ export default function CategoryCards() {
       '/images/products/Belleza y Cuidado Personal/barberia.jpg'
     ],
     mascotas: [
-      '/images/products/minimarket/comida-perro-1kg.jpg',
-      '/images/products/minimarket/arena-gato-5kg.jpg',
-      '/images/products/minimarket/juguete-perro.jpg',
-      '/images/products/minimarket/snacks-perro.jpg',
-      '/images/products/minimarket/collar-perro.jpg'
+      '/images/products/minimarket/carton-huevos.png',
+      '/images/products/minimarket/papas.jpg',
+      '/images/products/minimarket/chocolate-savoy.jpg',
+      '/images/products/minimarket/cocaCola-1_5lt.jpg',
+      '/images/products/minimarket/galletas-maria.jpg'
     ],
     ninos: [
-      '/images/products/minimarket/leche-formula-400g.jpg',
-      '/images/products/minimarket/pañales-talla-3.jpg',
-      '/images/products/minimarket/juguete-bebe.jpg',
-      '/images/products/minimarket/biberon-250ml.jpg',
-      '/images/products/minimarket/chupete-bebe.jpg'
+      '/images/products/minimarket/pañales-babysec.webp',
+      '/images/products/minimarket/leche-en-polvo-soprole-400g.png',
+      '/images/products/minimarket/toallas-humedas-babysec-70.jpg',
+      '/images/products/minimarket/yogurt-liquido-soprole.webp',
+      '/images/products/minimarket/chocolate-trencito-nestle.png'
     ]
   };
 

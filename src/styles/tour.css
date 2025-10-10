@@ -130,4 +130,63 @@
   .towny-slot--profile {
     background-image: url('/towny/towny_despedida.png');
   }
+
+  /* Modal de Bienvenida del Tour */
+  .town-tour-welcome-modal {
+    @apply fixed inset-0 z-[10000] flex items-center justify-center p-4;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    animation: fadeIn 300ms ease;
+  }
+
+  .town-tour-welcome-content {
+    @apply bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 max-w-md w-full;
+    @apply shadow-2xl border border-white/20 dark:border-slate-700/40;
+    animation: slideUp 400ms ease;
+  }
+
+  .town-tour-welcome-header {
+    @apply flex flex-col items-center mb-4;
+  }
+
+  .town-tour-welcome-header h2 {
+    @apply text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 text-center;
+  }
+
+  .town-tour-welcome-header .towny-slot {
+    @apply mb-4 w-32 h-32 md:w-40 md:h-40;
+  }
+
+  .town-tour-welcome-content p {
+    @apply text-base md:text-lg text-gray-700 dark:text-gray-300 text-center mb-6;
+  }
+
+  .town-tour-welcome-actions {
+    @apply flex flex-col sm:flex-row gap-3 justify-center;
+  }
+
+  .town-tour-btn--primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white;
+  }
+
+  .town-tour-btn--secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600;
+  }
+
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
