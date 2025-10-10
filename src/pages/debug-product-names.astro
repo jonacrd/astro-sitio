@@ -1,0 +1,173 @@
+---
+// Página de debug para verificar nombres de productos en pedidos
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Nombres de Productos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center">🔍 Debug: Nombres de Productos en Pedidos</h1>
+        
+        <div class="mb-6">
+            <button id="refreshBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                🔄 Actualizar Datos
+            </button>
+        </div>
+
+        <div id="loading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-4 text-gray-400">Cargando datos de debug...</p>
+        </div>
+
+        <div id="content" class="hidden">
+            <!-- Resultados del JOIN -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-green-400">🔗 Resultado del JOIN</h2>
+                <div id="joinResult"></div>
+            </div>
+
+            <!-- Resultado del método alternativo -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-yellow-400">🔄 Método Alternativo</h2>
+                <div id="alternativeResult"></div>
+            </div>
+
+            <!-- Estructura de tablas -->
+            <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-purple-400">📊 Estructura de Tablas</h2>
+                <div id="tablesStructure"></div>
+            </div>
+
+            <!-- Pedidos recientes -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-blue-400">📋 Pedidos Recientes</h2>
+                <div id="orders"></div>
+            </div>
+        </div>
+
+        <div id="error" class="hidden bg-red-900 border border-red-600 rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-red-400">❌ Error</h2>
+            <div id="errorContent"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDebugData() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            const error = document.getElementById('error');
+            
+            if (!loading || !content || !error) {
+                console.error('Elementos del DOM no encontrados');
+                return;
+            }
+            
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+            error.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/debug/check-product-names');
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+
+                // Mostrar resultado del JOIN
+                const joinResult = document.getElementById('joinResult');
+                if (!joinResult) return;
+                joinResult.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>Estado:</strong> ${result.data.joinResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                        <p><strong>Error:</strong> ${result.data.joinResult.error || 'Ninguno'}</p>
+                        <p><strong>Items encontrados:</strong> ${result.data.joinResult.itemsCount}</p>
+                        ${result.data.joinResult.sampleItem ? `
+                            <div class="bg-gray-700 p-3 rounded mt-2">
+                                <p><strong>Item de muestra:</strong></p>
+                                <p>Order ID: ${result.data.joinResult.sampleItem.order_id}</p>
+                                <p>Product ID: ${result.data.joinResult.sampleItem.product_id}</p>
+                                <p>Title (del JOIN): ${result.data.joinResult.sampleItem.title_from_join || 'NULL'}</p>
+                                <p>Price (del JOIN): ${result.data.joinResult.sampleItem.price_from_join || 'NULL'}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Mostrar resultado alternativo
+                const alternativeResult = document.getElementById('alternativeResult');
+                if (!alternativeResult) return;
+                alternativeResult.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>Estado:</strong> ${result.data.alternativeResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                        <p><strong>Error:</strong> ${result.data.alternativeResult.error || 'Ninguno'}</p>
+                        <p><strong>Items encontrados:</strong> ${result.data.alternativeResult.itemsCount}</p>
+                        <p><strong>Product IDs únicos:</strong> ${result.data.alternativeResult.productIds.length}</p>
+                        ${result.data.alternativeResult.productIds.length > 0 ? `
+                            <div class="bg-gray-700 p-3 rounded mt-2">
+                                <p><strong>Product IDs:</strong></p>
+                                <p class="text-sm">${result.data.alternativeResult.productIds.join(', ')}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Mostrar estructura de tablas
+                const tablesStructure = document.getElementById('tablesStructure');
+                if (!tablesStructure) return;
+                tablesStructure.innerHTML = `
+                    <div class="space-y-2">
+                        <p><strong>Tabla order_items:</strong> ${result.data.tablesStructure.order_items_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                        <p><strong>Tabla products:</strong> ${result.data.tablesStructure.products_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                        ${result.data.tablesStructure.order_items_error ? `<p><strong>Error order_items:</strong> ${result.data.tablesStructure.order_items_error}</p>` : ''}
+                        ${result.data.tablesStructure.products_error ? `<p><strong>Error products:</strong> ${result.data.tablesStructure.products_error}</p>` : ''}
+                    </div>
+                `;
+
+                // Mostrar pedidos
+                const orders = document.getElementById('orders');
+                if (!orders) return;
+                orders.innerHTML = `
+                    <div class="space-y-3">
+                        ${result.data.orders.map(order => `
+                            <div class="bg-gray-700 p-3 rounded">
+                                <p><strong>ID:</strong> ${order.id}</p>
+                                <p><strong>Total:</strong> $${order.total_cents}</p>
+                                <p><strong>Estado:</strong> ${order.status}</p>
+                                <p><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
+
+            } catch (err) {
+                console.error('Error cargando datos:', err);
+                loading.classList.add('hidden');
+                error.classList.remove('hidden');
+                const errorContent = document.getElementById('errorContent');
+                if (errorContent) {
+                    errorContent.innerHTML = `<p class="text-red-300">${err.message}</p>`;
+                }
+            }
+        }
+
+        // Cargar datos al inicio
+        loadDebugData();
+
+        // Botón de actualizar
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', loadDebugData);
+        }
+    </script>
+</body>
+</html>

@@ -110,7 +110,7 @@ import React from 'react'
         throw new Error('No hay sesión activa');
       }
       
-      const response = await fetch('/api/seller/orders', {
+      const response = await fetch('/api/seller/orders-emergency', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }

@@ -97,6 +97,12 @@ export const GET: APIRoute = async ({ request }) => {
 
       if (itemsError) {
         console.log('⚠️ Error con JOIN, intentando método alternativo:', itemsError.message);
+        console.log('🔍 Detalles del error JOIN:', {
+          message: itemsError.message,
+          details: itemsError.details,
+          hint: itemsError.hint,
+          code: itemsError.code
+        });
         
         // Método alternativo: obtener items y productos por separado
         const { data: itemsOnly, error: itemsOnlyError } = await supabase
@@ -114,6 +120,7 @@ export const GET: APIRoute = async ({ request }) => {
           // Obtener información de productos
           let productsMap = {};
           if (productIds.length > 0) {
+            console.log('🔍 Obteniendo productos para IDs:', productIds);
             const { data: products, error: productsError } = await supabase
               .from('products')
               .select('id, title, price_cents')
@@ -121,12 +128,27 @@ export const GET: APIRoute = async ({ request }) => {
 
             if (productsError) {
               console.log('⚠️ Error obteniendo productos:', productsError.message);
+              console.log('🔍 Detalles del error productos:', {
+                message: productsError.message,
+                details: productsError.details,
+                hint: productsError.hint
+              });
             } else {
+              console.log('✅ Productos obtenidos:', products?.length || 0);
+              if (products && products.length > 0) {
+                console.log('🔍 Primer producto:', {
+                  id: products[0].id,
+                  title: products[0].title,
+                  price_cents: products[0].price_cents
+                });
+              }
               productsMap = products?.reduce((acc, product) => {
                 acc[product.id] = product;
                 return acc;
               }, {} as Record<string, any>) || {};
             }
+          } else {
+            console.log('⚠️ No hay product_ids para buscar productos');
           }
 
           // Combinar items con información de productos
@@ -136,16 +158,37 @@ export const GET: APIRoute = async ({ request }) => {
             }
             
             const product = productsMap[item.product_id];
-            acc[item.order_id].push({
+            const finalItem = {
               ...item,
               title: product?.title || item.title || 'Producto',
               price_cents: product?.price_cents || item.price_cents || 0
+            };
+            
+            console.log('🔍 Combinando item:', {
+              order_id: item.order_id,
+              product_id: item.product_id,
+              product_found: !!product,
+              final_title: finalItem.title,
+              final_price: finalItem.price_cents
             });
+            
+            acc[item.order_id].push(finalItem);
             return acc;
           }, {} as Record<string, any[]>) || {};
         }
       } else {
         // JOIN funcionó correctamente
+        console.log('✅ JOIN funcionó correctamente, procesando items...');
+        console.log('🔍 Items con JOIN:', items?.length || 0);
+        if (items && items.length > 0) {
+          console.log('🔍 Primer item con JOIN:', {
+            order_id: items[0].order_id,
+            product_id: items[0].product_id,
+            title_from_join: items[0].product?.title,
+            price_from_join: items[0].product?.price_cents
+          });
+        }
+        
         orderItems = items?.reduce((acc, item) => {
           if (!acc[item.order_id]) {
             acc[item.order_id] = [];
