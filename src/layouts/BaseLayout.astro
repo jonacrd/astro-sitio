@@ -299,15 +299,29 @@ const {
   <script>
     // Inicializar tour de onboarding
     if (typeof window !== 'undefined') {
+      console.log('🎓 Tour: Esperando carga de la página...');
+      
       window.addEventListener('load', function() {
+        console.log('✅ Tour: Página cargada, iniciando en 500ms...');
+        
         setTimeout(async function() {
           try {
+            console.log('📦 Tour: Importando TourManager...');
             const { initTour } = await import('../lib/tour/TourManager');
-            initTour();
+            
+            console.log('✅ Tour: TourManager importado correctamente');
+            console.log('🚀 Tour: Llamando a initTour()...');
+            
+            const manager = initTour();
+            
+            console.log('✅ Tour: TourManager inicializado', manager);
+            console.log('🎯 Tour: Ruta actual:', window.location.pathname);
+            console.log('📝 Tour: Tour completado?', localStorage.getItem('town_tour_v1_done'));
           } catch (error) {
-            console.log('⚠️ Error inicializando tour:', error);
+            console.error('❌ Tour: Error inicializando tour:', error);
+            console.error('Stack completo:', error);
           }
-        }, 500); // Esperar 500ms después de la carga
+        }, 500);
       });
     }
   </script>

@@ -94,13 +94,22 @@ class TourManager {
   }
 
   private init(): void {
-    if (this.isInitialized) return;
+    console.log('🎓 TourManager.init() llamado');
+    
+    if (this.isInitialized) {
+      console.log('⚠️ TourManager ya está inicializado, saliendo...');
+      return;
+    }
+    
     this.isInitialized = true;
+    console.log('✅ TourManager marcado como inicializado');
 
     // Cargar estilos del tour
     this.loadTourStyles();
+    console.log('✅ Estilos del tour cargados');
 
     // Verificar si debe mostrar el tour al cargar la página
+    console.log('🔍 Verificando si debe mostrar modal de bienvenida...');
     this.checkAndShowWelcomeModal();
   }
 
@@ -110,25 +119,42 @@ class TourManager {
   }
 
   private checkAndShowWelcomeModal(): void {
+    const currentPath = window.location.pathname;
+    console.log('🔍 checkAndShowWelcomeModal - Ruta actual:', currentPath);
+    
     // Solo mostrar en la página principal
-    if (window.location.pathname !== '/' && !window.location.pathname.includes('index')) {
+    if (currentPath !== '/' && !currentPath.includes('index')) {
+      console.log('❌ No es la página principal, no se muestra el tour');
       return;
     }
+    
+    console.log('✅ Es la página principal');
 
     // Verificar si el tour ya se completó
-    if (this.isTourCompleted()) {
+    const completed = this.isTourCompleted();
+    console.log('🔍 Tour completado?', completed);
+    
+    if (completed) {
+      console.log('❌ Tour ya completado, no se muestra');
       return;
     }
+    
+    console.log('✅ Tour NO completado, mostrando modal en 1 segundo...');
 
     // Mostrar modal de bienvenida después de un pequeño delay
     setTimeout(() => {
+      console.log('🎭 Llamando a showWelcomeModal()...');
       this.showWelcomeModal();
     }, 1000);
   }
 
   private showWelcomeModal(): void {
+    console.log('🎭 showWelcomeModal() llamado');
+    
     const modal = document.createElement('div');
     modal.className = 'town-tour-welcome-modal';
+    console.log('📦 Modal creado con clase:', modal.className);
+    
     modal.innerHTML = `
       <div class="town-tour-welcome-content">
         <div class="town-tour-welcome-header">
@@ -146,21 +172,30 @@ class TourManager {
         </div>
       </div>
     `;
+    
+    console.log('📝 HTML del modal asignado');
 
     modal.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const action = target.getAttribute('data-action');
       
+      console.log('🖱️ Click en modal, acción:', action);
+      
       if (action === 'start') {
+        console.log('▶️ Iniciando tour...');
         this.startTour();
       } else if (action === 'skip') {
+        console.log('⏭️ Omitiendo tour...');
         this.markTourAsCompleted();
       }
       
       modal.remove();
+      console.log('✅ Modal removido');
     });
 
     document.body.appendChild(modal);
+    console.log('✅ Modal agregado al DOM');
+    console.log('🔍 Modal en DOM?', document.querySelector('.town-tour-welcome-modal') !== null);
   }
 
   private createTourCallbacks(): TourCallbacks {
