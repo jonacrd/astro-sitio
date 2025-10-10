@@ -83,6 +83,73 @@ export default function CategoryCards() {
     }
   ];
 
+  // CATEGORÍAS REALES QUE EXISTEN EN LA BASE DE DATOS
+  const realCategoryConfig = [
+    {
+      id: 'comida',
+      name: 'Comida',
+      icon: '🍽️',
+      color: 'from-orange-500 to-red-500',
+      route: '/categoria/comida'
+    },
+    {
+      id: 'supermercado',
+      name: 'Supermercado',
+      icon: '🏪',
+      color: 'from-blue-500 to-cyan-500',
+      route: '/categoria/supermercado'
+    },
+    {
+      id: 'abastos',
+      name: 'Abastos',
+      icon: '🛒',
+      color: 'from-green-500 to-emerald-500',
+      route: '/categoria/abastos'
+    },
+    {
+      id: 'postres',
+      name: 'Postres',
+      icon: '🍰',
+      color: 'from-pink-500 to-rose-500',
+      route: '/categoria/postres'
+    },
+    {
+      id: 'belleza',
+      name: 'Belleza',
+      icon: '💄',
+      color: 'from-purple-500 to-pink-500',
+      route: '/categoria/belleza'
+    },
+    {
+      id: 'bebidas_alcoholicas',
+      name: 'Bebidas Alcohólicas',
+      icon: '🍺',
+      color: 'from-amber-500 to-orange-500',
+      route: '/categoria/bebidas_alcoholicas'
+    },
+    {
+      id: 'panaderia',
+      name: 'Panadería',
+      icon: '🥖',
+      color: 'from-yellow-500 to-orange-500',
+      route: '/categoria/panaderia'
+    },
+    {
+      id: 'bebidas',
+      name: 'Bebidas',
+      icon: '🥤',
+      color: 'from-cyan-500 to-blue-500',
+      route: '/categoria/bebidas'
+    },
+    {
+      id: 'servicios',
+      name: 'Servicios',
+      icon: '🔧',
+      color: 'from-indigo-500 to-purple-500',
+      route: '/categoria/servicios'
+    }
+  ];
+
   // Mapeo de categorías a imágenes de ejemplo
   const categoryImages = {
     restaurantes: [
@@ -140,6 +207,63 @@ export default function CategoryCards() {
       '/images/products/minimarket/toallas-humedas-babysec-70.jpg',
       '/images/products/minimarket/yogurt-liquido-soprole.webp',
       '/images/products/minimarket/chocolate-trencito-nestle.png'
+    ],
+    // CATEGORÍAS REALES
+    supermercado: [
+      '/images/products/minimarket/leche-liquida-soprole-1lt.png',
+      '/images/products/minimarket/Arroz-GRADO2-elmarquez.jpg',
+      '/images/products/minimarket/desodorante-barra-dove-tonoUniformeOrquidea.webp',
+      '/images/products/minimarket/frescolita-lata.webp',
+      '/images/products/minimarket/zucaritas.webp',
+      '/images/products/minimarket/chocolate-savoy.jpg'
+    ],
+    comida: [
+      '/images/products/comida/pizza-de-peperoni.webp',
+      '/images/products/comida/emapanadas-24h.jpeg',
+      '/images/products/comida/ceviche-de-camarones.webp',
+      '/images/products/comida/hamburguesa-con-papas.jpg',
+      '/images/products/comida/sushi-mixto.webp',
+      '/images/products/comida/pasta-carbonara.jpg'
+    ],
+    abastos: [
+      '/images/products/minimarket/leche-liquida-soprole-1lt.png',
+      '/images/products/minimarket/Arroz-GRADO2-elmarquez.jpg',
+      '/images/products/minimarket/galletas-maria.jpg',
+      '/images/products/minimarket/cocaCola-1_5lt.jpg',
+      '/images/products/minimarket/chocolate-savoy.jpg',
+      '/images/products/minimarket/desodorante-barra-dove-tonoUniformeOrquidea.webp'
+    ],
+    belleza: [
+      '/images/products/minimarket/desodorante-barra-dove-tonoUniformeOrquidea.webp',
+      '/images/products/Belleza y Cuidado Personal/barberia.jpg',
+      '/images/products/Belleza y Cuidado Personal/peluqueria.jpg',
+      '/images/products/Belleza y Cuidado Personal/manicure.webp',
+      '/images/products/Belleza y Cuidado Personal/pedicure-2.jpg',
+      '/images/products/Belleza y Cuidado Personal/limpiezaprofunda_hidratacion.webp'
+    ],
+    bebidas_alcoholicas: [
+      '/images/products/bebidas/cerveza-corona.jpg',
+      '/images/products/bebidas/vino-tinto-casillero.jpg',
+      '/images/products/bebidas/whisky-johnnie-walker.jpg',
+      '/images/products/bebidas/ron-bacardi.jpg',
+      '/images/products/bebidas/tequila-patron.jpg',
+      '/images/products/bebidas/champagne-moet.jpg'
+    ],
+    panaderia: [
+      '/images/products/minimarket/pan-lactal-ideal.webp',
+      '/images/products/panaderia/pan-integral.jpg',
+      '/images/products/panaderia/croissants-frescos.jpg',
+      '/images/products/panaderia/pan-de-molde.jpg',
+      '/images/products/panaderia/baguette-artesanal.jpg',
+      '/images/products/panaderia/pan-de-centeno.jpg'
+    ],
+    bebidas: [
+      '/images/products/minimarket/cocaCola-1_5lt.jpg',
+      '/images/products/minimarket/frescolita-lata.webp',
+      '/images/products/bebidas/jugo-natural-naranja.jpg',
+      '/images/products/bebidas/agua-mineral.jpg',
+      '/images/products/bebidas/energizante-red-bull.jpg',
+      '/images/products/bebidas/te-verde.jpg'
     ]
   };
 
@@ -150,16 +274,17 @@ export default function CategoryCards() {
         setLoading(true);
         
         const categoriesWithProducts = await Promise.all(
-          categoryConfig.map(async (config) => {
+          realCategoryConfig.map(async (config) => {
             try {
               // Buscar productos por categoría
               const response = await fetch(`/api/feed/products?category=${config.id}&limit=6`);
               const data = await response.json();
               
-              if (data.success && data.products && data.products.length > 0) {
+              if (data.success && data.data && data.data.products && data.data.products.length > 0) {
+                console.log(`✅ Cargando ${data.data.products.length} productos reales para ${config.name}`);
                 return {
                   ...config,
-                  products: data.products.map((product: any) => ({
+                  products: data.data.products.map((product: any) => ({
                     id: product.id,
                     title: product.title,
                     image_url: product.image_url || '/images/placeholder-product.jpg',
@@ -169,6 +294,8 @@ export default function CategoryCards() {
                     category: product.category
                   }))
                 };
+              } else {
+                console.log(`⚠️ No se encontraron productos reales para ${config.name}, usando imágenes de ejemplo`);
               }
             } catch (error) {
               console.error(`Error cargando productos para ${config.name}:`, error);
@@ -223,7 +350,7 @@ export default function CategoryCards() {
       <div className="space-y-4">
         {/* Primera fila: Hero + 2 cards pequeñas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Hero Card - Restaurantes (más grande) */}
+          {/* Hero Card - Comida (más grande) */}
           <div className="lg:col-span-2">
             <CategoryCard 
               category={categories[0]} 

@@ -94,7 +94,7 @@ export default function RealProductFeed() {
       <h2 className="text-xl font-bold text-gray-900 mb-4">Productos Disponibles</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div key={product.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-md overflow-hidden">
             <img
               src={product.image_url}
               alt={product.title}

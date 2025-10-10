@@ -278,7 +278,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
       {/* Grid de productos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
+          <div key={product.id} className="bg-gray-800 border border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md hover:border-gray-600 transition-all">
             <div className="aspect-w-16 aspect-h-9">
               <img
                 src={product.image_url}
