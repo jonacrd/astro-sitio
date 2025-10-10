@@ -117,16 +117,58 @@ export const GET: APIRoute = async ({ request }) => {
         console.log('✅ Items obtenidos:', items?.length || 0);
         
         if (items && items.length > 0) {
+          // Obtener todos los product_ids únicos
+          const productIds = [...new Set(items.map(item => item.product_id).filter(Boolean))];
+          console.log('🔍 Product IDs únicos encontrados:', productIds);
+          
+          // Obtener todos los productos de una vez
+          let productsMap = {};
+          if (productIds.length > 0) {
+            const { data: products, error: productsError } = await supabase
+              .from('products')
+              .select('id, title')
+              .in('id', productIds);
+            
+            if (productsError) {
+              console.log('⚠️ Error obteniendo productos:', productsError.message);
+            } else {
+              console.log('✅ Productos obtenidos:', products?.length || 0);
+              productsMap = products?.reduce((acc, product) => {
+                acc[product.id] = product;
+                return acc;
+              }, {} as Record<string, any>) || {};
+            }
+          }
+          
           // Agrupar items por order_id
           orderItems = items.reduce((acc, item) => {
             if (!acc[item.order_id]) {
               acc[item.order_id] = [];
             }
             
-            // Usar el título del item si existe, sino usar "Producto"
+            // Intentar obtener el título del producto de diferentes formas
+            let productTitle = 'Producto';
+            
+            // 1. Si el item tiene title directamente
+            if (item.title) {
+              productTitle = item.title;
+            }
+            // 2. Si el item tiene product_title
+            else if (item.product_title) {
+              productTitle = item.product_title;
+            }
+            // 3. Si el item tiene name
+            else if (item.name) {
+              productTitle = item.name;
+            }
+            // 4. Usar el mapa de productos
+            else if (item.product_id && productsMap[item.product_id]) {
+              productTitle = productsMap[item.product_id].title;
+            }
+            
             const itemWithTitle = {
               ...item,
-              title: item.title || 'Producto', // Usar title del item si existe
+              title: productTitle,
               price_cents: item.price_cents || 0
             };
             

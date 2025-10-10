@@ -8,7 +8,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debug - Nombres de Productos</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-color: #111827; 
+            color: white; 
+            min-height: 100vh; 
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 2rem 1rem; 
+        }
+        h1 { 
+            font-size: 1.875rem; 
+            font-weight: bold; 
+            margin-bottom: 2rem; 
+            text-align: center; 
+        }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .py-2 { padding: 0.5rem 0; }
+        .py-8 { padding: 2rem 0; }
+        .px-4 { padding: 0 1rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-6 { padding: 1.5rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded { border-radius: 0.25rem; }
+        .border { border: 1px solid; }
+        .bg-gray-800 { background-color: #1f2937; }
+        .bg-gray-700 { background-color: #374151; }
+        .bg-gray-600 { background-color: #4b5563; }
+        .bg-blue-600 { background-color: #2563eb; }
+        .bg-blue-700 { background-color: #1d4ed8; }
+        .bg-green-400 { background-color: #4ade80; }
+        .bg-yellow-400 { background-color: #facc15; }
+        .bg-purple-400 { background-color: #c084fc; }
+        .bg-red-900 { background-color: #7f1d1d; }
+        .border-gray-700 { border-color: #374151; }
+        .border-red-600 { border-color: #dc2626; }
+        .text-white { color: white; }
+        .text-gray-400 { color: #9ca3af; }
+        .text-gray-300 { color: #d1d5db; }
+        .text-green-400 { color: #4ade80; }
+        .text-yellow-400 { color: #facc15; }
+        .text-purple-400 { color: #c084fc; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-red-400 { color: #f87171; }
+        .text-red-300 { color: #fca5a5; }
+        .text-xl { font-size: 1.25rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-medium { font-weight: 500; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        button { 
+            background-color: #2563eb; 
+            color: white; 
+            padding: 0.5rem 1rem; 
+            border-radius: 0.5rem; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #1d4ed8; }
+        .hidden { display: none; }
+        .text-center { text-align: center; }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .rounded-full { border-radius: 50%; }
+        .h-12 { height: 3rem; }
+        .w-12 { width: 3rem; }
+        .border-b-2 { border-bottom-width: 2px; }
+        .border-blue-500 { border-color: #3b82f6; }
+        .mx-auto { margin: 0 auto; }
+        strong { font-weight: 600; }
+    </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
     <div class="container mx-auto px-4 py-8">
@@ -58,13 +146,17 @@
     </div>
 
     <script>
+        console.log('🔍 Iniciando página de debug...');
+
         async function loadDebugData() {
+            console.log('📡 Cargando datos de debug...');
+            
             const loading = document.getElementById('loading');
             const content = document.getElementById('content');
             const error = document.getElementById('error');
             
             if (!loading || !content || !error) {
-                console.error('Elementos del DOM no encontrados');
+                console.error('❌ Elementos del DOM no encontrados');
                 return;
             }
             
@@ -73,84 +165,93 @@
             error.classList.add('hidden');
 
             try {
+                console.log('🌐 Haciendo fetch a /api/debug/check-product-names...');
                 const response = await fetch('/api/debug/check-product-names');
+                console.log('📡 Respuesta recibida:', response.status);
+                
                 const result = await response.json();
+                console.log('📊 Datos recibidos:', result);
 
                 if (!result.success) {
-                    throw new Error(result.error);
+                    throw new Error(result.error || 'Error desconocido');
                 }
 
                 // Mostrar resultado del JOIN
                 const joinResult = document.getElementById('joinResult');
-                if (!joinResult) return;
-                joinResult.innerHTML = `
-                    <div class="space-y-2">
-                        <p><strong>Estado:</strong> ${result.data.joinResult.success ? '✅ Éxito' : '❌ Error'}</p>
-                        <p><strong>Error:</strong> ${result.data.joinResult.error || 'Ninguno'}</p>
-                        <p><strong>Items encontrados:</strong> ${result.data.joinResult.itemsCount}</p>
-                        ${result.data.joinResult.sampleItem ? `
-                            <div class="bg-gray-700 p-3 rounded mt-2">
-                                <p><strong>Item de muestra:</strong></p>
-                                <p>Order ID: ${result.data.joinResult.sampleItem.order_id}</p>
-                                <p>Product ID: ${result.data.joinResult.sampleItem.product_id}</p>
-                                <p>Title (del JOIN): ${result.data.joinResult.sampleItem.title_from_join || 'NULL'}</p>
-                                <p>Price (del JOIN): ${result.data.joinResult.sampleItem.price_from_join || 'NULL'}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                if (joinResult) {
+                    joinResult.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>Estado:</strong> ${result.data.joinResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                            <p><strong>Error:</strong> ${result.data.joinResult.error || 'Ninguno'}</p>
+                            <p><strong>Items encontrados:</strong> ${result.data.joinResult.itemsCount}</p>
+                            ${result.data.joinResult.sampleItem ? `
+                                <div class="bg-gray-700 p-3 rounded mt-2">
+                                    <p><strong>Item de muestra:</strong></p>
+                                    <p>Order ID: ${result.data.joinResult.sampleItem.order_id}</p>
+                                    <p>Product ID: ${result.data.joinResult.sampleItem.product_id}</p>
+                                    <p>Title (del JOIN): ${result.data.joinResult.sampleItem.title_from_join || 'NULL'}</p>
+                                    <p>Price (del JOIN): ${result.data.joinResult.sampleItem.price_from_join || 'NULL'}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
 
                 // Mostrar resultado alternativo
                 const alternativeResult = document.getElementById('alternativeResult');
-                if (!alternativeResult) return;
-                alternativeResult.innerHTML = `
-                    <div class="space-y-2">
-                        <p><strong>Estado:</strong> ${result.data.alternativeResult.success ? '✅ Éxito' : '❌ Error'}</p>
-                        <p><strong>Error:</strong> ${result.data.alternativeResult.error || 'Ninguno'}</p>
-                        <p><strong>Items encontrados:</strong> ${result.data.alternativeResult.itemsCount}</p>
-                        <p><strong>Product IDs únicos:</strong> ${result.data.alternativeResult.productIds.length}</p>
-                        ${result.data.alternativeResult.productIds.length > 0 ? `
-                            <div class="bg-gray-700 p-3 rounded mt-2">
-                                <p><strong>Product IDs:</strong></p>
-                                <p class="text-sm">${result.data.alternativeResult.productIds.join(', ')}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                if (alternativeResult) {
+                    alternativeResult.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>Estado:</strong> ${result.data.alternativeResult.success ? '✅ Éxito' : '❌ Error'}</p>
+                            <p><strong>Error:</strong> ${result.data.alternativeResult.error || 'Ninguno'}</p>
+                            <p><strong>Items encontrados:</strong> ${result.data.alternativeResult.itemsCount}</p>
+                            <p><strong>Product IDs únicos:</strong> ${result.data.alternativeResult.productIds.length}</p>
+                            ${result.data.alternativeResult.productIds.length > 0 ? `
+                                <div class="bg-gray-700 p-3 rounded mt-2">
+                                    <p><strong>Product IDs:</strong></p>
+                                    <p class="text-sm">${result.data.alternativeResult.productIds.join(', ')}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
 
                 // Mostrar estructura de tablas
                 const tablesStructure = document.getElementById('tablesStructure');
-                if (!tablesStructure) return;
-                tablesStructure.innerHTML = `
-                    <div class="space-y-2">
-                        <p><strong>Tabla order_items:</strong> ${result.data.tablesStructure.order_items_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
-                        <p><strong>Tabla products:</strong> ${result.data.tablesStructure.products_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
-                        ${result.data.tablesStructure.order_items_error ? `<p><strong>Error order_items:</strong> ${result.data.tablesStructure.order_items_error}</p>` : ''}
-                        ${result.data.tablesStructure.products_error ? `<p><strong>Error products:</strong> ${result.data.tablesStructure.products_error}</p>` : ''}
-                    </div>
-                `;
+                if (tablesStructure) {
+                    tablesStructure.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>Tabla order_items:</strong> ${result.data.tablesStructure.order_items_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                            <p><strong>Tabla products:</strong> ${result.data.tablesStructure.products_has_data ? '✅ Tiene datos' : '❌ Sin datos'}</p>
+                            ${result.data.tablesStructure.order_items_error ? `<p><strong>Error order_items:</strong> ${result.data.tablesStructure.order_items_error}</p>` : ''}
+                            ${result.data.tablesStructure.products_error ? `<p><strong>Error products:</strong> ${result.data.tablesStructure.products_error}</p>` : ''}
+                        </div>
+                    `;
+                }
 
                 // Mostrar pedidos
                 const orders = document.getElementById('orders');
-                if (!orders) return;
-                orders.innerHTML = `
-                    <div class="space-y-3">
-                        ${result.data.orders.map(order => `
-                            <div class="bg-gray-700 p-3 rounded">
-                                <p><strong>ID:</strong> ${order.id}</p>
-                                <p><strong>Total:</strong> $${order.total_cents}</p>
-                                <p><strong>Estado:</strong> ${order.status}</p>
-                                <p><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                if (orders) {
+                    orders.innerHTML = `
+                        <div class="space-y-3">
+                            ${result.data.orders.map(order => `
+                                <div class="bg-gray-700 p-3 rounded">
+                                    <p><strong>ID:</strong> ${order.id}</p>
+                                    <p><strong>Total:</strong> $${order.total_cents}</p>
+                                    <p><strong>Estado:</strong> ${order.status}</p>
+                                    <p><strong>Fecha:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
 
                 loading.classList.add('hidden');
                 content.classList.remove('hidden');
+                console.log('✅ Datos mostrados correctamente');
 
             } catch (err) {
-                console.error('Error cargando datos:', err);
+                console.error('❌ Error cargando datos:', err);
                 loading.classList.add('hidden');
                 error.classList.remove('hidden');
                 const errorContent = document.getElementById('errorContent');
@@ -161,13 +262,21 @@
         }
 
         // Cargar datos al inicio
-        loadDebugData();
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM cargado, iniciando debug...');
+            loadDebugData();
+        });
 
         // Botón de actualizar
-        const refreshBtn = document.getElementById('refreshBtn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', loadDebugData);
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    console.log('🔄 Actualizando datos...');
+                    loadDebugData();
+                });
+            }
+        });
     </script>
 </body>
 </html>
