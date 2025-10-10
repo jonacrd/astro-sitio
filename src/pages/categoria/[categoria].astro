@@ -184,6 +184,11 @@ const config = categoryConfig[categoria] || {
 
         // Renderizar vendedores
         renderVendors(data.vendors);
+        
+        // Inicializar sliders después de renderizar
+        setTimeout(() => {
+          initializeSliders();
+        }, 100);
 
       } catch (error) {
         console.error('Error cargando datos:', error);
@@ -283,39 +288,88 @@ const config = categoryConfig[categoria] || {
                     ${vendor.products.length} productos disponibles
                   </p>
                   
-                  <!-- Preview de productos (solo 3) -->
-                  <div class="grid grid-cols-3 gap-3 mb-4">
-                    ${vendor.products.slice(0, 3).map(product => `
-                      <div class="bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-all duration-200 cursor-pointer group/product" onclick="viewProduct('${product.id}')">
-                        <div class="aspect-square bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg mb-2 overflow-hidden">
-                          <img 
-                            src="${product.image_url || '/images/placeholder-product.jpg'}" 
-                            alt="${product.title}"
-                            class="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-200"
-                            onerror="this.src='/images/placeholder-product.jpg'"
-                          />
+                  <!-- Preview de productos -->
+                  <div class="relative">
+                    ${vendor.products.length <= 4 ? `
+                      <!-- Grid simple para 4 productos o menos -->
+                      <div class="grid grid-cols-4 gap-3 mb-4">
+                        ${vendor.products.map(product => `
+                          <div class="bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-all duration-200 cursor-pointer group/product" onclick="viewProduct('${product.id}')">
+                            <div class="aspect-square bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg mb-2 overflow-hidden">
+                              <img 
+                                src="${product.image_url || '/images/placeholder-product.jpg'}" 
+                                alt="${product.title}"
+                                class="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-200"
+                                onerror="this.src='/images/placeholder-product.jpg'"
+                              />
+                            </div>
+                            <h4 class="text-white font-semibold text-sm mb-2 line-clamp-2 leading-tight">${product.title}</h4>
+                            <div class="flex items-center justify-between">
+                              <p class="text-blue-400 font-bold text-sm">$${(product.price_cents / 100).toFixed(0)}</p>
+                              <span class="text-green-400 text-xs">${product.stock}</span>
+                            </div>
+                          </div>
+                        `).join('')}
+                      </div>
+                    ` : `
+                      <!-- Slider horizontal para más de 4 productos -->
+                      <div class="relative">
+                        <div class="flex gap-3 overflow-x-auto scrollbar-hide pb-2" id="products-slider-${vendor.id}">
+                          ${vendor.products.map(product => `
+                            <div class="bg-white/5 rounded-xl p-3 hover:bg-white/10 transition-all duration-200 cursor-pointer group/product flex-shrink-0 w-40" onclick="viewProduct('${product.id}')">
+                              <div class="aspect-square bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-lg mb-2 overflow-hidden">
+                                <img 
+                                  src="${product.image_url || '/images/placeholder-product.jpg'}" 
+                                  alt="${product.title}"
+                                  class="w-full h-full object-cover group-hover/product:scale-105 transition-transform duration-200"
+                                  onerror="this.src='/images/placeholder-product.jpg'"
+                                />
+                              </div>
+                              <h4 class="text-white font-semibold text-sm mb-2 line-clamp-2 leading-tight">${product.title}</h4>
+                              <div class="flex items-center justify-between">
+                                <p class="text-blue-400 font-bold text-sm">$${(product.price_cents / 100).toFixed(0)}</p>
+                                <span class="text-green-400 text-xs">${product.stock}</span>
+                              </div>
+                            </div>
+                          `).join('')}
                         </div>
-                        <h4 class="text-white font-semibold text-xs mb-1 line-clamp-2">${product.title}</h4>
-                        <div class="flex items-center justify-between">
-                          <p class="text-blue-400 font-bold text-xs">$${(product.price_cents / 100).toFixed(0)}</p>
-                          <span class="text-green-400 text-xs">${product.stock}</span>
+                        
+                        <!-- Botones discretos del slider -->
+                        <div class="absolute -left-2 top-1/2 -translate-y-1/2">
+                          <button 
+                            class="w-6 h-6 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 slider-prev-${vendor.id}"
+                            onclick="scrollSlider('${vendor.id}', -1)"
+                          >
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        <div class="absolute -right-2 top-1/2 -translate-y-1/2">
+                          <button 
+                            class="w-6 h-6 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 slider-next-${vendor.id}"
+                            onclick="scrollSlider('${vendor.id}', 1)"
+                          >
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                          </button>
                         </div>
                       </div>
-                    `).join('')}
+                    `}
+                    
+                    <!-- Enlace discreto para ver todos (solo si hay más de 4 productos) -->
+                    ${vendor.products.length > 4 ? `
+                      <div class="mt-3 text-center">
+                        <button 
+                          class="text-gray-400 hover:text-white text-xs transition-colors"
+                          onclick="viewAllProducts('${vendor.id}')"
+                        >
+                          Ver todos los productos (${vendor.products.length})
+                        </button>
+                      </div>
+                    ` : ''}
                   </div>
-                  
-                  <!-- Botón ver más productos -->
-                  ${vendor.products.length > 3 ? `
-                    <button 
-                      class="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition-colors"
-                      onclick="viewAllProducts('${vendor.id}')"
-                    >
-                      Ver ${vendor.products.length - 3} productos más
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </button>
-                  ` : ''}
                 </div>
                 
                 <!-- Botones de acción -->
@@ -409,6 +463,60 @@ const config = categoryConfig[categoria] || {
     window.viewVendor = function(sellerId) {
       window.location.href = `/vendedor/${sellerId}`;
     };
+
+    // Función para el slider de productos
+    window.scrollSlider = function(vendorId, direction) {
+      const slider = document.getElementById(`products-slider-${vendorId}`);
+      if (!slider) return;
+      
+      const scrollAmount = 172; // 40 (w-40) + 12 (gap) = 52 * 3 = 156px aproximadamente
+      const currentScroll = slider.scrollLeft;
+      const targetScroll = currentScroll + (direction * scrollAmount);
+      
+      slider.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+      
+      // Actualizar visibilidad de botones
+      setTimeout(() => {
+        updateSliderButtons(vendorId);
+      }, 300);
+    };
+
+    // Actualizar visibilidad de botones del slider
+    function updateSliderButtons(vendorId) {
+      const slider = document.getElementById(`products-slider-${vendorId}`);
+      if (!slider) return;
+      
+      const prevBtn = document.querySelector(`.slider-prev-${vendorId}`);
+      const nextBtn = document.querySelector(`.slider-next-${vendorId}`);
+      
+      if (prevBtn && nextBtn) {
+        const isAtStart = slider.scrollLeft <= 0;
+        const isAtEnd = slider.scrollLeft >= slider.scrollWidth - slider.clientWidth;
+        
+        prevBtn.style.opacity = isAtStart ? '0.5' : '1';
+        nextBtn.style.opacity = isAtEnd ? '0.5' : '1';
+        
+        prevBtn.disabled = isAtStart;
+        nextBtn.disabled = isAtEnd;
+      }
+    }
+
+    // Inicializar todos los sliders
+    function initializeSliders() {
+      const sliders = document.querySelectorAll('[id^="products-slider-"]');
+      sliders.forEach(slider => {
+        const vendorId = slider.id.replace('products-slider-', '');
+        updateSliderButtons(vendorId);
+        
+        // Agregar listener para scroll manual
+        slider.addEventListener('scroll', () => {
+          updateSliderButtons(vendorId);
+        });
+      });
+    }
 
     // Exponer funciones globalmente para onclick
     window.loadCategoryData = loadCategoryData;
