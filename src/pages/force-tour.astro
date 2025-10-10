@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Forzar Tour">
+  <div class="min-h-screen bg-gradient-to-b from-[#0E1626] to-[#101828] flex items-center justify-center p-4">
+    <div class="max-w-md w-full text-center">
+      <h1 class="text-white text-3xl font-bold mb-4">🚀 Forzar Tour</h1>
+      <p class="text-white/70 mb-8">El tour se iniciará automáticamente en 2 segundos...</p>
+      
+      <div class="bg-white/10 rounded-lg p-6">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+        <p class="text-white/60">Preparando tour...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Forzar inicio del tour SIN VERIFICACIONES
+    setTimeout(async () => {
+      try {
+        console.log('🚀 FORZANDO TOUR - Sin verificar condiciones');
+        
+        // Limpiar localStorage para asegurar que no esté marcado como completado
+        localStorage.removeItem('town_tour_v1_done');
+        console.log('✅ LocalStorage limpiado');
+        
+        // Importar y llamar directamente a startTour
+        const { startTour } = await import('../lib/tour/TourManager');
+        console.log('✅ TourManager importado');
+        
+        // Redirigir a la página principal PRIMERO
+        console.log('🔄 Redirigiendo a la página principal...');
+        window.location.href = '/';
+        
+        // El tour se iniciará automáticamente en la página principal
+      } catch (error) {
+        console.error('❌ Error forzando tour:', error);
+        alert('Error: ' + error.message);
+      }
+    }, 2000);
+  </script>
+</BaseLayout>
+

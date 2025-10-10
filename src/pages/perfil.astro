@@ -408,8 +408,15 @@ import { getUser, getUserProfile } from '../lib/session'
     // Función para relanzar el tour
     (window as any).restartTour = async function() {
       try {
-        const { restartTour } = await import('../lib/tour/TourManager');
-        restartTour();
+        console.log('🎓 Relanzando tour desde perfil...');
+        
+        // Limpiar flag de completado
+        localStorage.removeItem('town_tour_v1_done');
+        console.log('✅ Flag de tour limpiado');
+        
+        // Redirigir a la página principal para que se active
+        console.log('🔄 Redirigiendo a página principal...');
+        window.location.href = '/';
       } catch (error) {
         console.error('Error relanzando tour:', error);
         alert('Error al cargar la guía. Por favor, recarga la página.');

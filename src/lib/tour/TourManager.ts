@@ -245,10 +245,14 @@ class TourManager {
   }
 
   public startTour(): void {
+    console.log('🚀 startTour() llamado');
+    
     if (this.tourInstance) {
+      console.log('🗑️ Destruyendo instancia anterior del tour');
       this.tourInstance.destroy();
     }
 
+    console.log('📦 Creando nueva instancia del tour con', tourSteps.length, 'pasos');
     this.tourInstance = createTour(
       tourSteps,
       {
@@ -261,7 +265,9 @@ class TourManager {
       this.createTourCallbacks()
     );
 
+    console.log('▶️ Llamando a tourInstance.start()...');
     this.tourInstance.start();
+    console.log('✅ Tour iniciado correctamente');
   }
 
   public restartTour(): void {
