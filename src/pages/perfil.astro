@@ -405,21 +405,25 @@ import { getUser, getUserProfile } from '../lib/session'
       }
     }
 
-    // Función para relanzar el tour
+    // Función para relanzar el tour (ahora resetea todas las guías)
     (window as any).restartTour = async function() {
       try {
-        console.log('🎓 Relanzando tour desde perfil...');
+        console.log('🎓 Reseteando todas las guías...');
         
-        // Limpiar flag de completado
-        localStorage.removeItem('town_tour_v1_done');
-        console.log('✅ Flag de tour limpiado');
+        // Limpiar todas las flags de guías
+        localStorage.removeItem('town_first_login');
+        localStorage.removeItem('town_first_search');
+        localStorage.removeItem('town_category_guide_shown');
+        console.log('✅ Todas las guías reseteadas');
         
-        // Redirigir a la página principal para que se active
+        alert('✅ Guías reseteadas. Serás redirigido a la página principal para volver a verlas.');
+        
+        // Redirigir a la página principal
         console.log('🔄 Redirigiendo a página principal...');
         window.location.href = '/';
       } catch (error) {
-        console.error('Error relanzando tour:', error);
-        alert('Error al cargar la guía. Por favor, recarga la página.');
+        console.error('Error reseteando guías:', error);
+        alert('Error al resetear las guías. Por favor, recarga la página.');
       }
     };
 
