@@ -10,6 +10,9 @@ import { SimpleBottomNav } from '@components/ui/SimpleBottomNav.tsx'
 import OneSignalSubscriber from '@components/react/OneSignalSubscriber.tsx'
 import NotificationWelcome from '@components/react/NotificationWelcome.tsx'
 import FloatingNotificationButton from '@components/react/FloatingNotificationButton.tsx'
+import WelcomeGuide from '@components/react/WelcomeGuide.tsx'
+import SearchGuide from '@components/react/SearchGuide.tsx'
+import CategoryGuide from '@components/react/CategoryGuide.tsx'
 
 export interface Props {
   title?: string
@@ -295,45 +298,14 @@ const {
   <!-- Botón flotante para activar notificaciones - Solo cuando sea necesario -->
   <FloatingNotificationButton client:idle />
   
-  <!-- Tour de Onboarding - Solo cuando sea necesario -->
-  <script>
-    // Inicializar tour de onboarding
-    if (typeof window !== 'undefined') {
-      console.log('🎓 Tour: Esperando carga de la página...');
-      
-      window.addEventListener('load', function() {
-        console.log('✅ Tour: Página cargada, iniciando en 500ms...');
-        
-        setTimeout(async function() {
-          try {
-            console.log('📦 Tour: Importando TourManager...');
-            const { initTour } = await import(`../lib/tour/TownyTourManager?t=${Date.now()}&v=new-design`);
-            
-            console.log('✅ Tour: TourManager importado correctamente');
-            console.log('🚀 Tour: Llamando a initTour()...');
-            
-            const manager = initTour();
-            
-            console.log('✅ Tour: TourManager inicializado', manager);
-            console.log('🎯 Tour: Ruta actual:', window.location.pathname);
-            console.log('📝 Tour: Tour completado?', localStorage.getItem('town_tour_v1_done'));
-            
-            // Agregar función de reset para testing
-            window.resetTour = async () => {
-              const { resetTour } = await import(`../lib/tour/TownyTourManager?t=${Date.now()}&v=new-design`);
-              resetTour();
-              console.log('🔄 Tour resetado - recarga la página para ver el nuevo tour');
-            };
-            
-            console.log('🔄 Para resetear el tour, ejecuta: window.resetTour()');
-          } catch (error) {
-            console.error('❌ Tour: Error inicializando tour:', error);
-            console.error('Stack completo:', error);
-          }
-        }, 500);
-      });
-    }
-  </script>
+  <!-- Guía de bienvenida para nuevos usuarios -->
+  <WelcomeGuide client:idle />
+  
+  <!-- Guía contextual de búsqueda -->
+  <SearchGuide client:idle />
+  
+  <!-- Guía contextual de categorías -->
+  <CategoryGuide client:idle />
   
   <!-- Script para sincronizar género desde Google - Optimizado -->
   <script>
@@ -372,6 +344,168 @@ const {
           }
         }, 2000); // Esperar 2 segundos después de la carga
       });
+    }
+  </script>
+
+  <!-- Script para testing de la guía de bienvenida -->
+  <script>
+    if (typeof window !== 'undefined') {
+      // Función para resetear la guía de bienvenida (solo para testing)
+      window.resetWelcomeGuide = function() {
+        localStorage.removeItem('town_first_login');
+        console.log('✅ Guía de bienvenida reseteada. Recarga la página y loguéate para verla.');
+      };
+      
+      // Función para simular login (solo para testing)
+      window.simulateFirstLogin = function() {
+        localStorage.setItem('auth-state', 'authenticated');
+        localStorage.removeItem('town_first_login');
+        window.dispatchEvent(new CustomEvent('auth-state-changed'));
+        console.log('✅ Simulando primer login. La guía debería aparecer.');
+      };
+      
+      // Función para resetear la guía de búsqueda (solo para testing)
+      window.resetSearchGuide = function() {
+        localStorage.removeItem('town_first_search');
+        console.log('✅ Guía de búsqueda reseteada. Haz click en la barra de búsqueda para verla.');
+      };
+      
+      // Función para mostrar la guía de búsqueda manualmente (solo para testing)
+      window.showSearchGuide = function() {
+        window.dispatchEvent(new CustomEvent('show-search-guide'));
+        console.log('✅ Mostrando guía de búsqueda.');
+      };
+      
+      // Función para resetear la guía de categorías (solo para testing)
+      window.resetCategoryGuide = function() {
+        localStorage.removeItem('town_category_guide_shown');
+        console.log('✅ Guía de categorías reseteada. Haz scroll hasta las categorías para verla.');
+      };
+      
+      // Función para mostrar la guía de categorías manualmente (solo para testing)
+      window.showCategoryGuide = function() {
+        const comidaCard = document.querySelector('[data-category="comida"]');
+        if (comidaCard) {
+          comidaCard.classList.add('guide-highlight');
+          // Hacer scroll a la categoría
+          comidaCard.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('show-category-guide'));
+          console.log('✅ Mostrando guía de categorías.');
+        }, 500);
+      };
+      
+      console.log('🔧 Funciones de testing disponibles:');
+      console.log('  - resetWelcomeGuide(): Resetea la guía de bienvenida');
+      console.log('  - simulateFirstLogin(): Simula un primer login');
+      console.log('  - resetSearchGuide(): Resetea la guía de búsqueda');
+      console.log('  - showSearchGuide(): Muestra la guía de búsqueda manualmente');
+      console.log('  - resetCategoryGuide(): Resetea la guía de categorías');
+      console.log('  - showCategoryGuide(): Muestra la guía de categorías manualmente');
+    }
+  </script>
+
+  <!-- Script para detectar scroll y mostrar guía de categorías -->
+  <script>
+    if (typeof window !== 'undefined') {
+      let categoryGuideShown = false;
+      let scrollTimeout;
+      let debugMode = true; // Para ver logs de debug
+
+      function checkCategoryGuide() {
+        // Solo mostrar si no se ha mostrado antes
+        const hasShownBefore = localStorage.getItem('town_category_guide_shown');
+        if (hasShownBefore || categoryGuideShown) {
+          if (debugMode && hasShownBefore) {
+            console.log('🔕 Guía de categorías ya fue mostrada antes');
+          }
+          return;
+        }
+
+        // Buscar el título "Explora por Categoría" específicamente
+        const categoryTitle = document.getElementById('category-title');
+        const header = document.querySelector('header');
+        
+        if (!categoryTitle) {
+          if (debugMode) {
+            console.log('⚠️ No se encontró el título de categorías (#category-title)');
+          }
+          return;
+        }
+
+        const headerHeight = header ? header.offsetHeight : 80;
+        
+        // Obtener la posición del elemento
+        const rect = categoryTitle.getBoundingClientRect();
+        
+        if (debugMode) {
+          console.log('📏 Posición del título:', {
+            top: rect.top,
+            headerHeight: headerHeight,
+            isInRange: rect.top <= headerHeight + 150
+          });
+        }
+        
+        // Verificar si el título está al nivel del header o ya pasó
+        // Ampliado el rango para que sea más fácil de activar
+        const isAtHeaderLevel = rect.top <= headerHeight + 150 && rect.top >= -100;
+        
+        if (isAtHeaderLevel) {
+          console.log('✅ ¡Activando guía de categorías!');
+          
+          // Marcar como mostrado
+          categoryGuideShown = true;
+          localStorage.setItem('town_category_guide_shown', 'true');
+          
+          // Destacar la categoría Comida
+          const comidaCard = document.querySelector('[data-category="comida"]');
+          if (comidaCard) {
+            comidaCard.classList.add('guide-highlight');
+            console.log('🎯 Categoría Comida destacada');
+            
+            // Hacer scroll suave a la categoría Comida si no está visible
+            setTimeout(() => {
+              comidaCard.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+              });
+            }, 100);
+          } else {
+            console.warn('⚠️ No se encontró la categoría Comida');
+          }
+          
+          // Disparar evento para mostrar la guía
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('show-category-guide'));
+            console.log('📍 Guía de categorías activada por scroll');
+          }, 300);
+        }
+      }
+
+      // Escuchar evento de scroll con throttling
+      window.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(checkCategoryGuide, 50);
+      }, { passive: true });
+
+      // Verificar al cargar la página
+      window.addEventListener('load', function() {
+        console.log('🚀 Script de guía de categorías cargado');
+        setTimeout(checkCategoryGuide, 2000);
+      });
+
+      // Verificar cada 2 segundos por si el elemento aparece después
+      let checkInterval = setInterval(function() {
+        const categoryTitle = document.getElementById('category-title');
+        if (categoryTitle) {
+          console.log('✅ Título de categorías encontrado, iniciando detección de scroll');
+          clearInterval(checkInterval);
+        }
+      }, 500);
     }
   </script>
 </body>

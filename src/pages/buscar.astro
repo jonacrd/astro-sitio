@@ -1,95 +1,195 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SmartSearchBar from '../components/react/SmartSearchBar';
+import SmartSearchBar from '../components/react/SmartSearchBar.tsx';
+
+const searchQuery = Astro.url.searchParams.get('q') || '';
 ---
 
-<BaseLayout title="Buscar Productos">
-  <div class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
-    <!-- Header -->
-    <div class="container mx-auto px-4 py-8">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-white mb-4">
-          🔍 Buscar Productos
-        </h1>
-        <p class="text-white/80 text-lg">
-          Búsqueda inteligente: productos, vendedores y servicios activos
-        </p>
-      </div>
-
-      <!-- Barra de búsqueda inteligente -->
-      <div class="max-w-4xl mx-auto">
+<BaseLayout 
+  title={searchQuery ? `Resultados para "${searchQuery}" - Town` : "Buscar - Town"}
+  description="Busca productos locales en Town"
+>
+  <div class="min-h-screen bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Barra de búsqueda -->
+      <div class="mb-8">
         <SmartSearchBar 
           client:load
-          onSearch={(query) => {
-            console.log('🔍 Búsqueda realizada:', query);
-          }}
-          onCategoryClick={(category) => {
-            console.log('📂 Categoría seleccionada:', category);
-          }}
-          onSellerClick={(sellerId) => {
-            console.log('🏪 Vendedor seleccionado:', sellerId);
-          }}
-          placeholder="¿Qué necesitas? Ej: cerveza, hamburguesa, corte de cabello..."
+          placeholder="¿Qué necesitas?"
         />
       </div>
 
-      <!-- Información adicional -->
-      <div class="max-w-4xl mx-auto mt-8">
-        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-          <h3 class="text-xl font-semibold text-white mb-4">
-            🧠 Búsqueda Inteligente
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-white/80">
-            <div class="text-center">
-              <div class="text-3xl mb-2">🔍</div>
-              <h4 class="font-semibold mb-2">Búsqueda Natural</h4>
-              <p class="text-sm">Busca por nombre, categoría, vendedor o descripción</p>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl mb-2">📦</div>
-              <h4 class="font-semibold mb-2">Productos & Servicios</h4>
-              <p class="text-sm">Incluye productos con stock y servicios del día</p>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl mb-2">🏪</div>
-              <h4 class="font-semibold mb-2">Vendedores Activos</h4>
-              <p class="text-sm">Encuentra tiendas y servicios disponibles ahora</p>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl mb-2">⚡</div>
-              <h4 class="font-semibold mb-2">Resultados Relevantes</h4>
-              <p class="text-sm">Ordenados por relevancia y disponibilidad</p>
-            </div>
-          </div>
+      <!-- Resultados de búsqueda -->
+      <div id="search-results" class="mt-8">
+        <div class="text-center text-gray-400 py-12">
+          <svg class="w-12 h-12 mx-auto mb-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p>Buscando productos...</p>
         </div>
       </div>
     </div>
   </div>
 </BaseLayout>
 
-<script>
-  // Limpiar caché de búsqueda al cargar la página
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('🧹 Limpiando caché de búsqueda...');
-    
-    // Limpiar localStorage relacionado con búsquedas
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.includes('search') || key.includes('query') || key.includes('results'))) {
-        keysToRemove.push(key);
+<script define:vars={{ searchQuery }}>
+  if (typeof window !== 'undefined' && searchQuery) {
+    // Función para formatear precio en pesos colombianos
+    function formatPrice(cents) {
+      const pesos = cents; // Los precios ya están en pesos
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(pesos);
+    }
+
+    // Realizar búsqueda
+    async function performSearch() {
+      try {
+        const response = await fetch(`/api/search/ai?q=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+
+        const resultsContainer = document.getElementById('search-results');
+        
+        if (data.success && data.data.results && data.data.results.length > 0) {
+          const products = data.data.results;
+          
+          // Mostrar información de la búsqueda
+          let html = `
+            <div class="mb-6">
+              <h2 class="text-2xl font-bold text-white mb-2">
+                Resultados para "${searchQuery}"
+              </h2>
+              ${data.data.correctedQuery !== searchQuery ? `
+                <p class="text-gray-400 text-sm">
+                  Mostrando resultados para: <span class="text-blue-400">"${data.data.correctedQuery}"</span>
+                </p>
+              ` : ''}
+              <p class="text-gray-500 text-sm mt-1">
+                ${products.length} producto${products.length !== 1 ? 's' : ''} encontrado${products.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          `;
+
+          // Mostrar productos
+          html += '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">';
+          
+          products.forEach(product => {
+            html += `
+              <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
+                <img 
+                  src="${product.image || '/img/placeholders/product-placeholder.jpg'}" 
+                  alt="${product.title}"
+                  class="w-full h-48 object-cover"
+                  onerror="this.src='/img/placeholders/product-placeholder.jpg'"
+                />
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-white mb-2 line-clamp-2">
+                    ${product.title}
+                  </h3>
+                  ${product.description ? `
+                    <p class="text-gray-400 text-sm mb-3 line-clamp-2">
+                      ${product.description}
+                    </p>
+                  ` : ''}
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-2xl font-bold text-blue-400">
+                      ${formatPrice(product.price)}
+                    </span>
+                    <span class="text-xs text-gray-500">
+                      ${product.category}
+                    </span>
+                  </div>
+                  <div class="flex items-center text-sm text-gray-500 mb-3">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    ${product.sellerName}
+                  </div>
+                  <a 
+                    href="/producto/${product.id}" 
+                    class="block w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Ver producto
+                  </a>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+
+          // Mostrar categorías relacionadas si existen
+          if (data.data.relatedCategories && data.data.relatedCategories.length > 0) {
+            html += `
+              <div class="mt-8 p-6 bg-gray-800 rounded-lg">
+                <h3 class="text-lg font-semibold text-white mb-3">
+                  Categorías relacionadas
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                  ${data.data.relatedCategories.map(cat => `
+                    <a 
+                      href="/categoria/${encodeURIComponent(cat.toLowerCase())}"
+                      class="px-4 py-2 bg-gray-700 text-gray-200 rounded-full hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      ${cat}
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+          
+          resultsContainer.innerHTML = html;
+        } else {
+          resultsContainer.innerHTML = `
+            <div class="text-center py-12">
+              <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 class="text-xl font-semibold text-white mb-2">
+                No encontramos resultados para "${searchQuery}"
+              </h3>
+              <p class="text-gray-400 mb-6">
+                Intenta con otras palabras clave o explora nuestras categorías
+              </p>
+              <a 
+                href="/" 
+                class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Volver al inicio
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error en la búsqueda:', error);
+        document.getElementById('search-results').innerHTML = `
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-xl font-semibold text-white mb-2">
+              Error al realizar la búsqueda
+            </h3>
+            <p class="text-gray-400 mb-6">
+              Por favor, intenta nuevamente
+            </p>
+            <button 
+              onclick="window.location.reload()" 
+              class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        `;
       }
     }
-    
-    keysToRemove.forEach(key => {
-      localStorage.removeItem(key);
-      console.log('🗑️ Eliminado:', key);
-    });
-    
-    console.log('✅ Caché de búsqueda limpiado');
-  });
+
+    // Ejecutar búsqueda al cargar la página
+    performSearch();
+  }
 </script>
-
-
-
-

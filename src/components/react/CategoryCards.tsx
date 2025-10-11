@@ -344,7 +344,7 @@ export default function CategoryCards() {
 
   return (
     <div className="px-4 py-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Explora por Categoría</h2>
+      <h2 id="category-title" className="text-2xl font-bold text-white mb-6">Explora por Categoría</h2>
       
       {/* Layout dinámico inspirado en apps de delivery */}
       <div className="space-y-4">
@@ -473,6 +473,8 @@ function CategoryCard({ category, size, isFirst = false }: CategoryCardProps) {
   return (
     <div 
       onClick={handleClick}
+      data-category={category.id}
+      data-category-name={category.name}
       className={`relative bg-gradient-to-br ${category.color} ${config.height} ${config.borderRadius} cursor-pointer overflow-hidden group hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border border-white/10 hover:border-white/20`}
     >
       {/* Imágenes de productos como fondo */}

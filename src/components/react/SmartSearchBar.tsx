@@ -5,173 +5,190 @@ interface SmartSearchBarProps {
   placeholder?: string;
 }
 
-export default function SmartSearchBar({ 
-  onSearch, 
-  placeholder = "¿Qué necesitas? Ej: cerveza, hamburguesa, corta" 
-}: SmartSearchBarProps) {
+const SmartSearchBar: React.FC<SmartSearchBarProps> = ({ 
+  onSearch,
+  placeholder = "¿Qué necesitas?" 
+}) => {
   const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Sugerencias de productos
-  const productSuggestions = [
-    'Perros calientes',
-    'Empanadas', 
-    'Arroz',
-    'Bebidas',
-    'Hamburguesas',
-    'Pizza',
-    'Sushi',
-    'Café',
-    'Helado',
-    'Pan',
-    'Leche',
-    'Huevos'
+  // Sugerencias estáticas iniciales
+  const staticSuggestions = [
+    "perros calientes",
+    "empanadas", 
+    "arroz",
+    "bebidas",
+    "comida",
+    "medicinas",
+    "postres"
   ];
 
-  // Manejar búsqueda
-  const handleSearch = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
-    
-    setIsLoading(true);
-    setShowSuggestions(false);
-    
+  // Función para obtener sugerencias de la IA
+  const fetchAISuggestions = async (searchQuery: string) => {
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      setAiSuggestions([]);
+      return;
+    }
+
     try {
-      // Llamar a la función de búsqueda si existe
-      if (onSearch) {
-        onSearch(searchQuery);
+      setIsLoading(true);
+      const response = await fetch(`/api/search/ai?q=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+
+      if (data.success && data.data.results) {
+        // Extraer títulos únicos de los resultados
+        const productTitles = data.data.results
+          .slice(0, 5) // Limitar a 5 sugerencias
+          .map((product: any) => product.title);
+        
+        setAiSuggestions(data.data.results.slice(0, 5));
+        setSuggestions(productTitles);
+        setShowSuggestions(true);
+      } else {
+        // Fallback a sugerencias estáticas
+        const filtered = staticSuggestions.filter(item => 
+          item.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setSuggestions(filtered);
+        setShowSuggestions(filtered.length > 0);
       }
-      
-      // También puedes hacer una búsqueda AI aquí si tienes la API
-      console.log('Buscando:', searchQuery);
     } catch (error) {
-      console.error('Error en búsqueda:', error);
+      console.error('Error obteniendo sugerencias de IA:', error);
+      // Fallback a sugerencias estáticas
+      const filtered = staticSuggestions.filter(item => 
+        item.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Manejar sugerencias
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    handleSearch(suggestion);
-  };
-
-  // Filtrar sugerencias basadas en la query
+  // Debounce para las sugerencias
   useEffect(() => {
-    if (query.length > 0) {
-      const filtered = productSuggestions.filter(suggestion =>
-        suggestion.toLowerCase().includes(query.toLowerCase())
-      );
-      setSuggestions(filtered.slice(0, 6));
-      setShowSuggestions(true);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  }, [query]);
-
-  // Cerrar sugerencias al hacer click fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsRef.current && 
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
+    const timer = setTimeout(() => {
+      if (query.length >= 2) {
+        fetchAISuggestions(query);
+      } else {
+        setSuggestions([]);
+        setAiSuggestions([]);
         setShowSuggestions(false);
       }
-    };
+    }, 300); // Esperar 300ms después de que el usuario deje de escribir
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+    if (onSearch) {
+      onSearch(suggestion);
+    }
+    // Redirigir a página de resultados de búsqueda
+    window.location.href = `/buscar?q=${encodeURIComponent(suggestion)}`;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      setShowSuggestions(false);
+      if (onSearch) {
+        onSearch(query);
+      }
+      // Redirigir a página de resultados de búsqueda
+      window.location.href = `/buscar?q=${encodeURIComponent(query)}`;
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleFocus = () => {
+    // Mostrar guía contextual la primera vez
+    const isFirstTimeSearching = localStorage.getItem('town_first_search');
+    if (!isFirstTimeSearching) {
+      // Disparar evento personalizado para mostrar la guía
+      window.dispatchEvent(new CustomEvent('show-search-guide'));
+      localStorage.setItem('town_first_search', 'true');
+    }
+
+    // Mostrar sugerencias si hay query
+    if (query.length >= 2) {
+      setShowSuggestions(true);
+    }
+  };
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
-      {/* Barra de búsqueda */}
-      <div className="relative">
+    <div className="relative">
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="relative">
         <input
-          ref={inputRef}
-          type="text"
+            ref={inputRef}
+            type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch(query);
-            }
-          }}
-          onFocus={() => {
-            if (suggestions.length > 0) {
-              setShowSuggestions(true);
-            }
-          }}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={handleFocus}
+            onBlur={() => {
+              // Delay para permitir clicks en sugerencias
+              setTimeout(() => setShowSuggestions(false), 200);
+            }}
           placeholder={placeholder}
-          className="w-full px-4 py-3 pl-12 pr-16 bg-gray-800 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            className="w-full px-4 py-3 pr-12 text-gray-900 bg-white border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+            id="main-search-input"
         />
-        
-        {/* Icono de búsqueda */}
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
-        {/* Botón de búsqueda */}
         <button
-          onClick={() => handleSearch(query)}
-          disabled={isLoading || !query.trim()}
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200"
-        >
-          {isLoading ? (
-            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          )}
+          type="submit"
+            disabled={isLoading}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600 transition-colors"
+          >
+            {isLoading ? (
+              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+            )}
         </button>
-      </div>
-
-      {/* Sugerencias de productos - Slider horizontal */}
-      <div className="mt-4">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {productSuggestions.map((suggestion, index) => (
-            <button
-              key={index}
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="flex-shrink-0 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-full text-sm font-medium transition-colors duration-200 whitespace-nowrap"
-            >
-              {suggestion}
-            </button>
-          ))}
         </div>
-      </div>
+      </form>
 
-      {/* Dropdown de sugerencias */}
+      {/* Sugerencias con IA */}
       {showSuggestions && suggestions.length > 0 && (
-        <div
-          ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-gray-600 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto"
-        >
+        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
-            <button
-              key={index}
+                      <button
+                        key={index}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-4 py-3 text-left text-white hover:bg-gray-700 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
+              className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors first:rounded-t-lg last:rounded-b-lg flex items-center space-x-2"
             >
-              {suggestion}
-            </button>
-          ))}
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span>{suggestion}</span>
+                          </button>
+                        ))}
         </div>
       )}
     </div>
   );
-}
+};
+
+export default SmartSearchBar;
