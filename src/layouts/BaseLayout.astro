@@ -307,7 +307,7 @@ const {
         setTimeout(async function() {
           try {
             console.log('📦 Tour: Importando TourManager...');
-            const { initTour } = await import('../lib/tour/TourManager');
+            const { initTour } = await import(`../lib/tour/TownyTourManager?t=${Date.now()}&v=new-design`);
             
             console.log('✅ Tour: TourManager importado correctamente');
             console.log('🚀 Tour: Llamando a initTour()...');
@@ -317,6 +317,15 @@ const {
             console.log('✅ Tour: TourManager inicializado', manager);
             console.log('🎯 Tour: Ruta actual:', window.location.pathname);
             console.log('📝 Tour: Tour completado?', localStorage.getItem('town_tour_v1_done'));
+            
+            // Agregar función de reset para testing
+            window.resetTour = async () => {
+              const { resetTour } = await import(`../lib/tour/TownyTourManager?t=${Date.now()}&v=new-design`);
+              resetTour();
+              console.log('🔄 Tour resetado - recarga la página para ver el nuevo tour');
+            };
+            
+            console.log('🔄 Para resetear el tour, ejecuta: window.resetTour()');
           } catch (error) {
             console.error('❌ Tour: Error inicializando tour:', error);
             console.error('Stack completo:', error);

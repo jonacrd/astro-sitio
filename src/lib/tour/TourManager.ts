@@ -1,7 +1,7 @@
 import { createTour } from './createTour';
 import type { TourStep, TourCallbacks } from './types';
 
-const TOUR_STORAGE_KEY = 'town_tour_v1_done';
+const TOUR_STORAGE_KEY = 'town_tour_v3_responsive_done';
 
 // Definir pasos del tour
     const tourSteps: TourStep[] = [

@@ -125,15 +125,49 @@ export function createTour(
     return imageMap[step.id] || '/towny/towny_estatico.png';
   }
 
-  // Posicionar Towny cerca de la burbuja del tour
+  // Posicionar Towny cerca de la burbuja del tour - RESPONSIVE
   function positionTowny(step: TourStep, bubblePos: { left: string; top: string }): { left: string; top: string } {
-    // Posicionar Towny cerca de la burbuja, no abajo
     const bubbleTop = parseInt(bubblePos.top) || 300;
+    const bubbleLeft = parseInt(bubblePos.left.replace('%', '')) || 50;
     
-    return {
-      left: '50%',
-      top: `${bubbleTop + 180}px` // Towny debajo de la burbuja
-    };
+    // Detectar si es móvil
+    const isMobile = window.innerWidth < 768;
+    
+    // Posicionamiento especial para el paso de bienvenida
+    if (step.id === 'welcome') {
+      console.log('🎯 TOWNY POSICIONAMIENTO WELCOME:', { bubbleTop, isMobile });
+      if (isMobile) {
+        // En móvil: Towny MUY cerca de la ventana, casi superpuesto
+        const pos = {
+          left: '10%', // MUY a la izquierda de la ventana
+          top: `${bubbleTop - 30}px` // ARRIBA de la ventana, muy cerca
+        };
+        console.log('🎯 TOWNY POSICIÓN MÓVIL WELCOME:', pos);
+        return pos;
+      } else {
+        // En desktop: Towny cerca de la ventana
+        const pos = {
+          left: '20%', // A la izquierda de la ventana
+          top: `${bubbleTop - 20}px` // Arriba de la ventana, cerca
+        };
+        console.log('🎯 TOWNY POSICIÓN DESKTOP WELCOME:', pos);
+        return pos;
+      }
+    }
+    
+    if (isMobile) {
+      // En móvil: Towny a la izquierda de la burbuja, cerca
+      return {
+        left: `${Math.max(bubbleLeft - 20, 5)}%`, // Un poco a la izquierda
+        top: `${bubbleTop + 10}px` // Casi a la misma altura
+      };
+    } else {
+      // En desktop: Towny debajo de la burbuja
+      return {
+        left: '50%',
+        top: `${bubbleTop + 180}px`
+      };
+    }
   }
 
   // Posicionar burbuja según el elemento objetivo
@@ -360,12 +394,31 @@ export function createTour(
 
     // Posicionar Towny cerca de la burbuja con brillo
     if (townyCharacter) {
+      const isMobile = window.innerWidth < 768;
+      
+      console.log('🎯 APLICANDO POSICIÓN TOWNY:', { townyPos, stepId: step.id, isMobile });
+      
       townyCharacter.style.left = townyPos.left;
       townyCharacter.style.top = townyPos.top;
       townyCharacter.style.bottom = 'auto'; // Usar top en lugar de bottom
       townyCharacter.style.backgroundImage = `url('${getTownyImage(step)}')`;
-      townyCharacter.style.transform = 'translateX(-50%) scale(1)';
       townyCharacter.style.opacity = '1';
+      
+      // Tamaño responsive - más pequeño en móvil para el welcome
+      if (isMobile) {
+        if (step.id === 'welcome') {
+          townyCharacter.style.width = '60px';
+          townyCharacter.style.height = '60px';
+        } else {
+          townyCharacter.style.width = '80px';
+          townyCharacter.style.height = '80px';
+        }
+        townyCharacter.style.transform = 'translateX(-50%) scale(1)';
+      } else {
+        townyCharacter.style.width = '100px';
+        townyCharacter.style.height = '100px';
+        townyCharacter.style.transform = 'translateX(-50%) scale(1)';
+      }
       
       // Agregar brillo sutil a Towny
       townyCharacter.style.filter = 'brightness(1.1) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))';

@@ -335,7 +335,7 @@ export default function CategoryCards() {
         <h2 className="text-2xl font-bold text-white mb-6">Categorías</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-gray-800 rounded-xl h-32 animate-pulse"></div>
+            <div key={`loading-skeleton-${i}`} className="bg-gray-800 rounded-xl h-32 animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -479,7 +479,7 @@ function CategoryCard({ category, size, isFirst = false }: CategoryCardProps) {
       <div className="absolute inset-0 flex">
         {category.products.map((product, index) => (
           <div
-            key={product.id}
+            key={`${category.id}-${product.id}-${index}`}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               index === currentImageIndex ? 'opacity-100' : 'opacity-0'
             }`}
@@ -548,7 +548,7 @@ function CategoryCard({ category, size, isFirst = false }: CategoryCardProps) {
           <div className="flex justify-center gap-1">
             {category.products.map((_, index) => (
               <div
-                key={index}
+                key={`${category.id}-indicator-${index}`}
                 className={`w-2 h-2 rounded-full transition-colors duration-300 ${
                   index === currentImageIndex ? 'bg-white' : 'bg-white/40'
                 }`}
