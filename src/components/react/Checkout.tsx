@@ -6,7 +6,6 @@ import SimpleDeliveryInfo from '../checkout/SimpleDeliveryInfo';
 import PaymentMethod from '../checkout/PaymentMethod';
 import OrderNotes from '../checkout/OrderNotes';
 import ConfirmBar from '../checkout/ConfirmBar';
-import { TownyCheckout } from './TownyMessage';
 
 interface CartItem {
   id: string;
@@ -667,12 +666,6 @@ export default function Checkout({}: CheckoutProps) {
           </button>
           <h1 className="text-white text-xl font-semibold">Finalizar Compra</h1>
         </div>
-
-        {/* Towny en checkout */}
-        <TownyCheckout 
-          title="¡Casi listo!"
-          message="Revisa tu pedido y completa la compra."
-        />
 
         <div className="space-y-4">
           {/* Resumen del carrito */}
