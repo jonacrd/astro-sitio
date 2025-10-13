@@ -386,7 +386,7 @@ export default function ProductManagerEnhanced() {
       <div className="bg-gray-800 px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-towny rounded-full flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
               </svg>
@@ -418,7 +418,7 @@ export default function ProductManagerEnhanced() {
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="bg-towny text-white px-4 py-2 rounded-lg font-medium hover:bg-towny-dark transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
@@ -438,7 +438,7 @@ export default function ProductManagerEnhanced() {
                 onClick={() => setActiveTab(category.id)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                   activeTab === category.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-towny text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
@@ -504,7 +504,7 @@ export default function ProductManagerEnhanced() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEditProduct(sellerProduct)}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    className="flex-1 bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark transition-colors text-sm font-medium"
                   >
                     ⚙️ Configurar
                   </button>
@@ -629,7 +629,7 @@ export default function ProductManagerEnhanced() {
 
                 <button
                   onClick={() => handleConfigureProduct(pendingProduct.product)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  className="w-full bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark transition-colors"
                 >
                   {pendingProduct.price > 0 && pendingProduct.stock > 0 ? 'Editar' : 'Configurar'}
                 </button>
@@ -717,7 +717,7 @@ export default function ProductManagerEnhanced() {
               </button>
               <button
                 onClick={handleSaveConfiguration}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark transition-colors"
               >
                 Guardar
               </button>
@@ -877,7 +877,7 @@ function EditProductModal({ product, onSave, onClose }: EditProductModalProps) {
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex-1 bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark transition-colors"
           >
             Guardar
           </button>

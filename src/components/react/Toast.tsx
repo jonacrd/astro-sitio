@@ -38,7 +38,7 @@ export default function Toast({ id, message, type, duration = 4000, onClose }: T
       case 'warning':
         return `${baseStyles} border-accent/30 bg-accent/10`;
       case 'info':
-        return `${baseStyles} border-blue-500/30 bg-blue-500/10`;
+        return `${baseStyles} border-blue-500/30 bg-towny-light/10`;
       default:
         return baseStyles;
     }
@@ -122,6 +122,8 @@ export function useToast() {
     ToastContainer
   };
 }
+
+
 
 
 

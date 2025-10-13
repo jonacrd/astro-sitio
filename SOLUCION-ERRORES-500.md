@@ -115,3 +115,5 @@ Si funciona en producción pero no en desarrollo:
 ---
 
 **💡 Tip**: Siempre que modifiques archivos en `src/pages/api/` o archivos importados por componentes del servidor, reinicia el servidor de desarrollo.
+
+

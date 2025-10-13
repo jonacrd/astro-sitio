@@ -90,7 +90,7 @@ export default function QuickPushButton() {
     <button
       onClick={activateNotifications}
       disabled={loading}
-      className="fixed bottom-20 right-4 bg-blue-500 text-white p-4 rounded-full shadow-lg z-40 hover:bg-blue-600 transition-all hover:scale-110 disabled:opacity-50 animate-pulse"
+      className="fixed bottom-20 right-4 bg-towny-light text-white p-4 rounded-full shadow-lg z-40 hover:bg-towny transition-all hover:scale-110 disabled:opacity-50 animate-pulse"
       title="Click para activar notificaciones"
     >
       {loading ? (

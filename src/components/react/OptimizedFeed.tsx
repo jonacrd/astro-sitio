@@ -181,10 +181,14 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
         {/* Skeleton para productos */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {[1,2,3,4,5,6,7,8,9,10].map(i => (
-            <div key={i} className="bg-gray-100 rounded-lg p-4 animate-pulse">
-              <div className="aspect-square bg-gray-200 rounded-lg mb-3"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+            <div key={i}>
+              <div className="rounded-2xl overflow-hidden bg-gray-700 animate-pulse mb-3">
+                <div className="w-full aspect-square bg-gray-600"></div>
+              </div>
+              <div className="flex items-center justify-between px-1">
+                <div className="h-5 bg-gray-600 rounded w-1/2 animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-600 rounded-full animate-pulse"></div>
+              </div>
             </div>
           ))}
         </div>
@@ -198,7 +202,7 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
         <p>Error: {error}</p>
         <button 
           onClick={() => loadProducts(1)}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark"
         >
           Reintentar
         </button>
@@ -246,7 +250,7 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
               className={`flex-shrink-0 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                 (selectedCategory === null && category.id === 'todos') || 
                 selectedCategory === category.id
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-towny text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -278,50 +282,64 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
             {/* Grid de productos de la categoría */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {categoryProducts.map(product => (
-                <div key={product.id} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 hover:bg-white/15 hover:border-white/30 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 relative group overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300">
-                  {/* Badge de vendedor */}
-                  <a 
-                    href={`/vendedor/${product.seller_id}`}
-                    className={`absolute top-3 left-3 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:scale-105 transition-all duration-200 cursor-pointer backdrop-blur-sm ${
-                      product.seller_active 
-                        ? 'bg-green-500/20 border border-green-400/30 hover:bg-green-500/30' 
-                        : 'bg-gray-500/20 border border-gray-400/30 hover:bg-gray-500/30'
-                    }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${product.seller_active ? 'bg-green-400' : 'bg-gray-400'}`}></span>
-                    {product.seller_name}
-                  </a>
-
-                  {/* Imagen del producto */}
-                  <div className="aspect-square bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl mb-4 overflow-hidden relative group-hover:scale-105 transition-transform duration-300">
+                <div key={product.id} className="group">
+                  {/* Imagen con bordes redondeados */}
+                  <div className="relative rounded-2xl overflow-hidden mb-3">
                     <img
                       src={product.image_url || '/images/placeholder.jpg'}
                       alt={product.title}
-                      className="w-full h-full object-cover group-hover:brightness-110 transition-all duration-300"
+                      className="w-full aspect-square object-cover"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Badge de vendedor arriba-izquierda */}
+                    <div className="absolute top-2 left-2">
+                      <a 
+                        href={`/vendedor/${product.seller_id}`}
+                        className={`inline-flex h-6 px-2 rounded-full text-white text-[11px] font-semibold items-center gap-1 hover:scale-105 transition-all duration-200 cursor-pointer ${
+                          product.seller_active 
+                            ? 'bg-green-600/90' 
+                            : 'bg-gray-600/90'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${product.seller_active ? 'bg-white' : 'bg-gray-300'}`}></span>
+                        {product.seller_name}
+                      </a>
+                    </div>
+
+                    {/* Overlay inferior con gradiente */}
+                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/75 via-black/35 to-transparent">
+                      <h3 className="text-white text-[15px] font-semibold line-clamp-2">
+                        {product.title}
+                      </h3>
+                    </div>
                   </div>
 
-                  {/* Información del producto */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-white text-sm line-clamp-2 leading-relaxed">
-                      {product.title}
-                    </h3>
+                  {/* Contenido inferior sin background */}
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-white text-[18px] font-extrabold">
+                      {formatPrice(product.price_cents)}
+                    </p>
                     
-                    <div className="flex items-center justify-between">
-                      <p className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                        {formatPrice(product.price_cents)}
-                      </p>
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 opacity-60"></div>
-                    </div>
-                    
+                    {/* Botón + a la derecha del precio */}
                     <button
-                      onClick={() => handleAddToCart(product)}
+                      onClick={(e) => {
+                        // Animación del botón
+                        const button = e.currentTarget;
+                        button.classList.add('animate-bounce');
+                        setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                        
+                        handleAddToCart(product);
+                      }}
                       disabled={!product.seller_active && !window.confirm}
-                      className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-600 hover:shadow-lg hover:shadow-blue-500/25 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                      className={`h-8 w-8 rounded-full text-white grid place-items-center transition-all duration-200 shadow-lg hover:shadow-xl ${
+                        product.seller_active
+                          ? 'bg-towny hover:bg-towny-light hover:scale-110 active:scale-95'
+                          : 'bg-gray-600 cursor-not-allowed opacity-50'
+                      }`}
+                      aria-label="Agregar al carrito"
                     >
-                      {!product.seller_active ? 'Tienda cerrada' : 'Agregar'}
+                      <span className="text-xl font-bold leading-none">+</span>
                     </button>
                   </div>
                 </div>
@@ -337,7 +355,7 @@ export default function OptimizedFeed({ className = '' }: OptimizedFeedProps) {
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+            className="px-6 py-3 bg-towny text-white rounded-lg hover:bg-towny-dark disabled:bg-gray-400 transition-colors"
           >
             {loadingMore ? 'Cargando...' : 'Cargar más productos'}
           </button>

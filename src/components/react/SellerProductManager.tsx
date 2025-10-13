@@ -190,7 +190,7 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
           <p className="text-sm mb-4">Agrega productos a tu inventario para empezar a vender</p>
           <button 
             onClick={() => window.location.href = '/dashboard/mis-productos'}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark"
           >
             Gestionar Productos
           </button>
@@ -308,7 +308,7 @@ export default function SellerProductManager({ onProductUpdated }: SellerProduct
                   </div>
                   <button
                     onClick={() => handleEdit(product)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark"
                   >
                     Editar
                   </button>

@@ -100,7 +100,7 @@ export default function PushDiagnostic() {
 
   if (loading) {
     return (
-      <div className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-lg shadow-lg max-w-md z-50">
+      <div className="fixed bottom-4 right-4 bg-towny-light text-white p-4 rounded-lg shadow-lg max-w-md z-50">
         <p className="text-sm">🔍 Diagnosticando notificaciones push...</p>
       </div>
     );
@@ -255,7 +255,7 @@ export default function PushDiagnostic() {
 
       <button
         onClick={runDiagnostic}
-        className="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        className="mt-4 w-full bg-towny-light text-white py-2 rounded-lg hover:bg-towny transition-colors"
       >
         🔄 Volver a diagnosticar
       </button>

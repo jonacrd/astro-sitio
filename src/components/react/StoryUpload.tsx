@@ -416,7 +416,7 @@ export default function StoryUpload({ isOpen, onClose, onSuccess, userId }: Stor
                   onClick={() => setTextPosition(option.value as any)}
                   className={`px-3 py-2 rounded-lg text-sm ${
                     textPosition === option.value
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-towny-light text-white'
                       : 'bg-gray-200 text-gray-700'
                   }`}
                 >
@@ -445,7 +445,7 @@ export default function StoryUpload({ isOpen, onClose, onSuccess, userId }: Stor
             <button
               type="submit"
               disabled={!mediaFile || uploading}
-              className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+              className="flex-1 px-4 py-2 bg-towny-light text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-towny transition-colors"
             >
               {uploading ? 'Creando...' : 'Crear Historia'}
             </button>

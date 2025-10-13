@@ -239,7 +239,7 @@ export default function OptimizedGridBlocks({ onAddToCart, onViewProduct, onCont
                     }
                   }}
                   disabled={cartLoading}
-                  className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-towny text-white text-xs font-semibold shadow hover:bg-towny-light active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {cartLoading ? 'Agregando...' : product.ctaLabel}
                 </button>

@@ -216,7 +216,7 @@ export default function ProductManagerSimple() {
           <h2 className="text-2xl font-bold">Mis productos</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="bg-towny text-white px-4 py-2 rounded-lg font-medium hover:bg-towny-dark transition-colors"
           >
             + Añadir producto
           </button>
@@ -231,7 +231,7 @@ export default function ProductManagerSimple() {
                 onClick={() => setActiveTab(category.id)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
                   activeTab === category.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-towny text-white'
                     : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 }`}
               >
@@ -253,7 +253,7 @@ export default function ProductManagerSimple() {
             <p className="text-sm mb-6">Haz clic en "+ Añadir producto" para comenzar a vender</p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="bg-towny text-white px-6 py-3 rounded-lg font-medium hover:bg-towny-dark transition-colors"
             >
               Agregar mi primer producto
             </button>
@@ -428,7 +428,7 @@ export default function ProductManagerSimple() {
                           </div>
                           <button
                             onClick={() => handleAddProduct(product)}
-                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+                            className="bg-towny text-white px-3 py-1 rounded text-sm hover:bg-towny-dark transition-colors"
                           >
                             Añadir
                           </button>

@@ -206,7 +206,7 @@ export default function PushDebugConsole() {
       <div className="grid grid-cols-2 gap-2 mb-3">
         <button
           onClick={checkPermissions}
-          className="px-3 py-2 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+          className="px-3 py-2 bg-towny-light text-white rounded text-xs hover:bg-towny"
         >
           🔔 Permisos
         </button>
@@ -218,7 +218,7 @@ export default function PushDebugConsole() {
         </button>
         <button
           onClick={testNotification}
-          className="px-3 py-2 bg-purple-500 text-white rounded text-xs hover:bg-purple-600"
+          className="px-3 py-2 bg-purple-500 text-white rounded text-xs hover:bg-towny"
         >
           🧪 Test Yo
         </button>
@@ -230,7 +230,7 @@ export default function PushDebugConsole() {
         </button>
         <button
           onClick={checkAllSubscriptions}
-          className="px-3 py-2 bg-indigo-500 text-white rounded text-xs hover:bg-indigo-600 col-span-2"
+          className="px-3 py-2 bg-indigo-500 text-white rounded text-xs hover:bg-towny col-span-2"
         >
           📋 Todas las Subs
         </button>
@@ -250,6 +250,8 @@ export default function PushDebugConsole() {
     </div>
   );
 }
+
+
 
 
 

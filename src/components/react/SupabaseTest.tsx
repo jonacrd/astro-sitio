@@ -92,7 +92,7 @@ export default function SupabaseTest() {
       <div className="mb-4">
         <button 
           onClick={testConnection}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
+          className="px-4 py-2 bg-towny-light text-white rounded hover:bg-towny mr-2"
         >
           🔄 Verificar Conexión
         </button>
@@ -135,6 +135,8 @@ export default function SupabaseTest() {
     </div>
   );
 }
+
+
 
 
 

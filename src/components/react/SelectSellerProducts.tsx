@@ -286,7 +286,7 @@ export default function SelectSellerProducts() {
           <button
             onClick={() => loadSellerProducts(true)}
             disabled={sellerLoading}
-            className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark disabled:opacity-50"
           >
             {sellerLoading ? 'Buscando...' : 'Buscar'}
           </button>
@@ -533,7 +533,7 @@ function ProductCard({
         <button
           onClick={() => onAdd(product, price, stock)}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-towny text-white py-2 px-3 rounded text-sm hover:bg-towny-dark disabled:opacity-50"
         >
           {loading ? 'Agregando...' : 'Agregar a mi catálogo'}
         </button>

@@ -142,7 +142,7 @@ export default function LoginButton({ onLoginSuccess }: LoginButtonProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-center hover:bg-blue-500/30 transition-colors"
+                    className="bg-towny-light/20 border border-blue-500/30 rounded-lg p-3 text-center hover:bg-towny-light/30 transition-colors"
                   >
                     <div className="text-2xl mb-1">🛒</div>
                     <p className="text-white font-medium text-sm">Comprador</p>

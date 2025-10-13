@@ -204,7 +204,7 @@ export default function CartSheet({
               </button>
               <button
                 onClick={onProceedToCheckout}
-                className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex-1 bg-towny-light text-white py-2 px-4 rounded-lg hover:bg-towny transition-colors"
               >
                 Proceder al Pago
               </button>

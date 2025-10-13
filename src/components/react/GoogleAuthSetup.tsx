@@ -130,7 +130,7 @@ export default function GoogleAuthSetup() {
               onClick={() => setStep(index + 1)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 step === index + 1
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-towny-light text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -161,7 +161,7 @@ export default function GoogleAuthSetup() {
         <button
           onClick={() => setStep(Math.min(steps.length, step + 1))}
           disabled={step === steps.length}
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-towny-light text-white rounded-lg hover:bg-towny disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Siguiente
         </button>
@@ -200,6 +200,8 @@ export default function GoogleAuthSetup() {
     </div>
   );
 }
+
+
 
 
 

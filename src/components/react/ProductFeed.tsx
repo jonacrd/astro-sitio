@@ -163,7 +163,7 @@ export default function ProductFeed({ className = '' }: ProductFeedProps) {
         <p>Error: {error}</p>
         <button 
           onClick={loadProducts}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="mt-4 px-4 py-2 bg-towny-light text-white rounded-lg hover:bg-towny transition-colors"
         >
           Reintentar
         </button>
@@ -183,7 +183,7 @@ export default function ProductFeed({ className = '' }: ProductFeedProps) {
               onClick={() => setFilter(filterType)}
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
                 filter === filterType
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-towny text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -204,59 +204,68 @@ export default function ProductFeed({ className = '' }: ProductFeedProps) {
           <p className="text-sm text-gray-400 mt-1">Los productos aparecen aquí cuando los vendedores los agregan</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              {/* Imagen del producto */}
-              <div className="relative">
+            <div key={product.id} className="group">
+              {/* Imagen con bordes redondeados */}
+              <div className="relative rounded-2xl overflow-hidden mb-3">
                 <img
                   src={product.image_url}
                   alt={product.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
+                  className="w-full aspect-square object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/default-product.png';
                   }}
+                  loading="lazy"
                 />
+                
+                {/* Badge de categoría arriba-izquierda */}
                 <div className="absolute top-2 left-2">
-                  <span className="px-2 py-1 bg-white bg-opacity-90 text-gray-700 rounded-full text-xs font-medium">
+                  <span className="inline-flex h-6 px-2 rounded-full bg-rose-600/90 text-white text-[11px] font-semibold items-center gap-1">
                     {getCategoryIcon(product.category)} {product.category}
                   </span>
                 </div>
+
+                {/* Badge de stock arriba-derecha */}
                 {product.stock > 0 && (
                   <div className="absolute top-2 right-2">
-                    <span className="px-2 py-1 bg-green-500 text-white rounded-full text-xs font-medium">
+                    <span className="inline-flex h-6 px-2 rounded-full bg-green-600/90 text-white text-[11px] font-semibold">
                       {product.stock} disponibles
                     </span>
                   </div>
                 )}
+
+                {/* Overlay inferior con gradiente */}
+                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/75 via-black/35 to-transparent">
+                  <h3 className="text-white text-[15px] font-semibold line-clamp-2">
+                    {product.title}
+                  </h3>
+                  <p className="text-white/70 text-[12px]">{product.seller_name}</p>
+                </div>
               </div>
 
-              {/* Información del producto */}
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.title}</h3>
-                {product.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                )}
+              {/* Contenido inferior sin background */}
+              <div className="flex items-center justify-between px-1">
+                <p className="text-white text-[18px] font-extrabold">
+                  {formatPrice(product.price_cents)}
+                </p>
                 
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-green-600">
-                    {formatPrice(product.price_cents)}
-                  </span>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">por</p>
-                    <p className="text-sm font-medium text-gray-700">{product.seller_name}</p>
-                  </div>
-                </div>
-
-                {/* Botones de acción */}
-                <div className="flex gap-2">
-                  <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-                    Ver Detalles
-                  </button>
-                  <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                    Agregar al Carrito
-                  </button>
-                </div>
+                {/* Botón + a la derecha del precio */}
+                <button
+                  onClick={(e) => {
+                    // Animación del botón
+                    const button = e.currentTarget;
+                    button.classList.add('animate-bounce');
+                    setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                    
+                    // TODO: Implementar agregar al carrito
+                    console.log('Agregar al carrito:', product.id);
+                  }}
+                  className="h-8 w-8 rounded-full bg-towny text-white grid place-items-center hover:bg-towny-light hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  aria-label="Agregar al carrito"
+                >
+                  <span className="text-xl font-bold leading-none">+</span>
+                </button>
               </div>
             </div>
           ))}

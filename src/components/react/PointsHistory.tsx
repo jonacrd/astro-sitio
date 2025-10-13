@@ -158,7 +158,7 @@ export default function PointsHistory({ userId, className = '' }: PointsHistoryP
             onClick={() => setShowSummary(!showSummary)}
             className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
               showSummary 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-towny text-white' 
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
@@ -185,7 +185,7 @@ export default function PointsHistory({ userId, className = '' }: PointsHistoryP
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-white truncate">{seller.seller_name}</h4>
                   {selectedSeller === seller.seller_id && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="w-2 h-2 bg-towny-light rounded-full"></div>
                   )}
                 </div>
                 <div className="space-y-1 text-sm">
@@ -305,6 +305,8 @@ export default function PointsHistory({ userId, className = '' }: PointsHistoryP
     </div>
   );
 }
+
+
 
 
 

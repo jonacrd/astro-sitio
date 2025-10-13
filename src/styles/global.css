@@ -20,6 +20,9 @@
 /* Importar sistema de Towny */
 @import './towny-system.css';
 
+/* Importar tema rosa Towny - SOBRESCRIBE TODOS LOS COLORES */
+@import './towny-pink-theme.css';
+
 /* Utilidades para feed tipo red social */
 .card {
   @apply bg-surface/80 border border-white/5 backdrop-blur-md rounded-2xl shadow-card;
@@ -95,7 +98,7 @@
 }
 
 .text-accent {
-  color: #F8C20A;
+  color: #FF4D6A;
 }
 
 .text-success {

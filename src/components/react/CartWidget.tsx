@@ -583,8 +583,8 @@ export default function CartWidget({ className = "" }: CartWidgetProps) {
               <div className="space-y-2">
                 <a
                   href="/checkout"
-                  className="w-full min-h-11 bg-blue-600 text-white rounded-lg font-medium 
-                           hover:bg-blue-700 transition-colors flex items-center justify-center"
+                  className="w-full min-h-11 bg-towny text-white rounded-lg font-medium 
+                           hover:bg-towny-dark transition-colors flex items-center justify-center"
                 >
                   Proceder al Pago
                 </a>

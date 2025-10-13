@@ -288,7 +288,7 @@ export default function GlobalAuthModal({ isOpen, onClose, onSuccess, initialMod
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition-colors"
+            className="w-full px-4 py-3 bg-towny-light text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-towny transition-colors"
           >
             {loading ? 'Procesando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
           </button>

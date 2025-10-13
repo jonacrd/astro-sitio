@@ -39,7 +39,7 @@ export default function ProfileButton() {
         href="/perfil"
         className="flex items-center space-x-3 bg-white rounded-full shadow-lg px-4 py-3 hover:shadow-xl transition-all duration-200 border border-gray-200"
       >
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+        <div className="w-8 h-8 bg-towny rounded-full flex items-center justify-center">
           <span className="text-white text-sm font-semibold">
             {profile?.name ? profile.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
           </span>
@@ -61,6 +61,8 @@ export default function ProfileButton() {
     </div>
   );
 }
+
+
 
 
 

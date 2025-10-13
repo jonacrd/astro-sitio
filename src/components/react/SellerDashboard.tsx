@@ -183,7 +183,7 @@ export default function SellerDashboard() {
         <p>Error: {error}</p>
         <button 
           onClick={loadProducts}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark"
         >
           Reintentar
         </button>
@@ -220,7 +220,7 @@ export default function SellerDashboard() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowAddProduct(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark transition-colors"
             >
               + Agregar Producto
             </button>
@@ -241,7 +241,7 @@ export default function SellerDashboard() {
             <p>No tienes productos aún.</p>
             <button
               onClick={() => setShowAddProduct(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="mt-4 px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark"
             >
               Agregar tu primer producto
             </button>
@@ -572,7 +572,7 @@ function AddProductModal({ onClose, onProductAdded }: { onClose: () => void; onP
               <button
                 type="submit"
                 disabled={loading || uploading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark disabled:opacity-50"
               >
                 {loading ? 'Agregando...' : 'Agregar Producto'}
               </button>

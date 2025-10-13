@@ -69,3 +69,5 @@ SELECT 'PROFILES' as info, id, name, phone, is_seller, opt_in_whatsapp FROM publ
 
 
 
+
+

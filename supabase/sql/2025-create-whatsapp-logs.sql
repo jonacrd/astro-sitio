@@ -33,3 +33,5 @@ CREATE INDEX IF NOT EXISTS idx_whatsapp_logs_created_at ON whatsapp_logs(created
 
 
 
+
+

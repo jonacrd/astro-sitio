@@ -18,3 +18,5 @@ comment on table public.whatsapp_logs is 'Outbound/inbound WhatsApp messages and
 
 
 
+
+

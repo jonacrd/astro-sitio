@@ -140,7 +140,7 @@ export default function CompleteProfile({ onComplete }: CompleteProfileProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-towny text-white py-2 px-4 rounded-md hover:bg-towny-dark focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Guardando...' : 'Completar Perfil'}
         </button>

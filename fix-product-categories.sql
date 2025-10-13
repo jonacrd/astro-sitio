@@ -36,3 +36,5 @@ SELECT category, COUNT(*) as total FROM products GROUP BY category ORDER BY tota
 
 
 
+
+

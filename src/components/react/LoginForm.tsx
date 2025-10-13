@@ -178,7 +178,7 @@ export default function LoginForm({ onLoginSuccess, onClose }: LoginFormProps) {
         // Mostrar notificación de éxito
         if (typeof window !== 'undefined') {
           const notification = document.createElement('div');
-          notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+          notification.className = 'fixed top-4 right-4 bg-towny-light text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
           notification.innerHTML = `
             <div class="flex items-center">
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -271,7 +271,7 @@ export default function LoginForm({ onLoginSuccess, onClose }: LoginFormProps) {
        // Mostrar notificación de éxito
        if (typeof window !== 'undefined') {
          const notification = document.createElement('div');
-         notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+         notification.className = 'fixed top-4 right-4 bg-towny-light text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
          notification.innerHTML = `
            <div class="flex items-center">
              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -543,7 +543,7 @@ export default function LoginForm({ onLoginSuccess, onClose }: LoginFormProps) {
           disabled={loading}
           className={`w-full py-2 px-4 rounded-md text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             mode === 'login' 
-              ? 'bg-blue-500 hover:bg-blue-600' 
+              ? 'bg-towny-light hover:bg-towny' 
               : 'bg-green-500 hover:bg-green-600'
           }`}
         >

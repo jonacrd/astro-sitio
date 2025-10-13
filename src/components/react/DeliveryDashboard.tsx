@@ -206,7 +206,7 @@ export default function DeliveryDashboard() {
         return (
           <button
             onClick={() => updateStatus(offer.id, 'picked_up')}
-            className="px-4 py-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 py-1 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors text-sm"
           >
             📦 Confirmar Recogida
           </button>
@@ -224,7 +224,7 @@ export default function DeliveryDashboard() {
         return (
           <button
             onClick={() => updateStatus(offer.id, 'delivered')}
-            className="px-4 py-2 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+            className="px-4 py-2 py-1 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors text-sm"
           >
             🎉 Marcar Entregado
           </button>

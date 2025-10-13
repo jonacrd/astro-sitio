@@ -406,7 +406,7 @@ export default function PushNotificationManager() {
             <button
               onClick={requestPermission}
               disabled={loading}
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-towny-light text-white px-4 py-2 rounded-lg hover:bg-towny disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Solicitando...' : 'Activar Notificaciones'}
             </button>
@@ -426,7 +426,7 @@ export default function PushNotificationManager() {
             <div className="space-y-2">
               <button
                 onClick={sendTestNotification}
-                className="w-full bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
+                className="w-full bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-towny"
               >
                 Enviar Notificación de Prueba
               </button>

@@ -114,7 +114,7 @@ export default function UserChecker() {
           <button
             onClick={checkUser}
             disabled={loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            className="px-4 py-2 bg-towny-light text-white rounded hover:bg-towny disabled:opacity-50"
           >
             {loading ? 'Buscando...' : '🔍 Buscar'}
           </button>
@@ -176,6 +176,8 @@ export default function UserChecker() {
     </div>
   );
 }
+
+
 
 
 

@@ -41,3 +41,5 @@ SELECT 'delivery_notifications' as table_name, count(*) as count FROM public.del
 
 
 
+
+

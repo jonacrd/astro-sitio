@@ -111,7 +111,7 @@ const WelcomeGuide: React.FC<WelcomeGuideProps> = ({ onComplete }) => {
             </button>
             <button
               onClick={handleNext}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="px-6 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors font-medium"
             >
               {isLastStep ? '¡Entendido!' : 'Siguiente'}
             </button>

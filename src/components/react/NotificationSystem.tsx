@@ -69,7 +69,7 @@ export default function NotificationSystem() {
           className={`px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
             notification.type === 'success' ? 'bg-green-500 text-white' :
             notification.type === 'error' ? 'bg-red-500 text-white' :
-            'bg-blue-500 text-white'
+            'bg-towny-light text-white'
           }`}
         >
           <div className="flex items-center justify-between">

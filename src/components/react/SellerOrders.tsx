@@ -33,7 +33,7 @@ const TransferProofViewer = ({ transferProof, orderId }: { transferProof: string
           <div className="flex gap-2">
             <button
               onClick={() => setShowModal(true)}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+              className="px-3 py-1 bg-towny text-white text-xs rounded-md hover:bg-towny-dark transition-colors"
             >
               Ver
             </button>
@@ -78,7 +78,7 @@ const TransferProofViewer = ({ transferProof, orderId }: { transferProof: string
               </button>
               <button
                 onClick={downloadProof}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark transition-colors"
               >
                 Descargar
               </button>
@@ -251,7 +251,7 @@ export default function SellerOrders() {
         <p>Error: {error}</p>
         <button 
           onClick={fetchOrders}
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          className="mt-4 bg-towny text-white px-4 py-2 rounded-lg hover:bg-towny-dark"
         >
           Reintentar
         </button>
@@ -267,7 +267,7 @@ export default function SellerOrders() {
           <button
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'all' ? 'bg-towny text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Todos ({orders.length})
@@ -275,7 +275,7 @@ export default function SellerOrders() {
           <button
             onClick={() => setFilter('pending')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'pending' ? 'bg-towny text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Pendientes ({orders.filter(o => o.status === 'pending').length})
@@ -283,7 +283,7 @@ export default function SellerOrders() {
           <button
             onClick={() => setFilter('confirmed')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'confirmed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'confirmed' ? 'bg-towny text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Confirmados ({orders.filter(o => o.status === 'confirmed').length})
@@ -291,7 +291,7 @@ export default function SellerOrders() {
           <button
             onClick={() => setFilter('delivered')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              filter === 'delivered' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              filter === 'delivered' ? 'bg-towny text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Entregados ({orders.filter(o => o.status === 'delivered').length})
@@ -396,7 +396,7 @@ export default function SellerOrders() {
                 {order.status === 'confirmed' && (
                   <button
                     onClick={() => updateOrderStatus(order.id, 'delivered')}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="bg-towny text-white px-4 py-2 rounded-lg hover:bg-towny-dark transition-colors"
                   >
                     Marcar como Entregado
                   </button>

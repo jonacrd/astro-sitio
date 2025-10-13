@@ -179,7 +179,7 @@ export default function EnhancedCategoryBanner({
                             className={`w-full py-1.5 px-3 rounded-lg font-medium text-xs transition-colors duration-200 ${
                               isOutOfStock
                                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-600 text-white hover:bg-blue-700"
+                                : "bg-towny text-white hover:bg-towny-dark"
                             }`}
                             disabled={isOutOfStock}
                           >

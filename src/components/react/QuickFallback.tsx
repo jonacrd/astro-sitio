@@ -40,7 +40,7 @@ export default function QuickFallback({ className = '' }: QuickFallbackProps) {
             <span className="font-bold text-xl text-gray-900">$3.500</span>
             <span className="text-sm text-gray-500">Stock: 10</span>
           </div>
-          <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+          <button className="w-full bg-towny-light text-white py-2 px-4 rounded-lg hover:bg-towny transition-colors">
             Añadir al carrito
           </button>
         </div>
@@ -59,7 +59,7 @@ export default function QuickFallback({ className = '' }: QuickFallbackProps) {
             <span className="font-bold text-xl text-gray-900">$8.000</span>
             <span className="text-sm text-gray-500">Stock: 5</span>
           </div>
-          <button className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+          <button className="w-full bg-towny-light text-white py-2 px-4 rounded-lg hover:bg-towny transition-colors">
             Añadir al carrito
           </button>
         </div>

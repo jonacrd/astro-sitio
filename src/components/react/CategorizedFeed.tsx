@@ -277,7 +277,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
               selectedCategory === null
-                ? 'bg-blue-600 text-white shadow-lg'
+                ? 'bg-towny text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
             }`}
           >
@@ -293,7 +293,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                 onClick={() => setSelectedCategory(category.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   selectedCategory === category.id
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-towny text-white shadow-lg'
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
@@ -374,7 +374,7 @@ export default function CategorizedFeed({ className = '' }: CategorizedFeedProps
                       onClick={() => handleAddToCart(product)}
                       className={`w-full py-2 rounded-lg active:scale-95 transition-all text-sm font-medium ${
                         product.seller_active
-                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          ? 'bg-towny text-white hover:bg-towny-dark'
                           : 'bg-gray-400 text-white hover:bg-gray-500'
                       }`}
                       title={product.seller_active ? 'Agregar al carrito' : 'Tienda cerrada - Click para más info'}

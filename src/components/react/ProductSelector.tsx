@@ -342,7 +342,7 @@ export default function ProductSelector({ sellerId, onProductsUpdated }: Product
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditProduct(sellerProduct)}
-                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+                        className="px-3 py-1 bg-towny-light text-white text-sm rounded-md hover:bg-towny transition-colors"
                       >
                         Editar
                       </button>

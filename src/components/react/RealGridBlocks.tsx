@@ -214,7 +214,7 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
                       
                       onAddToCart?.(product.id);
                     }}
-                    className="h-8 w-8 rounded-full bg-blue-600 text-white grid place-items-center hover:bg-blue-500 hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="h-8 w-8 rounded-full bg-towny text-white grid place-items-center hover:bg-towny-light hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
                     aria-label="Agregar al carrito"
                   >
                     <span className="text-xl font-bold leading-none">+</span>
@@ -233,7 +233,7 @@ export default function RealGridBlocks({ onAddToCart, onViewProduct, onContactSe
                 // TODO: Implementar navegación
                 console.log('Ver más productos');
               }}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-500 active:scale-95 transition"
+              className="px-6 py-3 bg-towny text-white rounded-xl font-semibold hover:bg-towny-light active:scale-95 transition"
             >
               Ver más
             </button>

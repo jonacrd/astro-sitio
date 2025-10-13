@@ -32,7 +32,7 @@
   }
 
   .towny-btn--primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+    @apply bg-[#FF4D6A] text-white hover:bg-[#E6435D];
   }
 
   .towny-btn--secondary {
@@ -117,7 +117,7 @@
 
   /* Para checkout con Towny */
   .towny-checkout {
-    @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6;
+    @apply bg-[#FF4D6A]/10 dark:bg-[#FF4D6A]/20 border border-[#FF4D6A]/30 dark:border-[#FF4D6A]/40 rounded-xl p-4 mb-6;
   }
 
   .towny-checkout .towny-image {
@@ -125,11 +125,13 @@
   }
 
   .towny-checkout .towny-title {
-    @apply text-lg font-semibold text-blue-800 dark:text-blue-200 mb-1;
+    @apply text-lg font-semibold text-[#FF4D6A] dark:text-[#FF6B82] mb-1;
   }
 
   .towny-checkout .towny-message {
-    @apply text-sm text-blue-600 dark:text-blue-300;
+    @apply text-sm text-[#FF4D6A] dark:text-[#FF6B82];
   }
 }
+
+
 

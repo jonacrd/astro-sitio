@@ -195,7 +195,7 @@ export default function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isAdding}
-      className={`${className} ${disabled || isAdding ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600 hover:scale-105'} bg-blue-500 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95 shadow-md hover:shadow-lg`}
+      className={`${className} ${disabled || isAdding ? 'opacity-50 cursor-not-allowed' : 'hover:bg-towny hover:scale-105'} bg-towny-light text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2 active:scale-95 shadow-md hover:shadow-lg`}
     >
       {isAdding ? (
         <>

@@ -239,9 +239,9 @@ export default function SimpleAuthButton() {
             <div className="py-1">
               <button
                 onClick={handleLoginClick}
-                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-blue-500/20 transition-colors"
+                className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-towny-light/20 transition-colors"
               >
-                <div className="w-8 h-8 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-towny-light/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
                   <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                   </svg>

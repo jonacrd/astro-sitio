@@ -1,0 +1,156 @@
+/* 
+ * Tema Rosa Towny - Color Principal #FF4D6A
+ * SOLO para botones de agregar al carrito, bottom nav bar y sus hovers/bordes
+ */
+
+:root {
+  /* Color principal Towny Rosa */
+  --towny-pink: #FF4D6A;
+  --towny-pink-hover: #E6435D;
+  --towny-pink-active: #CC3952;
+  --towny-pink-light: #FF6B82;
+  --towny-pink-dark: #B33449;
+}
+
+/* ============================================ */
+/* SOLO BOTONES DE AGREGAR AL CARRITO */
+/* ============================================ */
+
+/* Botones de agregar al carrito - selectores específicos */
+button[aria-label*="Agregar"],
+button[aria-label*="agregar"],
+button[aria-label*="Añadir"],
+button[aria-label*="añadir"],
+button[aria-label*="carrito"],
+.add-to-cart-button,
+.add-button,
+button:has(svg):has([d*="M12 4v16m8-8H4"]), /* Icono de + */
+button[class*="add-to-cart"],
+button[onclick*="addToCart"],
+button[onclick*="agregar"] {
+  background-color: var(--towny-pink) !important;
+  color: white !important;
+  border-color: var(--towny-pink) !important;
+}
+
+/* Hovers de botones de agregar */
+button[aria-label*="Agregar"]:hover,
+button[aria-label*="agregar"]:hover,
+button[aria-label*="Añadir"]:hover,
+button[aria-label*="añadir"]:hover,
+button[aria-label*="carrito"]:hover,
+.add-to-cart-button:hover,
+.add-button:hover,
+button[class*="add-to-cart"]:hover,
+button[onclick*="addToCart"]:hover {
+  background-color: var(--towny-pink-hover) !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(255, 77, 106, 0.4) !important;
+}
+
+/* Active state */
+button[aria-label*="Agregar"]:active,
+button[aria-label*="añadir"]:active,
+.add-to-cart-button:active {
+  background-color: var(--towny-pink-active) !important;
+  transform: scale(0.98);
+}
+
+/* Botones que contengan "Agregar" en el texto */
+button:has(+ span:contains("Agregar")),
+button span:contains("Agregar"),
+button:contains("Agregar"),
+button:contains("Añadir"),
+button:contains("agregar"),
+button:contains("añadir") {
+  background-color: var(--towny-pink) !important;
+}
+
+/* ============================================ */
+/* BOTTOM NAVIGATION BAR */
+/* ============================================ */
+
+/* Bottom nav - iconos y texto activos */
+nav[class*="bottom"] button.active,
+nav[class*="bottom"] a.active,
+.bottom-nav button.active,
+.bottom-nav a.active,
+.bottom-navigation button.active,
+.bottom-navigation a.active,
+[class*="BottomNav"] button.active,
+[class*="BottomNav"] a.active,
+footer nav button.active,
+footer nav a.active {
+  color: var(--towny-pink) !important;
+}
+
+/* Bottom nav - iconos hover */
+nav[class*="bottom"] button:hover:not(.active),
+nav[class*="bottom"] a:hover:not(.active),
+.bottom-nav button:hover:not(.active),
+.bottom-nav a:hover:not(.active),
+.bottom-navigation button:hover:not(.active),
+.bottom-navigation a:hover:not(.active) {
+  color: var(--towny-pink-light) !important;
+}
+
+/* Bottom nav - indicador activo (línea o dot) */
+nav[class*="bottom"] .indicator,
+.bottom-nav .indicator,
+.bottom-navigation .indicator,
+nav[class*="bottom"] button.active::after,
+nav[class*="bottom"] a.active::after {
+  background-color: var(--towny-pink) !important;
+}
+
+/* Bottom nav - backgrounds de botones si los hay */
+nav[class*="bottom"] button[class*="bg-"],
+.bottom-nav button[class*="bg-"],
+.bottom-navigation button[class*="bg-"] {
+  background-color: transparent !important;
+}
+
+nav[class*="bottom"] button.active[class*="bg-"],
+.bottom-nav button.active[class*="bg-"],
+.bottom-navigation button.active[class*="bg-"] {
+  background-color: rgba(255, 77, 106, 0.1) !important;
+}
+
+/* ============================================ */
+/* BORDES Y OUTLINES SOLO DE BOTONES DE AGREGAR */
+/* ============================================ */
+
+/* Bordes de botones de agregar al carrito */
+button[aria-label*="Agregar"],
+button[aria-label*="agregar"],
+.add-to-cart-button,
+.add-button {
+  border: 2px solid var(--towny-pink) !important;
+}
+
+/* Focus en botones de agregar */
+button[aria-label*="Agregar"]:focus,
+button[aria-label*="agregar"]:focus,
+.add-to-cart-button:focus,
+.add-button:focus {
+  outline: 2px solid var(--towny-pink) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(255, 77, 106, 0.3) !important;
+}
+
+/* ============================================ */
+/* ICONOS EN BOTONES DE AGREGAR (SVG) */
+/* ============================================ */
+
+/* Colorear iconos en botones de agregar */
+button[aria-label*="Agregar"] svg,
+button[aria-label*="agregar"] svg,
+.add-to-cart-button svg,
+.add-button svg {
+  stroke: currentColor;
+}
+
+/* ============================================ */
+/* FIN - SOLO BOTONES DE AGREGAR Y BOTTOM NAV */
+/* ============================================ */
+

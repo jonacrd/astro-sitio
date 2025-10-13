@@ -297,7 +297,7 @@ export default function EnhancedOrderCard({
               // Abrir modal o navegar a subir comprobante
               alert('Funcionalidad de subir comprobante - próximamente');
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors text-sm"
           >
             📤 Subir Comprobante
           </button>
@@ -358,7 +358,7 @@ export default function EnhancedOrderCard({
             <button
               onClick={() => handleStatusChange('delivered')}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+              className="px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors text-sm disabled:opacity-50"
             >
               {loading ? '⏳' : '📦'} Marcar como Entregado
             </button>
@@ -369,7 +369,7 @@ export default function EnhancedOrderCard({
           <button
             onClick={() => handleStatusChange('completed')}
             disabled={loading}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm disabled:opacity-50"
+            className="px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors text-sm disabled:opacity-50"
           >
             {loading ? '⏳' : '✅'} Completar Pedido
           </button>

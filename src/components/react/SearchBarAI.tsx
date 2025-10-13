@@ -836,7 +836,7 @@ export default function SearchBarAI({
                                 console.log('🛒 Botón Agregar clickeado para:', result.title);
                                 handleAddToCart(result);
                               }}
-                              className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs font-medium transition-colors"
+                              className="w-full mt-2 bg-towny hover:bg-towny-dark text-white px-2 py-1 rounded text-xs font-medium transition-colors"
                             >
                               Agregar
                             </button>

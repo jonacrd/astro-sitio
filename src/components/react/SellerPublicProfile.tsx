@@ -261,7 +261,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
           <p className="text-gray-600 mb-4">{error || 'Este vendedor no existe o no está disponible'}</p>
           <a 
             href="/" 
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors"
           >
             ← Volver al inicio
           </a>
@@ -336,7 +336,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                 </button>
                 <a 
                   href="/carrito"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-6 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors"
                 >
                   Ver Carrito
                 </a>
@@ -389,7 +389,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                         <button
                           onClick={() => handleAddToCart(product)}
                           disabled={!seller.is_active}
-                          className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                          className="w-full py-2 px-3 bg-towny text-white text-sm rounded-lg hover:bg-towny-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           {!seller.is_active ? 'Tienda cerrada' : 'Agregar'}
                         </button>
@@ -418,7 +418,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                 onClick={() => setSelectedCategory(null)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   selectedCategory === null
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-towny text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -432,7 +432,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
                     onClick={() => setSelectedCategory(category)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                       selectedCategory === category
-                        ? 'bg-blue-600 text-white shadow-lg'
+                        ? 'bg-towny text-white shadow-lg'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -467,7 +467,7 @@ export default function SellerPublicProfile({ sellerId }: SellerPublicProfilePro
               <button
                 onClick={() => handleAddToCart(product)}
                 disabled={!seller.is_active}
-                className="w-full py-2 px-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="w-full py-2 px-3 bg-towny text-white text-sm rounded-lg hover:bg-towny-dark disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 {!seller.is_active ? 'Tienda cerrada' : 'Agregar'}
               </button>

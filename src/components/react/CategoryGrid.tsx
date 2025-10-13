@@ -25,7 +25,7 @@ export default function CategoryGrid({ categories = [], onCategoryClick }: Categ
       id: '2',
       name: 'Tecnología',
       icon: '📱',
-      color: 'bg-blue-500'
+      color: 'bg-towny-light'
     },
     {
       id: '3',
@@ -82,6 +82,8 @@ export default function CategoryGrid({ categories = [], onCategoryClick }: Categ
     </section>
   );
 }
+
+
 
 
 

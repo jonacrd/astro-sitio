@@ -133,7 +133,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
         // Mostrar notificación de éxito
         if (typeof window !== 'undefined') {
           const notification = document.createElement('div');
-          notification.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+          notification.className = 'fixed top-4 right-4 bg-towny-light text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
           notification.innerHTML = `
             <div class="flex items-center">
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -256,7 +256,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }: LoginMod
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 bg-towny-light text-white py-2 px-4 rounded-md hover:bg-towny transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Iniciando...' : 'Iniciar Sesión'}
             </button>

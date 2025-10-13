@@ -237,7 +237,7 @@ export default function ProductCarousel({
                         className={`w-full h-10 md:h-11 px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm md:text-base ${
                           isOutOfStock
                             ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.99]"
+                            : "bg-towny text-white hover:bg-towny-dark active:scale-[0.99]"
                         }`}
                       >
                         {isOutOfStock ? "Agotado" : "Agregar al carrito"}

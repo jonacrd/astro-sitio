@@ -68,3 +68,5 @@ console.log('Si NO ves nada, el problema es otra cosa');
 ```
 
 **Copia todo y pégalo en la consola después de hacer click en el botón flotante.**
+
+

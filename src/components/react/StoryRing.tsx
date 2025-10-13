@@ -164,7 +164,7 @@ export default function StoryRing({ userId, onStoryClick, className = '' }: Stor
         <p>Error: {error}</p>
         <button 
           onClick={loadStories}
-          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="mt-2 px-4 py-2 bg-towny-light text-white rounded-lg hover:bg-towny transition-colors"
         >
           Reintentar
         </button>

@@ -207,7 +207,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
         <p>Error: {error}</p>
         <button 
           onClick={loadProducts}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="mt-4 px-4 py-2 bg-towny-light text-white rounded-lg hover:bg-towny transition-colors"
         >
           Reintentar
         </button>
@@ -237,7 +237,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
           onClick={() => setFilter('all')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'all' 
-              ? 'bg-blue-500 text-white' 
+              ? 'bg-towny-light text-white' 
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -247,7 +247,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
           onClick={() => setFilter('featured')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'featured' 
-              ? 'bg-blue-500 text-white' 
+              ? 'bg-towny-light text-white' 
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -257,7 +257,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
           onClick={() => setFilter('cheapest')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'cheapest' 
-              ? 'bg-blue-500 text-white' 
+              ? 'bg-towny-light text-white' 
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -267,7 +267,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
           onClick={() => setFilter('popular')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             filter === 'popular' 
-              ? 'bg-blue-500 text-white' 
+              ? 'bg-towny-light text-white' 
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
@@ -332,7 +332,7 @@ export default function ProductFeedSimple({ className = '' }: ProductFeedSimpleP
                   }
                 }}
                 disabled={cartLoading}
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-towny-light text-white py-2 px-4 rounded-lg hover:bg-towny transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {cartLoading ? 'Agregando...' : (product.category === 'servicios' ? 'Contactar' : 'Añadir al carrito')}
               </button>

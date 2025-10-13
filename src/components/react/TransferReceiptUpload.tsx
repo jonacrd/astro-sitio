@@ -221,7 +221,7 @@ export default function TransferReceiptUpload({
         <button
           type="submit"
           disabled={isUploading || !selectedFile}
-          className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-towny text-white py-3 px-4 rounded-lg font-medium hover:bg-towny-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isUploading ? (
             <div className="flex items-center justify-center">
@@ -253,6 +253,8 @@ export default function TransferReceiptUpload({
     </div>
   );
 }
+
+
 
 
 

@@ -315,7 +315,7 @@ export default function SupabaseQuickTest() {
         <button
           onClick={runDiagnostic}
           disabled={loading}
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          className="px-6 py-2 bg-towny-light text-white rounded-lg hover:bg-towny disabled:opacity-50"
         >
           {loading ? 'Ejecutando...' : 'Ejecutar Diagnóstico'}
         </button>
@@ -323,6 +323,8 @@ export default function SupabaseQuickTest() {
     </div>
   );
 }
+
+
 
 
 

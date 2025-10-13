@@ -334,7 +334,7 @@ export default function SellerPublicProfileManager() {
           <a 
             href={`/vendedor/${profile?.id}`}
             target="_blank"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors"
           >
             Ver perfil público →
           </a>
@@ -435,7 +435,7 @@ export default function SellerPublicProfileManager() {
           <button
             onClick={handleSaveProfile}
             disabled={saving}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
@@ -554,7 +554,7 @@ export default function SellerPublicProfileManager() {
               <button
                 onClick={handleCreateSection}
                 disabled={saving || !newSection.name.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Creando...' : 'Crear Sección'}
               </button>
@@ -574,6 +574,8 @@ export default function SellerPublicProfileManager() {
     </div>
   );
 }
+
+
 
 
 

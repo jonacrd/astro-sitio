@@ -129,7 +129,7 @@ export default function OptimizedProductFeed({ className = '' }: OptimizedProduc
         <p>Error: {error}</p>
         <button 
           onClick={loadProducts}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="mt-4 px-4 py-2 bg-towny-light text-white rounded-lg hover:bg-towny transition-colors"
         >
           Reintentar
         </button>
@@ -187,7 +187,7 @@ export default function OptimizedProductFeed({ className = '' }: OptimizedProduc
                 }
               }}
               disabled={cartLoading}
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-towny-light text-white py-2 px-4 rounded-lg hover:bg-towny transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cartLoading ? 'Agregando...' : 'Añadir al carrito'}
             </button>

@@ -230,3 +230,5 @@ Antes de reportar un problema, verifica:
 ---
 
 **¡Después de verificar todo esto, el tour debería funcionar perfectamente!** 🎉
+
+

@@ -53,7 +53,7 @@ export default function QuickFallbackGrid({ onAddToCart, onViewProduct, onContac
               <p className="text-white/80 text-xs mb-1">Minimarket La Esquina</p>
               <p className="text-white text-lg font-extrabold mt-1">$3.500</p>
             </div>
-            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition">
+            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-towny text-white text-xs font-semibold shadow hover:bg-towny-light active:scale-95 transition">
               Añadir al carrito
             </button>
           </div>
@@ -75,7 +75,7 @@ export default function QuickFallbackGrid({ onAddToCart, onViewProduct, onContac
               <p className="text-white/80 text-xs mb-1">Restaurante El Buen Sabor</p>
               <p className="text-white text-lg font-extrabold mt-1">$8.000</p>
             </div>
-            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition">
+            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-towny text-white text-xs font-semibold shadow hover:bg-towny-light active:scale-95 transition">
               Añadir al carrito
             </button>
           </div>
@@ -97,7 +97,7 @@ export default function QuickFallbackGrid({ onAddToCart, onViewProduct, onContac
               <p className="text-white/80 text-xs mb-1">TechStore Local</p>
               <p className="text-white text-lg font-extrabold mt-1">$15.000</p>
             </div>
-            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition">
+            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-towny text-white text-xs font-semibold shadow hover:bg-towny-light active:scale-95 transition">
               Ver más
             </button>
           </div>
@@ -119,7 +119,7 @@ export default function QuickFallbackGrid({ onAddToCart, onViewProduct, onContac
               <p className="text-white/80 text-xs mb-1">CleanPro Services</p>
               <p className="text-white text-lg font-extrabold mt-1">$45.000</p>
             </div>
-            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-500 active:scale-95 transition">
+            <button className="absolute left-2 bottom-2 rounded-full px-3 h-8 bg-towny text-white text-xs font-semibold shadow hover:bg-towny-light active:scale-95 transition">
               Contactar
             </button>
           </div>

@@ -230,97 +230,98 @@ export default function CatalogWithFilters({ initialCategory }: CatalogWithFilte
 
       {/* Grid de productos */}
       {!loading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow overflow-hidden"
-            >
-              {/* Imagen */}
-              <div className="aspect-[4/3] bg-gray-200 relative overflow-hidden">
-                {product.imageUrl ? (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Fallback a placeholder si la imagen falla
-                      (e.target as HTMLImageElement).src = `/img/placeholders/${product.category.slug}.jpg`;
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <span className="text-4xl">📦</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {products.map((product) => {
+            const priceInfo = formatPriceWithDiscount(product.priceCents, product.discountCents);
+            
+            return (
+              <div key={product.id} className="group">
+                {/* Imagen con bordes redondeados */}
+                <div className="relative rounded-2xl overflow-hidden mb-3">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full aspect-square object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `/img/placeholders/${product.category.slug}.jpg`;
+                      }}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full aspect-square flex items-center justify-center bg-gray-800 rounded-2xl">
+                      <span className="text-4xl">📦</span>
+                    </div>
+                  )}
+                  
+                  {/* Badge de origen arriba-izquierda */}
+                  <div className="absolute top-2 left-2">
+                    <span className={`inline-flex h-6 px-2 rounded-full text-white text-[11px] font-semibold items-center ${getOriginBadgeColor(product.origin)}`}>
+                      {getOriginBadge(product.origin)}
+                    </span>
                   </div>
-                )}
-                
-                {/* Badge de origen */}
-                <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${getOriginBadgeColor(product.origin)}`}>
-                  {getOriginBadge(product.origin)}
-                </div>
 
-                {/* Badge de vendedor online */}
-                {product.sellerOnline && (
-                  <div className="absolute top-2 right-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                    ✅ Activo
-                  </div>
-                )}
-              </div>
-
-              {/* Contenido */}
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {product.name}
-                </h3>
-                
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-
-                {/* Precio */}
-                <div className="mb-3">
-                  {(() => {
-                    const priceInfo = formatPriceWithDiscount(product.priceCents, product.discountCents);
-                    return priceInfo.hasDiscount ? (
-                      <div>
-                        <span className="text-lg font-bold text-green-600">
-                          {priceInfo.discounted}
-                        </span>
-                        <span className="text-sm text-gray-500 line-through ml-2">
-                          {priceInfo.original}
-                        </span>
-                        <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                          -{Math.round((product.discountCents! / product.priceCents) * 100)}%
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-lg font-bold text-gray-900">
-                        {priceInfo.discounted}
+                  {/* Badge de vendedor online arriba-derecha */}
+                  {product.sellerOnline && (
+                    <div className="absolute top-2 right-2">
+                      <span className="inline-flex h-6 px-2 rounded-full bg-green-600/90 text-white text-[11px] font-semibold">
+                        ✅ Activo
                       </span>
-                    );
-                  })()}
-                </div>
+                    </div>
+                  )}
 
-                {/* Info adicional */}
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                  <span>⭐ {product.rating.toFixed(1)}</span>
-                  <span>📦 {product.stock} disponibles</span>
-                </div>
+                  {/* Badge de descuento si aplica */}
+                  {priceInfo.hasDiscount && (
+                    <div className="absolute top-10 right-2">
+                      <span className="inline-flex h-6 px-2 rounded-full bg-red-600/90 text-white text-[11px] font-semibold">
+                        -{Math.round((product.discountCents! / product.priceCents) * 100)}%
+                      </span>
+                    </div>
+                  )}
 
-                {/* ETA de entrega */}
-                {product.sellerOnline && product.deliveryETA && (
-                  <div className="text-xs text-green-600 mb-3">
-                    🚚 Entrega: {product.deliveryETA}
+                  {/* Overlay inferior con gradiente */}
+                  <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/75 via-black/35 to-transparent">
+                    <h3 className="text-white text-[15px] font-semibold line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-white/70 text-[11px]">⭐ {product.rating.toFixed(1)}</span>
+                      <span className="text-white/70 text-[11px]">📦 {product.stock}</span>
+                    </div>
                   </div>
-                )}
+                </div>
 
-                {/* Botón */}
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                  Ver Detalles
-                </button>
+                {/* Contenido inferior sin background */}
+                <div className="flex items-center justify-between px-1">
+                  <div>
+                    <p className="text-white text-[18px] font-extrabold">
+                      {priceInfo.discounted}
+                    </p>
+                    {priceInfo.hasDiscount && (
+                      <p className="text-white/50 text-[12px] line-through">
+                        {priceInfo.original}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Botón + a la derecha del precio */}
+                  <button
+                    onClick={(e) => {
+                      const button = e.currentTarget;
+                      button.classList.add('animate-bounce');
+                      setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                      
+                      console.log('Ver detalles:', product.id);
+                    }}
+                    className="h-8 w-8 rounded-full bg-towny text-white grid place-items-center hover:bg-towny-light hover:scale-110 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    aria-label="Ver detalles"
+                  >
+                    <span className="text-xl font-bold leading-none">+</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -336,7 +337,7 @@ export default function CatalogWithFilters({ initialCategory }: CatalogWithFilte
           </p>
           <button
             onClick={clearFilters}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="bg-towny text-white px-6 py-2 rounded-md hover:bg-towny-dark transition-colors"
           >
             Limpiar filtros
           </button>

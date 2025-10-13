@@ -220,7 +220,7 @@ export default function DailyMenuManager() {
             </p>
             <a 
               href="/dashboard/mis-productos" 
-              className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-block bg-towny text-white px-6 py-2 rounded-lg hover:bg-towny-dark transition-colors"
             >
               Ir a Mis Productos
             </a>
@@ -414,6 +414,8 @@ export default function DailyMenuManager() {
     </div>
   );
 }
+
+
 
 
 

@@ -144,7 +144,7 @@ export default function PaymentValidationPanel({ sellerId, className = '' }: Pay
         <h2 className="text-xl font-bold text-white">Validación de Pagos</h2>
         <div className="flex items-center gap-2">
           <span className="text-gray-300">Pagos pendientes:</span>
-          <span className="bg-blue-600 text-white px-2 py-1 rounded-full text-sm font-medium">
+          <span className="bg-towny text-white px-2 py-1 rounded-full text-sm font-medium">
             {payments.length}
           </span>
         </div>
@@ -209,7 +209,7 @@ export default function PaymentValidationPanel({ sellerId, className = '' }: Pay
                           href={payment.transfer_receipt_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+                          className="bg-towny text-white px-3 py-1 rounded text-sm hover:bg-towny-dark transition-colors"
                         >
                           Ver comprobante
                         </a>
@@ -260,6 +260,8 @@ export default function PaymentValidationPanel({ sellerId, className = '' }: Pay
     </div>
   );
 }
+
+
 
 
 

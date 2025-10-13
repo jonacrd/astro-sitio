@@ -195,7 +195,7 @@ export default function SmartRecommendations({
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 selectedCategory === null
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-towny text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -207,7 +207,7 @@ export default function SmartRecommendations({
                 onClick={() => handleCategoryChange(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors capitalize ${
                   selectedCategory === category
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-towny text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >

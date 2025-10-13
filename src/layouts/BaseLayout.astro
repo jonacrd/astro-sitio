@@ -73,9 +73,14 @@ const {
   <!-- FORZAR BOTTOM NAV VISIBLE -->
   <link rel="stylesheet" href="/styles/force-bottom-nav.css">
   
-  <!-- Design Tokens -->
+  <!-- ⭐ TEMA ROSA TOWNY - FORZADO CON !IMPORTANT -->
   <style>
     :root {
+      /* 🌸 COLORES ROSA TOWNY */
+      --towny-pink: #FF4D6A !important;
+      --towny-pink-hover: #E6435D !important;
+      --towny-pink-active: #CC3952 !important;
+      
       /* Neutros cálidos (amables con fotos blancas) */
       --bg-app: #0F1115;              /* fondo app (oscuro, no negro puro) */
       --bg-surface: #151A21;          /* contenedores oscuros */
@@ -85,8 +90,9 @@ const {
       --text-primary: #FFFFFF;
       --text-inverse: #0E1116;
 
-      /* Accentos */
-      --primary: #2563EB;             /* CTA principal (azul) */
+      /* Accentos - CAMBIADO A ROSA */
+      --primary: #FF4D6A !important;  /* CTA principal (ROSA TOWNY) */
+      --color-accent: #FF4D6A !important;
       --primary-600: #1D4ED8;
       --accent: #F97316;              /* badges/ofertas */
       --success: #10B981;
@@ -132,6 +138,33 @@ const {
     .ui-btn:focus {
       outline: none;
       box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    /* 🌸 ROSA TOWNY SOLO EN BOTONES DE AGREGAR Y BOTTOM NAV */
+    
+    /* Botones de agregar al carrito en el feed */
+    button[aria-label*="Agregar"],
+    button[aria-label*="agregar"],
+    button[aria-label*="Añadir"],
+    button[aria-label*="carrito"],
+    .add-to-cart-button,
+    .add-button {
+      background-color: #FF4D6A !important;
+      color: white !important;
+    }
+
+    button[aria-label*="Agregar"]:hover,
+    button[aria-label*="agregar"]:hover,
+    .add-to-cart-button:hover,
+    .add-button:hover {
+      background-color: #E6435D !important;
+    }
+
+    /* Bottom nav activo */
+    nav[class*="bottom"] .active,
+    .bottom-nav .active,
+    footer nav .active {
+      color: #FF4D6A !important;
     }
 
     .ui-link {

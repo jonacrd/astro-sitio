@@ -6,7 +6,7 @@
 :root {
   /* Colores principales del tema Town */
   --color-primary: #0B1B3A;        /* Azul marino principal */
-  --color-accent: #F8C20A;          /* Amarillo dorado */
+  --color-accent: #FF4D6A;          /* Rosa Towny - Color principal de botones */
   --color-success: #16A34A;         /* Verde de éxito */
   --color-muted: #0F274F;           /* Azul oscuro secundario */
   --color-surface: #101828;        /* Superficie principal */
@@ -133,10 +133,10 @@
 /* Keyframes del tema Town */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(248, 194, 10, 0.3);
+    box-shadow: 0 0 20px rgba(255, 77, 106, 0.3);
   }
   50% {
-    box-shadow: 0 0 40px rgba(248, 194, 10, 0.6);
+    box-shadow: 0 0 40px rgba(255, 77, 106, 0.6);
   }
 }
 
@@ -237,6 +237,8 @@
 .town-warning {
   @apply border-accent bg-accent/10;
 }
+
+
 
 
 

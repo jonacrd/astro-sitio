@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ProductCard from './ProductCard';
 
 interface Product {
   id: string;
@@ -89,10 +88,18 @@ export default function ProductGrid({
       case 'small':
         return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4';
       case 'large':
-        return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+        return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
       default:
-        return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
+        return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4';
     }
+  };
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0
+    }).format(cents);
   };
 
   const getTitle = () => {
@@ -113,14 +120,14 @@ export default function ProductGrid({
           </h2>
         )}
         <div className={getGridClasses()}>
-          {Array.from({ length: limit }).map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-              <div className="h-48 bg-gray-200"></div>
-              <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded mb-4"></div>
-                <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded"></div>
+          {Array.from({ length: Math.min(limit, 10) }).map((_, index) => (
+            <div key={index}>
+              <div className="rounded-2xl overflow-hidden bg-gray-700 animate-pulse mb-3">
+                <div className="w-full aspect-square bg-gray-600"></div>
+              </div>
+              <div className="flex items-center justify-between px-1">
+                <div className="h-5 bg-gray-600 rounded w-1/2 animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-600 rounded-full animate-pulse"></div>
               </div>
             </div>
           ))}
@@ -185,12 +192,79 @@ export default function ProductGrid({
       )}
       <div className={getGridClasses()}>
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            variant={variant}
-            showSeller={showSeller}
-          />
+          <div key={product.id} className="group">
+            {/* Imagen con bordes redondeados */}
+            <div className="relative rounded-2xl overflow-hidden mb-3">
+              <img
+                src={product.imageUrl || '/images/placeholder.jpg'}
+                alt={product.title}
+                className="w-full aspect-square object-cover"
+                loading="lazy"
+              />
+              
+              {/* Badge de vendedor arriba-izquierda (solo si showSeller es true) */}
+              {showSeller && (
+                <div className="absolute top-2 left-2">
+                  <a 
+                    href={`/vendedor/${product.sellerId}`}
+                    className={`inline-flex h-6 px-2 rounded-full text-white text-[11px] font-semibold items-center gap-1 hover:scale-105 transition-all duration-200 cursor-pointer ${
+                      product.isOnline 
+                        ? 'bg-green-600/90' 
+                        : 'bg-gray-600/90'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${product.isOnline ? 'bg-white' : 'bg-gray-300'}`}></span>
+                    {product.sellerName}
+                  </a>
+                </div>
+              )}
+
+              {/* Badge de categoría o estado arriba-derecha */}
+              <div className="absolute top-2 right-2">
+                <span className="inline-flex h-6 px-2 rounded-full bg-rose-600/90 text-white text-[11px] font-semibold">
+                  {product.category}
+                </span>
+              </div>
+
+              {/* Overlay inferior con gradiente */}
+              <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/75 via-black/35 to-transparent">
+                <h3 className="text-white text-[15px] font-semibold line-clamp-2">
+                  {product.title}
+                </h3>
+              </div>
+            </div>
+
+            {/* Contenido inferior sin background */}
+            <div className="flex items-center justify-between px-1">
+              <p className="text-white text-[18px] font-extrabold">
+                {formatPrice(product.priceCents)}
+              </p>
+              
+              {/* Botón + a la derecha del precio */}
+              <button
+                onClick={(e) => {
+                  // Animación del botón
+                  const button = e.currentTarget;
+                  button.classList.add('animate-bounce');
+                  setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                  
+                  // Navegar a la URL del carrito o del producto
+                  if (product.addToCartUrl) {
+                    window.location.href = product.addToCartUrl;
+                  }
+                }}
+                disabled={!product.isOnline}
+                className={`h-8 w-8 rounded-full text-white grid place-items-center transition-all duration-200 shadow-lg hover:shadow-xl ${
+                  product.isOnline
+                    ? 'bg-towny hover:bg-towny-light hover:scale-110 active:scale-95'
+                    : 'bg-gray-600 cursor-not-allowed opacity-50'
+                }`}
+                aria-label="Agregar al carrito"
+              >
+                <span className="text-xl font-bold leading-none">+</span>
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>

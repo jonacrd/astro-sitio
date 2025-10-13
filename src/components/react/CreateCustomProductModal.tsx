@@ -241,7 +241,7 @@ export default function CreateCustomProductModal({ onClose, onSuccess }: CreateC
                 />
                 <label
                   htmlFor="image-upload"
-                  className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                  className="inline-block bg-towny text-white px-4 py-2 rounded-lg hover:bg-towny-dark cursor-pointer transition-colors"
                 >
                   {imageFile ? 'Cambiar imagen' : 'Subir imagen'}
                 </label>
@@ -310,7 +310,7 @@ export default function CreateCustomProductModal({ onClose, onSuccess }: CreateC
                 onClick={() => setInventoryMode('count')}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   inventoryMode === 'count'
-                    ? 'border-blue-500 bg-blue-500/20 text-white'
+                    ? 'border-blue-500 bg-towny-light/20 text-white'
                     : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
                 }`}
               >

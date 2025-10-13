@@ -117,7 +117,7 @@ export default function ShareProductWhatsApp({
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    className="px-4 py-3 bg-towny hover:bg-towny-dark text-white rounded-lg text-sm font-medium transition-colors"
                   >
                     {copied ? '✓ Copiado' : '📋 Copiar'}
                   </button>
@@ -188,6 +188,8 @@ export default function ShareProductWhatsApp({
     </>
   );
 }
+
+
 
 
 

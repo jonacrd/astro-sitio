@@ -32,7 +32,7 @@ const TransferProofViewer = ({ transferProof, orderId }: { transferProof: string
           <div className="flex gap-2">
             <button
               onClick={() => setShowModal(true)}
-              className="px-3 py-1 bg-blue-600 text-white text-xs rounded-md hover:bg-blue-700 transition-colors"
+              className="px-3 py-1 bg-towny text-white text-xs rounded-md hover:bg-towny-dark transition-colors"
             >
               Ver
             </button>
@@ -77,7 +77,7 @@ const TransferProofViewer = ({ transferProof, orderId }: { transferProof: string
               </button>
               <button
                 onClick={downloadProof}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-towny text-white rounded-md hover:bg-towny-dark transition-colors"
               >
                 Descargar
               </button>
@@ -359,7 +359,7 @@ export default function SellerOrdersDashboard({ className = '' }: SellerOrdersDa
         return (
           <button
             onClick={() => confirmOrder(order.id)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-towny text-white px-4 py-2 rounded-lg hover:bg-towny-dark transition-colors"
           >
             Confirmar Pedido
           </button>
@@ -431,7 +431,7 @@ export default function SellerOrdersDashboard({ className = '' }: SellerOrdersDa
               onClick={() => setFilter(status)}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                 filter === status
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-towny text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

@@ -147,7 +147,7 @@ export default function SearchBarEnhanced({
                     image={product.image_url}
                     sellerName={product.seller_name}
                     sellerId={product.seller_id}
-                    className="bg-blue-500 text-white py-1 px-3 rounded-lg hover:bg-blue-600 transition-colors text-xs"
+                    className="bg-towny-light text-white py-1 px-3 rounded-lg hover:bg-towny transition-colors text-xs"
                   />
                 </div>
               ))}

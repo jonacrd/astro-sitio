@@ -38,8 +38,17 @@ export default {
         primary: "#0A0A0A",
         surface: "#1A1A1A",
         muted: "#2A2A2A",
-        accent: "#F8C20A",
+        accent: "#FF4D6A", // Towny Rosa Fuerte
+        'accent-hover': "#E6435D",
+        'accent-active': "#CC3952",
         success: "#16A34A",
+        towny: {
+          pink: "#FF4D6A",
+          'pink-hover': "#E6435D",
+          'pink-active': "#CC3952",
+          'pink-light': "#FF6B82",
+          'pink-dark': "#B33449",
+        },
       },
       backgroundImage: {
         // Gradiente brand de Town

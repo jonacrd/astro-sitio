@@ -154,7 +154,7 @@ export default function ImageUpload({
         <button
           onClick={handleClick}
           disabled={uploading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 transition-colors"
+          className="w-full bg-towny text-white py-2 px-4 rounded-lg hover:bg-towny-dark focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 transition-colors"
         >
           {uploading ? (
             <span className="flex items-center justify-center gap-2">
@@ -179,6 +179,8 @@ export default function ImageUpload({
     </div>
   );
 }
+
+
 
 
 

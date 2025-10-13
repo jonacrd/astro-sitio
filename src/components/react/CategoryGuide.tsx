@@ -57,7 +57,7 @@ const CategoryGuide: React.FC = () => {
           {/* Button */}
           <button
             onClick={handleClose}
-            className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="w-full px-3 py-2 bg-towny text-white rounded-lg hover:bg-towny-dark transition-colors font-medium text-sm"
           >
             ¡Entendido!
           </button>
