@@ -27,7 +27,22 @@ button[aria-label*="carrito"],
 button:has(svg):has([d*="M12 4v16m8-8H4"]), /* Icono de + */
 button[class*="add-to-cart"],
 button[onclick*="addToCart"],
-button[onclick*="agregar"] {
+button[onclick*="agregar"],
+/* Botones con clases bg-blue que contengan texto de agregar */
+button.bg-blue-600:has-text("Añadir"),
+button.bg-blue-600:has-text("Agregar"),
+button.bg-blue-500:has-text("Añadir"),
+button.bg-blue-500:has-text("Agregar"),
+/* Botones en FeedCard y componentes de feed */
+.feed-card button.bg-blue-600,
+.feed-card button.bg-blue-500,
+.product-card button.bg-blue-600,
+.product-card button.bg-blue-500,
+/* Selectores genéricos para botones azules en el contexto del feed */
+[class*="feed"] button.bg-blue-600,
+[class*="feed"] button.bg-blue-500,
+[class*="product"] button.bg-blue-600,
+[class*="product"] button.bg-blue-500 {
   background-color: var(--towny-pink) !important;
   color: white !important;
   border-color: var(--towny-pink) !important;
@@ -42,7 +57,15 @@ button[aria-label*="carrito"]:hover,
 .add-to-cart-button:hover,
 .add-button:hover,
 button[class*="add-to-cart"]:hover,
-button[onclick*="addToCart"]:hover {
+button[onclick*="addToCart"]:hover,
+.feed-card button.bg-blue-600:hover,
+.feed-card button.bg-blue-500:hover,
+.product-card button.bg-blue-600:hover,
+.product-card button.bg-blue-500:hover,
+[class*="feed"] button.bg-blue-600:hover,
+[class*="feed"] button.bg-blue-500:hover,
+[class*="product"] button.bg-blue-600:hover,
+[class*="product"] button.bg-blue-500:hover {
   background-color: var(--towny-pink-hover) !important;
   transform: scale(1.05);
   box-shadow: 0 4px 14px rgba(255, 77, 106, 0.4) !important;

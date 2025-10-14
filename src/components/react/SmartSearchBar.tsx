@@ -148,13 +148,16 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
               setTimeout(() => setShowSuggestions(false), 200);
             }}
           placeholder={placeholder}
-            className="w-full px-4 py-3 pr-12 text-gray-900 bg-white border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
+            className="w-full px-5 py-4 pr-14 text-white bg-white/5 backdrop-blur-md border-2 border-[#FF4D6A]/30 rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-[#FF4D6A]/50 focus:border-[#FF4D6A] focus:bg-white/10 placeholder-white/50 transition-all duration-200"
             id="main-search-input"
+            style={{
+              boxShadow: '0 8px 32px rgba(255, 77, 106, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            }}
         />
         <button
           type="submit"
             disabled={isLoading}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 hover:text-blue-600 transition-colors"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 bg-[#FF4D6A] text-white hover:bg-[#E6435D] rounded-full transition-all duration-200 hover:scale-110 shadow-lg"
           >
             {isLoading ? (
               <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -170,19 +173,19 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         </div>
       </form>
 
-      {/* Sugerencias con IA */}
+      {/* Sugerencias con IA - Estilo Rosa Towny */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-3 bg-gray-900/95 backdrop-blur-xl border-2 border-[#FF4D6A]/30 rounded-2xl shadow-2xl max-h-60 overflow-y-auto">
           {suggestions.map((suggestion, index) => (
                       <button
                         key={index}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors first:rounded-t-lg last:rounded-b-lg flex items-center space-x-2"
+              className="w-full px-5 py-3 text-left text-white hover:bg-[#FF4D6A]/20 hover:text-[#FF4D6A] transition-all duration-200 first:rounded-t-2xl last:rounded-b-2xl flex items-center space-x-3 group"
             >
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-white/60 group-hover:text-[#FF4D6A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <span>{suggestion}</span>
+              <span className="font-medium">{suggestion}</span>
                           </button>
                         ))}
         </div>

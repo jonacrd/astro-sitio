@@ -224,7 +224,7 @@ export default function ReelCardWithFallback({
           {/* Botón Agregar (pill) */}
           <button
             onClick={onAdd}
-            className="bg-accent text-primary px-4 py-2 rounded-full text-sm font-medium shadow-card hover:bg-accent/90 transition-colors duration-200"
+            className="bg-[#FF4D6A] text-white px-4 py-2 rounded-full text-sm font-medium shadow-card hover:bg-[#E6435D] transition-colors duration-200"
             aria-label={`Agregar ${title} al carrito`}
           >
             Agregar

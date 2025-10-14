@@ -23,6 +23,37 @@
 /* Importar tema rosa Towny - SOBRESCRIBE TODOS LOS COLORES */
 @import './towny-pink-theme.css';
 
+/* ⭐ UTILIDADES TOWNY ROSA */
+@layer utilities {
+  .bg-towny {
+    background-color: #FF4D6A !important;
+  }
+  
+  .bg-towny-light {
+    background-color: #FF6B82 !important;
+  }
+  
+  .bg-towny-dark {
+    background-color: #B33449 !important;
+  }
+  
+  .hover\:bg-towny-light:hover {
+    background-color: #FF6B82 !important;
+  }
+  
+  .hover\:bg-towny-dark:hover {
+    background-color: #B33449 !important;
+  }
+  
+  .text-towny {
+    color: #FF4D6A !important;
+  }
+  
+  .border-towny {
+    border-color: #FF4D6A !important;
+  }
+}
+
 /* Utilidades para feed tipo red social */
 .card {
   @apply bg-surface/80 border border-white/5 backdrop-blur-md rounded-2xl shadow-card;

@@ -1,0 +1,127 @@
+✅ BOTONES ACTUALIZADOS A ROSA #FF4D6A
+========================================
+
+🎯 COMPONENTES MODIFICADOS:
+
+✓ RealGridBlocks.tsx
+  → Botón circular + (agregar) → ROSA
+  
+✓ FeedCard.tsx
+  → Botón "Añadir" → ROSA
+
+✓ SmartSearch.tsx
+  → Botón "Añadir" en búsqueda → ROSA
+
+✓ ProductCard.tsx
+  → Botón "Añadir al carrito" → ROSA
+  → Botón "Contactar" → ROSA
+
+✓ ReelCard.tsx
+  → Botón "Añadir al carrito" → ROSA
+
+✓ ReelCardWithFallback.tsx
+  → Botón "Agregar" → ROSA
+
+✓ SimpleBottomNav.tsx
+  → Icono activo → ROSA
+
+✓ tailwind.config.mjs
+  → bg-towny = #FF4D6A
+  → bg-towny-light = #FF6B82
+  → bg-towny-dark = #B33449
+
+✓ global.css
+  → Utilidades .bg-towny con !important
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 PARA VER LOS CAMBIOS AHORA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1: PARAR EL SERVIDOR
+--------------------------
+En la terminal donde está corriendo:
+→ Presiona: Ctrl + C
+
+PASO 2: REINICIAR EL SERVIDOR
+------------------------------
+→ cd "C:\Users\jonac\OneDrive\Documentos\Tienda web\astro-sitio"
+→ npm run dev
+
+PASO 3: LIMPIAR CACHÉ DEL NAVEGADOR
+------------------------------------
+→ Abre en modo incógnito: Ctrl + Shift + N
+→ Ve a: http://localhost:4321
+→ O presiona: Ctrl + F5 (recarga forzada)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ DÓNDE VERIFICAR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. FEED PRINCIPAL (/)
+   → Botón circular + (debajo del precio) → ROSA 🌸
+   → Hover → Rosa más oscuro
+   → Efecto zoom al pasar mouse
+
+2. BOTTOM NAV (barra inferior)
+   → Icono de página activa → ROSA 🌸
+   → Fondo del botón activo → Rosa transparente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 COLOR APLICADO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Principal: #FF4D6A  (botón normal)
+Hover:     #E6435D  (al pasar mouse)
+Active:    #CC3952  (al hacer click)
+Light:     #FF6B82  (hover en bottom nav)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 IMPORTANTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+El servidor DEBE reiniciarse para que Tailwind compile
+las nuevas clases bg-towny.
+
+SIN REINICIAR → No verás el color
+CON REINICIO → Verás todo rosa ✅
+
+Comando para reiniciar:
+1. Ctrl + C (parar)
+2. npm run dev (iniciar)
+3. Ctrl + Shift + N (modo incógnito)
+4. http://localhost:4321
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 ASÍ SE VERÁ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANTES:
+Card del Feed
+┌─────────────┐
+│   Imagen    │
+│             │
+├─────────────┤
+│ Título      │
+│ $15,000  🔵+│ ← AZUL o sin color
+└─────────────┘
+
+DESPUÉS:
+Card del Feed
+┌─────────────┐
+│   Imagen    │
+│             │
+├─────────────┤
+│ Título      │
+│ $15,000  🌸+│ ← ROSA #FF4D6A
+└─────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ REINICIA AHORA Y VERÁS EL ROSA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+

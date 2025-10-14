@@ -153,7 +153,7 @@ export default function ReelCard({
           <div className="flex gap-2">
             <button
               onClick={onAdd}
-              className="flex-1 bg-accent text-primary px-4 py-2 rounded-full font-medium hover:bg-accent/90 transition-all duration-200 hover:scale-105"
+              className="flex-1 bg-[#FF4D6A] text-white px-4 py-2 rounded-full font-medium hover:bg-[#E6435D] transition-all duration-200 hover:scale-105"
             >
               Añadir al carrito
             </button>

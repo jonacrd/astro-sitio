@@ -26,7 +26,7 @@ export default function FeedCard({ item }: { item: any }) {
       <div className="p-3">
         <div className="text-sm font-medium line-clamp-2">{item.title}</div>
         <div className="text-sm font-semibold mt-1">{formatPrice(item.priceCents)}</div>
-        <button className="mt-2 w-full text-sm py-1.5 rounded bg-blue-600 text-white">Añadir</button>
+        <button className="mt-2 w-full text-sm py-1.5 rounded bg-[#FF4D6A] hover:bg-[#E6435D] text-white transition-all duration-200 hover:scale-105">Añadir</button>
       </div>
     </div>
   );

@@ -43,10 +43,13 @@ export default {
         'accent-active': "#CC3952",
         success: "#16A34A",
         towny: {
+          DEFAULT: "#FF4D6A", // bg-towny
           pink: "#FF4D6A",
           'pink-hover': "#E6435D",
           'pink-active': "#CC3952",
+          light: "#FF6B82", // bg-towny-light
           'pink-light': "#FF6B82",
+          dark: "#B33449", // bg-towny-dark
           'pink-dark': "#B33449",
         },
       },

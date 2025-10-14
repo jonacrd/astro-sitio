@@ -51,17 +51,20 @@ export default function SmartSearch(){
 
   return (
     <div className="w-full">
-      <div className="flex gap-2 items-stretch w-full">
+      <div className="flex gap-3 items-stretch w-full">
         <input
           value={q}
           onChange={e=>setQ(e.target.value)}
           onKeyDown={e=>{ if(e.key==='Enter') runSearch(q); }}
           placeholder="¿Qué necesitas? Ej: hamburguesa, cerveza, corte de cabello…"
-          className="flex-1 rounded-xl px-4 py-3 bg-white text-slate-900 placeholder:text-slate-500 ring-2 ring-white/25 focus:ring-white/40 outline-none"
+          className="flex-1 rounded-full px-5 py-4 bg-white/5 backdrop-blur-md text-white placeholder:text-white/50 border-2 border-[#FF4D6A]/30 focus:border-[#FF4D6A] focus:ring-4 focus:ring-[#FF4D6A]/50 focus:bg-white/10 outline-none transition-all duration-200 shadow-lg"
+          style={{
+            boxShadow: '0 8px 32px rgba(255, 77, 106, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          }}
         />
         <button
           onClick={()=>runSearch(q)}
-          className="btn-primary-opaque rounded-xl px-5 py-3 font-semibold"
+          className="bg-[#FF4D6A] hover:bg-[#E6435D] text-white rounded-full px-6 py-4 font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
         >
           {loading ? 'Buscando…' : 'Buscar'}
         </button>
@@ -72,13 +75,13 @@ export default function SmartSearch(){
         Tip: pide en lenguaje natural. Ej: hamburguesa barata con delivery
       </p>
 
-      {/* Sugerencias con scroll horizontal */}
-      <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
+      {/* Sugerencias con scroll horizontal - Estilo Rosa */}
+      <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar pb-2">
         {SUGGESTIONS.map(s => (
           <button
             key={s}
             onClick={()=>{ setQ(s); runSearch(s); }}
-            className="tag-opaque shrink-0 text-sm px-3 py-1.5 rounded-full"
+            className="shrink-0 text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-[#FF4D6A] text-white/80 hover:text-white border border-white/20 hover:border-[#FF4D6A] transition-all duration-200 hover:scale-105"
           >
             {s}
           </button>
@@ -197,7 +200,7 @@ export default function SmartSearch(){
                         alert('Error al agregar producto al carrito');
                       }
                     }}
-                    className="flex-1 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm text-center transition-colors"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[#FF4D6A] hover:bg-[#E6435D] text-white text-sm text-center transition-all duration-200 hover:scale-105"
                   >
                     Añadir
                   </button>

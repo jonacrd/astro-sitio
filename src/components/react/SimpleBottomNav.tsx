@@ -181,8 +181,8 @@ export default function SimpleBottomNav({
                 }
               `}
               style={{
-                color: isActive(item.href) ? '#2563EB' : '#CBD5E1',
-                backgroundColor: isActive(item.href) ? 'rgba(37, 99, 235, 0.1)' : 'transparent'
+                color: isActive(item.href) ? '#FF4D6A' : '#CBD5E1',
+                backgroundColor: isActive(item.href) ? 'rgba(255, 77, 106, 0.1)' : 'transparent'
               }}
               aria-label={item.label}
             >
